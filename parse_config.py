@@ -26,8 +26,10 @@ class ConfigParser:
         save_dir = Path(self.config['trainer']['save_dir'])
 
         exper_name = self.config['name']
-        if run_id is None: # use timestamp as default run-id
+        if run_id is None:  # use timestamp as default run-id
             run_id = datetime.now().strftime(r'%m%d_%H%M%S')
+            # run_id = 'experiment'
+
         self._save_dir = save_dir / 'models' / exper_name / run_id
         self._log_dir = save_dir / 'log' / exper_name / run_id
 
@@ -52,6 +54,7 @@ class ConfigParser:
         """
         Initialize this class from some cli arguments. Used in train, test.
         """
+        # overwrite parameters given in config.json with ones given in CLI
         for opt in options:
             args.add_argument(*opt.flags, default=None, type=opt.type)
         if not isinstance(args, tuple):
@@ -71,10 +74,13 @@ class ConfigParser:
         config = read_json(cfg_fname)
         if args.config and resume:
             # update new config for fine-tuning
+            # so if I don't have the config position as default parameter, then it will be ignored here
+            # and only the saved config file will be used
             config.update(read_json(args.config))
 
         # parse custom cli options into dictionary
         modification = {opt.target : getattr(args, _get_opt_name(opt.flags)) for opt in options}
+        # initialize ConfigParser with given arguments here
         return cls(config, resume, modification)
 
     def init_obj(self, name, module, *args, **kwargs):

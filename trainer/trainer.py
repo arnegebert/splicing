@@ -47,6 +47,7 @@ class Trainer(BaseTrainer):
             loss.backward()
             self.optimizer.step()
 
+            # logs that this training step has been taken at current time
             self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update('loss', loss.item())
             for met in self.metric_ftns:
@@ -57,15 +58,17 @@ class Trainer(BaseTrainer):
                     epoch,
                     self._progress(batch_idx),
                     loss.item()))
+                # will make problems for non-image data
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
+            # todo belongs to iteration-based training - not sure what that is
             if batch_idx == self.len_epoch:
                 break
         log = self.train_metrics.result()
 
         if self.do_validation:
             val_log = self._valid_epoch(epoch)
-            log.update(**{'val_'+k : v for k, v in val_log.items()})
+            log.update(**{'val_' + k: v for k, v in val_log.items()})
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
@@ -91,6 +94,7 @@ class Trainer(BaseTrainer):
                 self.valid_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(output, target))
+                # todo remove for my data
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
         # add histogram of model parameters to the tensorboard

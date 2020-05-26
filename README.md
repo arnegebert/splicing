@@ -167,10 +167,14 @@ You can resume from a previously saved checkpoint by:
   ```
   python train.py --resume path/to/checkpoint
   ```
+e.g.
+  ```
+  python train.py -r saved/models/Mnist_LeNet/experiment/checkpoint-epoch9.pth
+  ``` 
 
 ### Using Multiple GPU
-You can enable multi-GPU training by setting `n_gpu` argument of the config file to larger number.
-If configured to use smaller number of gpu than available, first n devices will be used by default.
+You can enable multi-GPU training by setting `n_gpu` argument of the config file to a number > 1.
+If configured to use a smaller number of gpu than available, the first n devices will be used by default.
 Specify indices of available GPUs by cuda environmental variable.
   ```
   python train.py --device 2,3 -c config.json
