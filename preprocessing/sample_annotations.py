@@ -39,6 +39,8 @@ sample_idxs = []
 data = {}
 with open(path_junctions) as f:
     for i, line in enumerate(f):
+        if i % 1000 == 0: # ~ 357500 junctions
+            print(f'Reading line {i}')
         line = line.split('\t')
         if i == 2:
             for n in filtered_sample_names:
@@ -53,8 +55,19 @@ with open(path_junctions) as f:
             for idx in sample_idxs:
                 data_line.append(int(line[idx]))
             data[line[0]] = data_line
-
-print('HELLO')
-print(data)
-#
 # data = junctions -> sample reads
+
+# todo: some junctions are duplicated in the data... o.o
+# 352051 are only in the dictionary
+
+# planning:
+# in what format do i want data to later load it?
+# at first, junction : list of reads might not be bad
+# later i will need to extract the information from the junctions either way
+with open('../data/brain_junction_reads.csv', 'w') as f:
+    if i % 1000 == 0:  # ~ 357500 junctions
+        print(f'Writing line {i}')
+    for junction, reads in data.items():
+        f.write(f'{junction},{reads}\n')
+print('Processing finished')
+# print(data)
