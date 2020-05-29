@@ -1,5 +1,6 @@
 {
-    "name": "Mnist_LeNet",
+    "name": "Mnist_LeNet",slept rather poorly
+
     "n_gpu": 1,
 
     "arch": {

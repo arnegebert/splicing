@@ -64,7 +64,7 @@ with open(path_junctions) as f:
 # in what format do i want data to later load it?
 # at first, junction : list of reads might not be bad
 # later i will need to extract the information from the junctions either way
-with open('../data/brain_junction_reads.csv', 'w') as f:
+with open('../data/brain_cortex_junction_reads.csv', 'w') as f:
     if i % 1000 == 0:  # ~ 357500 junctions
         print(f'Writing line {i}')
     for junction, reads in data.items():
