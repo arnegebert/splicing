@@ -14,11 +14,15 @@ exons_after_start = 30 # exons
 exons_bef_end = 30 # exons
 introns_after_end = 50 # introns
 
+# want to load chromosome as one giant string
 def load_chrom_seq(chrom):
     with open(f'{data_path}/chr{chrom}.fa') as f:
-        reader = csv.reader(f, delimiter="\t")
+        all = f.read().replace('\n', '')
+        # reader = csv.reader(f, delimiter=" ")
+        # lines = list(reader)
+        # complete = ''.join(lines)
         # contains list with rows of samples
-        return list(reader)
+        return all
 
 junction_seqs = {}
 junction_psis = {}
@@ -36,8 +40,9 @@ with open(path_filtered_reads) as f:
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
             print(f'Reading line {i}')
-        line = line.split(',')
-        junction = line[0].split('_')
+        # line = line.split(',')
+        split_idx = line.find(',')
+        junction = line[:split_idx].split('_')
         read_chrom = int(junction[0][3:])
         start, end = int(junction[1]), int(junction[2])
 
@@ -83,14 +88,16 @@ with open(path_filtered_reads) as f:
         if end + introns_after_end > gene_end:
             continue
 
-        """ Extraction of the sequence """
+        # """ Extraction of the sequence """
         window_around_start = chrom_seq[start-introns_bef_start:start+exons_after_start]
         window_around_end = chrom_seq[end-exons_bef_end:end+introns_after_end]
-        junction_seqs[line[0]] = [window_around_start, window_around_end]
+        junction_seqs[line[:split_idx]] = [window_around_start, window_around_end]
 
         """ Estimation of the PSI value """
         # PSI = pos / (pos + neg)
-        pos = int(line[1][1:])
+        first_read_idx = line[split_idx+1:].find(',')
+        # yikes...
+        pos = int(line[split_idx+2:split_idx+1+first_read_idx])
         # neg == it overlaps with the junction in any way:
         # one way to test for overlap:
         # (1) start2 <= start, end >= end2 >= start,
@@ -107,15 +114,16 @@ with open(path_filtered_reads) as f:
         # solution 1: save the last ~10 lines seen before
         # solution 2: realise that file only has 300 mb and it is fine to load it into memory
         neg = 0
-        idx = i-1
+        idx_above = i - 1
+        # THIS MAKES THINGS SLOW AS FUCK ATM
         while True:
-            if idx <= 0: break
-            line2 = all[idx][0]
+            if idx_above <= 0: break
+            line2 = all[idx_above][0]
             break_idx = line2.find(',')
             junction2 = line2[:break_idx].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
             if end2 < start: break
-            idx -= 1
+            idx_above -= 1
             kms = line2[break_idx+1:].find(',')
             # +1 for ','
             # +1 for '['
@@ -126,7 +134,7 @@ with open(path_filtered_reads) as f:
         idx_below = i+1
         while True:
             if idx_below >= len(all): break
-            line2 = all[idx][0]
+            line2 = all[idx_below][0]
             break_idx = line2.find(',')
             junction2 = line2[:break_idx].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
@@ -138,7 +146,7 @@ with open(path_filtered_reads) as f:
             neg += int(line2[break_idx+2:break_idx+kms+1])
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)
-        junction_psis[line[0]] = psi
+        junction_psis[line[:split_idx]] = psi
 
 
 exit()
