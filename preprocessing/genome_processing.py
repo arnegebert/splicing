@@ -1,5 +1,6 @@
 # given junction reads from the correct samples, extract the corresponding intron-exon sequences from the genome
 import csv
+import linecache
 
 data_path = '../data'
 path_filtered_reads = f'{data_path}/brain_cortex_junction_reads.csv'
@@ -14,16 +15,18 @@ exons_bef_end = 30 # exons
 introns_after_end = 50 # introns
 
 def load_chrom_seq(chrom):
-    with open(f'{data_path}/chr{chrom}') as f:
+    with open(f'{data_path}/chr{chrom}.fa') as f:
         reader = csv.reader(f, delimiter="\t")
         # contains list with rows of samples
         return list(reader)
 
 junction_seqs = {}
+junction_psis = {}
 
 with open(path_filtered_reads) as f:
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
+    all = list(f)
 
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
@@ -61,6 +64,11 @@ with open(path_filtered_reads) as f:
         # make sure there are at least 'introns_bef_start' intron nts between exon junctions
         # q: do i even want to do this? how do i do this?
 
+
+        # make sure that very first exon in chromosone doesn't contain N nt input
+        # make sure that very last exon in chromosone doesn't contain N nt input
+        if i == 0 or i == len(all)-1: continue
+
         # if start - introns_bef_start < prev_end:
         #     continue
 
@@ -75,11 +83,61 @@ with open(path_filtered_reads) as f:
         window_around_end = loaded_chrom[end-exons_bef_end:end+introns_after_end]
         junction_seqs[line[0]] = [window_around_start, window_around_end]
 
+        """ Estimation of the PSI value """
+        # PSI = pos / (pos + neg)
+        pos = line[1][0]
+        # neg == it overlaps with the junction in any way:
+        # one way to test for overlap:
+        # (1) start2 <= start, end >= end2 >= start,
+        # (2) end >= start2 >= start, end2 >= end
+        # (3) end >= start2 >= start, end >= end2 >= start
+        # (4) start2 <= start, end2 >= end
+
+        # second way to test for overlap:
+        # (1) end2 < start or
+        # (2) start2 > end
+        # => end2 >= start and start2 <= end
+        # check all junctions above until end2 < start
+        # problem: file too large into memory, but need specific lines from it
+        # solution 1: save the last ~10 lines seen before
+        # solution 2: realise that file only has 300 mb and it is fine to load it into memory
+        neg = 0
+        idx = i-1
+        while True:
+            if idx <= 0: break
+            line2 = all[idx].split(',')
+            junction2 = line2[0].split('_')
+            start2, end2 = int(junction2[1]), int(junction2[2])
+            if end2 < start: break
+            idx -= 1
+            neg += line2[1][0]
+
+
+        # check all junctions below until start2 > end
+        idx_below = i+1
+        while True:
+            if idx_below >= len(all): break
+            line2 = all[idx].split(',')
+            junction2 = line2[0].split('_')
+            start2, end2 = int(junction2[1]), int(junction2[2])
+            if start2 > end: break
+            idx_below += 1
+            neg += line2[1][0]
+        psi = pos / (pos + neg)
+        junction_psis[line[0]] = psi
+
+
 
 # Write extracted sequences to file
 with open(f'{data_path}/brain_cortex_junction_seqs.csv', 'w') as f:
-    if i % 1000 == 0:  # ~ 357500 junctions
-        print(f'Writing line {i}')
-    for junction, reads in junction_seqs.items():
-        f.write(f'{junction},{reads}\n')
+    print('Beginning to write extracted sequences')
+    for junction, seqs in junction_seqs.items():
+        f.write(f'{junction},{seqs}\n')
+
+# Write estimated PSIs to file
+with open(f'{data_path}/brain_cortex_junction_psis.csv', 'w') as f:
+    print('Beginning to write estimated PSIs')
+    for junction, psis in junction_psis.items():
+        f.write(f'{junction},{psis}\n')
+
 print('Processing finished')
