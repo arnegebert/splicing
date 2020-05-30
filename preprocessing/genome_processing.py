@@ -24,16 +24,21 @@ junction_seqs = {}
 junction_psis = {}
 
 with open(path_filtered_reads) as f:
+    reader = csv.reader(f, delimiter="\n")
+    # contains list with rows of samples
+    all = list(reader)
+
+with open(path_filtered_reads) as f:
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
-    all = list(f)
-
+    # all = list(f)
+    print('Start of iteration through lines')
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
             print(f'Reading line {i}')
         line = line.split(',')
         junction = line[0].split('_')
-        read_chrom = int(junction[0][-3:])
+        read_chrom = int(junction[0][3:])
         start, end = int(junction[1]), int(junction[2])
 
         # if chromosome changes, update loaded sequence until chromosome 22 reached
@@ -79,13 +84,13 @@ with open(path_filtered_reads) as f:
             continue
 
         """ Extraction of the sequence """
-        window_around_start = loaded_chrom[start-introns_bef_start:start+exons_after_start]
-        window_around_end = loaded_chrom[end-exons_bef_end:end+introns_after_end]
+        window_around_start = chrom_seq[start-introns_bef_start:start+exons_after_start]
+        window_around_end = chrom_seq[end-exons_bef_end:end+introns_after_end]
         junction_seqs[line[0]] = [window_around_start, window_around_end]
 
         """ Estimation of the PSI value """
         # PSI = pos / (pos + neg)
-        pos = line[1][0]
+        pos = int(line[1][1:])
         # neg == it overlaps with the junction in any way:
         # one way to test for overlap:
         # (1) start2 <= start, end >= end2 >= start,
@@ -105,27 +110,38 @@ with open(path_filtered_reads) as f:
         idx = i-1
         while True:
             if idx <= 0: break
-            line2 = all[idx].split(',')
-            junction2 = line2[0].split('_')
+            line2 = all[idx][0]
+            break_idx = line2.find(',')
+            junction2 = line2[:break_idx].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
             if end2 < start: break
             idx -= 1
-            neg += line2[1][0]
+            kms = line2[break_idx+1:].find(',')
+            # +1 for ','
+            # +1 for '['
+            neg += int(line2[break_idx+2:break_idx+kms+1])
 
 
         # check all junctions below until start2 > end
         idx_below = i+1
         while True:
             if idx_below >= len(all): break
-            line2 = all[idx].split(',')
-            junction2 = line2[0].split('_')
+            line2 = all[idx][0]
+            break_idx = line2.find(',')
+            junction2 = line2[:break_idx].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
             if start2 > end: break
             idx_below += 1
-            neg += line2[1][0]
-        psi = pos / (pos + neg)
+            kms = line2[break_idx+1:].find(',')
+            # +1 for ','
+            # +1 for '['
+            neg += int(line2[break_idx+2:break_idx+kms+1])
+        if pos + neg == 0: psi = 0
+        else: psi = pos / (pos + neg)
         junction_psis[line[0]] = psi
 
+
+exit()
 
 
 # Write extracted sequences to file
