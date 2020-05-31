@@ -22,10 +22,16 @@ def load_chrom_seq(chrom):
         # lines = list(reader)
         # complete = ''.join(lines)
         # contains list with rows of samples
-        return all
+        # log10 solution would be cleaner, but this is more readable
+        # cutting out '>chr<chrom>'
+        if chrom < 10:
+            return all[5:]
+        else:
+            return all[6:]
 
 junction_seqs = {}
 junction_psis = {}
+seqs_psis = {}
 
 with open(path_filtered_reads) as f:
     reader = csv.reader(f, delimiter="\n")
@@ -43,16 +49,16 @@ with open(path_filtered_reads) as f:
         # line = line.split(',')
         split_idx = line.find(',')
         junction = line[:split_idx].split('_')
-        read_chrom = int(junction[0][3:])
+        try:
+            read_chrom = int(junction[0][3:])
+        except ValueError:
+            break
         start, end = int(junction[1]), int(junction[2])
 
         # if chromosome changes, update loaded sequence until chromosome 22 reached
         if read_chrom > loaded_chrom:
-            if loaded_chrom == 22:
-                break
-            else:
-                loaded_chrom += 1
-                chrom_seq = load_chrom_seq(loaded_chrom)
+            loaded_chrom += 1
+            chrom_seq = load_chrom_seq(loaded_chrom)
 
         # extract sequence around start
         # todo: investigate why earliest start is 12058 eg for chrom 1
@@ -87,10 +93,14 @@ with open(path_filtered_reads) as f:
         # remove last exon in gene
         if end + introns_after_end > gene_end:
             continue
+        # todo: probably want to make sure that i dont have junctions where distance between
+        # them is smaller than flanking sequence i extract
 
-        # """ Extraction of the sequence """
-        window_around_start = chrom_seq[start-introns_bef_start:start+exons_after_start]
-        window_around_end = chrom_seq[end-exons_bef_end:end+introns_after_end]
+        """ Extraction of the sequence """
+        # start gives start of canonical nts -> -1
+        # end gives end of canonical nts -> -2
+        window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
+        window_around_end = chrom_seq[end-exons_bef_end-2:end+introns_after_end-2]
         junction_seqs[line[:split_idx]] = [window_around_start, window_around_end]
 
         """ Estimation of the PSI value """
@@ -147,21 +157,25 @@ with open(path_filtered_reads) as f:
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)
         junction_psis[line[:split_idx]] = psi
+        seqs_psis[line[:split_idx]] = (window_around_start, window_around_end, psi)
 
 
-exit()
+# # Write extracted sequences to file
+# with open(f'{data_path}/brain_cortex_junction_seqs.csv', 'w') as f:
+#     print('Beginning to write extracted sequences')
+#     for junction, seqs in junction_seqs.items():
+#         f.write(f'{junction},{seqs}\n')
+#
+# # Write estimated PSIs to file
+# with open(f'{data_path}/brain_cortex_junction_psis.csv', 'w') as f:
+#     print('Beginning to write estimated PSIs')
+#     for junction, psis in junction_psis.items():
+#         f.write(f'{junction},{psis}\n')
 
 
-# Write extracted sequences to file
-with open(f'{data_path}/brain_cortex_junction_seqs.csv', 'w') as f:
-    print('Beginning to write extracted sequences')
-    for junction, seqs in junction_seqs.items():
-        f.write(f'{junction},{seqs}\n')
-
-# Write estimated PSIs to file
-with open(f'{data_path}/brain_cortex_junction_psis.csv', 'w') as f:
-    print('Beginning to write estimated PSIs')
-    for junction, psis in junction_psis.items():
-        f.write(f'{junction},{psis}\n')
+with open(f'{data_path}/brain_cortex_seqs_psis.csv', 'w') as f:
+    print('Beginning to write estimated PSIs and extraced sequences')
+    for junction, (start_seq, end_seq, psi) in seqs_psis.items():
+        f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
 
 print('Processing finished')
