@@ -8,7 +8,7 @@ import math
 from torch.autograd import Variable
 
 
-class MnistModel(BaseModel):
+class MNISTModel(BaseModel):
     def __init__(self, num_classes=10):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
@@ -25,6 +25,25 @@ class MnistModel(BaseModel):
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
+
+class PSIBaseline(BaseModel):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(4, 8, kernel_size=(1,3), padding=0)
+        self.conv2 = nn.Conv2d(8, 16, kernel_size=(1,3), padding=0)
+        self.conv2_drop = nn.Dropout2d()
+        self.fc1 = nn.Linear(156*16, 32)
+        self.fc2 = nn.Linear(32, 1)
+
+    def forward(self, x):
+        x = x.view(-1, 4, 1, 2*80)
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2_drop(self.conv2(x)))
+        x = x.view(-1, 156*16)
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, training=self.training)
+        x = self.fc2(x)
+        return F.sigmoid(x)
 
 
 class EncoderDecoder(nn.Module):

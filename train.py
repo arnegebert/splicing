@@ -2,10 +2,11 @@ import argparse
 import collections
 import torch
 import numpy as np
-import data_loader.MNISTDataLoader as module_data
+from data_loader import MNISTDataLoader as MNIST_module
+from data_loader import NaivePSIDataLoader as PSI_module
 import model.loss as module_loss
 import model.metric as module_metric
-import model.model as module_arch
+import model.models as module_arch
 from parse_config import ConfigParser
 from trainer import Trainer
 
@@ -22,7 +23,7 @@ def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
-    data_loader = config.init_obj('data_loader', module_data)
+    data_loader = config.init_obj('data_loader', PSI_module)
     valid_data_loader = data_loader.split_validation()
 
     # build model architecture, then print to console

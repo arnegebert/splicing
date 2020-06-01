@@ -1,16 +1,16 @@
 {
-    "name": "PSINaive",
+    "name": "Mnist_LeNet",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "PSIBaseline",
+        "type": "MNISTModel",
         "args": {}
     },
     "data_loader": {
-        "type": "NaivePSIDataLoader",
+        "type": "MNISTDataLoader",
         "args":{
-            "data_dir": "data/brain_cortex_full.csv",
+            "data_dir": "data/",
             "batch_size": 128,
             "shuffle": true,
             "validation_split": 0.1,
@@ -25,8 +25,9 @@
             "amsgrad": true
         }
     },
-    "loss": "l1_loss",
+    "loss": "nll_loss",
     "metrics": [
+        "accuracy", "top_k_acc"
     ],
     "lr_scheduler": {
         "type": "StepLR",
@@ -36,12 +37,12 @@
         }
     },
     "trainer": {
-        "epochs": 50,
+        "epochs": 8,
 
         "save_dir": "saved/",
-        "save_period": 3,
+        "save_period": 1,
         "verbosity": 1,
-
+        
         "monitor": "min val_loss",
         "early_stop": 10,
 

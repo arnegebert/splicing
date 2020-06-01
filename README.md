@@ -351,7 +351,11 @@ This template supports Tensorboard visualization by using either  `torch.utils.t
 
 3. **Open Tensorboard server** 
 
-    Type `tensorboard --logdir saved/log/` at the project root, then server will open at `http://localhost:6006`
+    Type 
+    ```
+     tensorboard --logdir saved/log/
+    ```
+    at the project root, then server will open at `http://localhost:6006`
 
 By default, values of loss and metrics specified in config file, input images, and histogram of model parameters will be logged.
 If you need more visualizations, use `add_scalar('tag', data)`, `add_image('tag', image)`, etc in the `trainer._train_epoch` method.

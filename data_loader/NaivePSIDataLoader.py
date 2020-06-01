@@ -17,18 +17,18 @@ class NaivePSIDataLoader(BaseDataLoader):
             transforms.Normalize((0.1307,), (0.3081,))
         ])
         self.data_dir = data_dir
-        self.dataset = NaivePSIDataset(path='../data/brain_cortex_seqs_psis.csv')
+        self.dataset = NaivePSIDataset(path=data_dir)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
 
 def one_hot_encode(nt):
     if nt == 'A' or nt == 'a':
-        return [1, 0, 0, 0]
+        return [1.0, 0, 0, 0]
     elif nt == 'C' or nt == 'c':
-        return [0, 1, 0, 0]
+        return [0, 1.0, 0, 0]
     elif nt == 'G' or nt == 'g':
-        return [0, 0, 1, 0]
+        return [0, 0, 1.0, 0]
     elif nt == 'T' or nt == 't':
-        return [0, 0, 0, 1]
+        return [0, 0, 0, 1.0]
 
 def encode_seq(seq):
     encoding = []
@@ -41,26 +41,21 @@ class NaivePSIDataset(Dataset):
 
     def __init__(self, path, transform=None):
         self.path = path
-        self.samples = None
+        start = time.time()
+        print(f'starting loading of data')
+        self.samples = []
+
+        with open(self.path, 'r') as f:
+            for i, l in enumerate(f):
+                j, start_seq, end_seq, psi = l.split(',')
+                psi = float(psi[:-1])
+                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T(psi))
+                self.samples.append(sample)
+        end = time.time()
+        print('total time to load data: {} secs'.format(end - start))
 
     def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        if self.samples is None:
-            start = time.time()
-            print(f'starting loading of data')
-            self.samples = []
-
-            with open(self.path, 'r') as f:
-                for i, l in enumerate(f):
-                    j, start_seq, end_seq, psi = l.split(',')
-                    psi = float(psi[:-1])
-                    sample = ((T(encode_seq(start_seq)), T(encode_seq(end_seq))), psi)
-                    self.samples.append(sample)
-            end = time.time()
-            print('total time to load data: {} secs'.format(end-start))
         return self.samples[idx]
-
-s = NaivePSIDataset(path='../data/brain_cortex_seqs_psis.csv')
-s.__getitem__(0)

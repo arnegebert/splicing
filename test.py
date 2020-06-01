@@ -1,10 +1,10 @@
 import argparse
 import torch
 from tqdm import tqdm
-import data_loader.MNISTDataLoader as module_data
+from data_loader import MNISTDataLoader as module_data
 import model.loss as module_loss
 import model.metric as module_metric
-import model.model as module_arch
+import model.models as module_arch
 from parse_config import ConfigParser
 
 
