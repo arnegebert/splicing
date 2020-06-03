@@ -1,16 +1,16 @@
 {
-    "name": "DSC",
+    "name": "PSINaive",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "DeepSplicingCode",
+        "type": "NaivePSIModel",
         "args": {}
     },
     "data_loader": {
         "type": "NaivePSIDataLoader",
         "args":{
-            "data_dir": "data/brain_cortex_chrom_1to10.csv",
+            "data_dir": "data/brain_cortex_chrom_1_to_10.csv",
             "batch_size": 128,
             "shuffle": true,
             "validation_split": 0.1,
@@ -20,7 +20,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 0.001,
+            "lr": 0.0001,
             "weight_decay": 0,
             "amsgrad": true
         }

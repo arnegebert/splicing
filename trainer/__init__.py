@@ -1,3 +1,3 @@
 from .MNISTTrainer import *
-from .PSITrainer import *
-
+from .NaivePSITrainer import *
+from .DSCTrainer import *

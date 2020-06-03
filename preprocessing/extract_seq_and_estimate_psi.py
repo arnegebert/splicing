@@ -4,9 +4,8 @@ import linecache
 
 data_path = '../data'
 path_filtered_reads = f'{data_path}/brain_cortex_junction_reads.csv'
-
-# todo do naive PSI estimation
-
+save_to = 'brain_cortex_chrom_1to10.csv'
+last_chrom = 10
 
 introns_bef_start = 50 # introns
 exons_after_start = 30 # exons
@@ -16,7 +15,7 @@ introns_after_end = 50 # introns
 
 # want to load chromosome as one giant string
 def load_chrom_seq(chrom):
-    with open(f'{data_path}/chr{chrom}.fa') as f:
+    with open(f'{data_path}/chromosomes/chr{chrom}.fa') as f:
         all = f.read().replace('\n', '')
         # reader = csv.reader(f, delimiter=" ")
         # lines = list(reader)
@@ -53,6 +52,7 @@ with open(path_filtered_reads) as f:
             read_chrom = int(junction[0][3:])
         except ValueError:
             break
+        if read_chrom == last_chrom: break
         start, end = int(junction[1]), int(junction[2])
 
         # if chromosome changes, update loaded sequence until chromosome 22 reached
@@ -119,41 +119,45 @@ with open(path_filtered_reads) as f:
         # (1) end2 < start or
         # (2) start2 > end
         # => end2 >= start and start2 <= end
-        # check all junctions above until end2 < start
+
         # problem: file too large into memory, but need specific lines from it
         # solution 1: save the last ~10 lines seen before
         # solution 2: realise that file only has 300 mb and it is fine to load it into memory
+
+        # check all junctions above until end2 < start
+        # good idea, but doesn't work because you can have
+        # 1 -> 10
+        # 2 -> 3
+        # 4 -> 5
+        # -> changing to look at 10 rows above (as heuristic)
         neg = 0
         idx_above = i - 1
-        # THIS MAKES THINGS SLOW AS FUCK ATM
-        while True:
+        for idx_above in range(i-1, i-10, -1):
             if idx_above <= 0: break
             line2 = all[idx_above][0]
             break_idx = line2.find(',')
             junction2 = line2[:break_idx].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
-            if end2 < start: break
-            idx_above -= 1
-            kms = line2[break_idx+1:].find(',')
-            # +1 for ','
-            # +1 for '['
-            neg += int(line2[break_idx+2:break_idx+kms+1])
+            if end2 >= start:
+                idx_above -= 1
+                kms = line2[break_idx+1:].find(',')
+                # +1 for ',', +1 for '['
+                neg += int(line2[break_idx+2:break_idx+kms+1])
 
 
         # check all junctions below until start2 > end
         idx_below = i+1
-        while True:
+        for idx_below in range(i+1, i+10):
             if idx_below >= len(all): break
             line2 = all[idx_below][0]
             break_idx = line2.find(',')
             junction2 = line2[:break_idx].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
-            if start2 > end: break
-            idx_below += 1
-            kms = line2[break_idx+1:].find(',')
-            # +1 for ','
-            # +1 for '['
-            neg += int(line2[break_idx+2:break_idx+kms+1])
+            if end >= start2:
+                idx_below += 1
+                kms = line2[break_idx+1:].find(',')
+                # +1 for ',', +1 for '['
+                neg += int(line2[break_idx+2:break_idx+kms+1])
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)
         junction_psis[line[:split_idx]] = psi
@@ -173,7 +177,7 @@ with open(path_filtered_reads) as f:
 #         f.write(f'{junction},{psis}\n')
 
 
-with open(f'{data_path}/brain_cortex_seqs_psis.csv', 'w') as f:
+with open(f'{data_path}/{save_to}', 'w') as f:
     print('Beginning to write estimated PSIs and extracted sequences')
     for junction, (start_seq, end_seq, psi) in seqs_psis.items():
         f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
