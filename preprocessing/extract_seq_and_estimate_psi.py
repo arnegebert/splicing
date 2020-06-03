@@ -174,7 +174,7 @@ with open(path_filtered_reads) as f:
 
 
 with open(f'{data_path}/brain_cortex_seqs_psis.csv', 'w') as f:
-    print('Beginning to write estimated PSIs and extraced sequences')
+    print('Beginning to write estimated PSIs and extracted sequences')
     for junction, (start_seq, end_seq, psi) in seqs_psis.items():
         f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
 

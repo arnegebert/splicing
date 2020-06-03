@@ -1,10 +1,10 @@
 from torchvision import datasets, transforms
 from base import BaseDataLoader
 from torch.utils.data import Dataset
-import csv
+import ast
 import time
 from torch import as_tensor as T
-
+import pickle
 
 
 class NaivePSIDataLoader(BaseDataLoader):
@@ -45,12 +45,17 @@ class NaivePSIDataset(Dataset):
         print(f'starting loading of data')
         self.samples = []
 
-        with open(self.path, 'r') as f:
-            for i, l in enumerate(f):
-                j, start_seq, end_seq, psi = l.split(',')
-                psi = float(psi[:-1])
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T(psi))
+        with open(self.path, 'rb') as f:
+            all = pickle.load(f)
+            for (start_seq, end_seq, psi) in all:
+                sample = (T((start_seq, end_seq)), T(psi))
                 self.samples.append(sample)
+            # for i, l in enumerate(f):
+            #     j, start_seq, end_seq, psi = l.split('\t')
+            #     psi = float(psi[:-1])
+            #     sample = (T((ast.literal_eval(start_seq), ast.literal_eval(end_seq))), T(psi))
+            #     self.samples.append(sample)
+            all = None
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))
 

@@ -25,7 +25,7 @@
             "amsgrad": true
         }
     },
-    "loss": "l1_loss",
+    "loss": "cross_entropy",
     "metrics": [
     ],
     "lr_scheduler": {
