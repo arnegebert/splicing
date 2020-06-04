@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from data_loader import MNISTDataLoader as MNIST_module
 from data_loader import NaivePSIDataLoader as PSI_module
+from data_loader import DSCDataLoader as DSC_module
 import model.loss as module_loss
 import model.metric as module_metric
 import model.models as module_arch
@@ -23,7 +24,7 @@ def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
-    data_loader = config.init_obj('data_loader', PSI_module)
+    data_loader = config.init_obj('data_loader', DSC_module)
     valid_data_loader = data_loader.split_validation()
 
     # build model architecture, then print to console
@@ -41,6 +42,7 @@ def main(config):
     lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
     # todo make trainer loadable / choosable in config file
+    # todo save encoded sequences .npy to save time
     trainer = Trainer(model, criterion, metrics, optimizer,
                       config=config,
                       data_loader=data_loader,

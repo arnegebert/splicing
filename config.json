@@ -8,10 +8,10 @@
         "args": {}
     },
     "data_loader": {
-        "type": "NaivePSIDataLoader",
+        "type": "DSCDataLoader",
         "args":{
-            "data_dir": "data/brain_cortex_cassette_full.csv",
-            "batch_size": 256,
+            "data_dir": "data/hexevent/cassette_exons_filtered.csv",
+            "batch_size": 100,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 2
@@ -20,7 +20,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 0.001,
+            "lr": 5e-4,
             "weight_decay": 0,
             "amsgrad": true
         }

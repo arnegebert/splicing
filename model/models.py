@@ -46,7 +46,7 @@ class NaivePSIModel(BaseModel):
         return F.sigmoid(x)
 
 
-class DeepSplicingCode(BaseModel):
+class DeepSplicingCodeSmoll(BaseModel):
 
     def __init__(self):
         super().__init__()
@@ -98,7 +98,56 @@ class DeepSplicingCode(BaseModel):
         return y
 
 
+class DeepSplicingCode(BaseModel):
 
+    def __init__(self):
+        super().__init__()
+
+        self.fc_in = 16*8*2
+        self.conv1_start = nn.Conv1d(4, 32, kernel_size=3)
+        self.conv1_drop_start = nn.Dropout2d(0.2)
+
+        self.conv2_start = nn.Conv1d(32, 8, kernel_size=3)
+        self.conv2_drop_start = nn.Dropout2d(0.2)
+
+        self.conv3_start = nn.Conv1d(8, 8, kernel_size=3)
+        self.conv3_drop_start = nn.Dropout2d(0.2)
+
+        # end conv blocks here...
+        self.conv1_end = nn.Conv1d(4, 32, kernel_size=3)
+        self.conv1_drop_end = nn.Dropout2d(0.2)
+
+        self.conv2_end = nn.Conv1d(32, 8, kernel_size=3)
+        self.conv2_drop_end = nn.Dropout2d(0.2)
+
+        self.conv3_end = nn.Conv1d(8, 8, kernel_size=3)
+        self.conv3_drop_end = nn.Dropout2d(0.2)
+
+        self.fc1 = nn.Linear(self.fc_in, 64)
+        self.drop_fc = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(64, 1)
+
+
+    def forward(self, data):
+        # [128, 142, 4]
+        start, end = data[:, 0], data[:, 1]
+        start, end = start.view(-1, 4, 142), end.view(-1, 4, 142)
+        # x = F.relu(self.conv1_drop_start(self.conv1_start(start)))
+
+        x = F.max_pool1d(F.relu(self.conv1_drop_start(self.conv1_start(start))), 2)
+        x = F.max_pool1d(F.relu(self.conv2_drop_start(self.conv2_start(x))), 2)
+        x = F.max_pool1d(F.relu(self.conv3_drop_start(self.conv3_start(x))), 2)
+
+        xx = F.max_pool1d(F.relu(self.conv1_drop_end(self.conv1_end(end))), 2)
+        # xx = F.relu(self.conv1_drop_end(self.conv1_end(end)))
+        xx = F.max_pool1d(F.relu(self.conv2_drop_end(self.conv2_end(xx))), 2)
+        xx = F.max_pool1d(F.relu(self.conv3_drop_end(self.conv3_end(xx))), 2)
+
+        feats = torch.cat((x, xx), dim=1)
+        feats = feats.view(-1, self.fc_in)
+        y = self.drop_fc(F.relu(self.fc1(feats)))
+        y = F.sigmoid(self.fc2(y))
+        return y
 
 
 

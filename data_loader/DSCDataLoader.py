@@ -7,7 +7,7 @@ from torch import as_tensor as T
 import pickle
 
 
-class NaivePSIDataLoader(BaseDataLoader):
+class DSCDataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
@@ -44,13 +44,26 @@ class NaivePSIDataset(Dataset):
         start = time.time()
         print(f'starting loading of data')
         self.samples = []
-
-        with open(self.path, 'r') as f:
+        con, cass = [], []
+        with open('data/hexevent/cons_exons_filtered.csv', 'r') as f:
             for i, l in enumerate(f):
                 j, start_seq, end_seq, psi = l.split('\t')
                 psi = float(psi[:-1])
                 sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T(psi))
-                self.samples.append(sample)
+                con.append(sample)
+
+        with open('data/hexevent/low_cassette_filtered.csv', 'r') as f:
+            for i, l in enumerate(f):
+                j, start_seq, end_seq, psi = l.split('\t')
+                psi = float(psi[:-1])
+                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T(psi))
+                cass.append(sample)
+
+        ratio = int(len(con)/len(cass))
+        self.samples = con
+        for _ in range(ratio):
+            self.samples.extend(cass)
+
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))
 

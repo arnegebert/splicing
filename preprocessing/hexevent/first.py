@@ -5,8 +5,8 @@ exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 filtered = []
 data_path = '../../data'
-src = 'hexevent/all_cons_exons.txt'
-target = 'hexevent/cons_exons_filtered.csv'
+src = 'hexevent/all_cassette_exons.txt'
+target = 'hexevent/low_cassette_filtered.csv'
 last_chrom = 22
 
 def load_chrom_seq(chrom):
@@ -64,6 +64,8 @@ with open(f'{data_path}/{src}') as f:
             # min length of 25
             if end - start < 25: continue
             constit_level, skip = float(line[9]), int(line[8])
+
+            if constit_level > 0.2: continue
             # ~ 12280 cas exons, might make because skipping is the primary one
             if skip < 20 and count < 20: continue
             # if (skip < 20 or count < 4) and (count < 20 or skip < 4): continue
@@ -87,6 +89,7 @@ with open(f'{data_path}/{src}') as f:
                 window_around_end = reverse_complement(window_around_end)
             # always the case since constitutive exons only atm
             psi = constit_level
+
             # if float(line[9]) != 1: print(f'{i}: no')
             junction = f'{line[0]}_{start}_{end}'
             filtered.append(
