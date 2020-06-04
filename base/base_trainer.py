@@ -91,7 +91,7 @@ class BaseTrainer:
                     not_improved_count = 0
                     best = True
                 else:
-                    not_improved_count += 1/
+                    not_improved_count += 1
 
                 if not_improved_count > self.early_stop:
                     self.logger.info("Validation performance didn\'t improve for {} epochs. "

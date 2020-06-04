@@ -2,16 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 psis = []
-with open('../data/brain_cortex_full.csv') as f:
+with open('../data/hexevent/cassette_exons_filtered.csv') as f:
     for l in f:
-        j, start_seq, end_seq, psi = l.split(',')
+        # j, start_seq, end_seq, psi = l.split(',')
+        j, start_seq, end_seq, psi = l.split('\t')
         psis.append(float(psi[:-1]))
 
 psis = np.array(psis)
 length = len(psis)
-print(f'number of values: {len(psis)}')
+print(f'number of values: {length}')
 print(f'percent of zeroes: {np.sum(psis==0)/length}')
-print(f'percent of psis <0.5: {np.sum(psis<0)/length}')
+print(f'percent of psis <0.5: {np.sum(psis<0.5)/length}')
 print(f'percent of psis =0.5: {np.sum(psis==0.5)/length}')
 print(f'percent of psis >0.5: {np.sum(psis>0.5)/length}')
 print(f'percent of psis =1: {np.sum(psis==1)/length}')
