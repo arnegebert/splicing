@@ -43,7 +43,7 @@ class NaivePSIModel(BaseModel):
         x = F.relu(self.fc1(x))
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
-        return F.sigmoid(x)
+        return torch.sigmoid(x)
 
 
 class DeepSplicingCodeSmoll(BaseModel):
@@ -94,7 +94,7 @@ class DeepSplicingCodeSmoll(BaseModel):
         feats = torch.cat((x, xx), dim=1)
         feats = feats.view(-1, self.fc_in)
         y = self.drop_fc(F.relu(self.fc1(feats)))
-        y = F.sigmoid(self.fc2(y))
+        y = torch.sigmoid(self.fc2(y))
         return y
 
 
@@ -146,7 +146,7 @@ class DeepSplicingCode(BaseModel):
         feats = torch.cat((x, xx), dim=1)
         feats = feats.view(-1, self.fc_in)
         y = self.drop_fc(F.relu(self.fc1(feats)))
-        y = F.sigmoid(self.fc2(y))
+        y = torch.sigmoid(self.fc2(y))
         return y
 
 
