@@ -1,5 +1,5 @@
 import csv
-
+import numpy as np
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
 
@@ -7,8 +7,19 @@ exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 filtered = []
 data_path = '../../data'
-src = 'hexevent/all_cassette_exons.txt'
-target = 'hexevent/all_cassette_filtered_class.csv'
+# src = 'hexevent/all_cons.txt'
+# target = 'hexevent/all_cons_filtered_class.csv'
+src = 'hexevent/all_cass.txt'
+target = 'hexevent/high_cass_filtered_class.csv'
+
+low = False
+high = True
+
+cons = False
+
+assert not(low and high), 'filter either for low or high inclusion rate'
+assert not(cons and (low or high)), 'can\'t filter according to inclusion level and be constitutive at the same time'
+
 last_chrom = 22
 gencode_idx = 0
 
@@ -55,7 +66,7 @@ def reverse_complement(seq):
 
 not_annotated = 0
 too_short = 0
-# todo add support for endings :|
+# O(N) search for intron & exon lengths :) smiley-face
 def find_gencode_exon(read_chrom, start, end):
     gencode_idx_cpy = gencode_idx
     gencode_cpy = gencode[read_chrom]
@@ -93,6 +104,8 @@ def find_gencode_exon(read_chrom, start, end):
             # print(f'Left like this on iteration {i}')
             return False, None, None, gencode_idx_cpy
 
+exon_lens = []
+intron_lens = []
 with open(f'{data_path}/{src}') as f:
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
@@ -118,15 +131,14 @@ with open(f'{data_path}/{src}') as f:
                 chrom_seq = load_chrom_seq(loaded_chrom)
 
             """ Filtering """
-            # min length of 25
-            if end - start < 25: continue
+
             constit_level, skip = float(line[9]), int(line[8])
 
             # -------------------------------------------------------------------------------
             # low inclusion exons only
-            # if constit_level > 0.2: continue
+            if low and constit_level > 0.2: continue
             # high inclusion exons only
-            # if constit_level < 0.8: continue
+            if high and constit_level < 0.8: continue
             # -------------------------------------------------------------------------------
 
 
@@ -143,6 +155,9 @@ with open(f'{data_path}/{src}') as f:
             if l1 < 80 or l3 < 80:
                 too_short += 1
                 continue
+            # min length of 25
+            l2 = end - start
+            if end - start < 25: continue
             # ~ 4564 cas exons
             # if count < 20: continue
             # if constit_level != 1 and skip < 4: continue
@@ -161,18 +176,32 @@ with open(f'{data_path}/{src}') as f:
                 window_around_start = reverse_complement(window_around_start)
                 window_around_end = reverse_complement(window_around_end)
             # always the case since constitutive exons only atm
-            is_constitutive = 0.0
+            if cons:
+                is_constitutive = 1.0
+            else:
+                is_constitutive = 0.0
 
             # if float(line[9]) != 1: print(f'{i}: no')
             junction = f'{line[0]}_{start}_{end}'
             filtered.append(
-                (junction, window_around_start, window_around_end, is_constitutive)
+                (junction, window_around_start, window_around_end, is_constitutive, l1, l2, l3)
             )
+            exon_lens.append(l2)
+            intron_lens.append(l1)
+            intron_lens.append(l3)
 
 print(f'Number of exons after filtering: {len(filtered)}')
 print(f'Number of skipped not-annotated exons: {not_annotated} ')
 print(f'Number of skipped exons with too short neighbouring introns l1 or l3: {too_short}')
-
+exon_lens = np.array(exon_lens)
+intron_lens = np.array(intron_lens)
+exon_mean, exon_std = np.mean(exon_lens), np.std(exon_lens)
+intron_mean, intron_std = np.mean(intron_lens), np.std(intron_lens)
+print(f'Exon mean: {exon_mean}')
+print(f'Exon std: {exon_std}')
+print(f'Intron mean: {intron_mean}')
+print(f'Intron std: {intron_std}')
 with open(f'{data_path}/{target}', 'w') as f:
-    for (junction, start, end, psi) in filtered:
-        f.write(f'{junction}\t{start}\t{end}\t{psi}\n')
+    for (junction, start, end, psi, l1, l2, l3) in filtered:
+        f.write(f'{junction}\t{start}\t{end}\t{psi}\t{(l1-exon_mean)/exon_std}\t'
+                f'{(l2-intron_mean)/intron_std}\t{(l3-intron_mean)/intron_std}\n')

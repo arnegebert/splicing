@@ -41,18 +41,18 @@ class NaivePSIDataset(Dataset):
         print(f'starting loading of data')
         self.samples = []
         con, cass = [], []
-        with open('data/hexevent/cons_exons_filtered_class.csv', 'r') as f:
+        with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
             for i, l in enumerate(f):
-                j, start_seq, end_seq, psi = l.split('\t')
-                psi = float(psi[:-1])
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T(psi))
+                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T((l1, l2, l3)), T(psi))
                 con.append(sample)
 
-        with open('data/hexevent/low_cassette_filtered_class.csv', 'r') as f:
+        with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
             for i, l in enumerate(f):
-                j, start_seq, end_seq, psi = l.split('\t')
-                psi = float(psi[:-1])
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T(psi))
+                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T((l1, l2, l3)), T(psi))
                 cass.append(sample)
 
         ratio = int(len(con)/len(cass))

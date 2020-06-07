@@ -23,7 +23,8 @@ class Trainer(BaseTrainer):
             self.len_epoch = len_epoch
         self.valid_data_loader = valid_data_loader
         self.do_validation = self.valid_data_loader is not None
-        self.lr_scheduler = lr_scheduler
+        # self.lr_scheduler = lr_scheduler
+        self.lr_scheduler = None
         self.log_step = int(np.sqrt(data_loader.batch_size))
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
@@ -38,11 +39,16 @@ class Trainer(BaseTrainer):
         """
         self.model.train()
         self.train_metrics.reset()
-        for batch_idx, (data, target) in enumerate(self.data_loader):
-            data, target = data.to(self.device), target.to(self.device)
-
+        for batch_idx, (seqs, lens, target) in enumerate(self.valid_data_loader):
+            seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
-            output = self.model(data)
+
+            output = self.model(seqs, lens)
+        # for batch_idx, (data, target) in enumerate(self.data_loader):
+        #     data, target = data.to(self.device), target.to(self.device)
+        #
+        #     self.optimizer.zero_grad()
+        #     output = self.model(data)
             loss = self.criterion(output, target)
             loss.backward()
             self.optimizer.step()
@@ -87,10 +93,10 @@ class Trainer(BaseTrainer):
             #     start_seq, end_seq, target = start_seq.to(self.device), end_seq.to(self.device), target.to(self.device)
             #
             #     output = self.model((start_seq, end_seq))
-            for batch_idx, (data, target) in enumerate(self.valid_data_loader):
-                data, target = data.to(self.device), target.to(self.device)
+            for batch_idx, (seqs, lens, target) in enumerate(self.valid_data_loader):
+                seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
 
-                output = self.model(data)
+                output = self.model(seqs, lens)
                 loss = self.criterion(output, target)
 
                 self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
