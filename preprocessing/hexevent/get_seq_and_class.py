@@ -1,3 +1,5 @@
+import csv
+
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
 
@@ -5,12 +7,31 @@ exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 filtered = []
 data_path = '../../data'
+xxx = 1
 src = 'hexevent/all_cassette_exons.txt'
 target = 'hexevent/all_cassette_filtered_class.csv'
 last_chrom = 22
-gencode_idx = 0
-gencode = list(open(f'{data_path}/gencode_exons.csv').read().replace('\n', ''))
+gencode_idx = 1
 
+# with open(f'../../data/gencode_exons.csv') as f:
+#     print('xxxxxxxx')
+
+# gencode = list(open(f'{data_path}/gencode_exons.csv').read().replace('\n', '').split('\t'))
+gencode = {}
+with open(f'{data_path}/gencode_exons.csv') as f:
+    for line in f:
+        line = line.split('\t')
+        if len(line) == 1: continue
+        chr, start, end = int(line[0][3:]), int(line[1]), int(line[2][:-1])
+        if chr not in gencode:
+            gencode[chr] = []
+        gencode[chr].append((start, end))
+    print('Finished reading gencode data')
+    # reader = csv.reader(f, delimiter="\t")
+    # contains list with rows of samples
+    # gencode = list(reader)
+
+print('Starting processing')
 def load_chrom_seq(chrom):
     with open(f'{data_path}/chromosomes/chr{chrom}.fa') as f:
         all = f.read().replace('\n', '')
@@ -40,32 +61,36 @@ def reverse_complement(seq):
     return ''.join(complt)
 
 # todo add support for endings :|
-def find_gencode_exon(start, end):
-    gencode_start = int(gencode[gencode_idx][1])
-    if gencode_start < start:
-        gencode_idx += 1
-    elif gencode_start == start:
-        gencode_end = int(gencode[gencode_idx][2])
-        if gencode_end == end:
-            # get next closest exon from left
-            idx_left = gencode_idx - 1
-            start_left = int(gencode[idx_left][1])
-            while start_left == start:
-                idx_left -= 1
-                start_left = int(gencode[idx_left][1])
-            end_left = int(gencode[idx_left][2])
-            l1 = end_left - start
+def find_gencode_exon(read_chrom, start, end):
+    gencode_idx_cpy = gencode_idx
+    gencode_cpy = gencode[read_chrom]
+    while True:
+        gencode_start, gencode_end = gencode_cpy[gencode_idx_cpy]
+        # gencode_start = int(gencode[gencode_idx_cpy][1])
+        if gencode_start < start:
+            gencode_idx_cpy += 1
+        elif gencode_start == start:
+            # gencode_end = int(gencode[gencode_idx_cpy][2])
+            if gencode_end == end:
+                # get next closest exon from left
+                idx_left = gencode_idx_cpy - 1
+                start_left = gencode_cpy[idx_left][0]
+                while start_left == start:
+                    idx_left -= 1
+                    start_left = gencode_cpy[idx_left][0]
+                end_left = gencode_cpy[idx_left][1]
+                l1 = end_left - start
 
-            # get next closest exon from right
-            idx_right = gencode_idx + 1
-            start_right = int(gencode[idx_right][1])
-            while start_right == start:
-                idx_right += 1
-                start_right = int(gencode[idx_right][1])
-            l3 = start_right - end
-            return True, l1, l3
-    else:  # hopefully only happens rarely
-        return False, None, None
+                # get next closest exon from right
+                idx_right = gencode_idx_cpy + 1
+                start_right = gencode_cpy[idx_right][0]
+                while start_right == start:
+                    idx_right += 1
+                    start_right = gencode_cpy[idx_right][0]
+                l3 = start_right - end
+                return True, l1, l3, gencode_idx_cpy
+        else:  # hopefully only happens rarely
+            return False, None, None, gencode_idx_cpy
 
 with open(f'{data_path}/{src}') as f:
     loaded_chrom = 1
@@ -103,11 +128,15 @@ with open(f'{data_path}/{src}') as f:
             # -------------------------------------------------------------------------------
 
 
-            # ~ 12280 cas exons, might make because skipping is the primary one
+            # ~ 12280 cas exons, might make sense because skipping is the primary one
             if skip < 20 and count < 20: continue
             # if (skip < 20 or count < 4) and (count < 20 or skip < 4): continue
 
-
+            # current state: this breaks in the first iteration;
+            # TypeError: cannot unpack non-iterable NoneType object
+            found, l1, l3, new_idx = find_gencode_exon(read_chrom, start, end)
+            gencode_idx = new_idx
+            if not found: continue
 
             # ~ 4564 cas exons
             # if count < 20: continue
