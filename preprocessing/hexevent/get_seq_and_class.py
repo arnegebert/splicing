@@ -7,14 +7,10 @@ exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 filtered = []
 data_path = '../../data'
-xxx = 1
 src = 'hexevent/all_cassette_exons.txt'
 target = 'hexevent/all_cassette_filtered_class.csv'
 last_chrom = 22
-gencode_idx = 1
-
-# with open(f'../../data/gencode_exons.csv') as f:
-#     print('xxxxxxxx')
+gencode_idx = 0
 
 # gencode = list(open(f'{data_path}/gencode_exons.csv').read().replace('\n', '').split('\t'))
 gencode = {}
@@ -27,9 +23,6 @@ with open(f'{data_path}/gencode_exons.csv') as f:
             gencode[chr] = []
         gencode[chr].append((start, end))
     print('Finished reading gencode data')
-    # reader = csv.reader(f, delimiter="\t")
-    # contains list with rows of samples
-    # gencode = list(reader)
 
 print('Starting processing')
 def load_chrom_seq(chrom):
@@ -60,6 +53,8 @@ def reverse_complement(seq):
         else: raise Exception("Unidentified base-pair given")
     return ''.join(complt)
 
+not_annotated = 0
+too_short = 0
 # todo add support for endings :|
 def find_gencode_exon(read_chrom, start, end):
     gencode_idx_cpy = gencode_idx
@@ -71,25 +66,31 @@ def find_gencode_exon(read_chrom, start, end):
             gencode_idx_cpy += 1
         elif gencode_start == start:
             # gencode_end = int(gencode[gencode_idx_cpy][2])
-            if gencode_end == end:
+            if gencode_end < end:
+                gencode_idx_cpy += 1
+            elif gencode_end > end:
+                return False, None, None, gencode_idx_cpy
+            elif gencode_end == end:
                 # get next closest exon from left
                 idx_left = gencode_idx_cpy - 1
-                start_left = gencode_cpy[idx_left][0]
-                while start_left == start:
+                start_left, end_left = gencode_cpy[idx_left]
+                while end_left >= start:
                     idx_left -= 1
-                    start_left = gencode_cpy[idx_left][0]
-                end_left = gencode_cpy[idx_left][1]
-                l1 = end_left - start
+                    start_left, end_left = gencode_cpy[idx_left]
+                l1 = start - end_left
+                if l1 == 0: print('It happened for l1')
 
                 # get next closest exon from right
                 idx_right = gencode_idx_cpy + 1
                 start_right = gencode_cpy[idx_right][0]
-                while start_right == start:
+                while start_right <= end:
                     idx_right += 1
                     start_right = gencode_cpy[idx_right][0]
                 l3 = start_right - end
+                if l3 == 0: print('It happened for l3')
                 return True, l1, l3, gencode_idx_cpy
         else:  # hopefully only happens rarely
+            # print(f'Left like this on iteration {i}')
             return False, None, None, gencode_idx_cpy
 
 with open(f'{data_path}/{src}') as f:
@@ -112,6 +113,7 @@ with open(f'{data_path}/{src}') as f:
             if read_chrom == last_chrom: break
             # if chromosome changes, update loaded sequence until chromosome 22 reached
             if read_chrom > loaded_chrom:
+                gencode_idx = 0
                 loaded_chrom += 1
                 chrom_seq = load_chrom_seq(loaded_chrom)
 
@@ -132,12 +134,15 @@ with open(f'{data_path}/{src}') as f:
             if skip < 20 and count < 20: continue
             # if (skip < 20 or count < 4) and (count < 20 or skip < 4): continue
 
-            # current state: this breaks in the first iteration;
-            # TypeError: cannot unpack non-iterable NoneType object
+            # extracting intron length and
             found, l1, l3, new_idx = find_gencode_exon(read_chrom, start, end)
             gencode_idx = new_idx
-            if not found: continue
-
+            if not found:
+                not_annotated += 1
+                continue
+            if l1 < 80 or l3 < 80:
+                too_short += 1
+                continue
             # ~ 4564 cas exons
             # if count < 20: continue
             # if constit_level != 1 and skip < 4: continue
@@ -164,7 +169,10 @@ with open(f'{data_path}/{src}') as f:
                 (junction, window_around_start, window_around_end, is_constitutive)
             )
 
-print(len(filtered))
+print(f'Number of exons after filtering: {len(filtered)}')
+print(f'Number of skipped not-annotated exons: {not_annotated} ')
+print(f'Number of skipped exons with too short neighbouring introns l1 or l3: {too_short}')
+
 with open(f'{data_path}/{target}', 'w') as f:
     for (junction, start, end, psi) in filtered:
         f.write(f'{junction}\t{start}\t{end}\t{psi}\n')
