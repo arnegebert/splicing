@@ -127,7 +127,6 @@ class DeepSplicingCode(BaseModel):
         self.drop_fc = nn.Dropout(0.5)
         self.fc2 = nn.Linear(64, 1)
 
-
     def forward(self, seqs, lens):
         # [128, 142, 4]
         start, end = seqs[:, 0], seqs[:, 1]
@@ -146,10 +145,19 @@ class DeepSplicingCode(BaseModel):
         feats = torch.cat((feats, lens), dim=1)
         y = self.drop_fc(F.relu(self.fc1(feats)))
         y = torch.sigmoid(self.fc2(y))
+
         return y
 
 
+class DSCKiller(BaseModel):
 
+    def __init__(self):
+        super().__init__()
+        self.lin = nn.Linear(3, 1)
+
+    def forward(self, seqs, lens):
+        y = torch.sigmoid(self.lin(lens))
+        return y
 
 
 

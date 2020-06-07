@@ -10,6 +10,7 @@ import model.metric as module_metric
 import model.models as module_arch
 from parse_config import ConfigParser
 from trainer import Trainer
+import time
 
 
 # fix random seeds for reproducibility
@@ -53,6 +54,7 @@ def main(config):
 
 
 if __name__ == '__main__':
+    start = time.time()
     args = argparse.ArgumentParser(description='PyTorch Template')
     args.add_argument('-c', '--config', default='config.json', type=str,
                       help='config file path (default: config.json)')
@@ -69,3 +71,5 @@ if __name__ == '__main__':
     ]
     config = ConfigParser.from_args(args, options)
     main(config)
+    end = time.time()
+    print(f'Training took {end-start:.3f} s')

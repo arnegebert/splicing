@@ -1,11 +1,11 @@
 from torchvision import datasets, transforms
 from base import BaseDataLoader
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, TensorDataset
 import ast
 import time
-from torch import as_tensor as T
+from torch import as_tensor as T, Tensor
 import pickle
-
+import torch
 
 class DSCDataLoader(BaseDataLoader):
     """
@@ -13,7 +13,9 @@ class DSCDataLoader(BaseDataLoader):
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
         self.data_dir = data_dir
-        self.dataset = NaivePSIDataset(path=data_dir, training=training)
+        self.dataset = DSCDataset(path=data_dir, training=training)
+        # samples = prepare_data()
+        # self.dataset = TensorDataset(*samples)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
 
 def one_hot_encode(nt):
@@ -32,7 +34,7 @@ def encode_seq(seq):
         encoding.append(one_hot_encode(nt))
     return encoding
 
-class NaivePSIDataset(Dataset):
+class DSCDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
 
     def __init__(self, path, transform=None, training=True):
@@ -45,14 +47,20 @@ class NaivePSIDataset(Dataset):
             for i, l in enumerate(f):
                 j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
                 psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T((l1, l2, l3)), T(psi))
+                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))#.to('cuda')
+                lens = T((l1, l2, l3))#.to('cuda')
+                psi = T(psi)#.to('cuda')
+                sample = (seqs, lens, psi)
                 con.append(sample)
 
         with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
             for i, l in enumerate(f):
                 j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
                 psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T((l1, l2, l3)), T(psi))
+                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))#.to('cuda')
+                lens = T((l1, l2, l3))#.to('cuda')
+                psi = T(psi)#.to('cuda')
+                sample = (seqs, lens, psi)
                 cass.append(sample)
 
         ratio = int(len(con)/len(cass))
@@ -71,3 +79,37 @@ class NaivePSIDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.samples[idx]
+
+
+def prepare_data():
+    start = time.time()
+    print(f'starting loading of data')
+    samples = []
+    con, cass = [], []
+    with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
+        for i, l in enumerate(f):
+            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+            lens = T((l1, l2, l3))
+            psi = T(psi)
+            sample = (seqs, lens, psi)
+            con.append(sample)
+
+    with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
+        for i, l in enumerate(f):
+            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+            lens = T((l1, l2, l3))
+            psi = T(psi)
+            sample = (seqs, lens, psi)
+            cass.append(sample)
+
+    ratio = int(len(con) / len(cass))
+    for _ in range(ratio):
+        samples.extend(cass)
+
+    end = time.time()
+    print('total time to load data: {} secs'.format(end - start))
+    return samples

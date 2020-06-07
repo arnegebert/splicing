@@ -45,17 +45,20 @@ def main(config):
     total_metrics = torch.zeros(len(metric_fns))
 
     with torch.no_grad():
-        for i, (data, target) in enumerate(tqdm(data_loader)):
-            data, target = data.to(device), target.to(device)
-            output = model(data)
+        # for i, (data, target) in enumerate(tqdm(data_loader)):
+        #     data, target = data.to(device), target.to(device)
+        #     output = model(data)
+        for batch_idx, (seqs, lens, target) in enumerate(tqdm(data_loader)):
+            seqs, lens, target = seqs.to(device), lens.to(device), target.to(device)
 
+            output = model(seqs, lens)
             #
             # save sample images, or do something with output here
             #
 
             # computing loss, metrics on test set
             loss = loss_fn(output, target)
-            batch_size = data.shape[0]
+            batch_size = seqs.shape[0]
             total_loss += loss.item() * batch_size
             for i, metric in enumerate(metric_fns):
                 total_metrics[i] += metric(output, target) * batch_size
@@ -72,7 +75,7 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser(description='PyTorch Template')
     args.add_argument('-c', '--config', default='config.json', type=str,
                       help='config file path (default: None)')
-    args.add_argument('-r', '--resume', default='saved/models/DSC/0604_200505/model_best.pth', type=str,
+    args.add_argument('-r', '--resume', default='saved/models/DSC/100_low_9997/model_best.pth', type=str,
                       help='path to latest checkpoint (default: None)')
     args.add_argument('-d', '--device', default=None, type=str,
                       help='indices of GPUs to enable (default: all)')

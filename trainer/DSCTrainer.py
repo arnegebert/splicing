@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
+from data_loader.DSCDataLoader import DSCDataset
 from utils import inf_loop, MetricTracker
 
 
@@ -29,6 +30,7 @@ class Trainer(BaseTrainer):
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.dataset = DSCDataset('')
 
     def _train_epoch(self, epoch):
         """
@@ -39,16 +41,13 @@ class Trainer(BaseTrainer):
         """
         self.model.train()
         self.train_metrics.reset()
+
+        # for batch_idx, (seqs, lens, target) in enumerate(self.dataset):
         for batch_idx, (seqs, lens, target) in enumerate(self.valid_data_loader):
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
             output = self.model(seqs, lens)
-        # for batch_idx, (data, target) in enumerate(self.data_loader):
-        #     data, target = data.to(self.device), target.to(self.device)
-        #
-        #     self.optimizer.zero_grad()
-        #     output = self.model(data)
             loss = self.criterion(output, target)
             loss.backward()
             self.optimizer.step()
@@ -89,10 +88,6 @@ class Trainer(BaseTrainer):
         self.model.eval()
         self.valid_metrics.reset()
         with torch.no_grad():
-            # for batch_idx, ((start_seq, end_seq), target) in enumerate(self.valid_data_loader):
-            #     start_seq, end_seq, target = start_seq.to(self.device), end_seq.to(self.device), target.to(self.device)
-            #
-            #     output = self.model((start_seq, end_seq))
             for batch_idx, (seqs, lens, target) in enumerate(self.valid_data_loader):
                 seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
 
@@ -103,7 +98,6 @@ class Trainer(BaseTrainer):
                 self.valid_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(output, target))
-                # todo remove for my data
                 # self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
         # add histogram of model parameters to the tensorboard
