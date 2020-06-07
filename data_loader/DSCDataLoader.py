@@ -47,9 +47,9 @@ class DSCDataset(Dataset):
             for i, l in enumerate(f):
                 j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
                 psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))#.to('cuda')
-                lens = T((l1, l2, l3))#.to('cuda')
-                psi = T(psi)#.to('cuda')
+                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+                lens = T((l1, l2, l3))
+                psi = T(psi)
                 sample = (seqs, lens, psi)
                 con.append(sample)
 
@@ -57,9 +57,9 @@ class DSCDataset(Dataset):
             for i, l in enumerate(f):
                 j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
                 psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))#.to('cuda')
-                lens = T((l1, l2, l3))#.to('cuda')
-                psi = T(psi)#.to('cuda')
+                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+                lens = T((l1, l2, l3))
+                psi = T(psi)
                 sample = (seqs, lens, psi)
                 cass.append(sample)
 
