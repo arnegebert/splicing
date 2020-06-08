@@ -53,7 +53,7 @@ class DSCDataset(Dataset):
                 sample = (seqs, lens, psi)
                 con.append(sample)
 
-        with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
+        with open('data/hexevent/all_cass_filtered_class.csv', 'r') as f:
             for i, l in enumerate(f):
                 j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
                 psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])

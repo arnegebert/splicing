@@ -4,7 +4,7 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "DeepSplicingCode",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
@@ -20,7 +20,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -32,15 +32,15 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 100,
+            "step_size": 0,
             "gamma": 0.1
         }
     },
     "trainer": {
-        "epochs": 50,
+        "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 51,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "min val_loss",

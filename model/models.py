@@ -98,7 +98,7 @@ class DeepSplicingCodeSmoll(BaseModel):
         return y
 
 
-class DeepSplicingCode(BaseModel):
+class DSC(BaseModel):
 
     def __init__(self):
         super().__init__()
@@ -159,7 +159,15 @@ class DSCKiller(BaseModel):
         y = torch.sigmoid(self.lin(lens))
         return y
 
+class DSCKillerKiller(BaseModel):
 
+    def __init__(self):
+        super().__init__()
+        self.lin = nn.Linear(1, 1, bias=True)
+
+    def forward(self, seqs, lens):
+        y = torch.sigmoid(self.lin(lens[:, 1].view(-1, 1)))
+        return y
 
 
 class EncoderDecoder(nn.Module):
