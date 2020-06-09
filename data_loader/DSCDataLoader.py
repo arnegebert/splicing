@@ -7,7 +7,7 @@ from torch import as_tensor as T, Tensor
 import pickle
 import torch
 import random
-
+import numpy as np
 
 class DSCDataLoader(BaseDataLoader):
     """
@@ -20,41 +20,43 @@ class DSCDataLoader(BaseDataLoader):
         self.samples = []
         cons, low, high = [], [], []
         data_type = 'cass'
-        with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
-            for i, l in enumerate(f):
-                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                lens = T((l1, l2, l3))
-                psi = T(psi)
-                sample = (seqs, lens, psi)
-                cons.append(sample)
+        if True:
+            cons = extract_values_from_dsc_np_format(np.load('data/hexevent/x_cons_data.npy'))
+            low = extract_values_from_dsc_np_format(np.load('data/hexevent/x_cas_data_low.npy'))
+            high = extract_values_from_dsc_np_format(np.load('data/hexevent/x_cas_data_high.npy'))
+        else:
+            with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
+                for i, l in enumerate(f):
+                    j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+                    psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+                    seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+                    lens = T((l1, l2, l3))
+                    psi = T(psi)
+                    sample = (seqs, lens, psi)
+                    cons.append(sample)
 
-        with open(f'data/hexevent/low_{data_type}_filtered_class.csv', 'r') as f:
-            for i, l in enumerate(f):
-                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                lens = T((l1, l2, l3))
-                psi = T(psi)
-                sample = (seqs, lens, psi)
-                low.append(sample)
+            with open(f'data/hexevent/low_{data_type}_filtered_class.csv', 'r') as f:
+                for i, l in enumerate(f):
+                    j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+                    psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+                    seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+                    lens = T((l1, l2, l3))
+                    psi = T(psi)
+                    sample = (seqs, lens, psi)
+                    low.append(sample)
 
-        with open(f'data/hexevent/high_{data_type}_filtered_class.csv', 'r') as f:
-            for i, l in enumerate(f):
-                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                lens = T((l1, l2, l3))
-                psi = T(psi)
-                sample = (seqs, lens, psi)
-                high.append(sample)
+            with open(f'data/hexevent/high_{data_type}_filtered_class.csv', 'r') as f:
+                for i, l in enumerate(f):
+                    j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+                    psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+                    seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+                    lens = T((l1, l2, l3))
+                    psi = T(psi)
+                    sample = (seqs, lens, psi)
+                    high.append(sample)
 
-        ratio = int(len(cons) / (len(low) + len(high)))
-        random.seed(0)
-        random.shuffle(cons)
-        random.shuffle(low)
-        random.shuffle(high)
+        ratio = int(len(cons) / (len(low) + len(high))) + 1
+
         len_cons, len_low, len_high = int(len(cons)*validation_split), int(len(low)*validation_split),\
                                       int(len(high)*validation_split)
         cons_val, cons_train = cons[:len_cons], cons[len_cons:]
@@ -62,7 +64,6 @@ class DSCDataLoader(BaseDataLoader):
         hval, htrain = high[:len_high], high[len_high:]
 
         train = cons_train
-
         for _ in range(ratio):
             train.extend(ltrain)
             train.extend(htrain)
@@ -70,6 +71,12 @@ class DSCDataLoader(BaseDataLoader):
         val_all = cons_val + lval + hval
         val_low = cons_val + lval
         val_high = cons_val + hval
+
+        random.seed(0)
+        random.shuffle(train)
+        random.shuffle(val_all)
+        random.shuffle(val_low)
+        random.shuffle(val_high)
 
         train_dataset = DSCDataset(train)
         val_all_dataset = DSCDataset(val_all)
@@ -97,6 +104,20 @@ def encode_seq(seq):
     for nt in seq:
         encoding.append(one_hot_encode(nt))
     return encoding
+
+# Constant values taken in reference from
+# https://github.com/louadi/DSC/blob/master/training%20notebooks/cons_vs_es.ipynb
+# Don't blame me ¯\_(ツ)_/¯
+def extract_values_from_dsc_np_format(array):
+    lifehack = 500000
+    psi = array[:lifehack, 140, 0]
+    start_seq, end_seq = array[:lifehack, :140, :4], array[:lifehack, 141:281, :4]
+    lens = array[:lifehack, -1, 0:3]
+    to_return = []
+    # could feed my network data with 280 + 3 + 1 dimensions
+    for s, e, l, p in zip(start_seq, end_seq, lens, psi):
+        to_return.append((T((s, e)).float(), T(l).float(), T(p).float()))
+    return to_return
 
 class DSCDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
