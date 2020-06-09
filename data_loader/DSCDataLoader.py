@@ -13,11 +13,71 @@ class DSCDataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
-    def __init__(self, data_dir, batch_size, data=None, shuffle=True, validation_split=0.0, num_workers=1, training=True):
+    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
         self.data_dir = data_dir
-        self.dataset = DSCDataset(path=data_dir, training=training, data=data)
+        start = time.time()
+        print(f'starting loading of data')
+        self.samples = []
+        cons, low, high = [], [], []
+        data_type = 'cass'
+        with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
+            for i, l in enumerate(f):
+                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+                lens = T((l1, l2, l3))
+                psi = T(psi)
+                sample = (seqs, lens, psi)
+                cons.append(sample)
 
+        with open(f'data/hexevent/low_{data_type}_filtered_class.csv', 'r') as f:
+            for i, l in enumerate(f):
+                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+                lens = T((l1, l2, l3))
+                psi = T(psi)
+                sample = (seqs, lens, psi)
+                low.append(sample)
 
+        with open(f'data/hexevent/high_{data_type}_filtered_class.csv', 'r') as f:
+            for i, l in enumerate(f):
+                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
+                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
+                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
+                lens = T((l1, l2, l3))
+                psi = T(psi)
+                sample = (seqs, lens, psi)
+                high.append(sample)
+
+        ratio = int(len(cons) / (len(low) + len(high)))
+        random.seed(0)
+        random.shuffle(cons)
+        random.shuffle(low)
+        random.shuffle(high)
+        len_cons, len_low, len_high = int(len(cons)*validation_split), int(len(low)*validation_split),\
+                                      int(len(high)*validation_split)
+        cons_val, cons_train = cons[:len_cons], cons[len_cons:]
+        lval, ltrain = low[:len_low], low[len_low:]
+        hval, htrain = high[:len_high], high[len_high:]
+
+        train = cons_train
+
+        for _ in range(ratio):
+            train.extend(ltrain)
+            train.extend(htrain)
+
+        val_all = cons_val + lval + hval
+        val_low = cons_val + lval
+        val_high = cons_val + hval
+
+        train_dataset = DSCDataset(train)
+        val_all_dataset = DSCDataset(val_all)
+        val_low_dataset = DSCDataset(val_low)
+        val_high_dataset = DSCDataset(val_high)
+        self.dataset = (train_dataset, val_all_dataset, val_low_dataset, val_high_dataset)
+        end = time.time()
+        print('total time to load data: {} secs'.format(end - start))
         # samples = prepare_data()
         # self.dataset = TensorDataset(*samples)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
@@ -41,89 +101,10 @@ def encode_seq(seq):
 class DSCDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
 
-    def __init__(self, path, transform=None, training=True, data=None):
-        self.path = path
-        start = time.time()
-        print(f'starting loading of data')
-        self.samples = []
-        con, low, high = [], [], []
-        with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
-            for i, l in enumerate(f):
-                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                lens = T((l1, l2, l3))
-                psi = T(psi)
-                sample = (seqs, lens, psi)
-                con.append(sample)
-
-        with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
-            for i, l in enumerate(f):
-                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                lens = T((l1, l2, l3))
-                psi = T(psi)
-                sample = (seqs, lens, psi)
-                low.append(sample)
-
-        with open('data/hexevent/high_cass_filtered_class.csv', 'r') as f:
-            for i, l in enumerate(f):
-                j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                lens = T((l1, l2, l3))
-                psi = T(psi)
-                sample = (seqs, lens, psi)
-                high.append(sample)
-
-        ratio = int(len(con) / (len(low) + len(high)))
-        self.samples = con
-        for _ in range(ratio):
-            self.samples.extend(low)
-            self.samples.extend(high)
-
-
-
-        if not data:
-            with open(path, 'r') as f:
-            # with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
-                for i, l in enumerate(f):
-                    j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                    psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                    seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                    lens = T((l1, l2, l3))
-                    psi = T(psi)
-                    sample = (seqs, lens, psi)
-                    cass.append(sample)
-            ratio = int(len(con)/len(cass))
-            self.samples = con
-            for _ in range(ratio):
-                self.samples.extend(cass)
-        else:
-            assert data in ['low', 'high']
-            with open(f'data/hexevent/{data}_cass_filtered_class.csv', 'r') as f:
-                for i, l in enumerate(f):
-                    j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                    psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                    seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                    lens = T((l1, l2, l3))
-                    psi = T(psi)
-                    sample = (seqs, lens, psi)
-                    cass.append(sample)
-
-            ratio = int(len(con)/len(cass))
-            self.samples = con
-            for _ in range(ratio):
-                self.samples.extend(cass)
-
-
-            random.seed(0)
-            random.shuffle(self.samples)
-            self.samples =
-
-        end = time.time()
-        print('total time to load data: {} secs'.format(end - start))
+    def __init__(self, samples):
+        random.seed(0)
+        random.shuffle(samples)
+        self.samples = samples
 
     def __len__(self):
         return len(self.samples)

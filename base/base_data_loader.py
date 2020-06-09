@@ -19,13 +19,19 @@ class BaseDataLoader(DataLoader):
         self.sampler, self.valid_sampler = self._split_sampler(self.validation_split)
 
         self.init_kwargs = {
-            'dataset': dataset,
             'batch_size': batch_size,
             'shuffle': self.shuffle,
             'collate_fn': collate_fn,
             'num_workers': num_workers
         }
-        super().__init__(sampler=self.sampler, **self.init_kwargs)
+
+        if not dsc_cv:
+            super().__init__(sampler=self.sampler, dataset=dataset, **self.init_kwargs)
+        else:
+            # choose a pytorch thing that suits me
+            # use self.samples here
+            self.train, self.val_all, self.val_low, self.val_high = dataset
+            super().__init__(dataset=self.train, **self.init_kwargs)
 
     def _split_sampler(self, split):
         if split == 0.0:
@@ -59,4 +65,10 @@ class BaseDataLoader(DataLoader):
         if self.valid_sampler is None:
             return None
         else:
-            return DataLoader(sampler=self.valid_sampler, **self.init_kwargs)
+            if not self.dsc_cv:
+                return DataLoader(sampler=self.valid_sampler, **self.init_kwargs)
+            else:
+                # return three dataloaders here based on my valid datasets
+                return DataLoader(dataset=self.val_all,  **self.init_kwargs),\
+                       DataLoader(dataset=self.val_low, **self.init_kwargs),\
+                       DataLoader(dataset=self.val_high,  **self.init_kwargs)
