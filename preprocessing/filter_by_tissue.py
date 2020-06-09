@@ -51,11 +51,11 @@ with open(path_junctions) as f:
                     pass
             print(f'{len(sample_idxs)} samples after only using those in .gtc-file')
         elif i > 2:
-            # data_line = []
-            # for idx in sample_idxs:
-            #     data_line.append(int(line[idx]))
-            # data[line[0]] = data_line
-            data[line[0]] = int(line[sample_idxs[0]])
+            data_line = []
+            for idx in sample_idxs:
+                data_line.append(line[idx])
+            data[line[0]] = '\t'.join(data_line)
+            # data[line[0]] = int(line[sample_idxs[164]])
 # data = junctions -> sample reads
 
 # todo: some junctions are duplicated in the data... o.o
@@ -65,7 +65,7 @@ with open(path_junctions) as f:
 # in what format do i want data to later load it?
 # at first, junction : list of reads might not be bad
 # later i will need to extract the information from the junctions either way
-with open('../data/brain_cortex_junction_reads_one_sample.csv', 'w') as f:
+with open('../data/brain_cortex_junction_reads.csv', 'w') as f:
     print('Beginning to write junction reads')
     for junction, reads in data.items():
         f.write(f'{junction},{reads}\n')

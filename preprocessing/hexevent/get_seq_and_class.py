@@ -1,11 +1,13 @@
 import csv
 import numpy as np
+import time
 
 srcs = ['hexevent/all_cons.txt', 'hexevent/all_cass.txt', 'hexevent/all_cass.txt', 'hexevent/all_cass.txt']
 targets = ['hexevent/all_cons_filtered_class.csv', 'hexevent/all_cass_filtered_class.csv',
            'hexevent/low_cass_filtered_class.csv', 'hexevent/high_cass_filtered_class.csv']
 settings = [(True, False, False), (False, False, False), (False, True, False), (False, False, True)]
 
+start = time.time()
 # gencode = list(open(f'{data_path}/gencode_exons.csv').read().replace('\n', '').split('\t'))
 gencode = {}
 with open(f'../../data/gencode_exons.csv') as f:
@@ -192,8 +194,10 @@ for src, target, (cons, low, high) in zip(srcs, targets, settings):
                     is_constitutive = 0.0
 
                 # if float(line[9]) != 1: print(f'{i}: no')
+
                 junction = f'{line[0]}_{start}_{end}'
                 filtered.append(
+                    # (junction, window_around_start, window_around_end, float(line[9]), l1, l2, l3)
                     (junction, window_around_start, window_around_end, is_constitutive, l1, l2, l3)
                 )
                 exon_lens.append(l2)
@@ -223,3 +227,6 @@ for src, target, (cons, low, high) in zip(srcs, targets, settings):
         for (junction, start, end, psi, l1, l2, l3) in filtered:
             f.write(f'{junction}\t{start}\t{end}\t{psi}\t{(l1-intron_mean)/intron_std}\t'
                     f'{(l2-exon_mean)/exon_std}\t{(l3-intron_mean)/intron_std}\n')
+end = time.time()
+
+print(f'It took {end-start} s to generate the data sets')

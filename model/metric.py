@@ -22,3 +22,7 @@ def top_k_acc(output, target, k=3):
 def auc(output, target):
     with torch.no_grad():
         return metrics.roc_auc_score(target.cpu(), output.cpu())
+
+def r2(output, target):
+    with torch.no_grad():
+        return metrics.r2_score(target.cpu(), output.cpu())

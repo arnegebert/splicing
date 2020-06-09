@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
-from data_loader.DSCDataLoader import DSCDataset
+from data_loader.DSCDataLoader import DSCDataset, DSCDataLoader
 from utils import inf_loop, MetricTracker
 
 
@@ -23,6 +23,9 @@ class Trainer(BaseTrainer):
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
         self.valid_data_loader = valid_data_loader
+        self.low_valid_data_loader = DSCDataLoader(data='low', data_dir=None, batch_size=100, training=False)
+        self.high_valid_data_loader = DSCDataLoader(data='high', data_dir=None, batch_size=100, training=False)
+
         self.do_validation = self.valid_data_loader is not None
         # self.lr_scheduler = lr_scheduler
         self.lr_scheduler = None
@@ -42,8 +45,7 @@ class Trainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
 
-        # for batch_idx, (seqs, lens, target) in enumerate(self.dataset):
-        for batch_idx, (seqs, lens, target) in enumerate(self.valid_data_loader):
+        for batch_idx, (seqs, lens, target) in enumerate(self.data_loader):
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
