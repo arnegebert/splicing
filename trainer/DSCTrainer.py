@@ -110,7 +110,7 @@ class Trainer(BaseTrainer):
                 output = self.model(seqs, lens)
                 loss = self.criterion(output, target)
 
-                self.writer.set_step((epoch - 1) * len(self.val_all) + batch_idx, 'valid')
+                self.writer.set_step((epoch - 1) * len(self.val_low) + batch_idx, 'valid')
                 self.valid_low_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
                     self.valid_low_metrics.update(met.__name__, met(output, target))
@@ -121,7 +121,7 @@ class Trainer(BaseTrainer):
                 output = self.model(seqs, lens)
                 loss = self.criterion(output, target)
 
-                self.writer.set_step((epoch - 1) * len(self.val_all) + batch_idx, 'valid')
+                self.writer.set_step((epoch - 1) * len(self.val_high) + batch_idx, 'valid')
                 self.valid_high_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
                     self.valid_high_metrics.update(met.__name__, met(output, target))

@@ -128,9 +128,12 @@ class DSC(BaseModel):
         self.fc2 = nn.Linear(64, 1)
 
     def forward(self, seqs, lens):
-        # [128, 142, 4]
+        # [128, 142, 4] or [128, 140, 4]
         start, end = seqs[:, 0], seqs[:, 1]
-        start, end = start.view(-1, 4, 140), end.view(-1, 4, 140)
+        if start.shape[2] == 140:
+            start, end = start.view(-1, 4, 140), end.view(-1, 4, 140)
+        else:
+            start, end = start.view(-1, 4, 142), end.view(-1, 4, 142)
 
         x = F.max_pool1d(F.relu(self.conv1_drop_start(self.conv1_start(start))), 2)
         x = F.max_pool1d(F.relu(self.conv2_drop_start(self.conv2_start(x))), 2)

@@ -1,5 +1,7 @@
 import torch
 from sklearn import metrics
+from sklearn.metrics import roc_curve
+
 
 def accuracy(output, target):
     with torch.no_grad():
@@ -22,6 +24,11 @@ def top_k_acc(output, target, k=3):
 def auc(output, target):
     with torch.no_grad():
         return metrics.roc_auc_score(target.cpu(), output.cpu())
+
+def auc2(output, target):
+    with torch.no_grad():
+        fpr, tpr, thresholds = roc_curve(target.cpu(), output.cpu())
+        return metrics.auc(fpr, tpr)
 
 def r2(output, target):
     with torch.no_grad():

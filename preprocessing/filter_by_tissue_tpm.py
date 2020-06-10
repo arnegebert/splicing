@@ -3,7 +3,8 @@ import numpy as np
 
 path_annotation = '../data/gtex/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
 # path_srcs = '../data/GTEx_Analysis_2017-06-05_v8_STARv2.5.3a_junctions.gct'
-path_srcs = '../data/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
+path_srcs = '../data/gtex/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
+# path_srcs = '../data/gtex/GTEx_Analysis_2017-06-05_v8_RSEMv1.3.0_transcript_tpm.gct'
 
 G = 6
 H = 7
@@ -55,7 +56,9 @@ with open(path_srcs) as f:
             # for idx in sample_idxs:
             #     data_line.append(line[idx])
             # data[line[0]] = '\t'.join(data_line)
-            data[line[0]] = int(line[sample_idxs[164]])
+            tpm = float(line[sample_idxs[164]])
+            if tpm >= 10:
+                data[line[0]] = tpm
 # data = junctions -> sample reads
 
 # todo: some junctions are duplicated in the data... o.o
@@ -65,8 +68,9 @@ with open(path_srcs) as f:
 # in what format do i want data to later load it?
 # at first, junction : list of reads might not be bad
 # later i will need to extract the information from the junctions either way
-with open('../data/gtex/brain_cortex_junction_reads_one_sample.csv', 'w') as f:
-    print('Beginning to write junction reads')
+print(f'{len(data)} values after filtering')
+with open('../data/gtex/brain_cortex_tpm_one_sample.csv', 'w') as f:
+    print('Beginning to write gene TPMs')
     for junction, reads in data.items():
         f.write(f'{junction},{reads}\n')
 print('Processing finished')

@@ -13,6 +13,26 @@ exons_after_start = 30 # exons
 exons_bef_end = 30 # exons
 introns_after_end = 50 # introns
 
+highly_expressed_genes = set()
+def load_highly_expressed_genes():
+    with open(f'../data/gtex/brain_cortex_tpm_one_sample.csv') as f:
+        for l in f:
+            gene_id, tpm = l.split(',')
+            highly_expressed_genes.add(gene_id)
+
+load_highly_expressed_genes()
+
+def map_from_position_to_genes(start, end):
+
+
+
+def contains_highly_expressed_gene(genes):
+    for gene in genes:
+        if gene in highly_expressed_genes:
+            return True
+    return False
+
+
 # want to load chromosome as one giant string
 def load_chrom_seq(chrom):
     with open(f'{data_path}/chromosomes/chr{chrom}.fa') as f:
@@ -72,6 +92,10 @@ with open(path_filtered_reads) as f:
         # required as exons/introns shorter than 25nt/80nt are usually caused by sequencing errors and
         # they represent less than 1% of the exon and intron length distributions
         # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6722613/
+        genes = map_from_position_to_genes(start, end)
+        in_highly_expressed_gene = contains_highly_expressed_gene(genes)
+        if not in_highly_expressed_gene: continue
+
         if end - start < 25:
             continue
         gene_start = 0

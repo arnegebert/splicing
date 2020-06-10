@@ -1,6 +1,6 @@
 import pickle
 
-src = '../data/brain_cortex_full.csv'
+src = '../data/gtex/brain_cortex_full.csv'
 target = '../data/brain_cortex_full.csv'
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 psis = []
-with open('../data/hexevent/cassette_exons_filtered.csv') as f:
+with open('../data/gtex/brain_cortex_junction_seqs.csv') as f:
     for l in f:
         # j, start_seq, end_seq, psi = l.split(',')
         j, start_seq, end_seq, psi = l.split('\t')
@@ -17,7 +17,7 @@ print(f'percent of psis =0.5: {np.sum(psis==0.5)/length}')
 print(f'percent of psis >0.5: {np.sum(psis>0.5)/length}')
 print(f'percent of psis =1: {np.sum(psis==1)/length}')
 print(f'mean: {np.mean(psis)}')
-print(f'median: {np.mean(psis)}')
+print(f'median: {np.median(psis)}')
 
 plt.hist(psis)
 plt.xlabel('PSI value')

@@ -20,10 +20,55 @@ class DSCDataLoader(BaseDataLoader):
         self.samples = []
         cons, low, high = [], [], []
         data_type = 'cass'
-        if True:
-            cons = extract_values_from_dsc_np_format(np.load('data/hexevent/x_cons_data.npy'))
-            low = extract_values_from_dsc_np_format(np.load('data/hexevent/x_cas_data_low.npy'))
-            high = extract_values_from_dsc_np_format(np.load('data/hexevent/x_cas_data_high.npy'))
+        if False:
+            x_cons_data = np.load('data/hexevent/x_cons_data.npy')
+            hx_cas_data = np.load('data/hexevent/x_cas_data_low.npy')
+            lx_cas_data = np.load('data/hexevent/x_cas_data_high.npy')
+            # cons = extract_values_from_dsc_np_format(x_cons_data)
+            # low = extract_values_from_dsc_np_format(hx_cas_data)
+            # high = extract_values_from_dsc_np_format(lx_cas_data)
+
+            a = int(x_cons_data.shape[0] / 10)
+            b = int(hx_cas_data.shape[0] / 10)
+            c = int(lx_cas_data.shape[0] / 10)
+
+            s = 0
+            # 9 folds for training
+            train = x_cons_data[:a * s]
+            train = np.concatenate((train, x_cons_data[a * (s + 1):]), axis=0)
+
+            d = int((9 * a) / (9 * (b + c)))
+            print(d)
+            for i in range(d):
+                train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)
+                train = np.concatenate((train, hx_cas_data[b * (s + 1):]), axis=0)
+
+                train = np.concatenate((train, lx_cas_data[:c * s]), axis=0)
+                train = np.concatenate((train, lx_cas_data[c * (s + 1):]), axis=0)
+
+            np.random.seed(0)
+            np.random.shuffle(train)
+
+            # 1 fold for testing
+
+            htest = np.concatenate((hx_cas_data[b * s:b * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
+            lt = np.concatenate((lx_cas_data[c * s:c * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
+
+            test = htest
+            test = np.concatenate((test, lx_cas_data[c * s:c * (s + 1)]), axis=0)
+
+            cons_test = x_cons_data[a * s:a * (s + 1)]
+            cas_test = np.concatenate((lx_cas_data[c * s:c * (s + 1)], hx_cas_data[b * s:b * (s + 1)]))
+
+            psi = cas_test[:, -1, 4]
+
+            train = extract_values_from_dsc_np_format(train)
+            val_high = extract_values_from_dsc_np_format(htest)
+            val_low = extract_values_from_dsc_np_format(lt)
+            val_all = extract_values_from_dsc_np_format(test)
+
+            # return train, test, htest, lt, cons_test, cas_test
+
         else:
             with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
                 for i, l in enumerate(f):
@@ -55,22 +100,22 @@ class DSCDataLoader(BaseDataLoader):
                     sample = (seqs, lens, psi)
                     high.append(sample)
 
-        ratio = int(len(cons) / (len(low) + len(high))) + 1
+            ratio = int(len(cons) / (len(low) + len(high))) + 1
 
-        len_cons, len_low, len_high = int(len(cons)*validation_split), int(len(low)*validation_split),\
-                                      int(len(high)*validation_split)
-        cons_val, cons_train = cons[:len_cons], cons[len_cons:]
-        lval, ltrain = low[:len_low], low[len_low:]
-        hval, htrain = high[:len_high], high[len_high:]
+            len_cons, len_low, len_high = int(len(cons)*validation_split), int(len(low)*validation_split),\
+                                          int(len(high)*validation_split)
+            cons_val, cons_train = cons[:len_cons], cons[len_cons:]
+            lval, ltrain = low[:len_low], low[len_low:]
+            hval, htrain = high[:len_high], high[len_high:]
 
-        train = cons_train
-        for _ in range(ratio):
-            train.extend(ltrain)
-            train.extend(htrain)
+            train = cons_train
+            for _ in range(ratio):
+                train.extend(ltrain)
+                train.extend(htrain)
 
-        val_all = cons_val + lval + hval
-        val_low = cons_val + lval
-        val_high = cons_val + hval
+            val_all = cons_val + lval + hval
+            val_low = cons_val + lval
+            val_high = cons_val + hval
 
         random.seed(0)
         random.shuffle(train)

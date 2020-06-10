@@ -10,7 +10,7 @@
     "data_loader": {
         "type": "DSCDataLoader",
         "args":{
-            "data_dir": "data/hexevent/cassette_filtered.csv",
+            "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -44,7 +44,7 @@
         "verbosity": 1,
 
         "monitor": "min val_loss",
-        "early_stop": 100,
+        "early_stop": 20,
 
         "tensorboard": true
     }

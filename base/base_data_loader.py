@@ -68,7 +68,7 @@ class BaseDataLoader(DataLoader):
             if not self.dsc_cv:
                 return DataLoader(sampler=self.valid_sampler, **self.init_kwargs)
             else:
-                # return three dataloaders here based on my valid datasets
+                # return three dataloaders here based on my validation datasets
                 return DataLoader(dataset=self.val_all,  **self.init_kwargs),\
                        DataLoader(dataset=self.val_low, **self.init_kwargs),\
                        DataLoader(dataset=self.val_high,  **self.init_kwargs)
