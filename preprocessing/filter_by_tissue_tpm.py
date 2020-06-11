@@ -6,8 +6,8 @@ path_annotation = '../data/gtex/GTEx_Analysis_v8_Annotations_SampleAttributesDS.
 path_srcs = '../data/gtex/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
 # path_srcs = '../data/gtex/GTEx_Analysis_2017-06-05_v8_RSEMv1.3.0_transcript_tpm.gct'
 
-G = 6
-H = 7
+include_version = False
+
 with open(path_annotation) as f:
     reader = csv.reader(f, delimiter="\t")
     # contains list with rows of samples
@@ -56,9 +56,13 @@ with open(path_srcs) as f:
             # for idx in sample_idxs:
             #     data_line.append(line[idx])
             # data[line[0]] = '\t'.join(data_line)
+            gene = line[0]
+            if not include_version:
+                version_idx = gene.index('.')
+                gene = gene[:version_idx]
             tpm = float(line[sample_idxs[164]])
             if tpm >= 10:
-                data[line[0]] = tpm
+                data[gene] = tpm
 # data = junctions -> sample reads
 
 # todo: some junctions are duplicated in the data... o.o
@@ -71,6 +75,6 @@ with open(path_srcs) as f:
 print(f'{len(data)} values after filtering')
 with open('../data/gtex/brain_cortex_tpm_one_sample.csv', 'w') as f:
     print('Beginning to write gene TPMs')
-    for junction, reads in data.items():
-        f.write(f'{junction},{reads}\n')
+    for gene, reads in data.items():
+        f.write(f'{gene},{reads}\n')
 print('Processing finished')

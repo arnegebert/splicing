@@ -16,6 +16,7 @@ class BaseDataLoader(DataLoader):
         self.n_samples = len(dataset)
         self.dsc_cv = dsc_cv
 
+        # if not dsc_cv:
         self.sampler, self.valid_sampler = self._split_sampler(self.validation_split)
 
         self.init_kwargs = {

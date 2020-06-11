@@ -92,6 +92,8 @@ class Trainer(BaseTrainer):
         """
         self.model.eval()
         self.valid_all_metrics.reset()
+        self.valid_low_metrics.reset()
+        self.valid_high_metrics.reset()
         with torch.no_grad():
             for batch_idx, (seqs, lens, target) in enumerate(self.val_all):
                 seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)

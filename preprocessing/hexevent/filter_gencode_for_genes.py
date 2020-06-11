@@ -1,5 +1,5 @@
 
-
+include_version = False
 exons = []
 with open('../../data/gencode.v34.annotation.gtf') as f:
     for i, l in enumerate(f):
@@ -10,8 +10,12 @@ with open('../../data/gencode.v34.annotation.gtf') as f:
             if type != 'gene': continue
             chr, start, end = l[0], int(l[3]), int(l[4])
             freetext = l[8]
-            gene_id_idx = freetext.index(';')
-            gene_id = freetext[9:gene_id_idx-1]
+            if include_version:
+                gene_id_idx = freetext.index(';')
+                gene_id = freetext[9:gene_id_idx-1]
+            else:
+                gene_id_idx = freetext.index('.')
+                gene_id = freetext[9:gene_id_idx]
             try:
                 chr_number = int(l[0][3:])
             except ValueError:

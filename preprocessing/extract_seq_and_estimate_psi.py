@@ -47,6 +47,8 @@ load_gencode_genes()
 not_highly_expressed = 0
 homeless_junctions = 0
 current_idx_overlap = 0
+too_short_exon = 0
+
 def map_from_position_to_genes(chr, start, end, idx):
     gene_start_and_ends = gencode_genes[chr]
     while gene_start_and_ends[idx][1] <= end and idx < len(gene_start_and_ends)-1:
@@ -58,8 +60,8 @@ def map_from_position_to_genes(chr, start, end, idx):
         gene, start2, end2 = gene_start_and_ends[i]
         if overlap(start, end, start2, end2):
             overlapping_genes.append(gene)
-    if len(overlapping_genes) == 0:
-        print(f'this mofo belongs to no gene')
+    # if len(overlapping_genes) == 0:
+    #     print(f'this mofo belongs to no gene')
     return overlapping_genes, idx
 
 def overlap(start, end, start2, end2):
@@ -112,8 +114,6 @@ with open(path_filtered_reads) as f:
             chrom_seq = load_chrom_seq(loaded_chrom)
 
         # extract sequence around start
-        # todo: investigate why earliest start is 12058 eg for chrom 1
-        # todo: i need to do this with respect to gene boundaries ;____;
             # however, not extremly big priorities as it essentially just some data pollution
         # q: does it work to just remove the first and last exon boundary found for each chromosome?
             # a: no, because that doesn't solve the problems for genes
@@ -127,28 +127,34 @@ with open(path_filtered_reads) as f:
         if not genes: homeless_junctions += 1
         current_idx_overlap = updated_idx
         in_highly_expressed_gene = contains_highly_expressed_gene(genes)
-        if not in_highly_expressed_gene: continue
+        if not in_highly_expressed_gene:
+            not_highly_expressed += 1
+            continue
 
-        if end - start < 25: continue
-        gene_start = 0
-        gene_end = 1e10
+        if end - start < 25:
+            too_short_exon += 1
+            continue
 
         # make sure there are at least 'introns_bef_start' intron nts between exon junctions
         # q: do i even want to do this? how do i do this?
 
 
-        # make sure that very first exon in chromosone doesn't contain N nt input
-        # make sure that very last exon in chromosone doesn't contain N nt input
-        if i == 0 or i == len(junction_reads_file)-1: continue
+        # make sure that very first exon in chromosome doesn't contain N nt input
+        # make sure that very last exon in chromosome doesn't contain N nt input
+        if i == 0 or i == len(junction_reads_file)-1:
+            print('----------------------------------------------------------------------')
+            continue
 
         # if start - introns_bef_start < prev_end:
         #     continue
 
         # remove first exon in gene
 
+        gene_start = 0
+        gene_end = 1e10
         # remove last exon in gene
-        if end + introns_after_end > gene_end:
-            continue
+        # if end + introns_after_end > gene_end:
+        #     continue
         # todo: probably want to make sure that i dont have junctions where distance between
         # them is smaller than flanking sequence i extract
 
@@ -163,20 +169,6 @@ with open(path_filtered_reads) as f:
         # PSI = pos / (pos + neg)
         pos = read_count
         # neg == it overlaps with the junction in any way:
-        # one way to test for overlap:
-        # (1) start2 <= start, end >= end2 >= start,
-        # (2) end >= start2 >= start, end2 >= end
-        # (3) end >= start2 >= start, end >= end2 >= start
-        # (4) start2 <= start, end2 >= end
-
-        # second way to test for overlap:
-        # (1) end2 < start or
-        # (2) start2 > end
-        # => end2 >= start and start2 <= end
-
-        # problem: file too large into memory, but need specific lines from it
-        # solution 1: save the last ~10 lines seen before
-        # solution 2: realise that file only has 300 mb and it is fine to load it into memory
 
         # check all junctions above until end2 < start
         # good idea, but doesn't work because you can have
@@ -185,7 +177,6 @@ with open(path_filtered_reads) as f:
         # 4 -> 5
         # -> changing to look at 10 rows above (as heuristic)
         neg = 0
-        idx_above = i - 1
         for idx_above in range(i-1, i-10, -1):
             if idx_above <= 0: break
             # [0] because it's in a one element list iirc
@@ -194,12 +185,9 @@ with open(path_filtered_reads) as f:
             junction2 = line2[0].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
             if end2 >= start:
-                # todo w / wo this
-                idx_above -= 1
                 neg += int(line2[1])
 
         # check all junctions below until start2 > end
-        idx_below = i+1
         for idx_below in range(i+1, i+10):
             if idx_below >= len(junction_reads_file): break
             line2 = junction_reads_file[idx_below][0]
@@ -207,10 +195,8 @@ with open(path_filtered_reads) as f:
             junction2 = line2[0].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
             if end >= start2:
-                # todo w / wo this
-                idx_below += 1
-                # +1 for ',', +1 for '['
                 neg += int(line2[1])
+
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)
         junction_psis[line[0]] = psi
@@ -231,6 +217,7 @@ with open(path_filtered_reads) as f:
 
 
 print(f'Number of skipped homeless junctions: {homeless_junctions} ')
+print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
 print(f'Number of junctions after filtering: {len(seqs_psis)}')
 
 with open(f'{data_path}/{save_to}', 'w') as f:

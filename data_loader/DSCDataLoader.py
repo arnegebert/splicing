@@ -22,8 +22,8 @@ class DSCDataLoader(BaseDataLoader):
         data_type = 'cass'
         if True:
             x_cons_data = np.load('data/hexevent/x_cons_data.npy')
-            hx_cas_data = np.load('data/hexevent/x_cas_data_low.npy')
-            lx_cas_data = np.load('data/hexevent/x_cas_data_high.npy')
+            hx_cas_data = np.load('data/hexevent/x_cas_data_high.npy')
+            lx_cas_data = np.load('data/hexevent/x_cas_data_low.npy')
             # cons = extract_values_from_dsc_np_format(x_cons_data)
             # low = extract_values_from_dsc_np_format(hx_cas_data)
             # high = extract_values_from_dsc_np_format(lx_cas_data)
@@ -63,9 +63,12 @@ class DSCDataLoader(BaseDataLoader):
             psi = cas_test[:, -1, 4]
 
             train = extract_values_from_dsc_np_format(train)
-            val_high = extract_values_from_dsc_np_format(htest)
-            val_low = extract_values_from_dsc_np_format(lt)
+            # cons + low + high
             val_all = extract_values_from_dsc_np_format(test)
+            # cons + low
+            val_low = extract_values_from_dsc_np_format(lt)
+            # cons + high
+            val_high = extract_values_from_dsc_np_format(htest)
 
             # return train, test, htest, lt, cons_test, cas_test
 
@@ -117,11 +120,11 @@ class DSCDataLoader(BaseDataLoader):
             val_low = cons_val + lval
             val_high = cons_val + hval
 
-        random.seed(0)
-        random.shuffle(train)
-        random.shuffle(val_all)
-        random.shuffle(val_low)
-        random.shuffle(val_high)
+        # random.seed(0)
+        # random.shuffle(train)
+        # random.shuffle(val_all)
+        # random.shuffle(val_low)
+        # random.shuffle(val_high)
 
         train_dataset = DSCDataset(train)
         val_all_dataset = DSCDataset(val_all)
