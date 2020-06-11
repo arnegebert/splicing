@@ -7,7 +7,7 @@ with open('../../data/gencode.v34.annotation.gtf') as f:
             l = l.split('\t')
             if len(l) == 1: continue
             type = l[2]
-            if type != 'exon': continue
+            if type != 'gene': continue
             chr, start, end = l[0], int(l[3]), int(l[4])
             freetext = l[8]
             gene_id_idx = freetext.index(';')

@@ -20,7 +20,7 @@ class DSCDataLoader(BaseDataLoader):
         self.samples = []
         cons, low, high = [], [], []
         data_type = 'cass'
-        if False:
+        if True:
             x_cons_data = np.load('data/hexevent/x_cons_data.npy')
             hx_cas_data = np.load('data/hexevent/x_cas_data_low.npy')
             lx_cas_data = np.load('data/hexevent/x_cas_data_high.npy')
