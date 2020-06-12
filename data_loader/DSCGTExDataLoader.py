@@ -7,7 +7,7 @@ from torch import as_tensor as T
 import pickle
 
 
-class NaivePSIDataLoader(BaseDataLoader):
+class DSCGTExDataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
@@ -17,7 +17,7 @@ class NaivePSIDataLoader(BaseDataLoader):
             transforms.Normalize((0.1307,), (0.3081,))
         ])
         self.data_dir = data_dir
-        self.dataset = NaivePSIDataset(path=data_dir)
+        self.dataset = DSCGTExDataset(path=data_dir)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
 
 def one_hot_encode(nt):
@@ -36,7 +36,7 @@ def encode_seq(seq):
         encoding.append(one_hot_encode(nt))
     return encoding
 
-class NaivePSIDataset(Dataset):
+class DSCGTExDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
 
     def __init__(self, path, transform=None):
@@ -45,11 +45,21 @@ class NaivePSIDataset(Dataset):
         print(f'starting loading of data')
         self.samples = []
 
+        avg_len = 7853.118899261425
+        std_len = 23917.691461462917
+        constitutive_level = 0.95
+
         with open(self.path, 'r') as f:
             for i, l in enumerate(f):
                 j, start_seq, end_seq, psi = l.split(',')
+                s, e = j.split('_')[1:3]
+                s, e = int(s), int(e)
                 psi = float(psi[:-1])
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), T(psi))
+                is_constitutive = psi >= constitutive_level
+                is_constitutive = T(float(is_constitutive))
+                l1 = (e-s-avg_len)/std_len
+                l1 = T(l1).float()
+                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, is_constitutive)
                 self.samples.append(sample)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))

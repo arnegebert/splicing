@@ -1,9 +1,9 @@
 import csv
 import numpy as np
 
-path_annotation = '../data/gtex/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
+path_annotation = '../data/gtex_origin/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
 # path_srcs = '../data/GTEx_Analysis_2017-06-05_v8_STARv2.5.3a_junctions.gct'
-path_srcs = '../data/gtex/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
+path_srcs = '../data/gtex_origin/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
 # path_srcs = '../data/gtex/GTEx_Analysis_2017-06-05_v8_RSEMv1.3.0_transcript_tpm.gct'
 
 include_version = False
@@ -73,7 +73,7 @@ with open(path_srcs) as f:
 # at first, junction : list of reads might not be bad
 # later i will need to extract the information from the junctions either way
 print(f'{len(data)} values after filtering')
-with open('../data/gtex/brain_cortex_tpm_one_sample.csv', 'w') as f:
+with open('../data/gtex_processed/brain_cortex_tpm_one_sample.csv', 'w') as f:
     print('Beginning to write gene TPMs')
     for gene, reads in data.items():
         f.write(f'{gene},{reads}\n')

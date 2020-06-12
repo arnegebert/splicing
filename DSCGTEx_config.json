@@ -10,7 +10,7 @@
     "data_loader": {
         "type": "DSCGTExDataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/brain_cortex_10.csv",
+            "data_dir": "data/gtex_processed/brain_cortex_full.csv",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -27,7 +27,7 @@
     },
     "loss": "binary_cross_entropy",
     "metrics": [
-        "auc"
+        "r2"
     ],
     "lr_scheduler": {
         "type": "StepLR",

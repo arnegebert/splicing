@@ -2,22 +2,23 @@
 import csv
 import linecache
 from timeit import default_timer as timer
+import numpy as np
 
-start = timer()
+startt = timer()
 data_path = '../data'
-path_filtered_reads = f'{data_path}/gtex/brain_cortex_junction_reads_one_sample.csv'
-save_to = 'brain_cortex_chrom_1to10.csv'
-last_chrom = 10
+path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
+save_to = 'gtex_processed/brain_cortex_full.csv'
+last_chrom = 22
 
-introns_bef_start = 50 # introns
-exons_after_start = 30 # exons
+introns_bef_start = 70 # introns
+exons_after_start = 70 # exons
 
-exons_bef_end = 30 # exons
-introns_after_end = 50 # introns
+exons_bef_end = 70 # exons
+introns_after_end = 70 # introns
 
 highly_expressed_genes = set()
 def load_highly_expressed_genes():
-    with open(f'../data/gtex/brain_cortex_tpm_one_sample.csv') as f:
+    with open(f'../data/gtex_processed/brain_cortex_tpm_one_sample.csv') as f:
         for l in f:
             gene_id, tpm = l.split(',')
             highly_expressed_genes.add(gene_id)
@@ -47,7 +48,7 @@ load_gencode_genes()
 not_highly_expressed = 0
 homeless_junctions = 0
 current_idx_overlap = 0
-too_short_exon = 0
+too_short_intron = 0
 
 def map_from_position_to_genes(chr, start, end, idx):
     gene_start_and_ends = gencode_genes[chr]
@@ -85,6 +86,7 @@ def load_chrom_seq(chrom):
 junction_seqs = {}
 junction_psis = {}
 seqs_psis = {}
+l1_lens = []
 
 with open(path_filtered_reads) as f:
     reader = csv.reader(f, delimiter="\n")
@@ -131,8 +133,8 @@ with open(path_filtered_reads) as f:
             not_highly_expressed += 1
             continue
 
-        if end - start < 25:
-            too_short_exon += 1
+        if end - start < 80:
+            too_short_intron += 1
             continue
 
         # make sure there are at least 'introns_bef_start' intron nts between exon junctions
@@ -150,8 +152,8 @@ with open(path_filtered_reads) as f:
 
         # remove first exon in gene
 
-        gene_start = 0
-        gene_end = 1e10
+        # gene_start = 0
+        # gene_end = 1e10
         # remove last exon in gene
         # if end + introns_after_end > gene_end:
         #     continue
@@ -164,6 +166,11 @@ with open(path_filtered_reads) as f:
         window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
         window_around_end = chrom_seq[end-exons_bef_end-2:end+introns_after_end-2]
         junction_seqs[0] = [window_around_start, window_around_end]
+
+        # almost always GT, but also many gc
+        # print(chrom_seq[start-1:start+1])
+        # almost always AG or AC
+        # print(chrom_seq[end - 2:end + 0])
 
         """ Estimation of the PSI value """
         # PSI = pos / (pos + neg)
@@ -200,25 +207,29 @@ with open(path_filtered_reads) as f:
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)
         junction_psis[line[0]] = psi
+        l1_lens.append(end-start)
         seqs_psis[line[0]] = (window_around_start, window_around_end, psi)
 
 
-# # Write extracted sequences to file
-# with open(f'{data_path}/brain_cortex_junction_seqs.csv', 'w') as f:
-#     print('Beginning to write extracted sequences')
-#     for junction, seqs in junction_seqs.items():
-#         f.write(f'{junction},{seqs}\n')
-#
-# # Write estimated PSIs to file
-# with open(f'{data_path}/brain_cortex_junction_psis.csv', 'w') as f:
-#     print('Beginning to write estimated PSIs')
-#     for junction, psis in junction_psis.items():
-#         f.write(f'{junction},{psis}\n')
-
-
+print(f'Number of too short introns: {too_short_intron}')
 print(f'Number of skipped homeless junctions: {homeless_junctions} ')
 print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
 print(f'Number of junctions after filtering: {len(seqs_psis)}')
+
+# chrom 1 to 10:
+# 9023.466260727668
+# 27015.74031545284
+
+# chrom 1 to 22:
+# 7853.118899261425
+# 23917.691461462917
+
+l1_lens = np.array(l1_lens)
+avg_len = np.mean(l1_lens)
+std_len = np.std(l1_lens)
+
+print(f'Average length of l1: {avg_len}')
+print(f'Standard deviation of l1: {std_len}')
 
 with open(f'{data_path}/{save_to}', 'w') as f:
     print('Beginning to write estimated PSIs and extracted sequences')
@@ -226,6 +237,6 @@ with open(f'{data_path}/{save_to}', 'w') as f:
         f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
 
 print('Processing finished')
-end = timer()
+endt = timer()
 
-print(f'It took {end-start} s to generate the data sets')
+print(f'It took {endt-startt} s to generate the data sets')

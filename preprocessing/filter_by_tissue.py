@@ -1,7 +1,7 @@
 import csv
 import numpy as np
 
-path_annotation = '../data/gtex/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
+path_annotation = '../data/gtex_origin/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
 # path_srcs = '../data/GTEx_Analysis_2017-06-05_v8_STARv2.5.3a_junctions.gct'
 path_srcs = '../data/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
 
@@ -65,7 +65,7 @@ with open(path_srcs) as f:
 # in what format do i want data to later load it?
 # at first, junction : list of reads might not be bad
 # later i will need to extract the information from the junctions either way
-with open('../data/gtex/brain_cortex_junction_reads_one_sample.csv', 'w') as f:
+with open('../data/gtex_processed/brain_cortex_junction_reads_one_sample.csv', 'w') as f:
     print('Beginning to write junction reads')
     for junction, reads in data.items():
         f.write(f'{junction},{reads}\n')

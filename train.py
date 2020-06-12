@@ -5,6 +5,7 @@ import numpy as np
 from data_loader import MNISTDataLoader as MNIST_module
 from data_loader import NaivePSIDataLoader as PSI_module
 from data_loader import DSCDataLoader as DSC_module
+from data_loader import DSCGTExDataLoader as GTEx_module
 import model.loss as module_loss
 import model.metric as module_metric
 import model.models as module_arch
@@ -25,7 +26,7 @@ def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
-    data_loader = config.init_obj('data_loader', DSC_module)
+    data_loader = config.init_obj('data_loader', GTEx_module)
     valid_data_loader = data_loader.split_validation()
 
     # build model architecture, then print to console

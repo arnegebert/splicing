@@ -15,9 +15,13 @@ class BaseDataLoader(DataLoader):
         self.batch_idx = 0
         self.n_samples = len(dataset)
         self.dsc_cv = dsc_cv
+        self.dataset = dataset
 
         # if not dsc_cv:
         self.sampler, self.valid_sampler = self._split_sampler(self.validation_split)
+
+        if dsc_cv:
+            self.shuffle = shuffle
 
         self.init_kwargs = {
             'batch_size': batch_size,
@@ -67,7 +71,7 @@ class BaseDataLoader(DataLoader):
             return None
         else:
             if not self.dsc_cv:
-                return DataLoader(sampler=self.valid_sampler, **self.init_kwargs)
+                return DataLoader(sampler=self.valid_sampler, dataset=self.dataset, **self.init_kwargs)
             else:
                 # return three dataloaders here based on my validation datasets
                 return DataLoader(dataset=self.val_all,  **self.init_kwargs),\

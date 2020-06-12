@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 psis = []
-with open('../data/gtex/brain_cortex_junction_seqs.csv') as f:
+with open('../data/gtex_origin/brain_cortex_junction_seqs.csv') as f:
     for l in f:
         # j, start_seq, end_seq, psi = l.split(',')
         j, start_seq, end_seq, psi = l.split('\t')
