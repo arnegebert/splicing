@@ -6,7 +6,7 @@ from data_loader.DSCDataLoader import DSCDataset, DSCDataLoader
 from utils import inf_loop, MetricTracker
 
 
-class Trainer(BaseTrainer):
+class DSCGTExTrainer(BaseTrainer):
     """
     Trainer class
     """

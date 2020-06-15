@@ -27,7 +27,7 @@ class DSCDataLoader(BaseDataLoader):
             # cons = extract_values_from_dsc_np_format(x_cons_data)
             # low = extract_values_from_dsc_np_format(hx_cas_data)
             # high = extract_values_from_dsc_np_format(lx_cas_data)
-
+            x_cons_data[:,-1,4] = 1
             a = int(x_cons_data.shape[0] / 10)
             b = int(hx_cas_data.shape[0] / 10)
             c = int(lx_cas_data.shape[0] / 10)
@@ -39,7 +39,8 @@ class DSCDataLoader(BaseDataLoader):
 
             d = int((9 * a) / (9 * (b + c)))
             print(d)
-            for i in range(d):
+            classification_task = False
+            for i in range(d): #range(1)
                 train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)
                 train = np.concatenate((train, hx_cas_data[b * (s + 1):]), axis=0)
 
@@ -60,7 +61,6 @@ class DSCDataLoader(BaseDataLoader):
             cons_test = x_cons_data[a * s:a * (s + 1)]
             cas_test = np.concatenate((lx_cas_data[c * s:c * (s + 1)], hx_cas_data[b * s:b * (s + 1)]))
 
-            psi = cas_test[:, -1, 4]
 
             train = extract_values_from_dsc_np_format(train)
             # cons + low + high
@@ -158,12 +158,18 @@ def encode_seq(seq):
 # Don't blame me ¯\_(ツ)_/¯
 def extract_values_from_dsc_np_format(array):
     lifehack = 500000
-    psi = array[:lifehack, 140, 0]
+    class_task = True
+    if class_task:
+        # classification
+        label = array[:lifehack, 140, 0]
+    else:
+        # psi value
+        label = array[:lifehack, -1, 4]
     start_seq, end_seq = array[:lifehack, :140, :4], array[:lifehack, 141:281, :4]
     lens = array[:lifehack, -1, 0:3]
     to_return = []
     # could feed my network data with 280 + 3 + 1 dimensions
-    for s, e, l, p in zip(start_seq, end_seq, lens, psi):
+    for s, e, l, p in zip(start_seq, end_seq, lens, label):
         to_return.append((T((s, e)).float(), T(l).float(), T(p).float()))
     return to_return
 

@@ -238,6 +238,131 @@ class DSCKillerKiller(BaseModel):
         return y
 
 
+# v bad, 140k parameters, AUC barely getting above 0.5
+class BiLSTM1(BaseModel):
+    def __init__(self):
+        super().__init__()
+        self.embedding = nn.Linear(4, 4, bias=True)
+
+        self.fc_in = 15*8*2 + 3
+        self.conv1_start = nn.Conv1d(4, 32, kernel_size=7)
+        torch.nn.init.xavier_uniform_(self.conv1_start.weight)
+        self.conv1_drop_start = nn.Dropout2d(0.2)
+
+        self.conv2_start = nn.Conv1d(32, 8, kernel_size=4)
+        torch.nn.init.xavier_uniform_(self.conv2_start.weight)
+        self.conv2_drop_start = nn.Dropout2d(0.2)
+
+        self.conv3_start = nn.Conv1d(8, 8, kernel_size=3)
+        torch.nn.init.xavier_uniform_(self.conv3_start.weight)
+        self.conv3_drop_start = nn.Dropout2d(0.2)
+
+        # end conv blocks here...
+        self.conv1_end = nn.Conv1d(4, 32, kernel_size=7)
+        torch.nn.init.xavier_uniform_(self.conv1_end.weight)
+        self.conv1_drop_end = nn.Dropout2d(0.2)
+
+        self.conv2_end = nn.Conv1d(32, 8, kernel_size=4)
+        torch.nn.init.xavier_uniform_(self.conv2_end.weight)
+        self.conv2_drop_end = nn.Dropout2d(0.2)
+
+        self.conv3_end = nn.Conv1d(8, 8, kernel_size=3)
+        torch.nn.init.xavier_uniform_(self.conv3_end.weight)
+        self.conv3_drop_end = nn.Dropout2d(0.2)
+        self.lstm = nn.LSTM(input_size=self.fc_in, hidden_size=100//2, num_layers=1, bidirectional=True,
+                            batch_first=True)
+        self.lin_1 = nn.Linear(100, 64)
+        self.lin_2 = nn.Linear(64, 1)
+
+        self.fc1 = nn.Linear(100, 64)
+        self.drop_fc = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(64, 1)
+
+    def forward(self, seqs, lens):
+        # [128, 142, 4] or [128, 140, 4]
+        start, end = seqs[:, 0], seqs[:, 1]
+        start, end = start.view(-1, 4, 140), end.view(-1, 4, 140)
+
+        x = F.max_pool1d(F.relu(self.conv1_drop_start(self.conv1_start(start))), 2, stride=2)
+        x = F.max_pool1d(F.relu(self.conv2_drop_start(self.conv2_start(x))), 2, stride=2)
+        x = F.max_pool1d(F.relu(self.conv3_drop_start(self.conv3_start(x))), 2, stride=2)
+
+        xx = F.max_pool1d(F.relu(self.conv1_drop_end(self.conv1_end(end))), 2, stride=2)
+        xx = F.max_pool1d(F.relu(self.conv2_drop_end(self.conv2_end(xx))), 2, stride=2)
+        xx = F.max_pool1d(F.relu(self.conv3_drop_end(self.conv3_end(xx))), 2, stride=2)
+
+        feats = torch.cat((x, xx), dim=1)
+        feats = feats.view(-1, self.fc_in-3)
+        feats = torch.cat((feats, lens), dim=1)
+        feats = feats.view(-1, 1, self.fc_in)
+        output, (h_n, c_n) = self.lstm(feats)
+        y = h_n.view(-1, 100)
+        y = self.drop_fc(F.relu(self.fc1(y)))
+        y = torch.sigmoid(self.fc2(y))
+        return y
+
+class BiLSTM2(BaseModel):
+    def __init__(self):
+        super().__init__()
+        self.embedding = nn.Linear(4, 4, bias=True)
+
+        self.fc_in = 15*8*2 + 3
+        self.conv1_start = nn.Conv1d(4, 32, kernel_size=7)
+        torch.nn.init.xavier_uniform_(self.conv1_start.weight)
+        self.conv1_drop_start = nn.Dropout2d(0.2)
+
+        self.conv2_start = nn.Conv1d(32, 8, kernel_size=4)
+        torch.nn.init.xavier_uniform_(self.conv2_start.weight)
+        self.conv2_drop_start = nn.Dropout2d(0.2)
+
+        self.conv3_start = nn.Conv1d(8, 8, kernel_size=3)
+        torch.nn.init.xavier_uniform_(self.conv3_start.weight)
+        self.conv3_drop_start = nn.Dropout2d(0.2)
+
+        # end conv blocks here...
+        self.conv1_end = nn.Conv1d(4, 32, kernel_size=7)
+        torch.nn.init.xavier_uniform_(self.conv1_end.weight)
+        self.conv1_drop_end = nn.Dropout2d(0.2)
+
+        self.conv2_end = nn.Conv1d(32, 8, kernel_size=4)
+        torch.nn.init.xavier_uniform_(self.conv2_end.weight)
+        self.conv2_drop_end = nn.Dropout2d(0.2)
+
+        self.conv3_end = nn.Conv1d(8, 8, kernel_size=3)
+        torch.nn.init.xavier_uniform_(self.conv3_end.weight)
+        self.conv3_drop_end = nn.Dropout2d(0.2)
+        self.lstm = nn.LSTM(input_size=self.fc_in, hidden_size=100//2, num_layers=1, bidirectional=True,
+                            batch_first=True)
+        self.lin_1 = nn.Linear(100, 64)
+        self.lin_2 = nn.Linear(64, 1)
+
+        self.fc1 = nn.Linear(100, 64)
+        self.drop_fc = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(64, 1)
+
+    def forward(self, seqs, lens):
+        # [128, 142, 4] or [128, 140, 4]
+        start, end = seqs[:, 0], seqs[:, 1]
+        start, end = start.view(-1, 4, 140), end.view(-1, 4, 140)
+
+        x = F.max_pool1d(F.relu(self.conv1_drop_start(self.conv1_start(start))), 2, stride=2)
+        x = F.max_pool1d(F.relu(self.conv2_drop_start(self.conv2_start(x))), 2, stride=2)
+        x = F.max_pool1d(F.relu(self.conv3_drop_start(self.conv3_start(x))), 2, stride=2)
+
+        xx = F.max_pool1d(F.relu(self.conv1_drop_end(self.conv1_end(end))), 2, stride=2)
+        xx = F.max_pool1d(F.relu(self.conv2_drop_end(self.conv2_end(xx))), 2, stride=2)
+        xx = F.max_pool1d(F.relu(self.conv3_drop_end(self.conv3_end(xx))), 2, stride=2)
+
+        feats = torch.cat((x, xx), dim=1)
+        feats = feats.view(-1, self.fc_in-3)
+        feats = torch.cat((feats, lens), dim=1)
+        feats = feats.view(-1, 1, self.fc_in)
+        output, (h_n, c_n) = self.lstm(feats)
+        y = h_n.view(-1, 100)
+        y = self.drop_fc(F.relu(self.fc1(y)))
+        y = torch.sigmoid(self.fc2(y))
+        return y
+
 class EncoderDecoder(nn.Module):
     """
     A standard Encoder-Decoder architecture. Base for this and many

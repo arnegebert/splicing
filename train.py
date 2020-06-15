@@ -2,15 +2,16 @@ import argparse
 import collections
 import torch
 import numpy as np
-from data_loader import MNISTDataLoader as MNIST_module
-from data_loader import NaivePSIDataLoader as PSI_module
-from data_loader import DSCDataLoader as DSC_module
-from data_loader import DSCGTExDataLoader as GTEx_module
+from data_loader import MNISTDataLoader #as data_loader_module
+from data_loader import NaivePSIDataLoader #as data_loader_module
+from data_loader import DSCDataLoader as data_loader_module
+from data_loader import DSCGTExDataLoader #as data_loader_module
 import model.loss as module_loss
 import model.metric as module_metric
 import model.models as module_arch
 from parse_config import ConfigParser
-from trainer import Trainer
+from trainer import DSCGTExTrainer# as Trainer
+from trainer import DSCTrainer as Trainer
 import time
 
 
@@ -26,7 +27,7 @@ def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
-    data_loader = config.init_obj('data_loader', GTEx_module)
+    data_loader = config.init_obj('data_loader', data_loader_module)
     valid_data_loader = data_loader.split_validation()
 
     # build model architecture, then print to console

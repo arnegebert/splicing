@@ -47,8 +47,12 @@ class DSCGTExDataset(Dataset):
 
         avg_len = 7853.118899261425
         std_len = 23917.691461462917
-        constitutive_level = 0.95
+        constitutive_level = 0.90
 
+        low = 0
+        medium = 0
+        high = 0
+        cons = 0
         with open(self.path, 'r') as f:
             for i, l in enumerate(f):
                 j, start_seq, end_seq, psi = l.split(',')
@@ -57,12 +61,21 @@ class DSCGTExDataset(Dataset):
                 psi = float(psi[:-1])
                 is_constitutive = psi >= constitutive_level
                 is_constitutive = T(float(is_constitutive))
+                if psi <= 0.2: low += 1
+                if 0.2 < psi <= 0.75: medium += 1
+                if psi > 0.75 and psi < constitutive_level: high += 1
+                if psi > constitutive_level: cons += 1
                 l1 = (e-s-avg_len)/std_len
                 l1 = T(l1).float()
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, is_constitutive)
+                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, T(psi))
                 self.samples.append(sample)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))
+        print(f'low: {low}')
+        print(f'medium: {medium}')
+        print(f'high: {high}')
+        print(f'cons: {cons}')
+        print(f'all: {low+high+cons}')
 
     def __len__(self):
         return len(self.samples)

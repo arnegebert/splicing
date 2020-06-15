@@ -5,7 +5,7 @@ from base import BaseTrainer
 from utils import inf_loop, MetricTracker
 
 
-class Trainer(BaseTrainer):
+class NaivePSITrainer(BaseTrainer):
     """
     Trainer class
     """
