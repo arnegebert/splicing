@@ -53,6 +53,7 @@ class DSCGTExDataset(Dataset):
         medium = 0
         high = 0
         cons = 0
+
         with open(self.path, 'r') as f:
             for i, l in enumerate(f):
                 j, start_seq, end_seq, psi = l.split(',')
@@ -67,7 +68,7 @@ class DSCGTExDataset(Dataset):
                 if psi > constitutive_level: cons += 1
                 l1 = (e-s-avg_len)/std_len
                 l1 = T(l1).float()
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, T(psi))
+                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, is_constitutive)
                 self.samples.append(sample)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))

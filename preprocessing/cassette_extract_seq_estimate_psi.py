@@ -3,7 +3,7 @@ import csv
 import linecache
 from timeit import default_timer as timer
 
-start = timer()
+startt = timer()
 data_path = '../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
 save_to = 'gtex_processed/brain_cortex_cassette_full.csv'
@@ -99,9 +99,9 @@ with open(path_filtered_reads) as f:
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
             print(f'Reading line {i}')
-        # line = line.split(',')
-        split_idx = line.find(',')
-        junction = line[:split_idx].split('_')
+        line = line.split(',')
+        # split_idx = line.find(',')
+        junction = line[0].split('_')
         try:
             read_chrom = int(junction[0][3:])
         except ValueError:
@@ -168,67 +168,19 @@ with open(path_filtered_reads) as f:
                         # todo: probably switch boundary adjustments
                         window_around_start = chrom_seq[b - introns_bef_start - 1:b + exons_after_start - 1]
                         window_around_end = chrom_seq[c - exons_bef_end - 2:c + introns_after_end - 2]
-                        junction_seqs[line[:split_idx]] = [window_around_start, window_around_end]
+                        junction_seqs[line[0]] = [window_around_start, window_around_end]
                         # almost always AG, but also frequently ac -2:0
                         # print(chrom_seq[b-2:b])
                         # almost always GT, but also many gc
                         print(chrom_seq[c-1:c+1])
                         # read count from a -> b / c -> d
-                        pos = int(count3)
+                        pos = int(count3) + int(line[1])
                         # read count from a -> d
                         neg = int(count2)
                         if (pos + neg) == 0: psi = 0
                         else: psi = pos / (pos + neg)
 
-                        seqs_psis[line[:split_idx]] = (window_around_start, window_around_end, psi)
-
-        #
-        # """ Extraction of the sequence """
-        # # start gives start of canonical nts -> -1
-        # # end gives end of canonical nts -> -2
-        # window_around_start = chrom_seq[a - introns_bef_start - 1:a + exons_after_start - 1]
-        # window_around_end = chrom_seq[b - exons_bef_end - 2:b + introns_after_end - 2]
-        # junction_seqs[line[:split_idx]] = [window_around_start, window_around_end]
-        #
-        # """ Estimation of the PSI value """
-        # # PSI = pos / (pos + neg)
-        # first_read_idx = line[split_idx+1:].find(',')
-        # # yikes...
-        # pos = int(line[split_idx+2:split_idx+1+first_read_idx])
-        # neg = 0
-        # idx_above = i - 1
-        # for idx_above in range(i-1, i-10, -1):
-        #     if idx_above <= 0: break
-        #     line2 = all[idx_above][0]
-        #     break_idx = line2.find(',')
-        #     junction2 = line2[:break_idx].split('_')
-        #     a2, d = int(junction2[1]), int(junction2[2])
-        #     if d >= a:
-        #         idx_above -= 1
-        #         kms = line2[break_idx+1:].find(',')
-        #         # +1 for ',', +1 for '['
-        #         neg += int(line2[break_idx+2:break_idx+kms+1])
-        #
-        #
-        # # check all junctions below until start2 > end
-        # idx_below = i + 1
-        # for idx_below in range(i + 1, i + 10):
-        #     if idx_below >= len(all): break
-        #     line2 = all[idx_below][0]
-        #     break_idx = line2.find(',')
-        #     junction2 = line2[:break_idx].split('_')
-        #     a2, d = int(junction2[1]), int(junction2[2])
-        #     if b >= a2:
-        #         idx_below += 1
-        #         kms = line2[break_idx+1:].find(',')
-        #         # +1 for ',', +1 for '['
-        #         neg += int(line2[break_idx+2:break_idx+kms+1])
-        # if pos + neg == 0: psi = 0
-        # else: psi = pos / (pos + neg)
-        # junction_psis[line[:split_idx]] = psi
-        # seqs_psis[line[:split_idx]] = (window_around_start, window_around_end, psi)
-
-
+                        seqs_psis[line[0]] = (window_around_start, window_around_end, psi)
 
 print(f'Number of skipped homeless junctions: {homeless_junctions} ')
 print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
@@ -239,6 +191,6 @@ with open(f'{data_path}/{save_to}', 'w') as f:
         f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
 
 print('Processing finished')
-end = timer()
+endt = timer()
 
-print(f'It took {end-start} s to generate the data sets')
+print(f'It took {endt-startt} s to generate the data sets')
