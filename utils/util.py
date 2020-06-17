@@ -3,7 +3,18 @@ import pandas as pd
 from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
+import math
 
+
+def split_into_sentences(text, n):
+    return [text[i * n:(i + 1) * n] for i in range(0, math.ceil(len(text) / n))]
+
+
+def split_into_3_mers(sentence):
+    words = []
+    for i in range(1, len(sentence) - 1):
+        words.append(sentence[i - 1:i + 2])
+    return words
 
 def ensure_dir(dirname):
     dirname = Path(dirname)
