@@ -56,21 +56,21 @@ print('Starting training')
 # x3 = next(gen)
 start = time.time()
 if not continue_training:
-    model = gensim.models.Doc2Vec(documents=sentences, vector_size=100, min_count=3, window=5,
+    model = gensim.models.Doc2Vec(documents=sentences, vector_size=200, min_count=3, window=5,
                                             dm=1, workers=8, epochs=epochs-1, negative=5)
 else:
     model = gensim.models.Word2Vec.load('d2v-full-5epochs')
     model.train(sentences=sentences, epochs=2, total_examples=model.corpus_count, word_count=0)
 
 end = time.time()
-# 5 epochs, full = 1.5 h
+# 5 epochs, full = 1h 30min
 # 20 epochs, full = 6 h
 print(f'Time for training {end-start}')
 # model.build_vocab(sentences)
 # model.train(sentences=sentences, epochs=5)
 # print('Training finished')
 
-model.save('d2v-full-5epochs')
+model.save('d2v-full-5epochs-200feats')
 
 print('Model saved')
 

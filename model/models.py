@@ -345,8 +345,6 @@ class BiLSTM2(BaseModel):
 
 
 
-
-
 #
 class MLP(BaseModel):
     def __init__(self):

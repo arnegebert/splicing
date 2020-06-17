@@ -10,6 +10,7 @@ import model.loss as module_loss
 import model.metric as module_metric
 import model.models as module_arch
 from parse_config import ConfigParser
+import trainer as module_trainer
 from trainer import DSCGTExTrainer as Trainer
 from trainer import DSCTrainer# as Trainer
 import time
@@ -44,13 +45,20 @@ def main(config):
 
     lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
-    # todo make trainer loadable / choosable in config file
-    # todo save encoded sequences .npy to save time
-    trainer = Trainer(model, criterion, metrics, optimizer,
+    # todo make trainer loadable / chooseable in config file
+    # todo save encoded sequences as .npy to save time
+    trainer = config.init_obj('trainer', module_trainer)
+    trainer.set_param(model, criterion, metrics, optimizer,
                       config=config,
                       data_loader=data_loader,
                       valid_data_loader=valid_data_loader,
                       lr_scheduler=lr_scheduler)
+
+    # trainer = Trainer(model, criterion, metrics, optimizer,
+    #                   config=config,
+    #                   data_loader=data_loader,
+    #                   valid_data_loader=valid_data_loader,
+    #                   lr_scheduler=lr_scheduler)
 
     trainer.train()
 

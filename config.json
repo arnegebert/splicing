@@ -37,6 +37,7 @@
         }
     },
     "trainer": {
+        "type": "D2V_DSCDataTrainer.py",
         "epochs": 500,
 
         "save_dir": "saved/",
