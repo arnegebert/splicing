@@ -28,8 +28,9 @@ class HumanGenomeCorpus(object):
         current_time = time.strftime("%H:%M:%S", t)
         print(current_time)
         self.epoch += 1
+        doc_id = 0
         for i in range(1, 23):
-            with open(f'../data/chromosomes/chr{i}.fa') as f:
+            with open(f'../../data/chromosomes/chr{i}.fa') as f:
                 print(f'Loaded chromosome {i}')
                 seq = f.read().replace('\n', '')
                 if i < 10:
@@ -39,46 +40,26 @@ class HumanGenomeCorpus(object):
                 seq_sentences = split_into_sentences(seq, sentence_len)
                 print(f'Split chromosome {i} into sentences')
             for sentence in seq_sentences:
-                yield split_into_3_mers(sentence)
-
-    # nvm, takes 5.5 GIG for chromosome 21 and 22 alone ;______;
-    def get_all_sentences(self):
-        print('-------------------------------')
-        print(f'Starting epoch {self.epoch}')
-        t = time.localtime()
-        current_time = time.strftime("%H:%M:%S", t)
-        print(current_time)
-        self.epoch += 1
-        all = []
-        for i in range(21, 23):
-            with open(f'../data/chromosomes/chr{i}.fa') as f:
-                print(f'Loaded chromosome {i}')
-                seq = f.read().replace('\n', '')
-                if i < 10:
-                    seq = seq[5:].replace('N', '').replace('n', '').upper()
-                else:
-                    seq = seq[6:].replace('N', '').replace('n', '').upper()
-                seq_sentences = split_into_sentences(seq, sentence_len)
-                print(f'Split chromosome {i} into sentences')
-                # processed = []
-                # for sentence in seq_sentences:
-                #     processed.append(split_into_3_mers(sentence))
-            all.extend(map(split_into_3_mers, seq_sentences))
-        return all
-
+                yield gensim.models.doc2vec.TaggedDocument(split_into_3_mers(sentence), [doc_id])
+                doc_id += 1
+        print(f'Number of documents: {doc_id+1}')
 
 # w o w
 # takes 11 s for 19-23 if I give a list
 # takes 49 s for 19-23 if I use a generator
 
-sentences = HumanGenomeCorpus()#.get_all_sentences()
+sentences = HumanGenomeCorpus()
 print('Starting training')
+# gen = sentences.__iter__()
+# x1 = next(gen)
+# x2 = next(gen)
+# x3 = next(gen)
 start = time.time()
 if not continue_training:
-    model = gensim.models.Word2Vec(sentences=sentences, size=25, min_count=5, window=5,
-                                            sg=0, workers=8, iter=epochs-1, negative=5)
+    model = gensim.models.Doc2Vec(documents=sentences, vector_size=100, min_count=3, window=5,
+                                            dm=1, workers=8, epochs=epochs-1, negative=5)
 else:
-    model = gensim.models.Word2Vec.load('w2v-full-5epochs-50feats')
+    model = gensim.models.Word2Vec.load('d2v-full-5epochs')
     model.train(sentences=sentences, epochs=2, total_examples=model.corpus_count, word_count=0)
 
 end = time.time()
@@ -89,7 +70,7 @@ print(f'Time for training {end-start}')
 # model.train(sentences=sentences, epochs=5)
 # print('Training finished')
 
-model.save('w2v-full-5epochs-25feats')
+model.save('d2v-full-5epochs')
 
 print('Model saved')
 

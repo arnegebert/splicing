@@ -75,3 +75,13 @@ def plot_with_matplotlib(x_vals, y_vals, labels):
 
 
 plot_with_matplotlib(x_vals, y_vals, labels)
+
+def infinite_sequence():
+    num = 0
+    for x in range(10):
+        yield num
+        num += 1
+
+x = infinite_sequence()
+for e in x:
+    print(e)
