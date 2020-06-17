@@ -1,6 +1,6 @@
 import gensim.models
 
-xxx = gensim.models.Word2Vec.load('../xxx')
+xxx = gensim.models.Word2Vec.load('../../model/w2v-full-5epochs')
 print('x')
 
 from sklearn.manifold import TSNE                   # final reduction
@@ -22,7 +22,7 @@ def reduce_dimensions(model):
 
     # reduce using t-SNE
     vectors = np.asarray(vectors)
-    tsne = TSNE(n_components=num_dimensions, random_state=0)
+    tsne = TSNE(n_components=num_dimensions, random_state=1)
     vectors = tsne.fit_transform(vectors)
 
     x_vals = [v[0] for v in vectors]
@@ -60,9 +60,10 @@ def plot_with_matplotlib(x_vals, y_vals, labels):
     # Label randomly subsampled 25 data points
     #
     indices = list(range(len(labels)))
-    selected_indices = random.sample(indices, 25)
+    selected_indices = random.sample(indices, 64)
     for i in selected_indices:
         plt.annotate(labels[i], (x_vals[i], y_vals[i]))
+    plt.savefig('tSNE-w2v.png')
     plt.show()
 
 # try:
