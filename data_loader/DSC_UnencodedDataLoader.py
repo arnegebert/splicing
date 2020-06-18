@@ -8,6 +8,7 @@ import pickle
 import torch
 import random
 import numpy as np
+import csv
 
 class DSC_UnencodedDataLoader(BaseDataLoader):
     """
@@ -21,20 +22,27 @@ class DSC_UnencodedDataLoader(BaseDataLoader):
         cons, low, high = [], [], []
         data_type = 'cass'
         if True:
-            x_cons_data = np.load('data/hexevent/x_cons_data.npy')
-            hx_cas_data = np.load('data/hexevent/x_cas_data_high.npy')
-            lx_cas_data = np.load('data/hexevent/x_cas_data_low.npy')
+            with open('data/distributed/decoded_cons_data_class.csv') as f:
+                reader = csv.reader(f, delimiter='\t')
+                x_cons_data = list(reader)
+            x_cons_data = np.array(x_cons_data)
+            with open('data/distributed/decoded_cas_data_high_class.csv') as f:
+                reader = csv.reader(f, delimiter='\t')
+                hx_cas_data = list(reader)
+            hx_cas_data = np.array(hx_cas_data)
+            with open('data/distributed/decoded_cas_data_low_class.csv') as f:
+                reader = csv.reader(f, delimiter='\t')
+                lx_cas_data = list(reader)
+            lx_cas_data = np.array(lx_cas_data)
+            # x_cons_data = np.load('data/hexevent/x_cons_data.npy')
+            # hx_cas_data = np.load('data/hexevent/x_cas_data_high.npy')
+            # lx_cas_data = np.load('data/hexevent/x_cas_data_low.npy')
             # cons = extract_values_from_dsc_np_format(x_cons_data)
             # low = extract_values_from_dsc_np_format(hx_cas_data)
             # high = extract_values_from_dsc_np_format(lx_cas_data)
-            tester = x_cons_data[0, :140, :4]
-            decoded = decode_seq(tester)
-            decoded = ''.join(decoded)
-            print('plis')
-            x_cons_data[:,-1,4] = 1
-            a = int(x_cons_data.shape[0] / 10)
-            b = int(hx_cas_data.shape[0] / 10)
-            c = int(lx_cas_data.shape[0] / 10)
+            a = int(len(x_cons_data) / 10)
+            b = int(len(hx_cas_data) / 10)
+            c = int(len(lx_cas_data) / 10)
 
             s = 0
             # 9 folds for training
@@ -66,14 +74,13 @@ class DSC_UnencodedDataLoader(BaseDataLoader):
             cas_test = np.concatenate((lx_cas_data[c * s:c * (s + 1)], hx_cas_data[b * s:b * (s + 1)]))
 
 
-            train = extract_values_from_dsc_np_format(train)
+            train = train
             # cons + low + high
-            val_all = extract_values_from_dsc_np_format(test)
+            val_all = test
             # cons + low
-            val_low = extract_values_from_dsc_np_format(lt)
+            val_low = lt
             # cons + high
-            val_high = extract_values_from_dsc_np_format(htest)
-
+            val_high = htest
             # return train, test, htest, lt, cons_test, cas_test
 
         else:
@@ -141,22 +148,6 @@ class DSC_UnencodedDataLoader(BaseDataLoader):
         # self.dataset = TensorDataset(*samples)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
 
-def one_hot_encode(nt):
-    if nt == 'A' or nt == 'a':
-        return [1.0, 0, 0, 0]
-    elif nt == 'C' or nt == 'c':
-        return [0, 1.0, 0, 0]
-    elif nt == 'G' or nt == 'g':
-        return [0, 0, 1.0, 0]
-    elif nt == 'T' or nt == 't':
-        return [0, 0, 0, 1.0]
-
-def encode_seq(seq):
-    encoding = []
-    for nt in seq:
-        encoding.append(one_hot_encode(nt))
-    return encoding
-
 def one_hot_decode(nt):
     if (nt == [1.0, 0, 0, 0]).all():
         return 'A'
@@ -166,11 +157,13 @@ def one_hot_decode(nt):
         return 'G'
     elif (nt == [0, 0, 0, 1.0]).all():
         return 'T'
+    else: raise Exception('Unknown encoding. Decoding failed. ')
 
-def decode_seq(seq):
+def decode_batch_of_seqs(batch):
     to_return = []
-    for encoding in seq:
-        to_return.append(one_hot_decode(encoding))
+    for seq in batch:
+        for encoding in seq:
+            to_return.append(one_hot_decode(encoding))
     return to_return
 
 
@@ -182,18 +175,18 @@ def extract_values_from_dsc_np_format(array):
     class_task = True
     if class_task:
         # classification
-        label = array[:lifehack, 140, 0]
+        labels = array[:lifehack, 140, 0]
     else:
         # psi value
-        label = array[:lifehack, -1, 4]
+        labels = array[:lifehack, -1, 4]
 
     start_seq, end_seq = array[:lifehack, :140, :4], array[:lifehack, 141:281, :4]
-    start_seq, end_seq = decode_seq(start_seq), decode_seq(end_seq)
+    start_seq, end_seq = decode_batch_of_seqs(start_seq), decode_batch_of_seqs(end_seq)
     lens = array[:lifehack, -1, 0:3]
     to_return = []
     # could feed my network data with 280 + 3 + 1 dimensions
-    for s, e, l, p in zip(start_seq, end_seq, lens, label):
-        to_return.append((T((s, e)).float(), T(l).float(), T(p).float()))
+    for start, end, len, label in zip(start_seq, end_seq, lens, labels):
+        to_return.append(((start, end), T(len).float(), T(label).float()))
     return to_return
 
 class DSCDataset(Dataset):
