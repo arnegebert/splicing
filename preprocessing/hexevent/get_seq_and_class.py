@@ -2,12 +2,15 @@ import csv
 import numpy as np
 from timeit import default_timer as timer
 
-srcs = ['hexevent/all_cons.txt', 'hexevent/all_cass.txt', 'hexevent/all_cass.txt', 'hexevent/all_cass.txt']
+# srcs = ['hexevent/all_cons.txt', 'hexevent/all_cass.txt', 'hexevent/all_cass.txt', 'hexevent/all_cass.txt']
+srcs = ['send_to_me_DSC/all_cons.txt', 'send_to_me_DSC/all_cass.txt', 'hexevent/all_cass.txt', 'hexevent/all_cass.txt']
+
 targets = ['hexevent/all_cons_filtered_class.csv', 'hexevent/all_cass_filtered_class.csv',
            'hexevent/low_cass_filtered_class.csv', 'hexevent/high_cass_filtered_class.csv']
+# (cons, low,  high)
 settings = [(True, False, False), (False, False, False), (False, True, False), (False, False, True)]
 
-start = timer()
+startt = timer()
 # gencode = list(open(f'{data_path}/gencode_exons.csv').read().replace('\n', '').split('\t'))
 gencode = {}
 with open(f'../../data/gencode_exons.csv') as f:
@@ -20,8 +23,10 @@ with open(f'../../data/gencode_exons.csv') as f:
         gencode[chr].append((start, end))
     print('Finished reading gencode data')
 
+hhh = 0
 for src, target, (cons, low, high) in zip(srcs, targets, settings):
-
+    if hhh == 2: break
+    hhh += 1
     introns_bef_start = 70 # introns
     exons_after_start = 70 # exons
 
@@ -227,6 +232,6 @@ for src, target, (cons, low, high) in zip(srcs, targets, settings):
         for (junction, start, end, psi, l1, l2, l3) in filtered:
             f.write(f'{junction}\t{start}\t{end}\t{psi}\t{(l1-intron_mean)/intron_std}\t'
                     f'{(l2-exon_mean)/exon_std}\t{(l3-intron_mean)/intron_std}\n')
-end = timer()
+endt = timer()
 
-print(f'It took {end-start} s to generate the data sets')
+print(f'It took {endt-startt} s to generate the data sets')

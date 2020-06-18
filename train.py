@@ -2,17 +2,12 @@ import argparse
 import collections
 import torch
 import numpy as np
-from data_loader import MNISTDataLoader #as data_loader_module
-from data_loader import NaivePSIDataLoader #as data_loader_module
-from data_loader import DSCDataLoader #as data_loader_module
-from data_loader import DSCGTExDataLoader as data_loader_module
+import data_loader as module_loader
 import model.loss as module_loss
 import model.metric as module_metric
 import model.models as module_arch
-from parse_config import ConfigParser
 import trainer as module_trainer
-from trainer import DSCGTExTrainer as Trainer
-from trainer import DSCTrainer# as Trainer
+from parse_config import ConfigParser
 import time
 
 
@@ -23,12 +18,11 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
-
 def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
-    data_loader = config.init_obj('data_loader', data_loader_module)
+    data_loader = config.init_obj('data_loader', module_loader)
     valid_data_loader = data_loader.split_validation()
 
     # build model architecture, then print to console
@@ -45,7 +39,6 @@ def main(config):
 
     lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
-    # todo make trainer loadable / chooseable in config file
     # todo save encoded sequences as .npy to save time
     trainer = config.init_obj('trainer', module_trainer)
     trainer.set_param(model, criterion, metrics, optimizer,
@@ -54,19 +47,13 @@ def main(config):
                       valid_data_loader=valid_data_loader,
                       lr_scheduler=lr_scheduler)
 
-    # trainer = Trainer(model, criterion, metrics, optimizer,
-    #                   config=config,
-    #                   data_loader=data_loader,
-    #                   valid_data_loader=valid_data_loader,
-    #                   lr_scheduler=lr_scheduler)
-
     trainer.train()
 
 
 if __name__ == '__main__':
     start = time.time()
     args = argparse.ArgumentParser(description='PyTorch Template')
-    args.add_argument('-c', '--config', default='config.json', type=str,
+    args.add_argument('-c', '--config', default='configMNIST2.json', type=str,
                       help='config file path (default: config.json)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')
