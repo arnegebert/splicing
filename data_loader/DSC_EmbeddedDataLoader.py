@@ -40,7 +40,7 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
             train = np.concatenate((train, x_cons_data[a * (s + 1):]), axis=0)
 
             d = int((9 * a) / (9 * (b + c)))
-            print(d)
+            #print(d)
             classification_task = False
             for i in range(d): #range(1)
                 train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)

@@ -345,7 +345,7 @@ class BiLSTM2(BaseModel):
 
 
 
-#
+# overfitting AS FUCK
 class MLP(BaseModel):
     def __init__(self):
         super().__init__()
@@ -365,8 +365,50 @@ class MLP(BaseModel):
         x = torch.sigmoid(self.fc3(x))
         return x
 
+# 512 neurons in hidden layers still overfits
+# 256 neurons with dropout 0.2/0.5 still overfits
+# 128/64 with dropout=0.5 overfits
+# 64/16 d=0.5 just bad; d=0.2 overfits
+# lens as input are again a fucking game changer...
+class MLP2(BaseModel):
+    def __init__(self):
+        super().__init__()
 
+        self.fc1 = nn.Linear(200+3, 32)
+        self.fc2 = nn.Linear(32, 8)
+        self.fc3 = nn.Linear(8, 1)
+        self.drop_fc1 = nn.Dropout(0.2)
+        self.drop_fc2 = nn.Dropout(0.2)
 
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
+
+        # [B, 200]
+        feats = torch.cat((d2v_feats, lens), dim=1)
+        x = F.relu(self.drop_fc1(self.fc1(feats)))
+        # x = F.relu(self.drop_fc1(self.fc1(d2v_feats)))
+        x  = F.relu(self.drop_fc2(self.fc2(x)))
+        x = torch.sigmoid(self.fc3(x))
+        return x
+
+# ok, still a bit of overfitting, but just worse than MLP2
+# AUC ~83.5 with 64, d=0.2
+class MLP3(BaseModel):
+    def __init__(self):
+        super().__init__()
+
+        self.fc1 = nn.Linear(200+3, 128)
+        self.fc2 = nn.Linear(128, 1)
+        self.drop_fc1 = nn.Dropout(0.35)
+
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
+
+        # [B, 200]
+        feats = torch.cat((d2v_feats, lens), dim=1)
+        x = F.relu(self.drop_fc1(self.fc1(feats)))
+        x = torch.sigmoid(self.fc2(x))
+        return x
 
 
 
