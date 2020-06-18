@@ -9,7 +9,7 @@ import torch
 import random
 import numpy as np
 
-class DSCDataLoader(BaseDataLoader):
+class DSC_UnencodedDataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
@@ -27,6 +27,10 @@ class DSCDataLoader(BaseDataLoader):
             # cons = extract_values_from_dsc_np_format(x_cons_data)
             # low = extract_values_from_dsc_np_format(hx_cas_data)
             # high = extract_values_from_dsc_np_format(lx_cas_data)
+            tester = x_cons_data[0, :140, :4]
+            decoded = decode_seq(tester)
+            decoded = ''.join(decoded)
+            print('plis')
             x_cons_data[:,-1,4] = 1
             a = int(x_cons_data.shape[0] / 10)
             b = int(hx_cas_data.shape[0] / 10)
@@ -153,15 +157,14 @@ def encode_seq(seq):
         encoding.append(one_hot_encode(nt))
     return encoding
 
-# TODO: figure out exactly what decoding DSC uses
 def one_hot_decode(nt):
-    if nt == [1.0, 0, 0, 0]:
+    if (nt == [1.0, 0, 0, 0]).all():
         return 'A'
-    elif nt == [0, 1.0, 0, 0]:
+    elif (nt == [0, 1.0, 0, 0]).all():
         return 'C'
-    elif nt == [0, 0, 1.0, 0]:
+    elif (nt == [0, 0, 1.0, 0]).all():
         return 'G'
-    elif nt == [0, 0, 0, 1.0]:
+    elif (nt == [0, 0, 0, 1.0]).all():
         return 'T'
 
 def decode_seq(seq):
@@ -185,7 +188,7 @@ def extract_values_from_dsc_np_format(array):
         label = array[:lifehack, -1, 4]
 
     start_seq, end_seq = array[:lifehack, :140, :4], array[:lifehack, 141:281, :4]
-    start_seq, end_seq = decode_seq(seq)
+    start_seq, end_seq = decode_seq(start_seq), decode_seq(end_seq)
     lens = array[:lifehack, -1, 0:3]
     to_return = []
     # could feed my network data with 280 + 3 + 1 dimensions
