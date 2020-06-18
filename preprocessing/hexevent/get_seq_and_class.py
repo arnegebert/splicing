@@ -49,7 +49,7 @@ for src, target, (cons, low, high) in zip(srcs, targets, settings):
     assert not(cons and (low or high)), 'can\'t filter according to inclusion level and be constitutive at the same time'
 
     filtered = []
-    last_chrom = 22
+    last_chrom = 23
     gencode_idx = 0
 
     print('Starting processing')
