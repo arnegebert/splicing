@@ -32,7 +32,7 @@ class D2V_DSCDataTrainer(BaseTrainer):
         self.lr_scheduler = lr_scheduler
         # self.lr_scheduler = None
         self.log_step = int(np.sqrt(data_loader.batch_size))
-        self.embedding_model = gensim.models.Doc2Vec.load('model/d2v-full-5epochs')
+        # self.embedding_model = gensim.models.Doc2Vec.load('model/d2v-full-5epochs')
 
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
@@ -50,12 +50,15 @@ class D2V_DSCDataTrainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
 
-        for batch_idx, (start, end, lens, target) in enumerate(self.data_loader):
-            start, end = split_into_3_mers(start), split_into_3_mers(end)
-            start_d2v = self.embedding_model.infer_vector(start)
-            end_d2v = self.embedding_model.infer_vector(end)
+        for batch_idx, data in enumerate(self.data_loader):
 
-            feats_d2v = torch.from_numpy(np.concatenate(start_d2v, end_d2v))
+            # start, end = split_into_3_mers(start), split_into_3_mers(end)
+            # start_d2v = self.embedding_model.infer_vector(start)
+            # end_d2v = self.embedding_model.infer_vector(end)
+
+            # print('mald')
+            feats_d2v = data[:, :2].view(-1, 200)
+            lens, target = data[:, 2, :3], data[:, 2, 3]
             feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
@@ -106,10 +109,12 @@ class D2V_DSCDataTrainer(BaseTrainer):
         self.valid_low_metrics.reset()
         self.valid_high_metrics.reset()
         with torch.no_grad():
-            for batch_idx, (seqs, lens, target) in enumerate(self.val_all):
-                seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
+            for batch_idx, data in enumerate(self.val_all):
+                feats_d2v = data[:, :2].view(-1, 200)
+                lens, target = data[:, 2, :3], data[:, 2, 3]
+                feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
+                output = self.model(feats_d2v, lens)
 
-                output = self.model(seqs, lens)
                 loss = self.criterion(output, target)
 
                 self.writer.set_step((epoch - 1) * len(self.val_all) + batch_idx, 'valid')
@@ -117,10 +122,11 @@ class D2V_DSCDataTrainer(BaseTrainer):
                 for met in self.metric_ftns:
                     self.valid_all_metrics.update(met.__name__, met(output, target))
 
-            for batch_idx, (seqs, lens, target) in enumerate(self.val_low):
-                seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
-
-                output = self.model(seqs, lens)
+            for batch_idx, data in enumerate(self.val_low):
+                feats_d2v = data[:, :2].view(-1, 200)
+                lens, target = data[:, 2, :3], data[:, 2, 3]
+                feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
+                output = self.model(feats_d2v, lens)
                 loss = self.criterion(output, target)
 
                 self.writer.set_step((epoch - 1) * len(self.val_low) + batch_idx, 'valid')
@@ -128,10 +134,12 @@ class D2V_DSCDataTrainer(BaseTrainer):
                 for met in self.metric_ftns:
                     self.valid_low_metrics.update(met.__name__, met(output, target))
 
-            for batch_idx, (seqs, lens, target) in enumerate(self.val_high):
-                seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
+            for batch_idx, data in enumerate(self.val_high):
+                feats_d2v = data[:, :2].view(-1, 200)
+                lens, target = data[:, 2, :3], data[:, 2, 3]
+                feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
 
-                output = self.model(seqs, lens)
+                output = self.model(feats_d2v, lens)
                 loss = self.criterion(output, target)
 
                 self.writer.set_step((epoch - 1) * len(self.val_high) + batch_idx, 'valid')

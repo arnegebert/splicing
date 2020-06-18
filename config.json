@@ -8,7 +8,7 @@
         "args": {}
     },
     "data_loader": {
-        "type": "DSC_UnencodedDataLoader",
+        "type": "DSC_EmbeddedDataLoader",
         "args":{
             "data_dir": "data/",
             "batch_size": 256,

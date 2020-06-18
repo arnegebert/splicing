@@ -356,13 +356,13 @@ class MLP(BaseModel):
         self.drop_fc1 = nn.Dropout(0.2)
         self.drop_fc2 = nn.Dropout(0.2)
 
-    def forward(self, d2v_feats):
+    def forward(self, d2v_feats, lens):
         # [B, 100] input
 
         # [128, 142, 4] or [128, 140, 4]
         x = F.relu(self.drop_fc1(self.fc1(d2v_feats)))
         x  = F.relu(self.drop_fc2(self.fc2(x)))
-        x = F.sigmoid(self.fc3(x))
+        x = torch.sigmoid(self.fc3(x))
         return x
 
 

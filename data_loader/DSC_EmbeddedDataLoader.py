@@ -10,7 +10,7 @@ import random
 import numpy as np
 import csv
 
-class DSC_UnencodedDataLoader(BaseDataLoader):
+class DSC_EmbeddedDataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
@@ -22,27 +22,17 @@ class DSC_UnencodedDataLoader(BaseDataLoader):
         cons, low, high = [], [], []
         data_type = 'cass'
         if True:
-            with open('data/distributed/decoded_cons_data_class.csv') as f:
-                reader = csv.reader(f, delimiter='\t')
-                x_cons_data = list(reader)
-            x_cons_data = np.array(x_cons_data)
-            with open('data/distributed/decoded_cas_data_high_class.csv') as f:
-                reader = csv.reader(f, delimiter='\t')
-                hx_cas_data = list(reader)
-            hx_cas_data = np.array(hx_cas_data)
-            with open('data/distributed/decoded_cas_data_low_class.csv') as f:
-                reader = csv.reader(f, delimiter='\t')
-                lx_cas_data = list(reader)
-            lx_cas_data = np.array(lx_cas_data)
-            # x_cons_data = np.load('data/hexevent/x_cons_data.npy')
-            # hx_cas_data = np.load('data/hexevent/x_cas_data_high.npy')
-            # lx_cas_data = np.load('data/hexevent/x_cas_data_low.npy')
-            # cons = extract_values_from_dsc_np_format(x_cons_data)
-            # low = extract_values_from_dsc_np_format(hx_cas_data)
-            # high = extract_values_from_dsc_np_format(lx_cas_data)
-            a = int(len(x_cons_data) / 10)
-            b = int(len(hx_cas_data) / 10)
-            c = int(len(lx_cas_data) / 10)
+            x_cons_data = np.load('data/distributed/embedded_cons_data_class.npy')
+            hx_cas_data = np.load('data/distributed/embedded_cas_data_high_class.npy')
+            lx_cas_data = np.load('data/distributed/embedded_cas_data_low_class.npy')
+
+            # a = int(len(x_cons_data) / 10)
+            # b = int(len(hx_cas_data) / 10)
+            # c = int(len(lx_cas_data) / 10)
+
+            a = int(x_cons_data.shape[0] / 10)
+            b = int(hx_cas_data.shape[0] / 10)
+            c = int(lx_cas_data.shape[0] / 10)
 
             s = 0
             # 9 folds for training
@@ -74,13 +64,21 @@ class DSC_UnencodedDataLoader(BaseDataLoader):
             cas_test = np.concatenate((lx_cas_data[c * s:c * (s + 1)], hx_cas_data[b * s:b * (s + 1)]))
 
 
-            train = train
+            train = torch.tensor(train)
             # cons + low + high
-            val_all = test
+            val_all = torch.tensor(test)
             # cons + low
-            val_low = lt
+            val_low = torch.tensor(lt)
             # cons + high
-            val_high = htest
+            val_high = torch.tensor(htest)
+
+            # train = train
+            # # cons + low + high
+            # val_all = test
+            # # cons + low
+            # val_low = lt
+            # # cons + high
+            # val_high = htest
             # return train, test, htest, lt, cons_test, cas_test
 
         else:
@@ -203,36 +201,3 @@ class DSCDataset(Dataset):
     def __getitem__(self, idx):
         return self.samples[idx]
 
-
-def prepare_data():
-    start = time.time()
-    print(f'starting loading of data')
-    samples = []
-    con, cass = [], []
-    with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
-        for i, l in enumerate(f):
-            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-            lens = T((l1, l2, l3))
-            psi = T(psi)
-            sample = (seqs, lens, psi)
-            con.append(sample)
-
-    with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
-        for i, l in enumerate(f):
-            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-            lens = T((l1, l2, l3))
-            psi = T(psi)
-            sample = (seqs, lens, psi)
-            cass.append(sample)
-
-    ratio = int(len(con) / len(cass))
-    for _ in range(ratio):
-        samples.extend(cass)
-
-    end = time.time()
-    print('total time to load data: {} secs'.format(end - start))
-    return samples

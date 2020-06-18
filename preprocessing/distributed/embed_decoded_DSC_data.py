@@ -1,7 +1,9 @@
 import numpy as np
 import csv
 import gensim.models
+import time
 
+start = time.time()
 data_path = '../../data/distributed'
 def batch_split_into_3_mers(batch):
     to_return = []
@@ -52,13 +54,16 @@ def embed_and_reshape(decoded_data):
         batch_vector.append(data_vector)
         # data_vector = np.concatenate((start_d2v, end_d2v, dummy_vector))
         # batch_vector = np.append(batch_vector, data_vector)
-    batch_vector = np.array(batch_vector)
-    batch_vector = np.reshape(batch_vector, (-1, 100, 3))
+    batch_vector = np.array(batch_vector).astype(np.float32)
+    #batch_vector = np.reshape(batch_vector, (-1, 100, 3))
     return batch_vector
 
 x_cons_data = embed_and_reshape(x_cons_data)
+print('Cons data done')
 hx_cas_data = embed_and_reshape(hx_cas_data)
+print('High data done')
 lx_cas_data = embed_and_reshape(lx_cas_data)
+print('Low data done')
 
 np.save(f'{data_path}/embedded_cons_data_class.npy', x_cons_data)
 np.save(f'{data_path}/embedded_cas_data_high_class.npy', hx_cas_data)
@@ -78,3 +83,5 @@ np.save(f'{data_path}/embedded_cas_data_low_class.npy', lx_cas_data)
 #         np.save(f'{data_path}/embedded_cas_data_high_class.npy', data_vector)
 #         f.write(f'{start}\t{end}\t{l1}\t{l2}\t{l3}\t{label}\n')
 
+end = time.time()
+print(f'Time to process data: {end-start}')
