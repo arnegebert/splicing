@@ -1,4 +1,4 @@
-from .GTEx_UnencodedDataLoade import *
+from .GTEx_EmbeddedDataLoader import *
 from .DSCGTExDataLoader import *
 from .DSCDataLoader import *
 from .DSC_EmbeddedDataLoader import *

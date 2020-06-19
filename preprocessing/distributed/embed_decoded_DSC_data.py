@@ -69,19 +69,6 @@ np.save(f'{data_path}/embedded_cons_data_class.npy', x_cons_data)
 np.save(f'{data_path}/embedded_cas_data_high_class.npy', hx_cas_data)
 np.save(f'{data_path}/embedded_cas_data_low_class.npy', lx_cas_data)
 
-# with open(f'{data_path}/embedded_cas_data_high_class.npy', 'w') as f:
-#     for start, end, l1, l2, l3, label in hx_cas_data:
-#         start, end = split_into_3_mers(start), split_into_3_mers(end)
-#         start_d2v = embedding_model.infer_vector(start)
-#         end_d2v = embedding_model.infer_vector(end)
-#         dummy_vector = np.zeros_like(start_d2v)
-#         dummy_vector[0] = l1
-#         dummy_vector[1] = l2
-#         dummy_vector[2] = l3
-#         dummy_vector[3] = label
-#         data_vector = np.concatenate(start_d2v, end_d2v, dummy_vector)
-#         np.save(f'{data_path}/embedded_cas_data_high_class.npy', data_vector)
-#         f.write(f'{start}\t{end}\t{l1}\t{l2}\t{l3}\t{label}\n')
 
 end = time.time()
 print(f'Time to process data: {end-start}')
