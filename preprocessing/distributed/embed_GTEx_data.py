@@ -6,9 +6,21 @@ from torch import as_tensor as T
 
 startt = time.time()
 data_path = '../../data/gtex_processed'
-src = 'brain_cortex_full.csv'
+
+# src = 'brain_cortex_full.csv'
+# target = 'embedded_gtex_junction_class.npy'
+# avg_len = 7853.118899261425 # Junction length measurrement
+# std_len = 23917.691461462917
+
+
+src = 'brain_cortex_cassette_full.csv'
+target = 'embedded_gtex_cass_class.npy'
+avg_len = 5028.584836672408 # Cassette exon measurements
+std_len = 18342.894894670942
+
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
 classification_task = True
+constitutive_level = 0.95
 
 def batch_split_into_3_mers(batch):
     to_return = []
@@ -25,11 +37,6 @@ def split_into_3_mers(sentence):
         words.append(sentence[i - 1:i + 2])
     return words
 
-# todo: estimate middle length more accurately (?)
-avg_len = 7853.118899261425
-std_len = 23917.691461462917
-constitutive_level = 0.90
-
 low = 0
 medium = 0
 high = 0
@@ -38,7 +45,7 @@ samples = []
 
 with open(f'{data_path}/{src}') as f:
     for i, l in enumerate(f):
-        if i % 1000: print(f'Processing line {i}')
+        if i % 1000==0: print(f'Processing line {i}')
         j, start_seq, end_seq, psi = l.split(',')
         s, e = j.split('_')[1:3]
         s, e = int(s), int(e)
@@ -71,9 +78,7 @@ print(f'cons: {cons}')
 print(f'all: {low+high+cons}')
 
 samples = np.array(samples).astype(np.float32)
-np.save(f'../../data/distributed/embedded_gtex_cass_class.npy', samples)
-
-print('x')
+np.save(f'../../data/distributed/{target}', samples)
 
 def embed_and_reshape(decoded_data):
     # batch_vector = np.array([])

@@ -37,11 +37,14 @@ class GTEx_EmbeddedDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
 
     def __init__(self, path, transform=None):
-        self.path = path
         startt = time.time()
         print(f'starting loading of data')
-        self.samples = np.load('data/distributed/embedded_gtex_cass_class.npy')
+        self.samples = np.load(path)
+        np.random.seed(0)
+        np.random.shuffle(self.samples)
+
         self.samples = torch.from_numpy(self.samples)
+
 
         endt = time.time()
         print(f'Took {endt-startt} to load data')

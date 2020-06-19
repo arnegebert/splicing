@@ -47,7 +47,12 @@ class DSCGTExDataset(Dataset):
 
         avg_len = 7853.118899261425
         std_len = 23917.691461462917
-        constitutive_level = 0.90
+
+        avg_len = 5028.584836672408  # Cassette exon measurements
+        std_len = 18342.894894670942
+
+        constitutive_level = 0.95
+        classification_task = False
 
         low = 0
         medium = 0
@@ -62,13 +67,17 @@ class DSCGTExDataset(Dataset):
                 psi = float(psi[:-1])
                 is_constitutive = psi >= constitutive_level
                 is_constitutive = T(float(is_constitutive))
+
                 if psi <= 0.2: low += 1
                 if 0.2 < psi <= 0.75: medium += 1
                 if psi > 0.75 and psi < constitutive_level: high += 1
                 if psi > constitutive_level: cons += 1
+
+                label = is_constitutive if classification_task else psi
+
                 l1 = (e-s-avg_len)/std_len
                 l1 = T(l1).float()
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, is_constitutive)
+                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, label)
                 self.samples.append(sample)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))

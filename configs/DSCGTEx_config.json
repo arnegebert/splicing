@@ -10,7 +10,7 @@
     "data_loader": {
         "type": "DSCGTExDataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/brain_cortex_full.csv",
+            "data_dir": "data/gtex_processed/brain_cortex_cassette_full.csv",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -18,7 +18,7 @@
         }
     },
     "optimizer": {
-        "type": "RMSProp",
+        "type": "Adam",
         "args":{
             "lr": 1e-3,
             "weight_decay": 0.0,
@@ -27,7 +27,7 @@
     },
     "loss": "binary_cross_entropy",
     "metrics": [
-        "r2"
+        "auc"
     ],
     "lr_scheduler": {
         "type": "StepLR",
@@ -46,7 +46,7 @@
         "verbosity": 1,
 
         "monitor": "min val_loss",
-        "early_stop": 25,
+        "early_stop": 15,
 
         "tensorboard": true
     }

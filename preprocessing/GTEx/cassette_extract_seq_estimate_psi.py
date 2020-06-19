@@ -2,22 +2,23 @@
 import csv
 import linecache
 from timeit import default_timer as timer
+import numpy as np
 
 startt = timer()
-data_path = '../data'
+data_path = '../../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
 save_to = 'gtex_processed/brain_cortex_cassette_full.csv'
-last_chrom = 22
+last_chrom = 23
 
-introns_bef_start = 50 # introns
-exons_after_start = 30 # exons
+introns_bef_start = 70 # introns
+exons_after_start = 70 # exons
 
-exons_bef_end = 30 # exons
-introns_after_end = 50 # introns
+exons_bef_end = 70 # exons
+introns_after_end = 70 # introns
 
 highly_expressed_genes = set()
 def load_highly_expressed_genes():
-    with open(f'../data/gtex_processed/brain_cortex_tpm_one_sample.csv') as f:
+    with open(f'{data_path}/gtex_processed/brain_cortex_tpm_one_sample.csv') as f:
         for l in f:
             gene_id, tpm = l.split(',')
             highly_expressed_genes.add(gene_id)
@@ -32,7 +33,7 @@ def contains_highly_expressed_gene(genes):
 
 gencode_genes = {}
 def load_gencode_genes():
-    with open(f'../data/gencode_genes.csv') as f:
+    with open(f'{data_path}/gencode_genes.csv') as f:
         for line in f:
             line = line.split('\t')
             if len(line) == 1: continue
@@ -85,6 +86,7 @@ def load_chrom_seq(chrom):
 junction_seqs = {}
 junction_psis = {}
 seqs_psis = {}
+exon_lens = []
 
 with open(path_filtered_reads) as f:
     reader = csv.reader(f, delimiter="\n")
@@ -169,10 +171,12 @@ with open(path_filtered_reads) as f:
                         window_around_start = chrom_seq[b - introns_bef_start - 1:b + exons_after_start - 1]
                         window_around_end = chrom_seq[c - exons_bef_end - 2:c + introns_after_end - 2]
                         junction_seqs[line[0]] = [window_around_start, window_around_end]
+
                         # almost always AG, but also frequently ac -2:0
                         # print(chrom_seq[b-2:b])
                         # almost always GT, but also many gc
-                        print(chrom_seq[c-1:c+1])
+                        # print(chrom_seq[c-1:c+1])
+
                         # read count from a -> b / c -> d
                         pos = int(count3) + int(line[1])
                         # read count from a -> d
@@ -180,11 +184,24 @@ with open(path_filtered_reads) as f:
                         if (pos + neg) == 0: psi = 0
                         else: psi = pos / (pos + neg)
 
+                        l2 = c-b
+                        exon_lens.append(l2)
                         seqs_psis[line[0]] = (window_around_start, window_around_end, psi)
 
 print(f'Number of skipped homeless junctions: {homeless_junctions} ')
 print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
-print(f'Number of junctions after filtering: {len(seqs_psis)}')
+print(f'Number of cassette exons after filtering: {len(seqs_psis)}')
+
+exon_lens = np.array(exon_lens)
+# intron_lens = np.array(intron_lens)
+exon_mean, exon_std = np.mean(exon_lens), np.std(exon_lens)
+# intron_mean, intron_std = np.mean(intron_lens), np.std(intron_lens)
+print(f'Exon mean: {exon_mean}')
+print(f'Exon std: {exon_std}')
+# print(f'Intron mean: {intron_mean}')
+# print(f'Intron std: {intron_std}')
+
+
 with open(f'{data_path}/{save_to}', 'w') as f:
     print('Beginning to write estimated PSIs and extracted sequences')
     for junction, (start_seq, end_seq, psi) in seqs_psis.items():

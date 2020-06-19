@@ -1,16 +1,14 @@
 {
-    "name": "GTEx_D2V_MLP",
-
+    "name": "GTExBiLSTM",
     "n_gpu": 1,
-
     "arch": {
-        "type": "MLP2",
+        "type": "BiLSTM2",
         "args": {}
     },
     "data_loader": {
-        "type": "GTEx_EmbeddedDataLoader",
-        "args":{
-            "data_dir": "data/",
+        "type": "DSCGTExDataLoader",
+        "args": {
+            "data_dir": "data/gtex_processed/brain_cortex_full.csv",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -19,35 +17,32 @@
     },
     "optimizer": {
         "type": "Adam",
-        "args":{
-            "lr": 5e-4,
-            "weight_decay": 0,
+        "args": {
+            "lr": 0.0005,
+            "weight_decay": 0.0,
             "amsgrad": true
         }
     },
     "loss": "binary_cross_entropy",
     "metrics": [
-        "auc"
+        "r2"
     ],
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 10000,
+            "step_size": 200,
             "gamma": 0.1
         }
     },
     "trainer": {
-        "type": "D2V_GTExTrainer",
+        "type": "DSCGTExTrainer",
         "args": {},
-        "epochs": 100,
-
+        "epochs": 500,
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
-
         "monitor": "min val_loss",
-        "early_stop": 5,
-
+        "early_stop": 25,
         "tensorboard": true
     }
 }
