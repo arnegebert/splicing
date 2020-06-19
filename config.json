@@ -14,7 +14,7 @@
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1
+            "num_workers": 0
         }
     },
     "optimizer": {
@@ -46,7 +46,7 @@
         "verbosity": 1,
 
         "monitor": "min val_loss",
-        "early_stop": 15,
+        "early_stop": 5,
 
         "tensorboard": true
     }

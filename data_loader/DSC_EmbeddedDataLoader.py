@@ -26,6 +26,10 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
             hx_cas_data = np.load('data/distributed/embedded_cas_data_high_class.npy')
             lx_cas_data = np.load('data/distributed/embedded_cas_data_low_class.npy')
 
+            # x_cons_data = x_cons_data[:10]
+            # hx_cas_data = hx_cas_data[:10]
+            # lx_cas_data = lx_cas_data[:10]
+
             # a = int(len(x_cons_data) / 10)
             # b = int(len(hx_cas_data) / 10)
             # c = int(len(lx_cas_data) / 10)
@@ -42,6 +46,7 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
             d = int((9 * a) / (9 * (b + c)))
             #print(d)
             classification_task = False
+            # todo change back
             for i in range(d): #range(1)
                 train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)
                 train = np.concatenate((train, hx_cas_data[b * (s + 1):]), axis=0)
@@ -192,7 +197,8 @@ class DSCDataset(Dataset):
 
     def __init__(self, samples):
         random.seed(0)
-        random.shuffle(samples)
+        # woooow, pretty proud of myself for figuring this out :>
+        # random.shuffle(samples)
         self.samples = samples
 
     def __len__(self):

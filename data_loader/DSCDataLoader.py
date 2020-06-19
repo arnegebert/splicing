@@ -177,8 +177,8 @@ class DSCDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
 
     def __init__(self, samples):
-        random.seed(0)
-        random.shuffle(samples)
+        # random.seed(0)
+        # random.shuffle(samples)
         self.samples = samples
 
     def __len__(self):

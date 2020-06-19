@@ -36,6 +36,8 @@
         }
     },
     "trainer": {
+        "type": "NaivePSITrainer",
+        "args": {},
         "epochs": 50,
 
         "save_dir": "saved/",

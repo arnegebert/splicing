@@ -37,6 +37,8 @@
         }
     },
     "trainer": {
+        "type": "DSCGTExTrainer",
+        "args": {},
         "epochs": 500,
 
         "save_dir": "saved/",
