@@ -279,11 +279,14 @@ avg_len = np.mean(l1_lens)
 std_len = np.std(l1_lens)
 
 psis_dsc, psis_gtex = np.array(psis_dsc), np.array(psis_gtex)
+print('----------------------------------')
 print(f'Average PSI value from DSC dataset: {np.mean(psis_dsc)}')
 print(f'Average PSI value from GTEx dataset: {np.mean(psis_gtex)}')
+print(f'Median PSI value from DSC dataset: {np.median(psis_dsc)}')
+print(f'Median PSI value from GTEx dataset: {np.median(psis_gtex)}')
 print(f'Correlation between DSC and GTEx PSI values: {np.corrcoef(psis_dsc, psis_gtex)[0,1]}')
 print(f'Average absolute differenec between DSC and GTEx PSI values: {np.mean(np.abs(psis_dsc-psis_gtex))}')
-
+print('---------------------------------')
 print(f'Average length of l1: {avg_len}')
 print(f'Standard deviation of l1: {std_len}')
 

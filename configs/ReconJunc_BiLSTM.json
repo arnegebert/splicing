@@ -49,5 +49,6 @@
         "early_stop": 15,
 
         "tensorboard": true
-    }
+    },
+    "comment": "With no filtering of highly expressed genes"
 }
