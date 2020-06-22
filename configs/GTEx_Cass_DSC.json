@@ -1,16 +1,16 @@
 {
-    "name": "DSC_Reconstruction_Junction",
+    "name": "GTEx_Cass_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "GTEx_DSC",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
-        "type": "GTEx_DSC_DataLoader",
+        "type": "DSCDataLoader",
         "args":{
-            "data_dir": "data/dsc_reconstruction_junction/brain_cortex_full.csv",
+            "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -20,7 +20,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -32,12 +32,12 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 10000,
+            "step_size": 100,
             "gamma": 0.1
         }
     },
     "trainer": {
-        "type": "DSCGTExTrainer",
+        "type": "DSCTrainer",
         "args": {},
         "epochs": 500,
 
@@ -45,8 +45,8 @@
         "save_period": 251,
         "verbosity": 1,
 
-        "monitor": "min val_loss",
-        "early_stop": 15,
+        "monitor": "max val_auc",
+        "early_stop": 20,
 
         "tensorboard": true
     }

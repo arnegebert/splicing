@@ -7,7 +7,7 @@ from torch import as_tensor as T
 import pickle
 
 
-class DSCGTExDataLoader(BaseDataLoader):
+class GTEx_DSC_DataLoader2(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
@@ -17,7 +17,7 @@ class DSCGTExDataLoader(BaseDataLoader):
             transforms.Normalize((0.1307,), (0.3081,))
         ])
         self.data_dir = data_dir
-        self.dataset = DSCGTExDataset(path=data_dir)
+        self.dataset = GTEx_DSC_Dataset(path=data_dir)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
 
 def one_hot_encode(nt):
@@ -36,7 +36,7 @@ def encode_seq(seq):
         encoding.append(one_hot_encode(nt))
     return encoding
 
-class DSCGTExDataset(Dataset):
+class GTEx_DSC_Dataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
 
     def __init__(self, path, transform=None):

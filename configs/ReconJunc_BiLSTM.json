@@ -1,10 +1,10 @@
 {
-    "name": "DSC_Reconstruction_Junction",
+    "name": "ReconJunc_BiLSTM",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "GTEx_DSC",
+        "type": "BiLSTM2",
         "args": {}
     },
     "data_loader": {

@@ -4,17 +4,18 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "DSCGTEx",
+        "type": "GTEx_DSC",
         "args": {}
     },
     "data_loader": {
-        "type": "DSCGTExDataLoader",
+        "type": "GTEx_DSC_DataLoader",
         "args":{
             "data_dir": "data/gtex_processed/brain_cortex_cassette_full.csv",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0
+            "num_workers": 0,
+            "classification_task": true
         }
     },
     "optimizer": {

@@ -7,7 +7,7 @@ import numpy as np
 startt = timer()
 data_path = '../../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
-save_to = 'partial_junction/brain_cortex_full.csv'
+save_to = 'dsc_reconstruction_junction/brain_cortex_full.csv'
 last_chrom = 22
 
 introns_bef_start = 70 # introns
@@ -85,7 +85,7 @@ def load_chrom_seq(chrom):
             return loaded_chrom_seq[6:]
 
 def load_DSC_exons():
-    with open(f'../../data/partial_junction/cons_exons.csv') as f:
+    with open(f'../../data/dsc_reconstruction_junction/cons_exons.csv') as f:
         reader_cons = csv.reader(f, delimiter='\t')
         cons = list(reader_cons)
         cons_divided = {}
@@ -95,7 +95,7 @@ def load_DSC_exons():
             if chrom not in cons_divided:
                 cons_divided[chrom] = []
             cons_divided[chrom].append((strand, start, end, count, skip, constit_level))
-    with open(f'../../data/partial_junction/cass_exons.csv') as f:
+    with open(f'../../data/dsc_reconstruction_junction/cass_exons.csv') as f:
         reader_cass = csv.reader(f, delimiter='\t')
         cass = list(reader_cass)
         cass_divided = {}
@@ -126,6 +126,8 @@ def find_DSC_exon_belonging_to_junction2(chrom, junc_start, junc_end):
 
 seqs_psis = {}
 l1_lens = []
+
+psis_gtex, psis_dsc = [], []
 
 with open(path_filtered_reads) as f:
     reader = csv.reader(f, delimiter="\n")
@@ -173,7 +175,8 @@ with open(path_filtered_reads) as f:
             continue
 
         try:
-            exon = find_DSC_exon_belonging_to_junction(loaded_chrom, start, end)
+            chrom, strand, exon_start, exon_end, count, skip, constit_level = \
+                find_DSC_exon_belonging_to_junction(loaded_chrom, start, end)
 
         except ValueError:
             non_dsc_junction += 1
@@ -252,6 +255,8 @@ with open(path_filtered_reads) as f:
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)
         l1_lens.append(end-start)
+        psis_dsc.append(constit_level)
+        psis_gtex.append(psi)
         seqs_psis[line[0]] = (window_around_start, window_around_end, psi)
 
 
@@ -272,6 +277,12 @@ print(f'Number of junctions after filtering: {len(seqs_psis)}')
 l1_lens = np.array(l1_lens)
 avg_len = np.mean(l1_lens)
 std_len = np.std(l1_lens)
+
+psis_dsc, psis_gtex = np.array(psis_dsc), np.array(psis_gtex)
+print(f'Average PSI value from DSC dataset: {np.mean(psis_dsc)}')
+print(f'Average PSI value from GTEx dataset: {np.mean(psis_gtex)}')
+print(f'Correlation between DSC and GTEx PSI values: {np.corrcoef(psis_dsc, psis_gtex)[0,1]}')
+print(f'Average absolute differenec between DSC and GTEx PSI values: {np.mean(np.abs(psis_dsc-psis_gtex))}')
 
 print(f'Average length of l1: {avg_len}')
 print(f'Standard deviation of l1: {std_len}')

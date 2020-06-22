@@ -7,8 +7,8 @@ startt = time.time()
 data_path_decoded = '../data/distributed'
 data_path_origin = '../data/send_to_me_DSC'
 # data_path_origin = '../data/hexevent'
+lifehack = 1000000
 
-lifehack = 25
 # decoded data
 with open(f'{data_path_decoded}/decoded_cons_data_class.csv') as f:
     reader = csv.reader(f, delimiter='\t')
@@ -33,7 +33,6 @@ with open(f'{data_path_origin}/all_cons.txt') as f:
 with open(f'{data_path_origin}/all_cass.txt') as f:
     reader = csv.reader(f, delimiter='\t')
     original_cass = list(reader)
-
 
 
 last_chrom = 23
@@ -97,10 +96,8 @@ def get_used_exons(decoded, original):
         if strand == '+':
             pos += 1
             in_there = window_around_start in hashs
-            continue
-            # xxxxxc = 2
-            # in_there = any([window_around_start in seq for seq in decoded[:, 0]])
         if strand == '-':
+            continue
             neg += 1
             # window_around_start = window_around_start[70:]
             cpy = window_around_start[105:]
@@ -130,7 +127,7 @@ print('Starting processing cons exons')
 used_cons_exons = get_used_exons(decoded_cons, original_cons)
 print(f'Found {len(used_cons_exons)} matching constitutive exons')
 print(f'Wanted to find {len(decoded_cons)} constitutive exons')
-with open('../data/partial_junction/cons_exons.csv', 'w') as f:
+with open('../data/dsc_reconstruction_junction/cons_exons.csv', 'w') as f:
     for chrom, strand, start, end, count, skip, constit_level in used_cons_exons:
         f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\n')
 
@@ -139,7 +136,7 @@ print('Starting processing cass exons')
 used_cass_exons = get_used_exons(decoded_cas, original_cass)
 print(f'Found {len(used_cass_exons)} matching cassette exons')
 print(f'Wanted to find {len(decoded_cas)} cassette exons')
-with open('../data/partial_junction/cass_exons.csv', 'w') as f:
+with open('../data/dsc_reconstruction_junction/cass_exons.csv', 'w') as f:
     for chrom, strand, start, end, count, skip, constit_level in used_cass_exons:
         f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\n')
 

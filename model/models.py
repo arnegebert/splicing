@@ -158,7 +158,7 @@ class DSC(BaseModel):
         return y
 
 
-class DSCGTEx(BaseModel):
+class GTEx_DSC(BaseModel):
 
     def __init__(self):
         super().__init__()
