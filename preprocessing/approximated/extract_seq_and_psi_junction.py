@@ -5,9 +5,9 @@ from timeit import default_timer as timer
 import numpy as np
 
 startt = timer()
-data_path = '../data'
+data_path = '../../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
-save_to = 'gtex_processed/brain_cortex_full.csv'
+save_to = 'partial_junction/brain_cortex_full.csv'
 last_chrom = 22
 
 introns_bef_start = 70 # introns
@@ -18,7 +18,7 @@ introns_after_end = 70 # introns
 
 highly_expressed_genes = set()
 def load_highly_expressed_genes():
-    with open(f'../data/gtex_processed/brain_cortex_tpm_one_sample.csv') as f:
+    with open(f'{data_path}/gtex_processed/brain_cortex_tpm_one_sample.csv') as f:
         for l in f:
             gene_id, tpm = l.split(',')
             highly_expressed_genes.add(gene_id)
@@ -33,7 +33,7 @@ def contains_highly_expressed_gene(genes):
 
 gencode_genes = {}
 def load_gencode_genes():
-    with open(f'../data/gencode_genes.csv') as f:
+    with open(f'{data_path}/gencode_genes.csv') as f:
         for line in f:
             line = line.split('\t')
             if len(line) == 1: continue
@@ -49,6 +49,7 @@ not_highly_expressed = 0
 homeless_junctions = 0
 current_idx_overlap = 0
 too_short_intron = 0
+non_dsc_junction = 0
 
 def map_from_position_to_genes(chr, start, end, idx):
     gene_start_and_ends = gencode_genes[chr]
@@ -85,22 +86,43 @@ def load_chrom_seq(chrom):
 
 def load_DSC_exons():
     with open(f'../../data/partial_junction/cons_exons.csv') as f:
-            reader_cons = csv.reader(f, delimiter='\t')
+        reader_cons = csv.reader(f, delimiter='\t')
+        cons = list(reader_cons)
+        cons_divided = {}
+        for chrom, strand, start, end, count, skip, constit_level in cons:
+            chrom, start, end, count, skip, constit_level = int(chrom[3:]), int(start), int(end), int(count),\
+                                                            int(skip), float(constit_level)
+            if chrom not in cons_divided:
+                cons_divided[chrom] = []
+            cons_divided[chrom].append((strand, start, end, count, skip, constit_level))
     with open(f'../../data/partial_junction/cass_exons.csv') as f:
         reader_cass = csv.reader(f, delimiter='\t')
-    return list(reader_cons), list(reader_cass)
+        cass = list(reader_cass)
+        cass_divided = {}
+        for chrom, strand, start, end, count, skip, constit_level in cass:
+            chrom, start, end, count, skip, constit_level = int(chrom[3:]), int(start), int(end), int(count),\
+                                                            int(skip), float(constit_level)
+            if chrom not in cass_divided:
+                cass_divided[chrom] = []
+            cass_divided[chrom].append((strand, start, end, count, skip, constit_level))
+    return cons_divided, cass_divided
 
 DSC_cons, DSC_cass = load_DSC_exons()
+print('Loaded DSC exons')
 
-def find_DSC_exon_belonging_to_junction(chrom, start, end):
-    for echrom, strand, estart, eend, count, skip, constit_level in DSC_cons:
-        if chrom == echrom and (start == estart or end == eend):
-            return (echrom, strand, estart, eend, count, skip, constit_level)
+def find_DSC_exon_belonging_to_junction(chrom, junc_start, junc_end):
+    cons, cass = DSC_cons[chrom], DSC_cass[chrom]
+    for strand, exon_start, exon_end, count, skip, constit_level in cons:
+        if (junc_start == exon_end or junc_end == exon_start):
+            return (chrom, strand, exon_start, exon_end, count, skip, constit_level)
 
-    for echrom, strand, estart, eend, count, skip, constit_level in DSC_cass:
-        if chrom == echrom and (start == estart or end == eend):
-            return (echrom, strand, estart, eend, count, skip, constit_level)
+    for strand, exon_start, exon_end, count, skip, constit_level in cass:
+        if (junc_start == exon_end or junc_end == exon_start):
+            return (chrom, strand, exon_start, exon_end, count, skip, constit_level)
     raise ValueError('No matching exon for junction in DSC data')
+
+def find_DSC_exon_belonging_to_junction2(chrom, junc_start, junc_end):
+    pass
 
 seqs_psis = {}
 l1_lens = []
@@ -150,8 +172,12 @@ with open(path_filtered_reads) as f:
             not_highly_expressed += 1
             continue
 
-        exon = find_DSC_exon_belonging_to_junction(loaded_chrom, start, end)
+        try:
+            exon = find_DSC_exon_belonging_to_junction(loaded_chrom, start, end)
 
+        except ValueError:
+            non_dsc_junction += 1
+            continue
 
         if end - start < 80:
             too_short_intron += 1
@@ -232,6 +258,7 @@ with open(path_filtered_reads) as f:
 print(f'Number of too short introns: {too_short_intron}')
 print(f'Number of skipped homeless junctions: {homeless_junctions} ')
 print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
+print(f'Number of skipped non-dsc junctions: {non_dsc_junction}')
 print(f'Number of junctions after filtering: {len(seqs_psis)}')
 
 # chrom 1 to 10:

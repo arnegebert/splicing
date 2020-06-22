@@ -8,7 +8,7 @@ data_path_decoded = '../data/distributed'
 data_path_origin = '../data/send_to_me_DSC'
 # data_path_origin = '../data/hexevent'
 
-lifehack = 100000
+lifehack = 25
 # decoded data
 with open(f'{data_path_decoded}/decoded_cons_data_class.csv') as f:
     reader = csv.reader(f, delimiter='\t')
@@ -37,11 +37,11 @@ with open(f'{data_path_origin}/all_cass.txt') as f:
 
 
 last_chrom = 23
-introns_bef_start = 70 - 1 # introns
-exons_after_start = 70 + 1 # exons
+introns_bef_start = 70# introns
+exons_after_start = 70# exons
 
-exons_bef_end = 70 -2 # exons
-introns_after_end = 70 # introns
+exons_bef_end = 70 # exons
+introns_after_end = 70# introns
 
 def load_chrom_seq(chrom):
     with open(f'../data/chromosomes/chr{chrom}.fa') as f:
@@ -92,35 +92,31 @@ def get_used_exons(decoded, original):
             current_idx_overlap = 0
             chrom_seq = load_chrom_seq(loaded_chrom)
 
-        window_around_start = chrom_seq[start - introns_bef_start - 1:start + exons_after_start - 1].upper()
-        window_around_end = chrom_seq[end - exons_bef_end - 2:end + introns_after_end - 2].upper()
+        window_around_start = chrom_seq[start - introns_bef_start:start + exons_after_start].upper()
+        window_around_end = chrom_seq[end - exons_bef_end:end + introns_after_end].upper()
         if strand == '+':
             pos += 1
+            in_there = window_around_start in hashs
+            continue
+            # xxxxxc = 2
+            # in_there = any([window_around_start in seq for seq in decoded[:, 0]])
         if strand == '-':
             neg += 1
-            # window_around_start = window_around_start[73:130]
-            window_around_start = window_around_start[::-1]
-            window_around_start = reverse_complement(window_around_start)
-            window_around_end = window_around_end[5:-5:-1]
-
-        # in_there = any([window_around_start in seq for seq in decoded[:, 0]])
-        in_there = window_around_start in hashs
-        # if i in [20286]:
-        #     test = set()
-        #     test.add(decoded[1,0])
-        #     test2 = set(window_around_start)
-        #     test3 = dict()
-        #     print(window_around_start==decoded[1,0])
-        #     print(window_around_start in test)
-        #     print(decoded[1,0] in test2)
-        #     print('meh')
-        if in_there:
+            # window_around_start = window_around_start[70:]
+            cpy = window_around_start[105:]
+            cpy = cpy[::-1]
+            cpy = reverse_complement(cpy)
+            # window_around_start = window_around_start[::-1]
+            # window_around_start = reverse_complement(window_around_start)
+            in_there = any([cpy in seq for seq in decoded[:, 0]])
+            # match beginning at index 62
+            # 31 the other time
+            # before 62, also matches sequence before
+            # therefore, extracting moved by 62 nts + reversed + reverse complemented????
+        if in_there: # +: 20286, -: 42079
             used_exons.append((chrom, strand, start, end, count, skip, constit_level))
             print(i)
-            # in_there2 = any([window_around_end in seq for seq in decoded[:, 1]])
-            # if in_there2: print('yep')
-    print(pos)
-    print(neg)
+            # print(f'Offset index: {decoded[[cpy in seq for seq in decoded[:, 0]].index(True),0].find(cpy)}')
     return used_exons
 
 # wowww -- 200-times speed up through hashing :>
