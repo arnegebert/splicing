@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "DSCGTExTrainer",
+        "type": "GTEx_DSC_Trainer",
         "args": {},
         "epochs": 500,
 

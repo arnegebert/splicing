@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "D2V_DSCDataTrainer",
+        "type": "DSC_D2V_DataTrainer",
         "args": {},
         "epochs": 100,
 

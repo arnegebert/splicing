@@ -10,7 +10,7 @@
     "data_loader": {
         "type": "GTEx_EmbeddedDataLoader",
         "args":{
-            "data_dir": "data/distributed/embedded_gtex_cass_class.npy",
+            "data_dir": "data/distributed/embedded_recon_junc_class.npy",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "D2V_GTExTrainer",
+        "type": "GTEx_D2V_Trainer",
         "args": {},
         "epochs": 100,
 

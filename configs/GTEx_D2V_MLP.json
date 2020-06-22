@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "D2V_GTExTrainer",
+        "type": "GTEx_D2V_Trainer",
         "args": {},
         "epochs": 100,
 
