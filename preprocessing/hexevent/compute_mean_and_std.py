@@ -20,7 +20,7 @@ cons = False
 assert not(low and high), 'filter either for low or high inclusion rate'
 assert not(cons and (low or high)), 'can\'t filter according to inclusion level and be constitutive at the same time'
 
-last_chrom = 22
+last_chrom = 23
 gencode_idx = 0
 
 # gencode = list(open(f'{data_path}/gencode_exons.csv').read().replace('\n', '').split('\t'))
@@ -205,7 +205,7 @@ cons = True
 assert not(low and high), 'filter either for low or high inclusion rate'
 assert not(cons and (low or high)), 'can\'t filter according to inclusion level and be constitutive at the same time'
 
-last_chrom = 22
+last_chrom = 23
 gencode_idx = 0
 
 with open(f'{data_path}/{src}') as f:

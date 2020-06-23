@@ -8,8 +8,10 @@ from utils import reverse_complement, one_hot_encode_seq
 startt = timer()
 data_path = '../../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
-save_to = 'dsc_reconstruction_exon/brain_cortex_full.npy'
-last_chrom = 22
+save_to_low = 'dsc_reconstruction_exon/brain_cortex_full_low.npy'
+save_to_high = 'dsc_reconstruction_exon/brain_cortex_full_high.npy'
+save_to_cons = 'dsc_reconstruction_exon/brain_cortex_full_cass.npy'
+last_chrom = 23
 
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
@@ -88,22 +90,24 @@ def load_DSC_exons():
         reader_cons = csv.reader(f, delimiter='\t')
         cons = list(reader_cons)
         cons_divided = {}
-        for chrom, strand, start, end, count, skip, constit_level in cons:
-            chrom, start, end, count, skip, constit_level = int(chrom[3:]), int(start), int(end), int(count),\
-                                                            int(skip), float(constit_level)
+        for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in cons:
+            chrom, start, end, count, skip, constit_level, l1, l2, l3 = int(chrom[3:]), int(start), int(end), \
+                                                                        int(count), int(skip), float(constit_level), \
+                                                                        float(l1), float(l2), float(l3)
             if chrom not in cons_divided:
                 cons_divided[chrom] = []
-            cons_divided[chrom].append((strand, start, end, count, skip, constit_level))
+            cons_divided[chrom].append((chrom, strand, start, end, count, skip, constit_level, l1, l2, l3))
     with open(f'../../data/dsc_reconstruction_junction/cass_exons.csv') as f:
         reader_cass = csv.reader(f, delimiter='\t')
         cass = list(reader_cass)
         cass_divided = {}
-        for chrom, strand, start, end, count, skip, constit_level in cass:
-            chrom, start, end, count, skip, constit_level = int(chrom[3:]), int(start), int(end), int(count),\
-                                                            int(skip), float(constit_level)
+        for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in cass:
+            chrom, start, end, count, skip, constit_level, l1, l2, l3 = int(chrom[3:]), int(start), int(end), \
+                                                                        int(count), int(skip), float(constit_level), \
+                                                                        float(l1), float(l2), float(l3)
             if chrom not in cass_divided:
                 cass_divided[chrom] = []
-            cass_divided[chrom].append((strand, start, end, count, skip, constit_level))
+            cass_divided[chrom].append((chrom, strand, start, end, count, skip, constit_level, l1, l2, l3))
     return cons_divided, cass_divided
 
 DSC_cons, DSC_cass = load_DSC_exons()
@@ -114,10 +118,10 @@ def overlap(start, end, start2, end2):
 
 def initialize_DSC_exon_counts(DSC_cons, DSC_cass):
     cons_counts, cass_counts = dict(), dict()
-    for chrom, strand, start, end, count, skip, constit_level in DSC_cons:
-        cons_counts[(start, end)] = [0, 0, (chrom, strand, start, end, count, skip, constit_level)]
-    for chrom, strand, start, end, count, skip, constit_level in DSC_cass:
-        cass_counts[(start, end)] = [0, 0, (chrom, strand, start, end, count, skip, constit_level)]
+    for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in DSC_cons.values():
+        cons_counts[(start, end)] = [0, 0, (chrom, strand, start, end, count, skip, constit_level, l1, l2, l3)]
+    for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in DSC_cass.values():
+        cass_counts[(start, end)] = [0, 0, (chrom, strand, start, end, count, skip, constit_level, l1, l2, l3)]
     return cons_counts, cass_counts
 
 DSC_cons_counts, DSC_cass_counts = initialize_DSC_exon_counts(DSC_cons, DSC_cass)
@@ -125,13 +129,13 @@ DSC_cons_counts, DSC_cass_counts = initialize_DSC_exon_counts(DSC_cons, DSC_cass
 # -1, otherwise no junction start / exon end matches
 def add_junction_reads_to_DSC_exon_counts(chrom, junc_start, junc_end, reads):
     cons, cass = DSC_cons[chrom], DSC_cass[chrom]
-    for strand, exon_start, exon_end, count, skip, constit_level in cons:
+    for exon_chr, strand, exon_start, exon_end, count, skip, constit_level in cons:
         if junc_start-1 == exon_end or junc_end == exon_start:
             DSC_cons_counts[(exon_start, exon_end)][0] += reads
         elif overlap(exon_start, exon_end, junc_start-1, junc_end):
             DSC_cons_counts[(exon_start, exon_end)][1] += reads
 
-    for strand, exon_start, exon_end, count, skip, constit_level in cass:
+    for exon_chr, strand, exon_start, exon_end, count, skip, constit_level in cass:
         if junc_start-1 == exon_end or junc_end == exon_start:
             if junc_start - 1 == exon_end or junc_end == exon_start:
                 DSC_cass_counts[(exon_start, exon_end)][0] += reads
@@ -141,7 +145,6 @@ def add_junction_reads_to_DSC_exon_counts(chrom, junc_start, junc_end, reads):
 seqs_psis = {}
 l1_lens = []
 
-psis_gtex, psis_dsc = [], []
 
 with open(path_filtered_reads) as f:
     reader = csv.reader(f, delimiter="\n")
@@ -149,9 +152,8 @@ with open(path_filtered_reads) as f:
     junction_reads_file = list(reader)
 
 with open(path_filtered_reads) as f:
-    loaded_chrom = 1
-    chrom_seq = load_chrom_seq(loaded_chrom)
     print('Start of iteration through lines')
+    prev_chrom = 1
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
             print(f'Reading line {i}')
@@ -162,25 +164,18 @@ with open(path_filtered_reads) as f:
         except ValueError:
             break
         if read_chrom == last_chrom: break
+        if read_chrom != prev_chrom:
+            current_idx_overlap = 0
+            prev_chrom = read_chrom
         start, end = int(junction[1]), int(junction[2])
         read_count = int(line[1][:-1])
-        # if chromosome changes, update loaded sequence until chromosome 22 reached
-        if read_chrom > loaded_chrom:
-            loaded_chrom += 1
-            current_idx_overlap = 0
-            chrom_seq = load_chrom_seq(loaded_chrom)
-
-        # extract sequence around start
-            # however, not extremly big priorities as it essentially just some data pollution
-        # q: does it work to just remove the first and last exon boundary found for each chromosome?
-            # a: no, because that doesn't solve the problems for genes
 
         """ Filtering """
         # a minimal length of 25nt for the exons and a length of 80nt for the neighboring introns are
         # required as exons/introns shorter than 25nt/80nt are usually caused by sequencing errors and
         # they represent less than 1% of the exon and intron length distributions
         # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6722613/
-        genes, updated_idx = map_from_position_to_genes(loaded_chrom, start, end, current_idx_overlap)
+        genes, updated_idx = map_from_position_to_genes(read_chrom, start, end, current_idx_overlap)
         if not genes: homeless_junctions += 1
         current_idx_overlap = updated_idx
         in_highly_expressed_gene = contains_highly_expressed_gene(genes)
@@ -188,117 +183,77 @@ with open(path_filtered_reads) as f:
             not_highly_expressed += 1
             continue
 
-
         if end - start < 80:
             too_short_intron += 1
             continue
 
-        # make sure there are at least 'introns_bef_start' intron nts between exon junctions
-        # q: do i even want to do this? how do i do this?
-
-
-        # make sure that very first exon in chromosome doesn't contain N nt input
-        # make sure that very last exon in chromosome doesn't contain N nt input
         if i == 0 or i == len(junction_reads_file)-1:
             print('----------------------------------------------------------------------')
             continue
-
-        add_junction_reads_to_DSC_exon_counts(loaded_chrom, start, end, read_count)
-
-        # if start - introns_bef_start < prev_end:
-        #     continue
-
-        # remove first exon in gene
-
-        # gene_start = 0
-        # gene_end = 1e10
-        # remove last exon in gene
-        # if end + introns_after_end > gene_end:
-        #     continue
-        # todo: probably want to make sure that i dont have junctions where distance between
-        # them is smaller than flanking sequence i extract
-
-        """ Extraction of the sequence """
-        # start gives start of canonical nts -> -1
-        # end gives end of canonical nts -> -2
-        # window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
-        # window_around_end = chrom_seq[end-exons_bef_end-2:end+introns_after_end-2]
-        #
-        # # almost always GT, but also many gc
-        # # print(chrom_seq[start-1:start+1])
-        # # almost always AG or AC
-        # # print(chrom_seq[end - 2:end + 0])
-        #
-        # """ Estimation of the PSI value """
-        # # PSI = pos / (pos + neg)
-        # pos = read_count
-        # # neg == it overlaps with the junction in any way:
-        #
-        # # check all junctions above until end2 < start
-        # # good idea, but doesn't work because you can have
-        # # 1 -> 10
-        # # 2 -> 3
-        # # 4 -> 5
-        # # -> changing to look at 10 rows above (as heuristic)
-        # neg = 0
-        # for idx_above in range(i-1, i-10, -1):
-        #     if idx_above <= 0: break
-        #     # [0] because it's in a one element list iirc
-        #     line2 = junction_reads_file[idx_above][0]
-        #     line2 = line2.split(',')
-        #     junction2 = line2[0].split('_')
-        #     start2, end2 = int(junction2[1]), int(junction2[2])
-        #     if end2 >= start:
-        #         neg += int(line2[1])
-        #
-        # # check all junctions below until start2 > end
-        # for idx_below in range(i+1, i+10):
-        #     if idx_below >= len(junction_reads_file): break
-        #     line2 = junction_reads_file[idx_below][0]
-        #     line2 = line2.split(',')
-        #     junction2 = line2[0].split('_')
-        #     start2, end2 = int(junction2[1]), int(junction2[2])
-        #     if end >= start2:
-        #         neg += int(line2[1])
-        #
-        # if pos + neg == 0: psi = 0
-        # else: psi = pos / (pos + neg)
-        # l1_lens.append(end-start)
-        # psis_dsc.append(constit_level)
-        # psis_gtex.append(psi)
-        # seqs_psis[line[0]] = (window_around_start, window_around_end, psi)
+        """Accumulating"""
+        add_junction_reads_to_DSC_exon_counts(read_chrom, start, end, read_count)
 
 no_junction = 0
-exons = []
-is_classification = True
-classification_treshold = 0.95
+psis_gtex, psis_dsc = [], []
+
 """Going through exons after all junction reads have been accounted for"""
-for pos, neg, (chrom, strand, start, end, count, skip, constit_level, l1, l2, l3) in DSC_cons_counts:
-    if pos == 0 and neg == 0:
-        no_junction += 1
-        continue
-    psi = pos / (pos + neg)
-    label = float(psi >= classification_treshold) if is_classification else psi
-    window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
-    window_around_end = chrom_seq[end-exons_bef_end-2:end+introns_after_end-2]
-    if strand == '-':
-        window_around_start = reverse_complement(window_around_start)
-        window_around_end = reverse_complement(window_around_end)
-    start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
-    dummy_vector = [0] * len(start)
-    dummy_vector[:4] = l1, l2, l3, label
-    exons.append([start, end, dummy_vector])
+def encoding_and_sequence_extraction(DSC_counts):
+    cons_exons, high_psi_exons, low_psi_exons = [], [], []
+    loaded_chrom = 1
+    chrom_seq = load_chrom_seq(loaded_chrom)
+    no_junction = 0
+    for pos, neg, (read_chrom, strand, start, end, count, skip, constit_level, l1, l2, l3) in DSC_counts:
+        if pos == 0 and neg == 0:
+            no_junction += 1
+            continue
+        if read_chrom > loaded_chrom:
+            loaded_chrom += 1
+            chrom_seq = load_chrom_seq(loaded_chrom)
 
-exons = np.array(exons)
+        psi = pos / (pos + neg)
+        psis_gtex.append(psi); psis_dsc.append(constit_level)
+
+        window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
+        window_around_end = chrom_seq[end-exons_bef_end-2:end+introns_after_end-2]
+        if strand == '-':
+            window_around_start = reverse_complement(window_around_start)
+            window_around_end = reverse_complement(window_around_end)
+        start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
+        dummy_vector = [0] * len(start)
+        dummy_vector[:4] = l1, l2, l3, psi
+        if psi < 0.8:
+            low_psi_exons.append([start, end, dummy_vector])
+        elif psi < 1:
+            high_psi_exons.append([start, end, dummy_vector])
+        else:
+            cons_exons.append([start, end, dummy_vector])
+
+    print(f'Skipped DSC exons because no junctions contributed any reads: {no_junction}')
+    low_psi_exons = np.array(low_psi_exons)
+    low_psi_exons[:, 2, :] = low_psi_exons[:, 2, :].astype(np.float32)
+    high_psi_exons = np.array(high_psi_exons)
+    high_psi_exons[:, 2, :] = high_psi_exons[:, 2, :].astype(np.float32)
+    cons_exons = np.array(cons_exons)
+    cons_exons[:, 2, :] = cons_exons[:, 2, :].astype(np.float32)
+
+    return low_psi_exons, high_psi_exons, cons_exons
+
+low_cons_exons, high_cons_exons, cons_cons_exons = encoding_and_sequence_extraction(DSC_cons_counts)
+low_cass_exons, high_cass_exons, cons_cass_exons = encoding_and_sequence_extraction(DSC_cons_counts)
+
+low_exons = np.concatenate((low_cons_exons, low_cass_exons))
+high_exons = np.concatenate((high_cons_exons, high_cass_exons))
+cons_exons = np.concatenate((cons_cons_exons, cons_cass_exons))
+
+print(f'Number of low PSI exons: {len(low_exons)}')
+print(f'Number of high PSI exons: {len(high_exons)}')
+print(f'Number of cons exons: {len(cons_exons)}')
+print(f'Total number of exons: {len(low_exons) + len(high_exons) + len(cons_exons)}')
 # pytorch loss expects float with 32 bits, otherwise we will have label with 64 bits
-exons[:, 2, 4] = exons[:, 2, 4].astype(np.float32)
 
-np.save(f'{data_path}/{save_to}')
-print(f'Number of too short introns: {too_short_intron}')
-print(f'Number of skipped homeless junctions: {homeless_junctions} ')
-print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
-print(f'Number of skipped non-dsc junctions: {non_dsc_junction}')
-print(f'Number of junctions after filtering: {len(seqs_psis)}')
+np.save(f'{data_path}/{save_to_low}', low_exons)
+np.save(f'{data_path}/{save_to_high}', high_exons)
+np.save(f'{data_path}/{save_to_cons}', cons_exons)
 
 # chrom 1 to 10:
 # 9023.466260727668
@@ -307,10 +262,6 @@ print(f'Number of junctions after filtering: {len(seqs_psis)}')
 # chrom 1 to 22:
 # 7853.118899261425
 # 23917.691461462917
-
-l1_lens = np.array(l1_lens)
-avg_len = np.mean(l1_lens)
-std_len = np.std(l1_lens)
 
 psis_dsc, psis_gtex = np.array(psis_dsc), np.array(psis_gtex)
 print('----------------------------------')
@@ -321,13 +272,7 @@ print(f'Median PSI value from GTEx dataset: {np.median(psis_gtex)}')
 print(f'Correlation between DSC and GTEx PSI values: {np.corrcoef(psis_dsc, psis_gtex)[0,1]}')
 print(f'Average absolute differenec between DSC and GTEx PSI values: {np.mean(np.abs(psis_dsc-psis_gtex))}')
 print('---------------------------------')
-print(f'Average length of l1: {avg_len}')
-print(f'Standard deviation of l1: {std_len}')
 
-with open(f'{data_path}/{save_to}', 'w') as f:
-    print('Beginning to write estimated PSIs and extracted sequences')
-    for junction, (start_seq, end_seq, psi) in seqs_psis.items():
-        f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
 
 print('Processing finished')
 endt = timer()

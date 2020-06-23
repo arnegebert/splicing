@@ -8,7 +8,7 @@ startt = timer()
 data_path = '../../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
 save_to = 'dsc_reconstruction_junction/brain_cortex_full.csv'
-last_chrom = 22
+last_chrom = 23
 
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
@@ -89,7 +89,7 @@ def load_DSC_exons():
         reader_cons = csv.reader(f, delimiter='\t')
         cons = list(reader_cons)
         cons_divided = {}
-        for chrom, strand, start, end, count, skip, constit_level in cons:
+        for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in cons:
             chrom, start, end, count, skip, constit_level = int(chrom[3:]), int(start), int(end), int(count),\
                                                             int(skip), float(constit_level)
             if chrom not in cons_divided:
@@ -99,7 +99,7 @@ def load_DSC_exons():
         reader_cass = csv.reader(f, delimiter='\t')
         cass = list(reader_cass)
         cass_divided = {}
-        for chrom, strand, start, end, count, skip, constit_level in cass:
+        for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in cass:
             chrom, start, end, count, skip, constit_level = int(chrom[3:]), int(start), int(end), int(count),\
                                                             int(skip), float(constit_level)
             if chrom not in cass_divided:

@@ -8,7 +8,7 @@ startt = timer()
 data_path = '../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
 save_to = 'gtex_processed/brain_cortex_full.csv'
-last_chrom = 22
+last_chrom = 23
 
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons

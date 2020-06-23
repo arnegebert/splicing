@@ -7,7 +7,7 @@ filtered = []
 data_path = '../../data'
 src = 'hexevent/all_cassette_exons.txt'
 target = 'hexevent/low_cassette_filtered.csv'
-last_chrom = 22
+last_chrom = 23
 
 def load_chrom_seq(chrom):
     with open(f'{data_path}/chromosomes/chr{chrom}.fa') as f:

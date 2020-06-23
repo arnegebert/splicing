@@ -69,9 +69,9 @@ def get_used_exons(decoded, original):
     used_exons = []
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
-    hashs = set()
-    for seq in decoded[:, 0]:
-        hashs.add(seq)
+    hasht = dict()
+    for i, seq in enumerate(decoded[:, 0]):
+        hasht[seq] = i
 
     print('Start of iteration through lines')
     for i, line in enumerate(original):
@@ -95,7 +95,7 @@ def get_used_exons(decoded, original):
         window_around_end = chrom_seq[end - exons_bef_end:end + introns_after_end].upper()
         if strand == '+':
             pos += 1
-            in_there = window_around_start in hashs
+            in_there = window_around_start in hasht
         if strand == '-':
             continue
             neg += 1
@@ -111,7 +111,9 @@ def get_used_exons(decoded, original):
             # before 62, also matches sequence before
             # therefore, extracting moved by 62 nts + reversed + reverse complemented????
         if in_there: # +: 20286, -: 42079
-            used_exons.append((chrom, strand, start, end, count, skip, constit_level))
+            decoded_idx = hasht[window_around_start]
+            l1, l2, l3 = decoded[decoded_idx, 2:5]
+            used_exons.append((chrom, strand, start, end, count, skip, constit_level, l1, l2, l3))
             print(i)
             # print(f'Offset index: {decoded[[cpy in seq for seq in decoded[:, 0]].index(True),0].find(cpy)}')
     return used_exons
@@ -128,17 +130,18 @@ used_cons_exons = get_used_exons(decoded_cons, original_cons)
 print(f'Found {len(used_cons_exons)} matching constitutive exons')
 print(f'Wanted to find {len(decoded_cons)} constitutive exons')
 with open('../data/dsc_reconstruction_junction/cons_exons.csv', 'w') as f:
-    for chrom, strand, start, end, count, skip, constit_level in used_cons_exons:
-        f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\n')
+    for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in used_cons_exons:
+        f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\t{l1}\t{l2}\t{l3}\n')
 
 
 print('Starting processing cass exons')
 used_cass_exons = get_used_exons(decoded_cas, original_cass)
-print(f'Found {len(used_cass_exons)} matching cassette exons')
-print(f'Wanted to find {len(decoded_cas)} cassette exons')
-with open('../data/dsc_reconstruction_junction/cass_exons.csv', 'w') as f:
-    for chrom, strand, start, end, count, skip, constit_level in used_cass_exons:
-        f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\n')
 
+with open('../data/dsc_reconstruction_junction/cass_exons.csv', 'w') as f:
+    for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in used_cass_exons:
+        f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\t{l1}\t{l2}\t{l3}\n')
+
+print(f'Found {len(used_cons_exons)} matching constitutive exons')
+print(f'Wanted to find {len(decoded_cons)} constitutive exons')
 endt = time.time()
 print(f'Time to process data: {endt-startt}')
