@@ -1,9 +1,9 @@
 import csv
 import numpy as np
 
-path_annotation = '../data/gtex_origin/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
+path_annotation = '../../data/gtex_origin/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
 # path_srcs = '../data/GTEx_Analysis_2017-06-05_v8_STARv2.5.3a_junctions.gct'
-path_srcs = '../data/gtex_origin/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
+path_srcs = '../../data/gtex_origin/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
 # path_srcs = '../data/gtex/GTEx_Analysis_2017-06-05_v8_RSEMv1.3.0_transcript_tpm.gct'
 
 include_version = False
@@ -38,6 +38,7 @@ print(f'{len(filtered_sample_names)} samples after getting those with brain cort
 # have to work with that very large python text file as a result
 sample_idxs = []
 data = {}
+treshold_tpm = 10
 with open(path_srcs) as f:
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
@@ -61,7 +62,7 @@ with open(path_srcs) as f:
                 version_idx = gene.index('.')
                 gene = gene[:version_idx]
             tpm = float(line[sample_idxs[164]])
-            if tpm >= 10:
+            if tpm >= treshold_tpm:
                 data[gene] = tpm
 # data = junctions -> sample reads
 
@@ -73,7 +74,7 @@ with open(path_srcs) as f:
 # at first, junction : list of reads might not be bad
 # later i will need to extract the information from the junctions either way
 print(f'{len(data)} values after filtering')
-with open('../data/gtex_processed/brain_cortex_tpm_one_sample.csv', 'w') as f:
+with open('../../data/gtex_processed/brain_cortex_tpm_one_sample.csv', 'w') as f:
     print('Beginning to write gene TPMs')
     for gene, reads in data.items():
         f.write(f'{gene},{reads}\n')

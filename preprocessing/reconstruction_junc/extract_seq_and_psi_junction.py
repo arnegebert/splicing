@@ -110,19 +110,42 @@ def load_DSC_exons():
 DSC_cons, DSC_cass = load_DSC_exons()
 print('Loaded DSC exons')
 
+# -1, otherwise no junction start / exon end matches
 def find_DSC_exon_belonging_to_junction(chrom, junc_start, junc_end):
     cons, cass = DSC_cons[chrom], DSC_cass[chrom]
     for strand, exon_start, exon_end, count, skip, constit_level in cons:
-        if (junc_start == exon_end or junc_end == exon_start):
+        if (junc_start-1 == exon_end or junc_end == exon_start):
             return (chrom, strand, exon_start, exon_end, count, skip, constit_level)
 
     for strand, exon_start, exon_end, count, skip, constit_level in cass:
-        if (junc_start == exon_end or junc_end == exon_start):
+        if (junc_start-1 == exon_end or junc_end == exon_start):
             return (chrom, strand, exon_start, exon_end, count, skip, constit_level)
     raise ValueError('No matching exon for junction in DSC data')
 
+# no junction start / exon end ever
 def find_DSC_exon_belonging_to_junction2(chrom, junc_start, junc_end):
-    pass
+    cons, cass = DSC_cons[chrom], DSC_cass[chrom]
+    for strand, exon_start, exon_end, count, skip, constit_level in cons:
+        if (junc_start-1 == exon_end):
+            print('cons junction start / exon end match')
+            return (chrom, strand, exon_start, exon_end, count, skip, constit_level)
+
+    for strand, exon_start, exon_end, count, skip, constit_level in cons:
+        if (junc_end == exon_start):
+            print('cons junction end / exon start match')
+            return (chrom, strand, exon_start, exon_end, count, skip, constit_level)
+
+    for strand, exon_start, exon_end, count, skip, constit_level in cass:
+        if (junc_end == exon_start):
+            print('cass junction end / exon start match')
+
+            return (chrom, strand, exon_start, exon_end, count, skip, constit_level)
+    for strand, exon_start, exon_end, count, skip, constit_level in cass:
+        if (junc_start-1 == exon_end):
+            print('cass junction start / exon end match')
+            return (chrom, strand, exon_start, exon_end, count, skip, constit_level)
+    raise ValueError('No matching exon for junction in DSC data')
+
 
 seqs_psis = {}
 l1_lens = []
