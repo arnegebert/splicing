@@ -51,12 +51,6 @@ class DSC_D2V_DataTrainer(BaseTrainer):
         self.train_metrics.reset()
 
         for batch_idx, data in enumerate(self.data_loader):
-
-            # start, end = split_into_3_mers(start), split_into_3_mers(end)
-            # start_d2v = self.embedding_model.infer_vector(start)
-            # end_d2v = self.embedding_model.infer_vector(end)
-
-            # print('mald')
             feats_d2v = data[:, :2].view(-1, 200)
             lens, target = data[:, 2, :3], data[:, 2, 3]
             feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)

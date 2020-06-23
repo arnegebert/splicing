@@ -134,7 +134,7 @@ class DSC(BaseModel):
         self.fc2 = nn.Linear(64, 1)
 
     def forward(self, seqs, lens):
-        # [128, 142, 4] or [128, 140, 4]
+        # [128, 2, 142, 4] or [128, 2, 140, 4]
         start, end = seqs[:, 0], seqs[:, 1]
         if start.shape[1] == 140:
             start, end = start.view(-1, 4, 140), end.view(-1, 4, 140)
@@ -214,7 +214,6 @@ class GTEx_DSC(BaseModel):
         feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
         y = self.drop_fc(F.relu(self.fc1(feats)))
         y = torch.sigmoid(self.fc2(y))
-
         return y
 
 class DSCKiller(BaseModel):

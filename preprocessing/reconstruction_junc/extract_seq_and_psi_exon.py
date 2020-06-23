@@ -8,9 +8,9 @@ from utils import reverse_complement, one_hot_encode_seq
 startt = timer()
 data_path = '../../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
-save_to_low = 'dsc_reconstruction_exon/brain_cortex_full_low.npy'
-save_to_high = 'dsc_reconstruction_exon/brain_cortex_full_high.npy'
-save_to_cons = 'dsc_reconstruction_exon/brain_cortex_full_cass.npy'
+save_to_low = 'dsc_reconstruction_exon/brain_cortex_low.npy'
+save_to_high = 'dsc_reconstruction_exon/brain_cortex_high.npy'
+save_to_cons = 'dsc_reconstruction_exon/brain_cortex_cons.npy'
 last_chrom = 23
 
 introns_bef_start = 70 # introns
@@ -223,9 +223,10 @@ def encoding_and_sequence_extraction(DSC_counts):
             window_around_end = reverse_complement(window_around_end)
         start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
         start, end = np.array(start), np.array(end)
-        lens_and_psi_vector = np.array([l1, l2, l3, psi]).astype(np.float32)
+        lens_and_psi_vector = np.array([l1, l2, l3, psi])
+        # lens_and_psi_vector[3] = lens_and_psi_vector[3].astype(np.float32)
         start_and_end = np.concatenate((start, end))
-        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4)))
+        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
         if psi < 0.8:
             low_psi_exons.append(sample)
         elif psi < 1:

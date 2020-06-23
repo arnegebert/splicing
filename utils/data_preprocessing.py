@@ -27,3 +27,19 @@ def one_hot_encode_seq(seq):
     for nt in seq:
         encoding.append(one_hot_encode(nt))
     return encoding
+
+def one_hot_decode(nt):
+    if (nt == [1.0, 0, 0, 0]).all():
+        return 'A'
+    elif (nt == [0, 1.0, 0, 0]).all():
+        return 'C'
+    elif (nt == [0, 0, 1.0, 0]).all():
+        return 'G'
+    elif (nt == [0, 0, 0, 1.0]).all():
+        return 'T'
+
+def one_hot_decode_seq_vanilla(seq):
+    to_return = []
+    for encoding in seq:
+        to_return.append(one_hot_decode(encoding))
+    return to_return
