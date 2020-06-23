@@ -118,10 +118,12 @@ def overlap(start, end, start2, end2):
 
 def initialize_DSC_exon_counts(DSC_cons, DSC_cass):
     cons_counts, cass_counts = dict(), dict()
-    for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in DSC_cons.values():
-        cons_counts[(start, end)] = [0, 0, (chrom, strand, start, end, count, skip, constit_level, l1, l2, l3)]
-    for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in DSC_cass.values():
-        cass_counts[(start, end)] = [0, 0, (chrom, strand, start, end, count, skip, constit_level, l1, l2, l3)]
+    for chrom_bucket in DSC_cons.values():
+        for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in chrom_bucket:
+            cons_counts[(start, end)] = [0, 0, (chrom, strand, start, end, count, skip, constit_level, l1, l2, l3)]
+    for chrom_bucket in DSC_cass.values():
+        for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in chrom_bucket:
+            cass_counts[(start, end)] = [0, 0, (chrom, strand, start, end, count, skip, constit_level, l1, l2, l3)]
     return cons_counts, cass_counts
 
 DSC_cons_counts, DSC_cass_counts = initialize_DSC_exon_counts(DSC_cons, DSC_cass)
@@ -129,18 +131,17 @@ DSC_cons_counts, DSC_cass_counts = initialize_DSC_exon_counts(DSC_cons, DSC_cass
 # -1, otherwise no junction start / exon end matches
 def add_junction_reads_to_DSC_exon_counts(chrom, junc_start, junc_end, reads):
     cons, cass = DSC_cons[chrom], DSC_cass[chrom]
-    for exon_chr, strand, exon_start, exon_end, count, skip, constit_level in cons:
+    for exon_chr, strand, exon_start, exon_end, count, skip, constit_level, l1, l2, l3 in cons:
         if junc_start-1 == exon_end or junc_end == exon_start:
             DSC_cons_counts[(exon_start, exon_end)][0] += reads
         elif overlap(exon_start, exon_end, junc_start-1, junc_end):
             DSC_cons_counts[(exon_start, exon_end)][1] += reads
 
-    for exon_chr, strand, exon_start, exon_end, count, skip, constit_level in cass:
-        if junc_start-1 == exon_end or junc_end == exon_start:
-            if junc_start - 1 == exon_end or junc_end == exon_start:
-                DSC_cass_counts[(exon_start, exon_end)][0] += reads
-            elif overlap(exon_start, exon_end, junc_start-1, junc_end):
-                DSC_cass_counts[(exon_start, exon_end)][1] += reads
+    for exon_chr, strand, exon_start, exon_end, count, skip, constit_level, l1, l2, l3 in cass:
+        if junc_start - 1 == exon_end or junc_end == exon_start:
+            DSC_cass_counts[(exon_start, exon_end)][0] += reads
+        elif overlap(exon_start, exon_end, junc_start-1, junc_end):
+            DSC_cass_counts[(exon_start, exon_end)][1] += reads
 
 seqs_psis = {}
 l1_lens = []
@@ -192,7 +193,9 @@ with open(path_filtered_reads) as f:
             continue
         """Accumulating"""
         add_junction_reads_to_DSC_exon_counts(read_chrom, start, end, read_count)
+        # if i > 5000: break
 
+print(f'Took {timer()-startt:.2f} s to go through all junctions and accumulate their reads')
 no_junction = 0
 psis_gtex, psis_dsc = [], []
 
@@ -202,7 +205,7 @@ def encoding_and_sequence_extraction(DSC_counts):
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
     no_junction = 0
-    for pos, neg, (read_chrom, strand, start, end, count, skip, constit_level, l1, l2, l3) in DSC_counts:
+    for pos, neg, (read_chrom, strand, start, end, count, skip, constit_level, l1, l2, l3) in DSC_counts.values():
         if pos == 0 and neg == 0:
             no_junction += 1
             continue
@@ -219,31 +222,35 @@ def encoding_and_sequence_extraction(DSC_counts):
             window_around_start = reverse_complement(window_around_start)
             window_around_end = reverse_complement(window_around_end)
         start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
-        dummy_vector = [0] * len(start)
-        dummy_vector[:4] = l1, l2, l3, psi
+        start, end = np.array(start), np.array(end)
+        lens_and_psi_vector = np.array([l1, l2, l3, psi]).astype(np.float32)
+        start_and_end = np.concatenate((start, end))
+        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4)))
         if psi < 0.8:
-            low_psi_exons.append([start, end, dummy_vector])
+            low_psi_exons.append(sample)
         elif psi < 1:
-            high_psi_exons.append([start, end, dummy_vector])
+            high_psi_exons.append(sample)
         else:
-            cons_exons.append([start, end, dummy_vector])
+            cons_exons.append(sample)
 
     print(f'Skipped DSC exons because no junctions contributed any reads: {no_junction}')
     low_psi_exons = np.array(low_psi_exons)
-    low_psi_exons[:, 2, :] = low_psi_exons[:, 2, :].astype(np.float32)
+    # low_psi_exons[:, 2, :] = low_psi_exons[:, 2, :].astype(np.float32)
     high_psi_exons = np.array(high_psi_exons)
-    high_psi_exons[:, 2, :] = high_psi_exons[:, 2, :].astype(np.float32)
+    # high_psi_exons[:, 2, :] = high_psi_exons[:, 2, :].astype(np.float32)
     cons_exons = np.array(cons_exons)
-    cons_exons[:, 2, :] = cons_exons[:, 2, :].astype(np.float32)
+    # cons_exons[:, 2, :] = cons_exons[:, 2, :].astype(np.float32)
 
     return low_psi_exons, high_psi_exons, cons_exons
 
 low_cons_exons, high_cons_exons, cons_cons_exons = encoding_and_sequence_extraction(DSC_cons_counts)
-low_cass_exons, high_cass_exons, cons_cass_exons = encoding_and_sequence_extraction(DSC_cons_counts)
+low_cass_exons, high_cass_exons, cons_cass_exons = encoding_and_sequence_extraction(DSC_cass_counts)
 
 low_exons = np.concatenate((low_cons_exons, low_cass_exons))
 high_exons = np.concatenate((high_cons_exons, high_cass_exons))
 cons_exons = np.concatenate((cons_cons_exons, cons_cass_exons))
+
+print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
 
 print(f'Number of low PSI exons: {len(low_exons)}')
 print(f'Number of high PSI exons: {len(high_exons)}')
@@ -270,7 +277,7 @@ print(f'Average PSI value from GTEx dataset: {np.mean(psis_gtex)}')
 print(f'Median PSI value from DSC dataset: {np.median(psis_dsc)}')
 print(f'Median PSI value from GTEx dataset: {np.median(psis_gtex)}')
 print(f'Correlation between DSC and GTEx PSI values: {np.corrcoef(psis_dsc, psis_gtex)[0,1]}')
-print(f'Average absolute differenec between DSC and GTEx PSI values: {np.mean(np.abs(psis_dsc-psis_gtex))}')
+print(f'Average absolute difference between DSC and GTEx PSI values: {np.mean(np.abs(psis_dsc-psis_gtex))}')
 print('---------------------------------')
 
 
