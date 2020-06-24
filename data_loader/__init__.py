@@ -5,3 +5,4 @@ from .DSC_EmbeddedDataLoader import *
 from .NaivePSIDataLoader import *
 from .MNISTDataLoader import *
 from .ReconExon_DataLoader import *
+from .ReconExon_EmbeddedDataLoader import *

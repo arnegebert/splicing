@@ -44,6 +44,7 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
             train = np.concatenate((train, x_cons_data[a * (s + 1):]), axis=0)
 
             d = int((9 * a) / (9 * (b + c)))
+            d = max(1, d)
             #print(d)
             classification_task = False
             # todo change back

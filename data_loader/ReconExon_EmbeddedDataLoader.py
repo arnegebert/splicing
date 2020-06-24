@@ -8,8 +8,9 @@ import pickle
 import torch
 import random
 import numpy as np
+import csv
 
-class DSCDataLoader(BaseDataLoader):
+class ReconExon_EmbeddedDataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
@@ -21,13 +22,18 @@ class DSCDataLoader(BaseDataLoader):
         cons, low, high = [], [], []
         data_type = 'cass'
         if True:
-            x_cons_data = np.load('data/hexevent/x_cons_data.npy')
-            hx_cas_data = np.load('data/hexevent/x_cas_data_high.npy')
-            lx_cas_data = np.load('data/hexevent/x_cas_data_low.npy')
-            # cons = extract_values_from_dsc_np_format(x_cons_data)
-            # low = extract_values_from_dsc_np_format(hx_cas_data)
-            # high = extract_values_from_dsc_np_format(lx_cas_data)
-            x_cons_data[:,-1,4] = 1
+            x_cons_data = np.load('data/dsc_reconstruction_exon/embedded_brain_cortex_cons.npy')
+            hx_cas_data = np.load('data/dsc_reconstruction_exon/embedded_brain_cortex_high.npy')
+            lx_cas_data = np.load('data/dsc_reconstruction_exon/embedded_brain_cortex_low.npy')
+
+            # x_cons_data = x_cons_data[:10]
+            # hx_cas_data = hx_cas_data[:10]
+            # lx_cas_data = lx_cas_data[:10]
+
+            # a = int(len(x_cons_data) / 10)
+            # b = int(len(hx_cas_data) / 10)
+            # c = int(len(lx_cas_data) / 10)
+
             a = int(x_cons_data.shape[0] / 10)
             b = int(hx_cas_data.shape[0] / 10)
             c = int(lx_cas_data.shape[0] / 10)
@@ -39,8 +45,9 @@ class DSCDataLoader(BaseDataLoader):
 
             d = int((9 * a) / (9 * (b + c)))
             d = max(1, d)
-            print(d)
+            #print(d)
             classification_task = False
+            # todo change back
             for i in range(d): #range(1)
                 train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)
                 train = np.concatenate((train, hx_cas_data[b * (s + 1):]), axis=0)
@@ -63,14 +70,21 @@ class DSCDataLoader(BaseDataLoader):
             cas_test = np.concatenate((lx_cas_data[c * s:c * (s + 1)], hx_cas_data[b * s:b * (s + 1)]))
 
 
-            train = extract_values_from_dsc_np_format(train)
+            train = torch.tensor(train)
             # cons + low + high
-            val_all = extract_values_from_dsc_np_format(test)
+            val_all = torch.tensor(test)
             # cons + low
-            val_low = extract_values_from_dsc_np_format(lt)
+            val_low = torch.tensor(lt)
             # cons + high
-            val_high = extract_values_from_dsc_np_format(htest)
+            val_high = torch.tensor(htest)
 
+            # train = train
+            # # cons + low + high
+            # val_all = test
+            # # cons + low
+            # val_low = lt
+            # # cons + high
+            # val_high = htest
             # return train, test, htest, lt, cons_test, cas_test
 
         else:
@@ -138,21 +152,24 @@ class DSCDataLoader(BaseDataLoader):
         # self.dataset = TensorDataset(*samples)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
 
-def one_hot_encode(nt):
-    if nt == 'A' or nt == 'a':
-        return [1.0, 0, 0, 0]
-    elif nt == 'C' or nt == 'c':
-        return [0, 1.0, 0, 0]
-    elif nt == 'G' or nt == 'g':
-        return [0, 0, 1.0, 0]
-    elif nt == 'T' or nt == 't':
-        return [0, 0, 0, 1.0]
+def one_hot_decode(nt):
+    if (nt == [1.0, 0, 0, 0]).all():
+        return 'A'
+    elif (nt == [0, 1.0, 0, 0]).all():
+        return 'C'
+    elif (nt == [0, 0, 1.0, 0]).all():
+        return 'G'
+    elif (nt == [0, 0, 0, 1.0]).all():
+        return 'T'
+    else: raise Exception('Unknown encoding. Decoding failed. ')
 
-def encode_seq(seq):
-    encoding = []
-    for nt in seq:
-        encoding.append(one_hot_encode(nt))
-    return encoding
+def decode_batch_of_seqs(batch):
+    to_return = []
+    for seq in batch:
+        for encoding in seq:
+            to_return.append(one_hot_decode(encoding))
+    return to_return
+
 
 # Constant values taken in reference from
 # https://github.com/louadi/DSC/blob/master/training%20notebooks/cons_vs_es.ipynb
@@ -162,23 +179,26 @@ def extract_values_from_dsc_np_format(array):
     class_task = True
     if class_task:
         # classification
-        label = array[:lifehack, 140, 0]
+        labels = array[:lifehack, 140, 0]
     else:
         # psi value
-        label = array[:lifehack, -1, 4]
+        labels = array[:lifehack, -1, 4]
+
     start_seq, end_seq = array[:lifehack, :140, :4], array[:lifehack, 141:281, :4]
+    start_seq, end_seq = decode_batch_of_seqs(start_seq), decode_batch_of_seqs(end_seq)
     lens = array[:lifehack, -1, 0:3]
     to_return = []
     # could feed my network data with 280 + 3 + 1 dimensions
-    for s, e, l, p in zip(start_seq, end_seq, lens, label):
-        to_return.append((T((s, e)).float(), T(l).float(), T(p).float()))
+    for start, end, len, label in zip(start_seq, end_seq, lens, labels):
+        to_return.append(((start, end), T(len).float(), T(label).float()))
     return to_return
 
 class DSCDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
 
     def __init__(self, samples):
-        # random.seed(0)
+        random.seed(0)
+        # woooow, pretty proud of myself for figuring this out :>
         # random.shuffle(samples)
         self.samples = samples
 
@@ -188,36 +208,3 @@ class DSCDataset(Dataset):
     def __getitem__(self, idx):
         return self.samples[idx]
 
-
-def prepare_data():
-    start = time.time()
-    print(f'starting loading of data')
-    samples = []
-    con, cass = [], []
-    with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
-        for i, l in enumerate(f):
-            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-            lens = T((l1, l2, l3))
-            psi = T(psi)
-            sample = (seqs, lens, psi)
-            con.append(sample)
-
-    with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
-        for i, l in enumerate(f):
-            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-            lens = T((l1, l2, l3))
-            psi = T(psi)
-            sample = (seqs, lens, psi)
-            cass.append(sample)
-
-    ratio = int(len(con) / len(cass))
-    for _ in range(ratio):
-        samples.extend(cass)
-
-    end = time.time()
-    print('total time to load data: {} secs'.format(end - start))
-    return samples

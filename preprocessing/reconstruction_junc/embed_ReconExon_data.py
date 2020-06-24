@@ -26,7 +26,7 @@ std_len = 21350.371079742523
 
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
 classification_task = True
-constitutive_level = 1.00
+constitutive_level = 0.99
 
 def batch_split_into_3_mers(batch):
     to_return = []
@@ -43,18 +43,22 @@ def split_into_3_mers(sentence):
         words.append(sentence[i - 1:i + 2])
     return words
 
+print('Loading data')
 cons_exons = np.load('../../data/dsc_reconstruction_exon/brain_cortex_cons.npy')
-low_exons = np.load('../../data/dsc_reconstruction_exon/brain_cortex_cons.npy')
-high_exons = np.load('../../data/dsc_reconstruction_exon/brain_cortex_cons.npy')
-
+low_exons = np.load('../../data/dsc_reconstruction_exon/brain_cortex_low.npy')
+high_exons = np.load('../../data/dsc_reconstruction_exon/brain_cortex_high.npy')
+print('Finished loading data')
 
 def decode_reshape_and_embed(batch):
+    #batch = batch[:501]
     batch_vector = []
     batch[:, 280, 3] = (batch[:, 280, 3] >= constitutive_level)#.astype(np.float32)
 
-    for line in batch:
+    for i, line in enumerate(batch):
+        if i % 500 == 0: print(f'Processing line {i}')
         start_enc, end_enc = line[:140], line[140:280]
-        start_seq, end_seq = one_hot_decode_seq_vanilla(start_enc), one_hot_decode_seq_vanilla(end_enc)
+        start_seq, end_seq = ''.join(one_hot_decode_seq_vanilla(start_enc)), \
+                             ''.join(one_hot_decode_seq_vanilla(end_enc))
         start, end = split_into_3_mers(start_seq), split_into_3_mers(end_seq)
         start_d2v = embedding_model.infer_vector(start)
         end_d2v = embedding_model.infer_vector(end)
@@ -66,6 +70,7 @@ def decode_reshape_and_embed(batch):
     batch_vector = np.array(batch_vector).astype(np.float32)
     return batch_vector
 
+print('Beginning to decode, reshape and embed constitutive exon data')
 cons_exons = decode_reshape_and_embed(cons_exons)
 print('Cons data done')
 low_exons = decode_reshape_and_embed(low_exons)

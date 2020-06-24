@@ -136,12 +136,16 @@ def add_junction_reads_to_DSC_exon_counts(chrom, junc_start, junc_end, reads):
             DSC_cons_counts[(exon_start, exon_end)][0] += reads
         elif overlap(exon_start, exon_end, junc_start-1, junc_end):
             DSC_cons_counts[(exon_start, exon_end)][1] += reads
+        elif junc_end < exon_start:
+            break
 
     for exon_chr, strand, exon_start, exon_end, count, skip, constit_level, l1, l2, l3 in cass:
         if junc_start - 1 == exon_end or junc_end == exon_start:
             DSC_cass_counts[(exon_start, exon_end)][0] += reads
         elif overlap(exon_start, exon_end, junc_start-1, junc_end):
             DSC_cass_counts[(exon_start, exon_end)][1] += reads
+        elif junc_end < exon_start:
+            break
 
 seqs_psis = {}
 l1_lens = []
@@ -172,10 +176,6 @@ with open(path_filtered_reads) as f:
         read_count = int(line[1][:-1])
 
         """ Filtering """
-        # a minimal length of 25nt for the exons and a length of 80nt for the neighboring introns are
-        # required as exons/introns shorter than 25nt/80nt are usually caused by sequencing errors and
-        # they represent less than 1% of the exon and intron length distributions
-        # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6722613/
         genes, updated_idx = map_from_position_to_genes(read_chrom, start, end, current_idx_overlap)
         if not genes: homeless_junctions += 1
         current_idx_overlap = updated_idx
@@ -184,7 +184,7 @@ with open(path_filtered_reads) as f:
             not_highly_expressed += 1
             continue
 
-        if end - start < 80:
+        if end - start < 25:
             too_short_intron += 1
             continue
 
@@ -206,11 +206,12 @@ def encoding_and_sequence_extraction(DSC_counts):
     chrom_seq = load_chrom_seq(loaded_chrom)
     no_junction = 0
     for pos, neg, (read_chrom, strand, start, end, count, skip, constit_level, l1, l2, l3) in DSC_counts.values():
-        if pos == 0 and neg == 0:
+        if pos + neg < 4:
             no_junction += 1
             continue
         if read_chrom > loaded_chrom:
             loaded_chrom += 1
+            print(f'Loading chromosome {loaded_chrom} (read {read_chrom})')
             chrom_seq = load_chrom_seq(loaded_chrom)
 
         psi = pos / (pos + neg)
@@ -219,13 +220,14 @@ def encoding_and_sequence_extraction(DSC_counts):
         window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
         window_around_end = chrom_seq[end-exons_bef_end-2:end+introns_after_end-2]
         if strand == '-':
+            print('here')
             window_around_start = reverse_complement(window_around_start)
             window_around_end = reverse_complement(window_around_end)
         start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
         start, end = np.array(start), np.array(end)
         lens_and_psi_vector = np.array([l1, l2, l3, psi])
-        # lens_and_psi_vector[3] = lens_and_psi_vector[3].astype(np.float32)
         start_and_end = np.concatenate((start, end))
+        # pytorch loss expects float with 32 bits, otherwise we will have inputs with 64 bits
         sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
         if psi < 0.8:
             low_psi_exons.append(sample)
@@ -235,12 +237,11 @@ def encoding_and_sequence_extraction(DSC_counts):
             cons_exons.append(sample)
 
     print(f'Skipped DSC exons because no junctions contributed any reads: {no_junction}')
+    total = len(low_psi_exons) + len(high_psi_exons) + len(cons_exons)
+    print(f'Low: {len(low_psi_exons)/total}%, high: {len(high_psi_exons)/total}%, cons: {len(cons_exons)/total}%')
     low_psi_exons = np.array(low_psi_exons)
-    # low_psi_exons[:, 2, :] = low_psi_exons[:, 2, :].astype(np.float32)
     high_psi_exons = np.array(high_psi_exons)
-    # high_psi_exons[:, 2, :] = high_psi_exons[:, 2, :].astype(np.float32)
     cons_exons = np.array(cons_exons)
-    # cons_exons[:, 2, :] = cons_exons[:, 2, :].astype(np.float32)
 
     return low_psi_exons, high_psi_exons, cons_exons
 
@@ -257,19 +258,10 @@ print(f'Number of low PSI exons: {len(low_exons)}')
 print(f'Number of high PSI exons: {len(high_exons)}')
 print(f'Number of cons exons: {len(cons_exons)}')
 print(f'Total number of exons: {len(low_exons) + len(high_exons) + len(cons_exons)}')
-# pytorch loss expects float with 32 bits, otherwise we will have label with 64 bits
 
 np.save(f'{data_path}/{save_to_low}', low_exons)
 np.save(f'{data_path}/{save_to_high}', high_exons)
 np.save(f'{data_path}/{save_to_cons}', cons_exons)
-
-# chrom 1 to 10:
-# 9023.466260727668
-# 27015.74031545284
-
-# chrom 1 to 22:
-# 7853.118899261425
-# 23917.691461462917
 
 psis_dsc, psis_gtex = np.array(psis_dsc), np.array(psis_gtex)
 print('----------------------------------')
