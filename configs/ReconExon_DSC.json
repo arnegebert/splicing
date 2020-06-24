@@ -16,7 +16,7 @@
             "validation_split": 0.1,
             "num_workers": 0,
             "classification": true,
-            "classification_treshold": 1.0
+            "classification_treshold": 0.99
         }
     },
     "optimizer": {

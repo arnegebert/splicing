@@ -4,7 +4,7 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "MLP2",
+        "type": "MLP3",
         "args": {}
     },
     "data_loader": {

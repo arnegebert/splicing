@@ -3,6 +3,7 @@ import csv
 import linecache
 from timeit import default_timer as timer
 import numpy as np
+import matplotlib.pyplot as plt
 
 startt = timer()
 data_path = '../../data'
@@ -301,8 +302,17 @@ l1_lens = np.array(l1_lens)
 avg_len = np.mean(l1_lens)
 std_len = np.std(l1_lens)
 
+
+
 psis_dsc, psis_gtex = np.array(psis_dsc), np.array(psis_gtex)
+plt.hist(psis_gtex)
+plt.title('PSI Value distribution DSC-like Junction dataset')
+plt.xlabel('PSI value')
+plt.ylabel('number of data points')
+plt.show()
+
 print('----------------------------------')
+
 print(f'Average PSI value from DSC dataset: {np.mean(psis_dsc)}')
 print(f'Average PSI value from GTEx dataset: {np.mean(psis_gtex)}')
 print(f'Median PSI value from DSC dataset: {np.median(psis_dsc)}')

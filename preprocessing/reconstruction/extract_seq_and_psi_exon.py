@@ -4,6 +4,7 @@ import linecache
 from timeit import default_timer as timer
 import numpy as np
 from utils import reverse_complement, one_hot_encode_seq
+import matplotlib.pyplot as plt
 
 startt = timer()
 data_path = '../../data'
@@ -211,7 +212,7 @@ def encoding_and_sequence_extraction(DSC_counts):
             continue
         if read_chrom > loaded_chrom:
             loaded_chrom += 1
-            print(f'Loading chromosome {loaded_chrom} (read {read_chrom})')
+            # print(f'Loading chromosome {loaded_chrom} (read {read_chrom})')
             chrom_seq = load_chrom_seq(loaded_chrom)
 
         psi = pos / (pos + neg)
@@ -264,11 +265,17 @@ np.save(f'{data_path}/{save_to_high}', high_exons)
 np.save(f'{data_path}/{save_to_cons}', cons_exons)
 
 psis_dsc, psis_gtex = np.array(psis_dsc), np.array(psis_gtex)
+plt.hist(psis_gtex)
+plt.title('PSI Value distribution DSC-like Exon dataset')
+plt.xlabel('PSI value')
+plt.ylabel('number of data points')
+plt.show()
 print('----------------------------------')
 print(f'Average PSI value from DSC dataset: {np.mean(psis_dsc)}')
 print(f'Average PSI value from GTEx dataset: {np.mean(psis_gtex)}')
 print(f'Median PSI value from DSC dataset: {np.median(psis_dsc)}')
 print(f'Median PSI value from GTEx dataset: {np.median(psis_gtex)}')
+print(f'Percentage of PSI values with >0.99 but <1: {len(psis_gtex[(0.99 < psis_gtex) & (psis_gtex< 1) ])/len(psis_gtex)}')
 print(f'Correlation between DSC and GTEx PSI values: {np.corrcoef(psis_dsc, psis_gtex)[0,1]}')
 print(f'Average absolute difference between DSC and GTEx PSI values: {np.mean(np.abs(psis_dsc-psis_gtex))}')
 print('---------------------------------')

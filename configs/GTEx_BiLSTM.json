@@ -3,7 +3,9 @@
     "n_gpu": 1,
     "arch": {
         "type": "BiLSTM2",
-        "args": {}
+        "args": {
+            "three_len_feats": true
+        }
     },
     "data_loader": {
         "type": "GTEx_DSC_DataLoader",

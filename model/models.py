@@ -302,10 +302,10 @@ class BiLSTM1(BaseModel):
 
 # ok, but 113 k parameters and doesn't amaze
 class BiLSTM2(BaseModel):
-    def __init__(self):
+    def __init__(self, three_len_feats):
         super().__init__()
-        dsc_data = False
-        if dsc_data:
+        self.three_feats = three_len_feats
+        if self.three_feats:
             self.in_dim = 140
             self.in_fc = 103
         else:
@@ -336,7 +336,10 @@ class BiLSTM2(BaseModel):
         xx = c_n.view(-1, 50)
 
         feats = torch.cat((x, xx), dim=1)
-        feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
+        if self.three_feats:
+            feats = torch.cat((feats, lens.view(-1, 3)), dim=1)
+        else:
+            feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
         feats = feats.view(-1, self.in_fc)
         y = self.drop_fc(F.relu(self.fc1(feats)))
         y = torch.sigmoid(self.fc2(y))
@@ -396,9 +399,9 @@ class MLP3(BaseModel):
     def __init__(self):
         super().__init__()
 
-        self.fc1 = nn.Linear(200+3, 128)
-        self.fc2 = nn.Linear(128, 1)
-        self.drop_fc1 = nn.Dropout(0.35)
+        self.fc1 = nn.Linear(200+3, 16)
+        self.fc2 = nn.Linear(16, 1)
+        self.drop_fc1 = nn.Dropout(0.2)
 
     def forward(self, d2v_feats, lens):
         # [B, 100] input
@@ -409,7 +412,22 @@ class MLP3(BaseModel):
         x = torch.sigmoid(self.fc2(x))
         return x
 
+class MLP4(BaseModel):
+    def __init__(self):
+        super().__init__()
 
+        self.fc1 = nn.Linear(200+3, 1)
+        self.drop_fc1 = nn.Dropout(0.35)
+
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
+
+        # [B, 200]
+        feats = torch.cat((d2v_feats, lens), dim=1)
+        x = torch.sigmoid(self.fc1(feats))
+        # x = torch.sigmoid(self.drop_fc1(self.fc1(feats)))
+        # x = (self.fc2(x))
+        return x
 
 
 

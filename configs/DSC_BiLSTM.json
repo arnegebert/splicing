@@ -5,7 +5,9 @@
 
     "arch": {
         "type": "BiLSTM2",
-        "args": {}
+        "args": {
+            "three_len_feats": true
+        }
     },
     "data_loader": {
         "type": "DSCDataLoader",

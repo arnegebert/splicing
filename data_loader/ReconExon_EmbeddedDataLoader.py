@@ -45,9 +45,8 @@ class ReconExon_EmbeddedDataLoader(BaseDataLoader):
 
             d = int((9 * a) / (9 * (b + c)))
             d = max(1, d)
-            #print(d)
+            print(d)
             classification_task = False
-            # todo change back
             for i in range(d): #range(1)
                 train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)
                 train = np.concatenate((train, hx_cas_data[b * (s + 1):]), axis=0)
@@ -145,6 +144,10 @@ class ReconExon_EmbeddedDataLoader(BaseDataLoader):
         val_all_dataset = DSCDataset(val_all)
         val_low_dataset = DSCDataset(val_low)
         val_high_dataset = DSCDataset(val_high)
+        print(f'Length training dataset: {len(train_dataset)}')
+        print(f'Length mixed validation dataset: {len(val_all_dataset)}')
+        print(f'Length low inclusion validation dataset: {len(val_low_dataset)}')
+        print(f'Length high inclusion validation dataset: {len(val_high_dataset)}')
         self.dataset = (train_dataset, val_all_dataset, val_low_dataset, val_high_dataset)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))
