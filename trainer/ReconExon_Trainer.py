@@ -50,9 +50,16 @@ class ReconExon_Trainer(BaseTrainer):
         self.train_metrics.reset()
 
         for batch_idx, data in enumerate(self.data_loader):
+            # start, end = data[:, :140, :4], data[:, 140:280]
             seqs = data[:, :280].view(-1, 2, 140, 4)
             lens, target = data[:, 280, :3], data[:, 280, 3]
 
+            xxx = torch.tensor([ 0.60716164,  0.80365247, -0.22670029])
+            for i, ls in enumerate(lens):
+                if torch.sum(torch.isclose(xxx, ls)) == torch.tensor(3):
+                    # print(i)
+                    # print('subdued happyness')
+                    pass
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 

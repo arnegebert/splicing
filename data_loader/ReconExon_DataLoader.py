@@ -9,6 +9,18 @@ import torch
 import random
 import numpy as np
 
+eps = 1e-3
+def kms(lens_gai, lens_fake):
+    l1, l2, l3 = lens_gai
+    l1, l2, l3 = float(l1), float(l2), float(l3)
+    l4, l5, l6 = lens_fake
+    l4, l5, l6 = float(l4), float(l5), float(l6)
+    b1 = abs(l1 - l4 ) < eps
+    b2 = abs(l2 - l5 ) < eps
+    b3 = abs(l3 - l6 ) < eps
+    return b1 and b2 and b3
+    #return (l1, l2, l3) == (l4, l5, l6)
+
 class ReconExon_DataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
@@ -26,6 +38,17 @@ class ReconExon_DataLoader(BaseDataLoader):
             x_cons_data = np.load('data/dsc_reconstruction_exon/brain_cortex_cons.npy')
             hx_cas_data = np.load('data/dsc_reconstruction_exon/brain_cortex_high.npy')
             lx_cas_data = np.load('data/dsc_reconstruction_exon/brain_cortex_low.npy')
+
+            lens, target = hx_cas_data[:, 280, :3], hx_cas_data[:, 280, 3]
+            xxx = torch.tensor([ 0.60716164,  0.80365247, -0.22670029])
+            xxx2 = np.array([ 0.60716164,  0.80365247, -0.22670029])
+            for i, ls in enumerate(lens):
+                # if kms(xxx2, ls):
+                if np.sum(np.isclose(xxx2,ls)) == 3:
+                    # if torch.sum(xxx == ls) == torch.tensor(3):
+                    print(i)
+                    print('subdued')
+
             if classification:
                 x_cons_data[:, 280, 3] = (x_cons_data[:, 280, 3] >= classification_treshold).astype(np.float32)
                 hx_cas_data[:, 280, 3] = (hx_cas_data[:, 280, 3] >= classification_treshold).astype(np.float32)
@@ -76,6 +99,11 @@ class ReconExon_DataLoader(BaseDataLoader):
             val_low = lt
             # cons + high
             val_high = htest
+
+            print(f'Size training dataset: {len(train)}')
+            print(f'Size mixed validation dataset: {len(val_all)}')
+            print(f'Size low inclusion validation dataset: {len(val_low)}')
+            print(f'Size high inclusion validation dataset: {len(val_high)}')
 
             # return train, test, htest, lt, cons_test, cas_test
 
@@ -186,6 +214,16 @@ class ReconExon_Dataset(Dataset):
 
     def __init__(self, samples):
         self.samples = torch.tensor(samples)
+
+        lens, target = samples[:, 280, :3], samples[:, 280, 3]
+        xxx = torch.tensor([-0.23017790490661963, -0.16999491874342373, -0.1983459465537275])
+        xxx2 = np.array([-0.23017790490661963, -0.16999491874342373, -0.1983459465537275])
+        for i, ls in enumerate(lens):
+            if np.sum(xxx2 == ls) == 3:
+            # if torch.sum(xxx == ls) == torch.tensor(3):
+                print(i)
+                print('subdued happyness')
+
 
     def __len__(self):
         return len(self.samples)

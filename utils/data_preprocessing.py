@@ -2,13 +2,13 @@ def reverse_complement(seq):
     complt = []
     for bp in seq:
         if bp == 'a' or bp == 'A':
-            complt.append('t')
+            complt.append('T')
         elif bp == 'c' or bp == 'C':
-            complt.append('g')
+            complt.append('G')
         elif bp == 'g' or bp == 'G':
-            complt.append('c')
+            complt.append('C')
         elif bp == 't' or bp == 'T':
-            complt.append('a')
+            complt.append('A')
         else: raise Exception("Unidentified base-pair given")
     return ''.join(complt)
 
@@ -21,6 +21,7 @@ def one_hot_encode(nt):
         return [0, 0, 1.0, 0]
     elif nt == 'T' or nt == 't':
         return [0, 0, 0, 1.0]
+    else: raise Exception('Unknown nucleotide given')
 
 def one_hot_encode_seq(seq):
     encoding = []

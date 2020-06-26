@@ -70,11 +70,12 @@ def get_used_exons(decoded, original):
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
     hasht_start, hasht_end = dict(), dict()
+    duplicates = 0
     for i, (seq_start, seq_end) in enumerate(decoded[:, :2]):
-        if seq_start in hasht_start: print(f'decoded sequence {i} is duplicate')
+        if seq_start in hasht_start: duplicates += 1#print(f'decoded sequence {i} is duplicate')
         hasht_start[seq_start] = i
         hasht_end[seq_end] = i
-
+    print(f'Number of repeated decoded sequences: {duplicates}')
     print('Start of iteration through lines')
     for i, line in enumerate(original):
         if i == 0: continue
@@ -116,10 +117,10 @@ def get_used_exons(decoded, original):
         if in_there: # +: 20286, -: 42079
             # decoded_idx = hasht_start[window_around_start]
             decoded_idx = hasht_start[seq]
-            print(f'Original exon {i} matched to decoded exon: {decoded_idx}')
-            l1, l2, l3 = decoded[decoded_idx, 2:5]
+            # print(f'Original exon {i} matched to decoded exon: {decoded_idx}')
+            start_seq, end_seq, l1, l2, l3, is_cons = decoded[decoded_idx]
             # l1, l2, l3 = 0, 0,0
-            used_exons.append((chrom, strand, start, end, count, skip, constit_level, l1, l2, l3))
+            used_exons.append((chrom, strand, start, end, count, skip, constit_level, start_seq, end_seq, l1, l2, l3))
     return used_exons
 
 # 35958:
@@ -141,16 +142,16 @@ used_cons_exons = get_used_exons(decoded_cons, original_cons)
 print(f'Found {len(used_cons_exons)} matching constitutive exons')
 print(f'Wanted to find {len(decoded_cons)} constitutive exons')
 with open('../data/dsc_reconstruction_junction/cons_exons.csv', 'w') as f:
-    for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in used_cons_exons:
-        f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\t{l1}\t{l2}\t{l3}\n')
+    for chrom, strand, start, end, count, skip, constit_level, start_seq, end_seq, l1, l2, l3 in used_cons_exons:
+        f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\t{start_seq}\t{end_seq}\t{l1}\t{l2}\t{l3}\n')
 
 
 print('Starting processing cass exons')
 used_cass_exons = get_used_exons(decoded_cas, original_cass)
 
 with open('../data/dsc_reconstruction_junction/cass_exons.csv', 'w') as f:
-    for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in used_cass_exons:
-        f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\t{l1}\t{l2}\t{l3}\n')
+    for chrom, strand, start, end, count, skip, constit_level, start_seq, end_seq, l1, l2, l3 in used_cass_exons:
+        f.write(f'{chrom}\t{strand}\t{start}\t{end}\t{count}\t{skip}\t{constit_level}\t{start_seq}\t{end_seq}\t{l1}\t{l2}\t{l3}\n')
 
 print(f'Found {len(used_cass_exons)} matching cassette exons')
 print(f'Wanted to find {len(decoded_cas)} cassette exons')
