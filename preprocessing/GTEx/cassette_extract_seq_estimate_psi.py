@@ -101,7 +101,7 @@ with open(path_filtered_reads) as f:
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
             print(f'Reading line {i}')
-        line = line.split(',')
+        line = line.replace('\n', '').split(',')
         # split_idx = line.find(',')
         junction = line[0].split('_')
         try:
@@ -130,10 +130,11 @@ with open(path_filtered_reads) as f:
         # required as exons/introns shorter than 25nt/80nt are usually caused by sequencing errors and
         # they represent less than 1% of the exon and intron length distributions
         # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6722613/
-        genes, updated_idx = map_from_position_to_genes(loaded_chrom, start, end, current_idx_overlap)
-        if not genes: homeless_junctions += 1
-        current_idx_overlap = updated_idx
-        in_highly_expressed_gene = contains_highly_expressed_gene(genes)
+        # genes, updated_idx = map_from_position_to_genes(loaded_chrom, start, end, current_idx_overlap)
+        # if not genes: homeless_junctions += 1
+        # current_idx_overlap = updated_idx
+        gene = line[2]
+        in_highly_expressed_gene = contains_highly_expressed_gene([gene])
         if not in_highly_expressed_gene:
             not_highly_expressed += 1
             continue
@@ -154,14 +155,14 @@ with open(path_filtered_reads) as f:
         for idx_below in range(i + 1, i + 10):
             if idx_below >= len(junction_reads_file): break
             line2 = junction_reads_file[idx_below][0]
-            junction2, count2 = line2.split(',')
+            junction2, count2 = line2.replace('\n','').split(',')
             _, a2, d = junction2.split('_')
             a2, d = int(a2), int(d)
             if a == a2:
                 for idx_below_below in range(idx_below + 1, idx_below + 10):
                     if idx_below_below >= len(junction_reads_file): break
                     line2 = junction_reads_file[idx_below_below][0]
-                    junction2, count3 = line2.split(',')
+                    junction2, count3 = line2.replace('\n','').split(',')
                     _, c, d2 = junction2.split('_')
                     c, d2 = int(c), int(d2)
                     if d == d2 and c > b:

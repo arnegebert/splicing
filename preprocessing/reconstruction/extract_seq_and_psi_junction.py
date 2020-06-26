@@ -165,7 +165,7 @@ with open(path_filtered_reads) as f:
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
             print(f'Reading line {i}')
-        line = line.split(',')
+        line = line.replace('\n','').split(',')
         junction = line[0].split('_')
         try:
             read_chrom = int(junction[0][3:])
@@ -173,7 +173,7 @@ with open(path_filtered_reads) as f:
             break
         if read_chrom == last_chrom: break
         start, end = int(junction[1]), int(junction[2])
-        read_count = int(line[1][:-1])
+        read_count = int(line[1])
         # if chromosome changes, update loaded sequence until chromosome 22 reached
         if read_chrom > loaded_chrom:
             loaded_chrom += 1
@@ -190,10 +190,11 @@ with open(path_filtered_reads) as f:
         # required as exons/introns shorter than 25nt/80nt are usually caused by sequencing errors and
         # they represent less than 1% of the exon and intron length distributions
         # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6722613/
-        genes, updated_idx = map_from_position_to_genes(loaded_chrom, start, end, current_idx_overlap)
-        if not genes: homeless_junctions += 1
-        current_idx_overlap = updated_idx
-        in_highly_expressed_gene = contains_highly_expressed_gene(genes)
+        # genes, updated_idx = map_from_position_to_genes(loaded_chrom, start, end, current_idx_overlap)
+        # if not genes: homeless_junctions += 1
+        # current_idx_overlap = updated_idx
+        gene = line[2]
+        in_highly_expressed_gene = contains_highly_expressed_gene([gene])
         if not in_highly_expressed_gene:
             not_highly_expressed += 1
             continue

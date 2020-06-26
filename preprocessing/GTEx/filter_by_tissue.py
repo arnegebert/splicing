@@ -1,9 +1,9 @@
 import csv
 import numpy as np
 
-path_annotation = '../data/gtex_origin/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
-# path_srcs = '../data/GTEx_Analysis_2017-06-05_v8_STARv2.5.3a_junctions.gct'
-path_srcs = '../data/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
+path_annotation = '../../data/gtex_origin/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
+path_srcs = '../../data/gtex_origin/GTEx_Analysis_2017-06-05_v8_STARv2.5.3a_junctions.gct'
+# path_srcs = '../../data/gtex_origin/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
 
 G = 6
 H = 7
@@ -36,7 +36,7 @@ print(f'{len(filtered_sample_names)} samples after getting those with brain cort
 # given the sample names, preprocess junction data file such that it only contains junctions from desired samples
 # have to work with that very large python text file as a result
 sample_idxs = []
-data = {}
+data = []
 with open(path_srcs) as f:
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
@@ -55,7 +55,12 @@ with open(path_srcs) as f:
             # for idx in sample_idxs:
             #     data_line.append(line[idx])
             # data[line[0]] = '\t'.join(data_line)
-            data[line[0]] = int(line[sample_idxs[164]])
+            gene = line[1]
+            dot_idx = gene.index('.')
+            gene = gene[:dot_idx]
+            junction = line[0]
+            reads = int(line[sample_idxs[164]])
+            data.append((gene, junction, reads))
 # data = junctions -> sample reads
 
 # todo: some junctions are duplicated in the data... o.o
@@ -65,8 +70,8 @@ with open(path_srcs) as f:
 # in what format do i want data to later load it?
 # at first, junction : list of reads might not be bad
 # later i will need to extract the information from the junctions either way
-with open('../data/gtex_processed/brain_cortex_junction_reads_one_sample.csv', 'w') as f:
+with open('../../data/gtex_processed/brain_cortex_junction_reads_one_sample.csv', 'w') as f:
     print('Beginning to write junction reads')
-    for junction, reads in data.items():
-        f.write(f'{junction},{reads}\n')
+    for (gene, junction, reads) in data:
+        f.write(f'{junction},{reads},{gene}\n')
 print('Processing finished')

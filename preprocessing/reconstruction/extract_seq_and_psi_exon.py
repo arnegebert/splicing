@@ -163,7 +163,7 @@ with open(path_filtered_reads) as f:
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
             print(f'Reading line {i}')
-        line = line.split(',')
+        line = line.replace('\n', '').split(',')
         junction = line[0].split('_')
         try:
             read_chrom = int(junction[0][3:])
@@ -174,13 +174,14 @@ with open(path_filtered_reads) as f:
             current_idx_overlap = 0
             prev_chrom = read_chrom
         start, end = int(junction[1]), int(junction[2])
-        read_count = int(line[1][:-1])
+        read_count = int(line[1])
 
         """ Filtering """
-        genes, updated_idx = map_from_position_to_genes(read_chrom, start, end, current_idx_overlap)
-        if not genes: homeless_junctions += 1
-        current_idx_overlap = updated_idx
-        in_highly_expressed_gene = contains_highly_expressed_gene(genes)
+        # genes, updated_idx = map_from_position_to_genes(read_chrom, start, end, current_idx_overlap)
+        # if not genes: homeless_junctions += 1
+        # current_idx_overlap = updated_idx
+        gene = line[2]
+        in_highly_expressed_gene = contains_highly_expressed_gene([gene])
         if not in_highly_expressed_gene:
             not_highly_expressed += 1
             continue
