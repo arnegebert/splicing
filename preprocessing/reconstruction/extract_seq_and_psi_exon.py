@@ -198,6 +198,8 @@ with open(path_filtered_reads) as f:
         # if i > 1000: break
 
 print(f'Took {timer()-startt:.2f} s to go through all junctions and accumulate their reads')
+print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
+
 psis_gtex, psis_dsc = [], []
 
 
@@ -221,7 +223,7 @@ def encoding_and_sequence_extraction(DSC_counts):
             chrom_seq = load_chrom_seq(loaded_chrom)
 
         gtex_psi = pos / (pos + neg)
-        psi = constit_level
+        psi = gtex_psi
         psis_gtex.append(gtex_psi); psis_dsc.append(constit_level)
 
         window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
@@ -229,7 +231,7 @@ def encoding_and_sequence_extraction(DSC_counts):
         if strand == '-':
             window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
                                                      reverse_complement(window_around_start[::-1])
-        start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
+        start, end = one_hot_encode_seq(start_seq), one_hot_encode_seq(end_seq)
         # start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
         if strand == '+':
             sim_score = sum([c1 == c2 for c1, c2 in zip(start_seq, window_around_start[1:])])
@@ -240,7 +242,7 @@ def encoding_and_sequence_extraction(DSC_counts):
             # print(sim_score)
             # print('xxxxx')
         start, end = np.array(start), np.array(end)
-        lens_and_psi_vector = np.array([l1, l2, l3, constit_level])
+        lens_and_psi_vector = np.array([l1, l2, l3, psi])
         start_and_end = np.concatenate((start, end))
         # pytorch loss expects float with 32 bits, otherwise we will have inputs with 64 bits
         sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
@@ -265,17 +267,16 @@ def encoding_and_sequence_extraction(DSC_counts):
 low_cons_exons, high_cons_exons, cons_cons_exons = encoding_and_sequence_extraction(DSC_cons_counts)
 low_cass_exons, high_cass_exons, cons_cass_exons = encoding_and_sequence_extraction(DSC_cass_counts)
 
-if low_cons_exons:
+if low_cons_exons.size > 0:
     low_exons = np.concatenate((low_cons_exons, low_cass_exons))
 else: low_exons = low_cass_exons
-if high_cons_exons:
+if high_cons_exons.size > 0:
     high_exons = np.concatenate((high_cons_exons, high_cass_exons))
 else: high_exons = high_cass_exons
-if cons_cass_exons:
+if cons_cass_exons.size > 0:
     cons_exons = np.concatenate((cons_cons_exons, cons_cass_exons))
 else: cons_exons = cons_cons_exons
 
-print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
 print(f'Number of low PSI exons: {len(low_exons)}')
 print(f'Number of high PSI exons: {len(high_exons)}')
 print(f'Number of cons exons: {len(cons_exons)}')
@@ -296,7 +297,7 @@ print(f'Average PSI value from DSC dataset: {np.mean(psis_dsc)}')
 print(f'Average PSI value from GTEx dataset: {np.mean(psis_gtex)}')
 print(f'Median PSI value from DSC dataset: {np.median(psis_dsc)}')
 print(f'Median PSI value from GTEx dataset: {np.median(psis_gtex)}')
-print(f'Percentage of PSI values with >0.99 but <1: {len(high_exons[:,280,3][(0.99 < high_exons[:,280,3]) & (high_exons[:,280,3]< 1) ])/len(high_exons[:,280,3])}')
+print(f'Percentage of high inclusion PSI values >0.99 but <1: {len(high_exons[:,280,3][(0.99 < high_exons[:,280,3]) & (high_exons[:,280,3]< 1) ])/len(high_exons[:,280,3])}')
 print(f'Correlation between DSC and GTEx PSI values: {np.corrcoef(psis_dsc, psis_gtex)[0,1]}')
 print(f'Average absolute difference between DSC and GTEx PSI values: {np.mean(np.abs(psis_dsc-psis_gtex))}')
 print('---------------------------------')
