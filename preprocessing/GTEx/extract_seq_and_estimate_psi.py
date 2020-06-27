@@ -3,11 +3,37 @@ import csv
 import linecache
 from timeit import default_timer as timer
 import numpy as np
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--tissue', type=str, default='', metavar='tissue',
+                    help='type of tissue filtered for')
+args = parser.parse_args()
 
 startt = timer()
-data_path = '../data'
-path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
-save_to = 'gtex_processed/brain_cortex_full.csv'
+tissue = 'cerebellum' if not args.tissue else args.tissue
+
+assert tissue in ['brain', 'cerebellum', 'heart']
+data_path = '../../data'
+
+
+if tissue == 'brain':
+    path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
+    path_highly_expr_genes = '../../data/gtex_processed/brain_cortex_tpm_one_sample.csv'
+    save_to = 'gtex_processed/brain_cortex_full.csv'
+elif tissue == 'cerebellum':
+    path_filtered_reads = f'{data_path}/gtex_processed/cerebellum_junction_reads_one_sample.csv'
+    path_highly_expr_genes = '../../data/gtex_processed/cerebellum_tpm_one_sample.csv'
+    save_to = 'gtex_processed/cerebellum_full.csv'
+elif tissue == 'heart':
+    path_filtered_reads = f'{data_path}/gtex_processed/heart_junction_reads_one_sample.csv'
+    path_highly_expr_genes = '../../data/gtex_processed/heart_tpm_one_sample.csv'
+    save_to = 'gtex_processed/heart_full.csv'
+
+print('-'*40)
+print(f'Processing tissue type: {tissue}')
+print('-'*40)
+
 last_chrom = 23
 
 introns_bef_start = 70 # introns
@@ -18,7 +44,7 @@ introns_after_end = 70 # introns
 
 highly_expressed_genes = set()
 def load_highly_expressed_genes():
-    with open(f'../data/gtex_processed/brain_cortex_tpm_one_sample.csv') as f:
+    with open(path_highly_expr_genes) as f:
         for l in f:
             gene_id, tpm = l.split(',')
             highly_expressed_genes.add(gene_id)
@@ -33,7 +59,7 @@ def contains_highly_expressed_gene(genes):
 
 gencode_genes = {}
 def load_gencode_genes():
-    with open(f'../data/gencode_genes.csv') as f:
+    with open(f'../../data/gencode_genes.csv') as f:
         for line in f:
             line = line.split('\t')
             if len(line) == 1: continue
@@ -233,6 +259,7 @@ print(f'Average length of l1: {avg_len}')
 print(f'Standard deviation of l1: {std_len}')
 
 with open(f'{data_path}/{save_to}', 'w') as f:
+    f.write(f'{avg_len},{std_len}\n')
     print('Beginning to write estimated PSIs and extracted sequences')
     for junction, (start_seq, end_seq, psi) in seqs_psis.items():
         f.write(f'{junction},{start_seq},{end_seq},{psi}\n')

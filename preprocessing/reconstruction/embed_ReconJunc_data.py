@@ -3,13 +3,8 @@ import csv
 import gensim.models
 import time
 from torch import as_tensor as T
-import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--tissue', type=str, default='', metavar='tissue',
-                    help='type of tissue filtered for')
-args = parser.parse_args()
-
+#todo could make this doable via command line arguments and export / document data processing process via a bash script
 startt = time.time()
 # data_path = '../../data/gtex_processed'
 data_path = '../../data'
@@ -24,24 +19,21 @@ data_path = '../../data'
 # target = 'distributed/embedded_gtex_cass_class.npy'
 # avg_len = 5028.584836672408 # Cassette exon measurements
 # std_len = 18342.894894670942
-tissue = 'brain' if not args.tissue else args.tissue
+tissue = 'brain'
 assert tissue in ['brain', 'cerebellum', 'heart']
 
 if tissue == 'brain':
-    src = 'gtex_processed/brain_cortex_full.csv'
-    target = 'distributed/brain_cortex_embedded_junc_class.npy'
+    src = 'dsc_reconstruction_junction/brain_cortex_full.csv'
+    target = 'distributed/brain_cortex_embedded_recon_junc_class.npy'
 elif tissue == 'heart':
     src = 'gtex_processed/heart_full.csv'
-    target = 'distributed/heart_embedded_junc_class.npy'
+    target = 'distributed/heart_embedded_recon_junc_class.npy'
 elif tissue == 'cerebellum':
     src = 'gtex_processed/cerebellum_full.csv'
-    target = 'distributed/cerebellum_embedded_junc_class.npy'
+    target = 'distributed/cerebellum_embedded_recon_junc_class.npy'
 # avg_len = 7770.843898366985 # Junction length first iteration reconstruction dataset
 # std_len = 21350.371079742523
 
-print('-'*40)
-print(f'Processing tissue type: {tissue}')
-print('-'*40)
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
 classification_task = True
 constitutive_level = 0.95

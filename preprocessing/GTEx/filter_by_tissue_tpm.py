@@ -1,19 +1,32 @@
 import csv
 import numpy as np
+import argparse
+import time
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--tissue', type=str, default='Brain - Cortex', metavar='tissue',
+                    help='type of tissue filtered for')
+parser.add_argument('--save-to', type=str,
+                    default='../../data/gtex_processed/brain_cortex_junction_reads_one_sample.csv',
+                    metavar='save_to', help='path to folder and file to save to')
+args = parser.parse_args()
+
 
 path_annotation = '../../data/gtex_origin/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
-# path_srcs = '../data/GTEx_Analysis_2017-06-05_v8_STARv2.5.3a_junctions.gct'
 path_srcs = '../../data/gtex_origin/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct'
 # path_srcs = '../data/gtex/GTEx_Analysis_2017-06-05_v8_RSEMv1.3.0_transcript_tpm.gct'
 target = '../../data/gtex_processed/brain_cortex_tpm_one_sample.csv'
 include_version = False
 
+startt = time.time()
 with open(path_annotation) as f:
     reader = csv.reader(f, delimiter="\t")
     # contains list with rows of samples
     d = list(reader)
 
-tissue = 'Brain - Cortex'
+tissue = args.tissue
+target = args.save_to
+#'Brain - Cortex'
 
 def samples_from_tissue(data, tissue):
     filtered_sample_names = []
@@ -31,7 +44,7 @@ filtered_sample_names = samples_from_tissue(d, tissue)
 # GTEX-117XS-3026-SM-CYKOR
 # for i in range(5):
 #     print(filtered_sample_names[i])
-print(f'{len(filtered_sample_names)} samples after getting those with brain cortex data')
+print(f'{len(filtered_sample_names)} samples after getting those with {tissue} data')
 
 # next step:
 # given the sample names, preprocess junction data file such that it only contains junctions from desired samples
@@ -73,9 +86,11 @@ with open(path_srcs) as f:
 # in what format do i want data to later load it?
 # at first, junction : list of reads might not be bad
 # later i will need to extract the information from the junctions either way
-print(f'{len(data)} values after filtering')
+print(f'{len(data)} genes after filtering')
 with open(target, 'w') as f:
     print('Beginning to write gene TPMs')
     for gene, reads in data.items():
         f.write(f'{gene},{reads}\n')
-print('Processing finished')
+
+endt = time.time()
+print(f'Processing finished in {endt-startt:.2f} s')

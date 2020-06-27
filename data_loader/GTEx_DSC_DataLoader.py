@@ -46,11 +46,11 @@ class GTEx_DSC_Dataset(Dataset):
         print(f'starting loading of data')
         self.samples = []
 
-        avg_len = 7853.118899261425
-        std_len = 23917.691461462917
-
-        avg_len = 5028.584836672408  # Cassette exon measurements
-        std_len = 18342.894894670942
+        # avg_len = 7853.118899261425
+        # std_len = 23917.691461462917
+        #
+        # avg_len = 5028.584836672408  # Cassette exon measurements
+        # std_len = 18342.894894670942
 
         constitutive_level = 0.95
 
@@ -61,24 +61,28 @@ class GTEx_DSC_Dataset(Dataset):
 
         with open(self.path, 'r') as f:
             for i, l in enumerate(f):
-                j, start_seq, end_seq, psi = l.split(',')
-                s, e = j.split('_')[1:3]
-                s, e = int(s), int(e)
-                psi = T(float(psi[:-1])).float()
-                is_constitutive = psi >= constitutive_level
-                is_constitutive = T(float(is_constitutive))
+                if i == 0:
+                    avg_len, std_len = l.split(',')
+                    avg_len, std_len = float(avg_len), float(std_len)
+                else:
+                    j, start_seq, end_seq, psi = l.split(',')
+                    s, e = j.split('_')[1:3]
+                    s, e = int(s), int(e)
+                    psi = T(float(psi[:-1])).float()
+                    is_constitutive = psi >= constitutive_level
+                    is_constitutive = T(float(is_constitutive))
 
-                if psi <= 0.2: low += 1
-                if 0.2 < psi <= 0.75: medium += 1
-                if psi > 0.75 and psi < constitutive_level: high += 1
-                if psi > constitutive_level: cons += 1
+                    if psi <= 0.2: low += 1
+                    if 0.2 < psi <= 0.75: medium += 1
+                    if psi > 0.75 and psi < constitutive_level: high += 1
+                    if psi > constitutive_level: cons += 1
 
-                label = is_constitutive if classification_task else psi
+                    label = is_constitutive if classification_task else psi
 
-                l1 = (e-s-avg_len)/std_len
-                l1 = T(l1).float()
-                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, label)
-                self.samples.append(sample)
+                    l1 = (e-s-avg_len)/std_len
+                    l1 = T(l1).float()
+                    sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, label)
+                    self.samples.append(sample)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))
         print(f'low: {low}')
