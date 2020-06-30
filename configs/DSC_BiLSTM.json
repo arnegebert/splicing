@@ -51,5 +51,6 @@
         "early_stop": 25,
 
         "tensorboard": true
-    }
+    },
+    "comment": ""
 }

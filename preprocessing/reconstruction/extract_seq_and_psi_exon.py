@@ -5,10 +5,21 @@ from timeit import default_timer as timer
 import numpy as np
 from utils import reverse_complement, one_hot_encode_seq
 import matplotlib.pyplot as plt
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--tissue', type=str, default='', metavar='tissue',
+                    help='type of tissue filtered for')
+args = parser.parse_args()
 
 startt = timer()
 data_path = '../../data'
-path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
+
+tissue = 'brain' if not args.tissue else args.tissue
+assert tissue in ['brain', 'cerebellum', 'heart']
+
+path_filtered_reads = f'{data_path}/gtex_processed/cerebellum_junction_reads_one_sample.csv'
 save_to_low = 'dsc_reconstruction_exon/brain_cortex_low.npy'
 save_to_high = 'dsc_reconstruction_exon/brain_cortex_high.npy'
 save_to_cons = 'dsc_reconstruction_exon/brain_cortex_cons.npy'
