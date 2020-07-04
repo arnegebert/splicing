@@ -314,8 +314,8 @@ def run_epoch(data_iter, model, loss_compute):
         tokens += batch.ntokens
         if i % 50 == 1:
             elapsed = time.time() - start
-            print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
-                    (i, loss / batch.ntokens, tokens / elapsed))
+            # print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
+            #         (i, loss / batch.ntokens, tokens / elapsed))
             start = time.time()
             tokens = 0
     return total_loss / total_tokens
@@ -445,12 +445,12 @@ def data_gen(V, batch, nbatches, input_length):
 
 # Train the simple copy task.
 
-V = 140
-input_length = 280
+V = 10
+input_length = 20
 batch_size = 10 # parameter supposed to be large for efficient GPU parallelization
 nbatches = 15
 criterion = LabelSmoothing(size=V, padding_idx=0, smoothing=0.0)
-model = make_model(V, V, N=6, d_model=64, d_ff=256, h=4).to(device)
+model = make_model(V, V, N=6, d_model=512, d_ff=2048, h=8).to(device)
 model_opt = NoamOpt(model.src_embed[0].d_model, 1, 400,
         torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
 
@@ -464,12 +464,8 @@ for epoch in range(10):
     run_epoch(data_gen(V, batch_size, nbatches, input_length), model,
               SimpleLossCompute(model.generator, criterion, model_opt))
     print(f'Finished epoch {epoch}')
-    print('Validation: ')
     model.eval()
-    print(run_epoch(data_gen(V, 30, 5, input_length), model,
-                    SimpleLossCompute(model.generator, criterion, None)))
-    print(run_epoch(data_gen(V, 30, 5, input_length//2), model,
-                    SimpleLossCompute(model.generator, criterion, None)))
+    print(f'Validation: {run_epoch(data_gen(V, 30, 5, input_length), model, SimpleLossCompute(model.generator, criterion, None))}')
 
 end = time.time()
 print(f'Training took {end-start:.2f} s')

@@ -51,19 +51,27 @@ print('Finished loading data')
 
 def decode_reshape_and_embed(batch):
     #batch = batch[:501]
+    batch_len = len(batch)-1
     batch_vector = []
-    batch[:, 280, 3] = (batch[:, 280, 3] >= constitutive_level)#.astype(np.float32)
+    # batch[:, 240, 3] = (batch[:, 240, 3] >= constitutive_level)#.astype(np.float32)
+    # batch[:, 1200, 3] = (batch[:, 1200, 3] >= constitutive_level)#.astype(np.float32)
+    batch[:, len(batch), 3] = (batch[:, len(batch), 3] >= constitutive_level)
 
     for i, line in enumerate(batch):
         if i % 500 == 0: print(f'Processing line {i}')
-        start_enc, end_enc = line[:140], line[140:280]
+        # start_enc, end_enc = line[:140], line[140:280]
+        # start_enc, end_enc = line[:600], line[600:1200]
+        start_enc, end_enc = line[:batch_len//2], line[batch_len//2:batch_len]
+
         start_seq, end_seq = ''.join(one_hot_decode_seq_vanilla(start_enc)), \
                              ''.join(one_hot_decode_seq_vanilla(end_enc))
         start, end = split_into_3_mers(start_seq), split_into_3_mers(end_seq)
         start_d2v = embedding_model.infer_vector(start)
         end_d2v = embedding_model.infer_vector(end)
         dummy_vector = [0] * len(start_d2v)
-        dummy_vector[:4] = line[280]
+        # dummy_vector[:4] = line[280]
+        # dummy_vector[:4] = line[1200]
+        dummy_vector[:4] = line[batch_len]
         data_vector = [start_d2v, end_d2v, dummy_vector]
         batch_vector.append(data_vector)
 

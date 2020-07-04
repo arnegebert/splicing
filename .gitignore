@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+salmon/quants
+salmon/human_index
+*.majiq
+*.sj
+majiq/bam
 Jha_et_al_2017
 # C extensions
 *.so
@@ -116,3 +121,25 @@ preprocessing/pls_work
 preprocessing/w2v-full-2epochs
 preprocessing/distributed/d2v-full-5epochs-x
 preprocessing/xxx
+majiq/Homo_sapiens.GRCh38.100.chr.gff3
+majiq/Homo_sapiens.GRCh38.100.gff3
+majiq/builder/splicegraph.sql
+majiq/builder/constitutive_exons.tsv
+majiq/builder/constitutive_junctions.tsv
+majiq/builder/constitutive_junctions_sorted.tsv
+majiq/fix_Homo_sapiens.GRCh38.100.chr.gff3
+*.gff3
+*.tsv#
+*.tsv
+*.voila
+*.gz
+salmon/human_index/mphf.bin
+salmon/human_index/pos.bin
+salmon/human_index/rank.bin
+salmon/human_index/refAccumLengths.bin
+suppa/formatted_iso_tpm.txt
+*.gtf
+suppa/hg38.events_SE_strict.ioe
+suppa/iso_tpm.txt
+suppa/second.events_SE_strict.ioe
+*.psi

@@ -242,8 +242,8 @@ def encoding_and_sequence_extraction(DSC_counts):
         if strand == '-':
             window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
                                                      reverse_complement(window_around_start[::-1])
-        start, end = one_hot_encode_seq(start_seq), one_hot_encode_seq(end_seq)
-        # start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
+        # start, end = one_hot_encode_seq(start_seq), one_hot_encode_seq(end_seq)
+        start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
         if strand == '+':
             sim_score = sum([c1 == c2 for c1, c2 in zip(start_seq, window_around_start[1:])])
         else:
