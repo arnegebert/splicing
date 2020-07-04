@@ -1,6 +1,6 @@
 import numpy as np
 
-events = []
+psis = []
 with open('second.psi') as f:
     for i, l in enumerate(f):
         if i==0: continue
@@ -11,12 +11,12 @@ with open('second.psi') as f:
             psi =float(psi)
         except ValueError:
             continue
-        events.append(psi)
+        psis.append(psi)
 
-events = np.array(events)
-print(len(events))
-print(np.mean(events))
-print(np.median(events))
+psis = np.array(psis)
+print(len(psis))
+print(np.mean(psis))
+print(np.median(psis))
 
 # with vs without formatting doesn't make a difference
 # 18360

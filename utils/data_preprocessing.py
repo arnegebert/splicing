@@ -44,3 +44,4 @@ def one_hot_decode_seq_vanilla(seq):
     for encoding in seq:
         to_return.append(one_hot_decode(encoding))
     return to_return
+
