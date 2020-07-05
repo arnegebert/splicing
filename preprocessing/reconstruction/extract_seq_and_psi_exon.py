@@ -234,7 +234,7 @@ def encoding_and_sequence_extraction(DSC_counts):
             chrom_seq = load_chrom_seq(loaded_chrom)
 
         gtex_psi = pos / (pos + neg)
-        psi = gtex_psi
+        psi = constit_level
         psis_gtex.append(gtex_psi); psis_dsc.append(constit_level)
 
         window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]

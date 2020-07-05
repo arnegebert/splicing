@@ -430,22 +430,134 @@ class MLP4(BaseModel):
         return x
 
 
+class CancellationOfDSC(BaseModel):
+    def __init__(self):
+        super().__init__()
+
+        self.fc1 = nn.Linear(0+3, 16)
+        self.fc2 = nn.Linear(16, 1)
+        self.drop_fc1 = nn.Dropout(0.2)
+
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
+
+        # [B, 200]
+        # feats = torch.cat((d2v_feats, lens), dim=1)
+        x = F.relu(self.drop_fc1(self.fc1(lens)))
+        x = torch.sigmoid(self.fc2(x))
+        return x
+
+class CancellationOfDSC2(BaseModel):
+    def __init__(self):
+        super().__init__()
+
+        self.fc1 = nn.Linear(0+3, 16)
+        self.fc2 = nn.Linear(16, 1)
+
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
+
+        # [B, 200]
+        # feats = torch.cat((d2v_feats, lens), dim=1)
+        x = F.relu(self.fc1(lens))
+        x = torch.sigmoid(self.fc2(x))
+        return x
+
+class CancellationOfDSC3(BaseModel):
+    def __init__(self):
+        super().__init__()
+
+        self.fc1 = nn.Linear(0+3, 8)
+        self.fc2 = nn.Linear(8, 1)
+
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
+
+        # [B, 200]
+        # feats = torch.cat((d2v_feats, lens), dim=1)
+        x = F.relu(self.fc1(lens))
+        x = torch.sigmoid(self.fc2(x))
+        return x
 
 
+class CancellationOfDSC4(BaseModel):
+    def __init__(self):
+        super().__init__()
 
+        self.fc1 = nn.Linear(0+3, 1)
 
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
 
+        # [B, 200]
+        x = torch.sigmoid(self.fc1(lens))
+        # x = torch.sigmoid(self.drop_fc1(self.fc1(feats)))
+        # x = (self.fc2(x))
+        return x
 
+class CancellationOfDSC5(BaseModel):
+    def __init__(self):
+        super().__init__()
 
+        self.fc1 = nn.Linear(0+3, 4)
+        self.fc2 = nn.Linear(4, 1)
 
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
 
+        # [B, 200]
+        # feats = torch.cat((d2v_feats, lens), dim=1)
+        x = F.relu(self.fc1(lens))
+        x = torch.sigmoid(self.fc2(x))
+        return x
 
+class CancellationOfDSC6(BaseModel):
+    def __init__(self):
+        super().__init__()
 
+        self.fc1 = nn.Linear(0+3, 4)
+        self.fc2 = nn.Linear(4, 1)
 
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
 
+        # [B, 200]
+        # feats = torch.cat((d2v_feats, lens), dim=1)
+        x = (self.fc1(lens))
+        x = torch.sigmoid(self.fc2(x))
+        return x
 
+class CancellationOfDSC7(BaseModel):
+    def __init__(self):
+        super().__init__()
 
+        self.fc1 = nn.Linear(0+3, 3)
+        self.fc2 = nn.Linear(3, 1)
 
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
+
+        # [B, 200]
+        # feats = torch.cat((d2v_feats, lens), dim=1)
+        x = F.relu(self.fc1(lens))
+        x = torch.sigmoid(self.fc2(x))
+        return x
+
+class CancellationOfDSC8(BaseModel):
+    def __init__(self):
+        super().__init__()
+
+        self.fc1 = nn.Linear(0+3, 8)
+        self.fc2 = nn.Linear(8, 1)
+
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
+
+        # [B, 200]
+        # feats = torch.cat((d2v_feats, lens), dim=1)
+        x = (self.fc1(lens))
+        x = (self.fc2(x))
+        return x
 
 
 
