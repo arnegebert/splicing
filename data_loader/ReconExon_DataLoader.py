@@ -39,15 +39,15 @@ class ReconExon_DataLoader(BaseDataLoader):
             hx_cas_data = np.load('data/dsc_reconstruction_exon/brain_cortex_high.npy')
             lx_cas_data = np.load('data/dsc_reconstruction_exon/brain_cortex_low.npy')
 
-            lens, target = hx_cas_data[:, 280, :3], hx_cas_data[:, 280, 3]
-            xxx = torch.tensor([ 0.60716164,  0.80365247, -0.22670029])
-            xxx2 = np.array([ 0.60716164,  0.80365247, -0.22670029])
-            for i, ls in enumerate(lens):
-                # if kms(xxx2, ls):
-                if np.sum(np.isclose(xxx2,ls)) == 3:
-                    # if torch.sum(xxx == ls) == torch.tensor(3):
-                    print(i)
-                    print('subdued')
+            # lens, target = hx_cas_data[:, 280, :3], hx_cas_data[:, 280, 3]
+            # xxx = torch.tensor([ 0.60716164,  0.80365247, -0.22670029])
+            # xxx2 = np.array([ 0.60716164,  0.80365247, -0.22670029])
+            # for i, ls in enumerate(lens):
+            #     # if kms(xxx2, ls):
+            #     if np.sum(np.isclose(xxx2,ls)) == 3:
+            #         # if torch.sum(xxx == ls) == torch.tensor(3):
+            #         print(i)
+            #         print('subdued')
 
             if classification:
                 x_cons_data[:, 280, 3] = (x_cons_data[:, 280, 3] >= classification_treshold).astype(np.float32)
@@ -189,25 +189,6 @@ def encode_seq(seq):
     return encoding
 
 
-# Constant values taken in reference from
-# https://github.com/louadi/DSC/blob/master/training%20notebooks/cons_vs_es.ipynb
-# Don't blame me ¯\_(ツ)_/¯
-def extract_values_from_dsc_np_format(array):
-    lifehack = 500000
-    class_task = True
-    if class_task:
-        # classification
-        label = array[:lifehack, 140, 0]
-    else:
-        # psi value
-        label = array[:lifehack, -1, 4]
-    start_seq, end_seq = array[:lifehack, :140, :4], array[:lifehack, 141:281, :4]
-    lens = array[:lifehack, -1, 0:3]
-    to_return = []
-    # could feed my network data with 280 + 3 + 1 dimensions
-    for s, e, l, p in zip(start_seq, end_seq, lens, label):
-        to_return.append((T((s, e)).float(), T(l).float(), T(p).float()))
-    return to_return
 
 class ReconExon_Dataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
@@ -215,14 +196,14 @@ class ReconExon_Dataset(Dataset):
     def __init__(self, samples):
         self.samples = torch.tensor(samples)
 
-        lens, target = samples[:, 280, :3], samples[:, 280, 3]
-        xxx = torch.tensor([-0.23017790490661963, -0.16999491874342373, -0.1983459465537275])
-        xxx2 = np.array([-0.23017790490661963, -0.16999491874342373, -0.1983459465537275])
-        for i, ls in enumerate(lens):
-            if np.sum(xxx2 == ls) == 3:
-            # if torch.sum(xxx == ls) == torch.tensor(3):
-                print(i)
-                print('subdued happyness')
+        # lens, target = samples[:, 280, :3], samples[:, 280, 3]
+        # xxx = torch.tensor([-0.23017790490661963, -0.16999491874342373, -0.1983459465537275])
+        # xxx2 = np.array([-0.23017790490661963, -0.16999491874342373, -0.1983459465537275])
+        # for i, ls in enumerate(lens):
+        #     if np.sum(xxx2 == ls) == 3:
+        #     # if torch.sum(xxx == ls) == torch.tensor(3):
+        #         print(i)
+        #         print('subdued happyness')
 
 
     def __len__(self):
@@ -230,37 +211,3 @@ class ReconExon_Dataset(Dataset):
 
     def __getitem__(self, idx):
         return self.samples[idx]
-
-
-def prepare_data():
-    start = time.time()
-    print(f'starting loading of data')
-    samples = []
-    con, cass = [], []
-    with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
-        for i, l in enumerate(f):
-            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-            lens = T((l1, l2, l3))
-            psi = T(psi)
-            sample = (seqs, lens, psi)
-            con.append(sample)
-
-    with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
-        for i, l in enumerate(f):
-            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-            lens = T((l1, l2, l3))
-            psi = T(psi)
-            sample = (seqs, lens, psi)
-            cass.append(sample)
-
-    ratio = int(len(con) / len(cass))
-    for _ in range(ratio):
-        samples.extend(cass)
-
-    end = time.time()
-    print('total time to load data: {} secs'.format(end - start))
-    return samples

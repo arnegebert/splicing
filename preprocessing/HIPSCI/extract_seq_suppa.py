@@ -1,14 +1,15 @@
 import numpy as np
-
+import time
 from utils import one_hot_encode_seq, reverse_complement
 
+startt = time.time()
 psis = []
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
 data_path = '../../data'
-save_to_low = 'hipsci_suppa/brain_cortex_low.npy'
-save_to_high = 'hipsci_suppa/brain_cortex_high.npy'
-save_to_cons = 'hipsci_suppa/brain_cortex_cons.npy'
+save_to_low = 'hipsci_suppa/low.npy'
+save_to_high = 'hipsci_suppa/high.npy'
+save_to_cons = 'hipsci_suppa/cons.npy'
 exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 
@@ -22,7 +23,7 @@ def load_chrom_seq(chrom):
             return loaded_chrom_seq[6:]
 
 cons_exons, high_exons, low_exons = [], [], []
-
+exon_mean, exon_std, intron_mean, intron_std = 145.42, 198.0, 5340., 17000.
 with open('../../suppa/formatted_second.psi') as f:
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
@@ -42,10 +43,17 @@ with open('../../suppa/formatted_second.psi') as f:
         if strand == '-':
             window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
                                                      reverse_complement(window_around_start[::-1])
+            # window_around_start, window_around_end = reverse_complement(window_around_start[::-1]), \
+            #                                          reverse_complement(window_around_end[::-1])
+            # window_around_start, window_around_end = reverse_complement(window_around_start), \
+            #                                          reverse_complement(window_around_end)
+
+        # not doing anything based on strand type kinda tends to have the best results....
 
         start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
         start, end = np.array(start), np.array(end)
-        l1, l2, l3 = 0, 0, 0
+        l1, l2, l3 = s1-e1, e2-s1, s2-e2
+        l1, l2, l3 = (l1-intron_mean)/intron_std, (l2-exon_mean)/exon_std, (l3-intron_mean)/intron_std
         lens_and_psi_vector = np.array([l1, l2, l3, psi])
         start_and_end = np.concatenate((start, end))
         sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
@@ -73,7 +81,7 @@ print(f'Number of cons exons: {len(cons_exons)}')
 np.save(f'{data_path}/{save_to_low}', low_exons)
 np.save(f'{data_path}/{save_to_high}', high_exons)
 np.save(f'{data_path}/{save_to_cons}', cons_exons)
-
+print(f'Runtime {time.time()-startt}')
 # with vs without formatting doesn't make a difference
 # 18360
 # 0.4743559224421955

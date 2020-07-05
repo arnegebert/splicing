@@ -6,3 +6,5 @@ from .NaivePSIDataLoader import *
 from .MNISTDataLoader import *
 from .ReconExon_DataLoader import *
 from .ReconExon_EmbeddedDataLoader import *
+from .HIPSCI_SUPPA_DataLoader import *
+from .HIPSCI_SUPPA_EmbeddedDataLoader import *

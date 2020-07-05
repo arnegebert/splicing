@@ -22,7 +22,7 @@ with open('second.psi') as f:
         except ValueError:
             continue
         e1, s1 = coord1.split('-')
-        e2, s2 = coord1.split('-')
+        e2, s2 = coord2.split('-')
         exons.append((int(chrom[3:]), strand, int(e1), int(s1), int(e2), int(s2), psi))
         psis.append(psi)
 
