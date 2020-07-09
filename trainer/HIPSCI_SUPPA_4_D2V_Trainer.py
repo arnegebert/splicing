@@ -7,7 +7,7 @@ from utils import inf_loop, MetricTracker, split_into_3_mers
 import gensim.models
 
 
-class DSC_D2V_DataTrainer(BaseTrainer):
+class HIPSCI_SUPPA_4_D2V_Trainer(BaseTrainer):
     """
     Trainer class
     """
@@ -51,8 +51,8 @@ class DSC_D2V_DataTrainer(BaseTrainer):
         self.train_metrics.reset()
 
         for batch_idx, data in enumerate(self.data_loader):
-            feats_d2v = data[:, :2].view(-1, 200)
-            lens, target = data[:, 2, :3], data[:, 2, 3]
+            feats_d2v = data[:, :4].view(-1, 400)
+            lens, target = data[:, 4, :3], data[:, 4, 3]
             feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
@@ -104,9 +104,9 @@ class DSC_D2V_DataTrainer(BaseTrainer):
         self.valid_high_metrics.reset()
         with torch.no_grad():
             for batch_idx, data_all in enumerate(self.val_all):
-                feats_d2v = data_all[:, :2].view(-1, 200)
+                feats_d2v = data_all[:, :4].view(-1, 400)
 
-                lens, target = data_all[:, 2, :3], data_all[:, 2, 3]
+                lens, target = data_all[:, 4, :3], data_all[:, 4, 3]
                 feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
                 output = self.model(feats_d2v, lens)
 
@@ -118,9 +118,9 @@ class DSC_D2V_DataTrainer(BaseTrainer):
                     self.valid_all_metrics.update(met.__name__, met(output, target))
 
             for batch_idx, data_low in enumerate(self.val_low):
-                feats_d2v = data_low[:, :2].view(-1, 200)
+                feats_d2v = data_low[:, :4].view(-1, 400)
 
-                lens, target = data_low[:, 2, :3], data_low[:, 2, 3]
+                lens, target = data_low[:, 4, :3], data_low[:, 4, 3]
                 feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
                 output = self.model(feats_d2v, lens)
                 loss = self.criterion(output, target)
@@ -131,9 +131,9 @@ class DSC_D2V_DataTrainer(BaseTrainer):
                     self.valid_low_metrics.update(met.__name__, met(output, target))
 
             for batch_idx, data_high in enumerate(self.val_high):
-                feats_d2v = data_high[:, :2].view(-1, 200)
+                feats_d2v = data_high[:, :4].view(-1, 400)
 
-                lens, target = data_high[:, 2, :3], data_high[:, 2, 3]
+                lens, target = data_high[:, 4, :3], data_high[:, 4, 3]
                 feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
 
                 output = self.model(feats_d2v, lens)

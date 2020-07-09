@@ -429,6 +429,27 @@ class MLP4(BaseModel):
         # x = (self.fc2(x))
         return x
 
+class MLP_4_SEQ(BaseModel):
+    def __init__(self):
+        super().__init__()
+
+        self.fc1 = nn.Linear(400+3, 32)
+        self.fc2 = nn.Linear(32, 8)
+        self.fc3 = nn.Linear(8, 1)
+        self.drop_fc1 = nn.Dropout(0.2)
+        self.drop_fc2 = nn.Dropout(0.2)
+
+    def forward(self, d2v_feats, lens):
+        # [B, 100] input
+
+        # [B, 200]
+        feats = torch.cat((d2v_feats, lens), dim=1)
+        x = F.relu(self.drop_fc1(self.fc1(feats)))
+        # x = F.relu(self.drop_fc1(self.fc1(d2v_feats)))
+        x  = F.relu(self.drop_fc2(self.fc2(x)))
+        x = torch.sigmoid(self.fc3(x))
+        return x
+
 
 class CancellationOfDSC(BaseModel):
     def __init__(self):

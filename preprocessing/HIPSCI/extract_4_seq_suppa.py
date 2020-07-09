@@ -7,9 +7,9 @@ psis = []
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
 data_path = '../../data'
-save_to_low = 'hipsci_suppa/low.npy'
-save_to_high = 'hipsci_suppa/high.npy'
-save_to_cons = 'hipsci_suppa/cons.npy'
+save_to_low = 'hipsci_suppa/4_low.npy'
+save_to_high = 'hipsci_suppa/4_high.npy'
+save_to_cons = 'hipsci_suppa/4_cons.npy'
 exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 
@@ -38,26 +38,33 @@ with open('../../suppa/formatted_second.psi') as f:
             loaded_chrom += 1
             chrom_seq = load_chrom_seq(loaded_chrom)
 
+        window_around_exon_before = chrom_seq[e1-70:e1+70]
+        window_around_exon_after = chrom_seq[s2-70:s2+70]
+
         window_around_start = chrom_seq[s1-introns_bef_start-1:s1+exons_after_start-1]
         window_around_end = chrom_seq[e2-exons_bef_end-2:e2+introns_after_end-2]
         if strand == '-':
             window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
                                                      reverse_complement(window_around_start[::-1])
+            window_around_exon_before, window_around_exon_after = \
+                                                                reverse_complement(window_around_exon_after[::-1]),\
+                                                                reverse_complement(window_around_exon_before[::-1])
             # window_around_start, window_around_end = reverse_complement(window_around_start[::-1]), \
             #                                          reverse_complement(window_around_end[::-1])
             # window_around_start, window_around_end = reverse_complement(window_around_start), \
             #                                          reverse_complement(window_around_end)
-            # print('hello....')
 
         # not doing anything based on strand type kinda tends to have the best results....
 
         start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
+        start_exon, end_exon = one_hot_encode_seq(window_around_exon_before), one_hot_encode_seq(window_around_exon_after)
         start, end = np.array(start), np.array(end)
+        start_exon, end_exon = np.array(start_exon), np.array(end_exon)
         l1, l2, l3 = s1-e1, e2-s1, s2-e2
         l1, l2, l3 = (l1-intron_mean)/intron_std, (l2-exon_mean)/exon_std, (l3-intron_mean)/intron_std
         lens_and_psi_vector = np.array([l1, l2, l3, psi])
-        start_and_end = np.concatenate((start, end))
-        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
+        start_and_ends = np.concatenate((start_exon, start, end, end_exon))
+        sample = np.concatenate((start_and_ends,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
         if psi < 0.8:
             low_exons.append(sample)
         elif psi < 1:
