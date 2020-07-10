@@ -1,10 +1,25 @@
+import functools
 import json
+import time
+
 import pandas as pd
 from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
 import math
 
+def timer(func):
+    """Print the runtime of the decorated function"""
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        start_time = time.perf_counter()  # 1
+        value = func(*args, **kwargs)
+        end_time = time.perf_counter()  # 2
+        run_time = end_time - start_time  # 3
+        print(f"Finished {func.__name__!r} in {run_time:.4f} secs")
+        return value
+    return wrapper_timer #  no "()" here, we need the object to
+                         #  be returned.
 
 def split_into_sentences(text, n):
     return [text[i * n:(i + 1) * n] for i in range(0, math.ceil(len(text) / n))]

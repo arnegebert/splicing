@@ -64,7 +64,12 @@ class HIPSCI_SUPPA_Trainer(BaseTrainer):
             self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update('loss', loss.item())
             for met in self.metric_ftns:
-                self.train_metrics.update(met.__name__, met(output, target))
+                try:
+                    auc_val = met(output, target)
+                    self.train_metrics.update(met.__name__, auc_val)
+                except ValueError:
+                    print('AUC bitching around for train metrics')
+                    continue
 
             if batch_idx % self.log_step == 0:
                 self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(
@@ -114,7 +119,12 @@ class HIPSCI_SUPPA_Trainer(BaseTrainer):
                 self.writer.set_step((epoch - 1) * len(self.val_all) + batch_idx, 'valid')
                 self.valid_all_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
-                    self.valid_all_metrics.update(met.__name__, met(output, target))
+                    try:
+                        auc_val = met(output, target)
+                        self.valid_all_metrics.update(met.__name__, auc_val)
+                    except ValueError:
+                        print('AUC bitching around for val all')
+                        continue
 
             for batch_idx, data_low in enumerate(self.val_low):
                 seqs = data_low[:, :280].view(-1, 2, 140, 4)
@@ -127,7 +137,12 @@ class HIPSCI_SUPPA_Trainer(BaseTrainer):
                 self.writer.set_step((epoch - 1) * len(self.val_low) + batch_idx, 'valid')
                 self.valid_low_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
-                    self.valid_low_metrics.update(met.__name__, met(output, target))
+                    try:
+                        auc_val = met(output, target)
+                        self.valid_low_metrics.update(met.__name__, auc_val)
+                    except ValueError:
+                        print('AUC bitching around for val low')
+                        continue
 
             for batch_idx, data_high in enumerate(self.val_high):
                 seqs = data_high[:, :280].view(-1, 2, 140, 4)
@@ -141,7 +156,12 @@ class HIPSCI_SUPPA_Trainer(BaseTrainer):
                 self.writer.set_step((epoch - 1) * len(self.val_high) + batch_idx, 'valid')
                 self.valid_high_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
-                    self.valid_high_metrics.update(met.__name__, met(output, target))
+                    try:
+                        auc_val = met(output, target)
+                        self.valid_high_metrics.update(met.__name__, auc_val)
+                    except ValueError:
+                        print('AUC bitching around for val high')
+                        continue
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():

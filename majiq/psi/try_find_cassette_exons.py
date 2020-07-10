@@ -47,6 +47,8 @@ for (k, v) in d.items():
     print(f'{k}: {v}')
 
 with open('sorted_all.psi.tsv', 'w') as f:
+    f.write(f'geneid\tlsvid\tlsvtype\tE[psi]\tStd[E[psi]]\ta5ss\ta3ss\tES\tnjunc\tnexon\tjunc coord\tir coord\tstart1\tend1\tstart2\tend2\n')
     for (geneid, lsvid, lsvtype, epsi, stdev, a5ss, a3ss, es, njunc, nexon, juncoord, ircoord,
                                  start1, end1, start2, end2) in es_lines:
         f.write(f'{geneid}\t{lsvid}\t{lsvtype}\t{epsi}\t{stdev}\t{a5ss}\t{a3ss}\t{es}\t{njunc}\t{nexon}\t{juncoord}\t{ircoord}\t{start1}\t{end1}\t{start2}\t{end2}\n')
+        

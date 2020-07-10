@@ -58,12 +58,12 @@ class HIPSCI_SUPPA_4_EmbeddedDataLoader(BaseDataLoader):
             np.random.shuffle(train)
 
             # 1 fold for testing
-
-            htest = np.concatenate((hx_cas_data[b * s:b * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
-            lt = np.concatenate((lx_cas_data[c * s:c * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
+            n_samples = 5000000
+            htest = np.concatenate((hx_cas_data[b * s:b * (s + 1)][:n_samples], x_cons_data[a * s:a * (s + 1)][:n_samples]), axis=0)
+            lt = np.concatenate((lx_cas_data[c * s:c * (s + 1)][:n_samples], x_cons_data[a * s:a * (s + 1)][:n_samples]), axis=0)
 
             test = htest
-            test = np.concatenate((test, lx_cas_data[c * s:c * (s + 1)]), axis=0)
+            test = np.concatenate((test, lx_cas_data[c * s:c * (s + 1)][:n_samples]), axis=0)
 
             cons_test = x_cons_data[a * s:a * (s + 1)]
             cas_test = np.concatenate((lx_cas_data[c * s:c * (s + 1)], hx_cas_data[b * s:b * (s + 1)]))
