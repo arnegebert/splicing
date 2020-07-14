@@ -4,12 +4,13 @@ from utils import one_hot_encode_seq, reverse_complement
 
 startt = time.time()
 psis = []
-introns_bef_start = 70 # introns
-exons_after_start = 70 # exons
+
 data_path = '../../data'
 save_to_low = 'hipsci_suppa/low.npy'
 save_to_high = 'hipsci_suppa/high.npy'
 save_to_cons = 'hipsci_suppa/cons.npy'
+introns_bef_start = 70 # introns
+exons_after_start = 70 # exons
 exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 

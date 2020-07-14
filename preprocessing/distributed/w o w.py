@@ -1,10 +1,65 @@
 import gensim.models
 
-xxx = gensim.models.Word2Vec.load('../../model/w2v-full-5epochs')
+model_name = 'd2v'
+# d2v: 7.5 I like the best, 25 previous favorite
+# w2v: 12.5 I like the best, 10 also decent
+perplexity = 7.5
+xxx = gensim.models.Word2Vec.load(f'../../model/{model_name}-full-5epochs')
 print('x')
 
 from sklearn.manifold import TSNE                   # final reduction
 import numpy as np                                  # array handling
+
+
+def codon_to_amino_acid(codon):
+    mapping = {
+        'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
+        'ACA': 'T', 'ACC': 'T', 'ACG': 'T', 'ACT': 'T',
+        'AAC': 'N', 'AAT': 'N', 'AAA': 'K', 'AAG': 'K',
+        'AGC': 'S', 'AGT': 'S', 'AGA': 'R', 'AGG': 'R',
+        'CTA': 'L', 'CTC': 'L', 'CTG': 'L', 'CTT': 'L',
+        'CCA': 'P', 'CCC': 'P', 'CCG': 'P', 'CCT': 'P',
+        'CAC': 'H', 'CAT': 'H', 'CAA': 'Q', 'CAG': 'Q',
+        'CGA': 'R', 'CGC': 'R', 'CGG': 'R', 'CGT': 'R',
+        'GTA': 'V', 'GTC': 'V', 'GTG': 'V', 'GTT': 'V',
+        'GCA': 'A', 'GCC': 'A', 'GCG': 'A', 'GCT': 'A',
+        'GAC': 'D', 'GAT': 'D', 'GAA': 'E', 'GAG': 'E',
+        'GGA': 'G', 'GGC': 'G', 'GGG': 'G', 'GGT': 'G',
+        'TCA': 'S', 'TCC': 'S', 'TCG': 'S', 'TCT': 'S',
+        'TTC': 'F', 'TTT': 'F', 'TTA': 'L', 'TTG': 'L',
+        'TAC': 'Y', 'TAT': 'Y', 'TAA': '_', 'TAG': '_',
+        'TGC': 'C', 'TGT': 'C', 'TGA': '_', 'TGG': 'W',
+    }
+    return mapping[codon]
+
+def one_l_codon_to_three_l_codon(one_letter_codon_abbrv):
+    mapping = {
+        'F' : 'Phe',
+        'L' : 'Leu',
+        'S': 'Ser',
+        'Y': 'Tyr',
+        'X': 'Ter',
+        'C': 'Cys',
+        'W': 'Trp',
+        'P': 'Pro',
+        'H': 'His',
+        'Q': 'Gln',
+        'R': 'Arg',
+        'I': 'Ile',
+        'M': 'Met',
+        'T': 'Thr',
+        'N': 'Asn',
+        'K': 'Lys',
+        'V': 'Val',
+        'A': 'Ala',
+        'D': 'Asp',
+        'E': 'Glu',
+        'G': 'Gly',
+        'B': 'Asp/Asn',
+        'Z': 'Glu/Gln',
+        '_': 'Ter'
+    }
+    return mapping[one_letter_codon_abbrv]
 
 
 def reduce_dimensions(model):
@@ -22,7 +77,8 @@ def reduce_dimensions(model):
 
     # reduce using t-SNE
     vectors = np.asarray(vectors)
-    tsne = TSNE(n_components=num_dimensions, random_state=1)
+
+    tsne = TSNE(n_components=num_dimensions, random_state=1, perplexity=perplexity)
     vectors = tsne.fit_transform(vectors)
 
     x_vals = [v[0] for v in vectors]
@@ -57,13 +113,20 @@ def plot_with_matplotlib(x_vals, y_vals, labels):
     plt.scatter(x_vals, y_vals)
 
     #
-    # Label randomly subsampled 25 data points
+    # Label randomly subsampled 64 data points
     #
     indices = list(range(len(labels)))
     selected_indices = random.sample(indices, 64)
     for i in selected_indices:
-        plt.annotate(labels[i], (x_vals[i], y_vals[i]))
-    plt.savefig('tSNE-w2v.png')
+        # plt.annotate(codon_to_amino_acid(labels[i]), (x_vals[i], y_vals[i]))
+        label_name = codon_to_amino_acid(labels[i])
+        label_name = one_l_codon_to_three_l_codon(label_name)
+        xy = (x_vals[i], y_vals[i])
+        xytext = (x_vals[i]-3.5, y_vals[i]+2)
+        plt.annotate(label_name, xy=(x_vals[i], y_vals[i]),xytext=xytext)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.savefig(f'tSNE-{model_name}.png', bbox_inches='tight')
     plt.show()
 
 # try:
@@ -85,3 +148,6 @@ def infinite_sequence():
 x = infinite_sequence()
 for e in x:
     print(e)
+
+
+
