@@ -40,6 +40,7 @@ with open('filtered_all.tsv') as f:
 
     for i, line in enumerate(f):
         if i == 0: continue
+        if i % 1000 == 0: print(f'Line {i}')
         genename, geneid, lsvid, epsi, stdev, lsvtype, njunc, nexon, denovojunc, \
         chrom, strand, juncoord, excoords, ircoord, ucsc = line.replace('\n', '').split('\t')
         denovo += denovojunc.count('1')
@@ -52,9 +53,11 @@ with open('filtered_all.tsv') as f:
 
         excoord1, excoord2, excoord3 = excoords.split(';')
         exidx1, exidx2, exidx3 = excoord1.find('-'), excoord2.find('-'), excoord2.find('-')
-        ex1start, ex1end = int(excoord1[:exidx1]), int(excoord1[exidx1 + 1:])
-        ex2start, ex2end = int(excoord2[:exidx2]), int(excoord2[exidx2 + 1:])
-        ex3start, ex3end = int(excoord3[:exidx3]), int(excoord3[exidx3 + 1:])
+        try:
+            ex1start, ex1end = int(excoord1[:exidx1]), int(excoord1[exidx1 + 1:])
+            ex2start, ex2end = int(excoord2[:exidx2]), int(excoord2[exidx2 + 1:])
+            ex3start, ex3end = int(excoord3[:exidx3]), int(excoord3[exidx3 + 1:])
+        except ValueError: continue
 
         if s1 == s2:
             var1 += 1
@@ -79,7 +82,7 @@ with open('filtered_all.tsv') as f:
                 break
         # copy from other extract sequence files:
         # extract sequence
-        if chrom > loaded_chrom:
+        if int(chrom) > loaded_chrom:
             loaded_chrom += 1
             chrom_seq = load_chrom_seq(loaded_chrom)
 
@@ -91,10 +94,10 @@ with open('filtered_all.tsv') as f:
             window_around_end2 = chrom_seq[e2 - exons_bef_end - 2:e2 + introns_after_end - 2]
             psi1, psi2 = map(float, epsi.split(';'))
         else:
-            window_around_start1 = chrom_seq[s1 - introns_bef_start - 1:s1 + exons_after_start - 1]
-            window_around_end1 = chrom_seq[e1 - exons_bef_end - 2:e1 + introns_after_end - 2]
-            window_around_start2 = chrom_seq[s2 - introns_bef_start - 1:s2 + exons_after_start - 1]
-            window_around_end2 = chrom_seq[e2 - exons_bef_end - 2:e2 + introns_after_end - 2]
+            window_around_start1 = chrom_seq[s2 - introns_bef_start - 1:s2 + exons_after_start - 1]
+            window_around_end1 = chrom_seq[e2 - exons_bef_end - 2:e2 + introns_after_end - 2]
+            window_around_start2 = chrom_seq[s1 - introns_bef_start - 1:s1 + exons_after_start - 1]
+            window_around_end2 = chrom_seq[e1 - exons_bef_end - 2:e1 + introns_after_end - 2]
             psi2, psi1 = map(float, epsi.split(';'))
         if strand == '-':
             window_around_start1, window_around_end1 = reverse_complement(window_around_end1[::-1]), \
@@ -107,31 +110,14 @@ with open('filtered_all.tsv') as f:
         start2, end2 = one_hot_encode_seq(window_around_start2), one_hot_encode_seq(window_around_end2)
         start2, end2 = np.array(start2), np.array(end2)
 
-        # my brain is starting to hurt
-        # don't think I need the below with standardization above
-        # if (e1 - s1) > (e2 - s2): # s1-e1 is skipping junction
-        #     l11, l21, l31 = ex1end-ex1start, ex3start-ex1end, ex3end-ex3start
-        #     if s1 == s2: # left junction
-        #         l12, l22, l32 = ex1end-ex1start, ex2start-ex1end, ex2end-ex2start
-        #     elif e1 == e2: # right junction
-        #         l12, l22, l32 = ex2end - ex2start, ex3start - ex2end, ex3end - ex3start
-        # else: # s1-e1 is including junction
-        #     if s1 == s2: # left junction
-        #         l12, l22, l32 = ex1end-ex1start, ex2start-ex1end, ex2end-ex2start
-        #     elif e1 == e2: # right junction
-        #         l12, l22, l32 = ex2end - ex2start, ex3start - ex2end, ex3end - ex3start
-        #
-        #     l11, l21, l31 = ex1end-ex1start, ex3start-ex1end, ex3end-ex3start
-
         l11, l21, l31 = ex1end - ex1start, ex3start - ex1end, ex3end - ex3start
         if s1 == s2:  # left junction
             l12, l22, l32 = ex1end - ex1start, ex2start - ex1end, ex2end - ex2start
         elif e1 == e2:  # right junction
             l12, l22, l32 = ex2end - ex2start, ex3start - ex2end, ex3end - ex3start
-
+        else: continue
         l11, l21, l31 = (l11 - exon_mean) / exon_std, (l21 - intron_mean) / intron_std, (l31 - exon_mean) / exon_std
         l12, l22, l32 = (l12 - exon_mean) / exon_std, (l22 - intron_mean) / intron_std, (l32 - exon_mean) / exon_std
-
 
         lens_and_psi_vector1 = np.array([l11, l21, l31, psi1])
         start_and_end1 = np.concatenate((start1, end1))
@@ -157,23 +143,12 @@ with open('filtered_all.tsv') as f:
     high_psi_exons = np.array(high_exons)
     cons_exons = np.array(cons_exons)
 
-        # # save
-        # es_lines.append((geneid, lsvid, lsvtype, epsi, stdev, a5ss, a3ss, es, njunc, nexon, juncoord, ircoord,
-        #                  s1, e1, s2, e2))
-        # if s1 == prev_start1:
-        #     exons.append(es_lines[-1])
-        # prev_start1 = s1
-
-
-# es_lines.sort(key=lambda tup: tup[-1])
-# es_lines.sort(key=lambda tup: tup[-2])
-# es_lines.sort(key=lambda tup: tup[-3])
-# es_lines.sort(key=lambda tup: tup[-4])
 psis = np.array(psis)
 print(f'Number of samples: {len(psis)}')
 print(f'Mean PSI: {np.mean(psis)}')
 print(f'Median PSI: {np.median(psis)}')
 
+print(f'Number of generated training samples: {len(low_psi_exons)+len(high_psi_exons)+len(cons_exons)}')  # 22700
 
 print(f'Number of low PSI exons: {len(low_exons)}')
 print(f'Number of high PSI exons: {len(high_exons)}')
@@ -194,15 +169,6 @@ print(f'Number of var1 junctions where shorter junction is first: {shorter_first
 print(f'Number of var1 junctions where shorter junction is second: {shorter_second_var1}') # 5507
 print(f'Number of var2 junctions where shorter junction is first: {shorter_first_var2}') # 5076
 print(f'Number of var2 junctions where shorter junction is second: {shorter_second_var2}') # 5876
-
-print(f'Number of exon skipped events: {len(es_lines)}')  # 22700
+print(f'Number of de novo junctions: {denovo}')
 for (k, v) in d.items():
     print(f'{k}: {v}')
-
-# with open('sorted_all.psi.tsv', 'w') as f:
-#     f.write(
-#         f'geneid\tlsvid\tlsvtype\tE[psi]\tStd[E[psi]]\ta5ss\ta3ss\tES\tnjunc\tnexon\tjunc coord\tir coord\tstart1\tend1\tstart2\tend2\n')
-#     for (geneid, lsvid, lsvtype, epsi, stdev, a5ss, a3ss, es, njunc, nexon, juncoord, ircoord,
-#          s1, e1, s2, e2) in es_lines:
-#         f.write(
-#             f'{geneid}\t{lsvid}\t{lsvtype}\t{epsi}\t{stdev}\t{a5ss}\t{a3ss}\t{es}\t{njunc}\t{nexon}\t{juncoord}\t{ircoord}\t{s1}\t{e1}\t{s2}\t{e2}\n')
