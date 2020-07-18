@@ -6,7 +6,7 @@ startt = time.time()
 psis = []
 
 data_path = '../../data'
-save_to_cons = 'hipsci_majiq/cons.npy'
+save_to_cons = 'hipsci_majiq/junc/cons.npy'
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
 exons_bef_end = 70 # exons

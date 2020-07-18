@@ -20,9 +20,14 @@ class HIPSCI_MAJIQ_DataLoader(BaseDataLoader):
         print(f'starting loading of data')
         self.samples = []
 
-        x_cons_data = np.load('data/hipsci_majiq/cons.npy')
-        hx_cas_data = np.load('data/hipsci_majiq/high.npy')
-        lx_cas_data = np.load('data/hipsci_majiq/low.npy')
+        if data_dir:
+            x_cons_data = np.load(f'{data_dir}/cons.npy')
+            hx_cas_data = np.load(f'{data_dir}/high.npy')
+            lx_cas_data = np.load(f'{data_dir}/low.npy')
+        else:
+            x_cons_data = np.load('data/hipsci_majiq/junc/cons.npy')
+            hx_cas_data = np.load('data/hipsci_majiq/junc/high.npy')
+            lx_cas_data = np.load('data/hipsci_majiq/junc/low.npy')
 
         if classification:
             x_cons_data[:, 280, 3] = (x_cons_data[:, 280, 3] >= classification_treshold).astype(np.float32)

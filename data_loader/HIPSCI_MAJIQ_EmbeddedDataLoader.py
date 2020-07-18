@@ -22,9 +22,15 @@ class HIPSCI_MAJIQ_EmbeddedDataLoader(BaseDataLoader):
         cons, low, high = [], [], []
         data_type = 'cass'
         if True:
-            x_cons_data = np.load('data/hipsci_majiq/embedded_cons.npy')
-            hx_cas_data = np.load('data/hipsci_majiq/embedded_high.npy')
-            lx_cas_data = np.load('data/hipsci_majiq/embedded_low.npy')
+            if data_dir:
+                x_cons_data = np.load(f'{data_dir}/embedded_cons.npy')
+                hx_cas_data = np.load(f'{data_dir}/embedded_high.npy')
+                lx_cas_data = np.load(f'{data_dir}/embedded_low.npy')
+            else:
+                x_cons_data = np.load('data/hipsci_majiq/junc/embedded_cons.npy')
+                hx_cas_data = np.load('data/hipsci_majiq/junc/embedded_high.npy')
+                lx_cas_data = np.load('data/hipsci_majiq/junc/embedded_low.npy')
+
 
             # x_cons_data = x_cons_data[:10]
             # hx_cas_data = hx_cas_data[:10]

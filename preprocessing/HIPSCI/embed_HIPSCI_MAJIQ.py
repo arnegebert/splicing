@@ -7,7 +7,7 @@ from utils import one_hot_decode_seq_vanilla
 #todo could make this doable via command line arguments and export / document data processing process via a bash script
 startt = time.time()
 data_path = '../../data'
-
+data_dir = 'hipsci_majiq/exon'
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
 classification_task = True
 constitutive_level = 0.99
@@ -28,9 +28,9 @@ def split_into_3_mers(sentence):
     return words
 
 print('Loading data')
-cons_exons = np.load('../../data/hipsci_majiq/cons.npy')
-low_exons = np.load('../../data/hipsci_majiq/low.npy')
-high_exons = np.load('../../data/hipsci_majiq/high.npy')
+cons_exons = np.load(f'../../data/{data_dir}/cons.npy')
+low_exons = np.load(f'../../data/{data_dir}/low.npy')
+high_exons = np.load(f'../../data/{data_dir}/high.npy')
 print('Finished loading data')
 
 def decode_reshape_and_embed(batch):
@@ -70,9 +70,9 @@ print('Low data done')
 high_exons = decode_reshape_and_embed(high_exons)
 print('High data done')
 
-np.save(f'{data_path}/hipsci_majiq/embedded_cons.npy', cons_exons)
-np.save(f'{data_path}/hipsci_majiq/embedded_low.npy', low_exons)
-np.save(f'{data_path}/hipsci_majiq/embedded_high.npy', high_exons)
+np.save(f'{data_path}/{data_dir}/embedded_cons.npy', cons_exons)
+np.save(f'{data_path}/{data_dir}/embedded_low.npy', low_exons)
+np.save(f'{data_path}/{data_dir}/embedded_high.npy', high_exons)
 
 
 endt = time.time()

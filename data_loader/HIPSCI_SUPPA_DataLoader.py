@@ -19,10 +19,14 @@ class HIPSCI_SUPPA_DataLoader(BaseDataLoader):
         start = time.time()
         print(f'starting loading of data')
         self.samples = []
-
-        x_cons_data = np.load('data/hipsci_suppa/cons.npy')
-        hx_cas_data = np.load('data/hipsci_suppa/high.npy')
-        lx_cas_data = np.load('data/hipsci_suppa/low.npy')
+        if data_dir:
+            x_cons_data = np.load(f'{data_dir}/cons.npy')
+            hx_cas_data = np.load(f'{data_dir}/high.npy')
+            lx_cas_data = np.load(f'{data_dir}/low.npy')
+        else:
+            x_cons_data = np.load('data/hipsci_suppa/cons.npy')
+            hx_cas_data = np.load('data/hipsci_suppa/high.npy')
+            lx_cas_data = np.load('data/hipsci_suppa/low.npy')
 
         if classification:
             x_cons_data[:, 280, 3] = (x_cons_data[:, 280, 3] >= classification_treshold).astype(np.float32)

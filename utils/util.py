@@ -8,6 +8,11 @@ from itertools import repeat
 from collections import OrderedDict
 import math
 
+
+def overlap(start, end, start2, end2):
+    return not (start > end2 or end < start2)
+
+
 def timer(func):
     """Print the runtime of the decorated function"""
     @functools.wraps(func)
