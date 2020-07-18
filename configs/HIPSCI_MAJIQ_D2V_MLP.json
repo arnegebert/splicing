@@ -1,5 +1,5 @@
 {
-    "name": "HIPSCI_SUPPA_D2V_MLP",
+    "name": "HIPSCI_MAJIQ_D2V_MLP",
 
     "n_gpu": 1,
 
@@ -8,7 +8,7 @@
         "args": {}
     },
     "data_loader": {
-        "type": "HIPSCI_SUPPA_EmbeddedDataLoader",
+        "type": "HIPSCI_MAJIQ_EmbeddedDataLoader",
         "args":{
             "data_dir": "data/",
             "batch_size": 256,
@@ -46,7 +46,7 @@
         "verbosity": 1,
 
         "monitor": "min val_loss",
-        "early_stop": 15,
+        "early_stop": 25,
 
         "tensorboard": true
     }

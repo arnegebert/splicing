@@ -7,7 +7,7 @@ from utils import inf_loop, MetricTracker, split_into_3_mers
 import gensim.models
 
 
-class DSC_D2V_DataTrainer(BaseTrainer):
+class D2V_DataTrainer(BaseTrainer):
     """
     Trainer class
     """

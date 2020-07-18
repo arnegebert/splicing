@@ -9,3 +9,5 @@ from .ReconExon_EmbeddedDataLoader import *
 from .HIPSCI_SUPPA_DataLoader import *
 from .HIPSCI_SUPPA_EmbeddedDataLoader import *
 from .HIPSCI_SUPPA_4_EmbeddedDataLoader import *
+from .HIPSCI_MAJIQ_DataLoader import *
+from .HIPSCI_MAJIQ_EmbeddedDataLoader import *

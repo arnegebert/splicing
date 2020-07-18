@@ -1,26 +1,28 @@
 {
-    "name": "HIPSCI_SUPPA_D2V_MLP",
+    "name": "HIPSCI_MAJIQ_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "MLP3",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
-        "type": "HIPSCI_SUPPA_EmbeddedDataLoader",
+        "type": "HIPSCI_MAJIQ_DataLoader",
         "args":{
-            "data_dir": "data/",
+            "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1
+            "num_workers": 0,
+            "classification": true,
+            "classification_treshold": 0.99
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -37,17 +39,18 @@
         }
     },
     "trainer": {
-        "type": "D2V_DataTrainer",
+        "type": "HIPSCI_MAJIQ_Trainer",
         "args": {},
-        "epochs": 200,
+        "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "min val_loss",
-        "early_stop": 15,
+        "early_stop": 25,
 
         "tensorboard": true
-    }
+    },
+    "comment": ""
 }
