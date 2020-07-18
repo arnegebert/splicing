@@ -34,7 +34,7 @@ junc_not_matching_exon = 0
 d = defaultdict(lambda: 0)
 prev_start1 = 0
 denovo = 0
-with open('filtered_all.tsv') as f:
+with open('../../majiq/voila/filtered_all.tsv') as f:
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
 
@@ -127,7 +127,7 @@ with open('filtered_all.tsv') as f:
         elif psi1 < 1:
             high_exons.append(sample1)
         else:
-            cons_exons.append(sample1)
+            raise Exception('Constitutive junction detected')
 
         lens_and_psi_vector2 = np.array([l12, l22, l32, psi2])
         start_and_end2 = np.concatenate((start2, end2))
@@ -137,11 +137,10 @@ with open('filtered_all.tsv') as f:
         elif psi2 < 1:
             high_exons.append(sample2)
         else:
-            cons_exons.append(sample2)
+            raise Exception('Constitutive junction detected')
         psis.append(psi1)
     low_psi_exons = np.array(low_exons)
     high_psi_exons = np.array(high_exons)
-    cons_exons = np.array(cons_exons)
 
 psis = np.array(psis)
 print(f'Number of samples: {len(psis)}')
@@ -156,7 +155,6 @@ print(f'Number of cons exons: {len(cons_exons)}')
 
 np.save(f'{data_path}/{save_to_low}', low_exons)
 np.save(f'{data_path}/{save_to_high}', high_exons)
-np.save(f'{data_path}/{save_to_cons}', cons_exons)
 print(f'Runtime {time.time()-startt}')
 
 print(f'Number of junctions where cassette exon is left: {var1}') # 10886
