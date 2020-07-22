@@ -407,6 +407,8 @@ class MLP3(BaseModel):
         # [B, 100] input
 
         # [B, 200]
+        # lens = torch.zeros_like(lens)
+        d2v_feats = torch.zeros_like(d2v_feats)
         feats = torch.cat((d2v_feats, lens), dim=1)
         x = F.relu(self.drop_fc1(self.fc1(feats)))
         x = torch.sigmoid(self.fc2(x))

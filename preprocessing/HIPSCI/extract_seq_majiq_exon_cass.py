@@ -2,6 +2,7 @@ from collections import defaultdict
 import time
 import numpy as np
 from utils import reverse_complement, one_hot_encode_seq, intron_mean, exon_mean, intron_std, exon_std
+import matplotlib.pyplot as plt
 
 startt = time.time()
 # want to load chromosome as one giant string
@@ -23,7 +24,7 @@ exons_after_start = 70 # exons
 exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 
-es_lines = []
+l1s, l2s, l3s = [], [], []
 psis = []
 cons_exons, high_exons, low_exons = [], [], []
 var1, var2, var3 = 0, 0, 0
@@ -100,7 +101,10 @@ with open('../../majiq/voila/filtered_all.tsv') as f:
         start, end = np.array(start), np.array(end)
 
         l1, l2, l3 = ex2start - ex1end, ex2end - ex2start, ex3start - ex2end
-        l1, l2, l3 = (l1 - exon_mean) / exon_std, (l2 - intron_mean) / intron_std, (l3 - exon_mean) / exon_std
+        l1, l2, l3 = (l1 - intron_mean) / intron_std, (l2 - exon_mean) / exon_std, (l3 - intron_mean) / intron_std
+        l1s.append(l1)
+        l2s.append(l2)
+        l3s.append(l3)
 
         lens_and_psi_vector1 = np.array([l1, l2, l3, psi])
         start_and_end1 = np.concatenate((start, end))
@@ -116,6 +120,20 @@ with open('../../majiq/voila/filtered_all.tsv') as f:
     high_psi_exons = np.array(high_exons)
 
 psis = np.array(psis)
+l1s, l2s, l3s = np.array(l1s), np.array(l2s), np.array(l3s)
+l1avg, l2avg, l3avg = np.mean(l1s), np.mean(l2s), np.mean(l3s)
+l1median, l2median, l3median = np.median(l1s), np.median(l2s), np.median(l3s)
+
+print(f'L1avg: {l1avg}, l2avg: {l2avg}, l3avg: {l3avg}')
+print(f'L1 median: {l1median}, l2 median: {l2median}, l3 median: {l3median}')
+
+plt.hist(l1s[l1s<=50])
+plt.xlabel('normalized L1 value')
+plt.ylabel('number of data points')
+plt.title('Cassette exons MAJIQ')
+plt.show()
+
+
 print(f'Number of samples: {len(psis)}')
 print(f'Mean PSI: {np.mean(psis)}')
 print(f'Median PSI: {np.median(psis)}')

@@ -1,6 +1,7 @@
 import numpy as np
 import time
 from utils import one_hot_encode_seq, reverse_complement
+import matplotlib.pyplot as plt
 
 startt = time.time()
 psis = []
@@ -23,6 +24,8 @@ def load_chrom_seq(chrom):
         else:
             return loaded_chrom_seq[6:]
 
+l1scons, l2scons, l3scons = [], [], []
+l1scass, l2scass, l3scass = [], [], []
 cons_exons, high_exons, low_exons = [], [], []
 exon_mean, exon_std, intron_mean, intron_std = 145.42, 198.0, 5340., 17000.
 with open('../../suppa/formatted_second.psi') as f:
@@ -61,15 +64,52 @@ with open('../../suppa/formatted_second.psi') as f:
         sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
         if psi < 0.8:
             low_exons.append(sample)
+            l1scass.append(l1)
+            l2scass.append(l2)
+            l3scass.append(l3)
         elif psi < 1:
             high_exons.append(sample)
+            l1scass.append(l1)
+            l2scass.append(l2)
+            l3scass.append(l3)
         else:
             cons_exons.append(sample)
+            l1scons.append(l1)
+            l2scons.append(l2)
+            l3scons.append(l3)
 
         psis.append(psi)
     low_psi_exons = np.array(low_exons)
     high_psi_exons = np.array(high_exons)
     cons_exons = np.array(cons_exons)
+
+l1scons, l2scons, l3scons = np.array(l1scons), np.array(l2scons), np.array(l3scons)
+l1avgcons, l2avgcons, l3avgcons = np.mean(l1scons), np.mean(l2scons), np.mean(l3scons)
+l1mediancons, l2mediancons, l3mediancons = np.median(l1scons), np.median(l2scons), np.median(l3scons)
+
+print(f'Cons:')
+print(f'L1avg: {l1avgcons}, l2avg: {l2avgcons}, l3avg: {l3avgcons}')
+print(f'L1 median: {l1mediancons}, l2 median: {l2mediancons}, l3 median: {l3mediancons}')
+
+l1scass, l2scass, l3scass = np.array(l1scass), np.array(l2scass), np.array(l3scass)
+l1avgcass, l2avgcass, l3avgcass = np.mean(l1scass), np.mean(l2scass), np.mean(l3scass)
+l1mediancass, l2mediancass, l3mediancass = np.median(l1scass), np.median(l2scass), np.median(l3scass)
+
+print(f'Cass:')
+print(f'L1avg: {l1avgcass}, l2avg: {l2avgcass}, l3avg: {l3avgcass}')
+print(f'L1 median: {l1mediancass}, l2 median: {l2mediancass}, l3 median: {l3mediancass}')
+
+plt.hist(l1scons)
+plt.xlabel('normalized L1 value')
+plt.ylabel('number of data points')
+plt.title('Constitutive exons SUPPA')
+plt.show()
+
+plt.hist(l1scass)
+plt.xlabel('normalized L1 value')
+plt.ylabel('number of data points')
+plt.title('Cassette exons SUPPA')
+plt.show()
 
 psis = np.array(psis)
 print(f'Number of samples: {len(psis)}')

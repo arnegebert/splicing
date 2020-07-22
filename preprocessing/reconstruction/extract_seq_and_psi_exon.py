@@ -212,7 +212,8 @@ print(f'Took {timer()-startt:.2f} s to go through all junctions and accumulate t
 print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
 
 psis_gtex, psis_dsc = [], []
-
+l1scons, l2scons, l3scons = [], [], []
+l1scass, l2scass, l3scass = [], [], []
 
 """Going through exons after all junction reads have been accounted for"""
 def encoding_and_sequence_extraction(DSC_counts):
@@ -259,13 +260,23 @@ def encoding_and_sequence_extraction(DSC_counts):
         sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
         if psi < 0.8:
             low_psi_exons.append(sample)
+            l1scass.append(l1)
+            l2scass.append(l2)
+            l3scass.append(l3)
         elif psi < 1:
             high_psi_exons.append(sample)
+            l1scass.append(l1)
+            l2scass.append(l2)
+            l3scass.append(l3)
         else:
             cons_exons.append(sample)
+            l1scons.append(l1)
+            l2scons.append(l2)
+            l3scons.append(l3)
 
     print(f'Skipped DSC exons because no junctions contributed any reads: {no_junction}')
     print(f'Skipped DSC exons because less than four contributed reads: {less_than_four}')
+
     print(f'DSC exons with low similarity between my and original sequences: {low_sim}')
     total = len(low_psi_exons) + len(high_psi_exons) + len(cons_exons)
     print(f'Low: {len(low_psi_exons)/total}%, high: {len(high_psi_exons)/total}%, cons: {len(cons_exons)/total}%')
@@ -275,8 +286,41 @@ def encoding_and_sequence_extraction(DSC_counts):
 
     return low_psi_exons, high_psi_exons, cons_exons
 
+
+
 low_cons_exons, high_cons_exons, cons_cons_exons = encoding_and_sequence_extraction(DSC_cons_counts)
 low_cass_exons, high_cass_exons, cons_cass_exons = encoding_and_sequence_extraction(DSC_cass_counts)
+
+l1scons, l2scons, l3scons = np.array(l1scons), np.array(l2scons), np.array(l3scons)
+l1avgcons, l2avgcons, l3avgcons = np.mean(l1scons), np.mean(l2scons), np.mean(l3scons)
+l1mediancons, l2mediancons, l3mediancons = np.median(l1scons), np.median(l2scons), np.median(l3scons)
+
+print(f'Cons:')
+print(f'L1avg: {l1avgcons}, l2avg: {l2avgcons}, l3avg: {l3avgcons}')
+print(f'L1 median: {l1mediancons}, l2 median: {l2mediancons}, l3 median: {l3mediancons}')
+
+l1scass, l2scass, l3scass = np.array(l1scass), np.array(l2scass), np.array(l3scass)
+l1avgcass, l2avgcass, l3avgcass = np.mean(l1scass), np.mean(l2scass), np.mean(l3scass)
+l1mediancass, l2mediancass, l3mediancass = np.median(l1scass), np.median(l2scass), np.median(l3scass)
+
+print(f'Cass:')
+print(f'L1avg: {l1avgcass}, l2avg: {l2avgcass}, l3avg: {l3avgcass}')
+print(f'L1 median: {l1mediancass}, l2 median: {l2mediancass}, l3 median: {l3mediancass}')
+
+
+plt.hist(l1scons)
+plt.xlabel('normalized L1 value')
+plt.ylabel('number of data points')
+plt.title('Constitutive exons DSC')
+plt.xlim(-2, 10)
+plt.show()
+
+plt.hist(l1scass)
+plt.xlabel('normalized L1 value')
+plt.ylabel('number of data points')
+plt.title('Cassette exons DSC')
+plt.xlim(-2, 10)
+plt.show()
 
 if low_cons_exons.size > 0:
     low_exons = np.concatenate((low_cons_exons, low_cass_exons))

@@ -1,6 +1,7 @@
 import numpy as np
 import time
 from utils import one_hot_encode_seq, reverse_complement, overlap
+import matplotlib.pyplot as plt
 
 startt = time.time()
 psis = []
@@ -21,6 +22,7 @@ def load_chrom_seq(chrom):
         else:
             return loaded_chrom_seq[6:]
 
+l1s, l2s, l3s = [], [], []
 cons_exons = []
 prev_astart, prev_aend = 0, 0
 prev_dstart, prev_dend = 0, 0
@@ -57,6 +59,9 @@ with open('../../majiq/builder/constitutive_junctions_sorted_stranded.tsv') as f
             l1, l2, l3 = dstart-prev_dend, dend-dstart, astart-dend
             l1, l2, l3 = (l1-intron_mean)/intron_std, (l2-exon_mean)/exon_std, (l3-intron_mean)/intron_std
             lens_and_psi_vector = np.array([l1, l2, l3, psi])
+            l1s.append(l1)
+            l2s.append(l2)
+            l3s.append(l3)
             start_and_end = np.concatenate((start, end))
             sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
             cons_exons.append(sample)
@@ -68,6 +73,20 @@ with open('../../majiq/builder/constitutive_junctions_sorted_stranded.tsv') as f
     cons_exons = np.array(cons_exons)
 
 psis = np.array(psis)
+
+l1s, l2s, l3s = np.array(l1s), np.array(l2s), np.array(l3s)
+l1avg, l2avg, l3avg = np.mean(l1s), np.mean(l2s), np.mean(l3s)
+l1median, l2median, l3median = np.median(l1s), np.median(l2s), np.median(l3s)
+
+plt.hist(l1s)
+plt.xlabel('normalized L1 value')
+plt.ylabel('number of data points')
+plt.title('Constitutive exons MAJIQ')
+plt.show()
+
+print(f'L1avg: {l1avg}, l2avg: {l2avg}, l3avg: {l3avg}')
+print(f'L1 median: {l1median}, l2 median: {l2median}, l3 median: {l3median}')
+
 
 print(f'Number of cons exon: {len(cons_exons)}')
 print(f'Number of overlapping (supposedly constitutive) junctions: {overlaps}')
