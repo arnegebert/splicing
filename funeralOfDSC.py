@@ -27,8 +27,8 @@ np.random.seed(0)
 class MLP(torch.nn.Module):
     def __init__(self):
         super(MLP, self).__init__()
-        self.fc1 = nn.Linear(3, 4, bias=True)
-        self.fc2 = nn.Linear(4, 1, bias=False)
+        self.fc1 = nn.Linear(3, 12, bias=True)
+        self.fc2 = nn.Linear(12, 1, bias=False)
 
     def forward(self, lens):
         x = F.relu(self.fc1(lens))

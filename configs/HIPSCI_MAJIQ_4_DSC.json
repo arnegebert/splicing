@@ -1,16 +1,16 @@
 {
-    "name": "HIPSCI_MAJIQ_4_D2V_MLP",
+    "name": "HIPSCI_MAJIQ_4_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "MLP_4_SEQ",
+        "type": "DSC_4_SEQ",
         "args": {}
     },
     "data_loader": {
-        "type": "HIPSCI_MAJIQ_4_EmbeddedDataLoader",
+        "type": "Vanilla_4_DataLoader",
         "args":{
-            "data_dir": "data/",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "D2V_4_Trainer",
+        "type": "Vanilla_4_Trainer",
         "args": {},
         "epochs": 100,
 

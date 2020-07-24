@@ -313,14 +313,14 @@ plt.xlabel('normalized L1 value')
 plt.ylabel('number of data points')
 plt.title('Constitutive exons DSC')
 plt.xlim(-2, 10)
-plt.show()
+# plt.show()
 
 plt.hist(l1scass)
 plt.xlabel('normalized L1 value')
 plt.ylabel('number of data points')
 plt.title('Cassette exons DSC')
 plt.xlim(-2, 10)
-plt.show()
+# plt.show()
 
 if low_cons_exons.size > 0:
     low_exons = np.concatenate((low_cons_exons, low_cass_exons))

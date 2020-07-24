@@ -135,6 +135,7 @@ class DSC(BaseModel):
 
     def forward(self, seqs, lens):
         # [128, 2, 142, 4] or [128, 2, 140, 4]
+        lens = torch.zeros_like(lens)
         start, end = seqs[:, 0], seqs[:, 1]
         if start.shape[1] == 140:
             start, end = start.view(-1, 4, 140), end.view(-1, 4, 140)
@@ -157,6 +158,99 @@ class DSC(BaseModel):
 
         return y
 
+
+class DSC_4_SEQ(BaseModel):
+
+    def __init__(self):
+        super().__init__()
+
+        self.fc_in = 15*8*4 + 3
+        # sequence before start
+        self.conv1_bef_start = nn.Conv1d(4, 32, kernel_size=7)
+        torch.nn.init.xavier_uniform_(self.conv1_bef_start.weight)
+        self.conv1_drop_bef_start = nn.Dropout2d(0.2)
+
+        self.conv2_bef_start = nn.Conv1d(32, 8, kernel_size=4)
+        torch.nn.init.xavier_uniform_(self.conv2_bef_start.weight)
+        self.conv2_drop_bef_start = nn.Dropout2d(0.2)
+
+        self.conv3_bef_start = nn.Conv1d(8, 8, kernel_size=3)
+        torch.nn.init.xavier_uniform_(self.conv3_bef_start.weight)
+        self.conv3_drop_bef_start = nn.Dropout2d(0.2)
+
+        # start sequence
+        self.conv1_start = nn.Conv1d(4, 32, kernel_size=7)
+        torch.nn.init.xavier_uniform_(self.conv1_start.weight)
+        self.conv1_drop_start = nn.Dropout2d(0.2)
+
+        self.conv2_start = nn.Conv1d(32, 8, kernel_size=4)
+        torch.nn.init.xavier_uniform_(self.conv2_start.weight)
+        self.conv2_drop_start = nn.Dropout2d(0.2)
+
+        self.conv3_start = nn.Conv1d(8, 8, kernel_size=3)
+        torch.nn.init.xavier_uniform_(self.conv3_start.weight)
+        self.conv3_drop_start = nn.Dropout2d(0.2)
+
+        # end conv blocks here...
+        self.conv1_end = nn.Conv1d(4, 32, kernel_size=7)
+        torch.nn.init.xavier_uniform_(self.conv1_end.weight)
+        self.conv1_drop_end = nn.Dropout2d(0.2)
+
+        self.conv2_end = nn.Conv1d(32, 8, kernel_size=4)
+        torch.nn.init.xavier_uniform_(self.conv2_end.weight)
+        self.conv2_drop_end = nn.Dropout2d(0.2)
+
+        self.conv3_end = nn.Conv1d(8, 8, kernel_size=3)
+        torch.nn.init.xavier_uniform_(self.conv3_end.weight)
+        self.conv3_drop_end = nn.Dropout2d(0.2)
+
+        # end conv blocks here...
+        self.conv1_after_end = nn.Conv1d(4, 32, kernel_size=7)
+        torch.nn.init.xavier_uniform_(self.conv1_after_end.weight)
+        self.conv1_drop_after_end = nn.Dropout2d(0.2)
+
+        self.conv2_after_end = nn.Conv1d(32, 8, kernel_size=4)
+        torch.nn.init.xavier_uniform_(self.conv2_after_end.weight)
+        self.conv2_drop_after_end = nn.Dropout2d(0.2)
+
+        self.conv3_after_end = nn.Conv1d(8, 8, kernel_size=3)
+        torch.nn.init.xavier_uniform_(self.conv3_after_end.weight)
+        self.conv3_drop_after_end = nn.Dropout2d(0.2)
+
+        self.fc1 = nn.Linear(self.fc_in, 64)
+        self.drop_fc = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(64, 1)
+
+    def forward(self, seqs, lens):
+        # [128, 2, 142, 4] or [128, 2, 140, 4]
+        lens = torch.zeros_like(lens)
+        bef_start, start, end, after_end = seqs[:, 0], seqs[:, 1], seqs[:, 2], seqs[:, 3]
+        bef_start, start, end, after_end = bef_start.view(-1, 4, 140), start.view(-1, 4, 140), \
+                                           end.view(-1, 4, 140), after_end.view(-1, 4, 140)
+
+        x = F.max_pool1d(F.relu(self.conv1_drop_bef_start(self.conv1_bef_start(bef_start))), 2, stride=2)
+        x = F.max_pool1d(F.relu(self.conv2_drop_bef_start(self.conv2_bef_start(x))), 2, stride=2)
+        x = F.max_pool1d(F.relu(self.conv3_drop_bef_start(self.conv3_bef_start(x))), 2, stride=2)
+
+        xx = F.max_pool1d(F.relu(self.conv1_drop_start(self.conv1_start(start))), 2, stride=2)
+        xx = F.max_pool1d(F.relu(self.conv2_drop_start(self.conv2_start(xx))), 2, stride=2)
+        xx = F.max_pool1d(F.relu(self.conv3_drop_start(self.conv3_start(xx))), 2, stride=2)
+
+        xxx = F.max_pool1d(F.relu(self.conv1_drop_end(self.conv1_end(end))), 2, stride=2)
+        xxx = F.max_pool1d(F.relu(self.conv2_drop_end(self.conv2_end(xxx))), 2, stride=2)
+        xxx = F.max_pool1d(F.relu(self.conv3_drop_end(self.conv3_end(xxx))), 2, stride=2)
+
+        xxxx = F.max_pool1d(F.relu(self.conv1_drop_after_end(self.conv1_after_end(after_end))), 2, stride=2)
+        xxxx = F.max_pool1d(F.relu(self.conv2_drop_after_end(self.conv2_after_end(xxxx))), 2, stride=2)
+        xxxx = F.max_pool1d(F.relu(self.conv3_drop_after_end(self.conv3_after_end(xxxx))), 2, stride=2)
+
+        feats = torch.cat((x, xx, xxx, xxxx), dim=1)
+        feats = feats.view(-1, self.fc_in-3)
+        feats = torch.cat((feats, lens), dim=1)
+        y = self.drop_fc(F.relu(self.fc1(feats)))
+        y = torch.sigmoid(self.fc2(y))
+
+        return y
 
 class GTEx_DSC(BaseModel):
 
@@ -324,6 +418,7 @@ class BiLSTM2(BaseModel):
 
     def forward(self, seqs, lens):
         # [128, 142, 4] or [128, 140, 4]
+        lens = torch.zeros_like(lens)
         start, end = seqs[:, 0], seqs[:, 1]
         start, end = start.view(-1, 4, self.in_dim), end.view(-1, 4, self.in_dim)
 
@@ -407,8 +502,8 @@ class MLP3(BaseModel):
         # [B, 100] input
 
         # [B, 200]
-        # lens = torch.zeros_like(lens)
-        d2v_feats = torch.zeros_like(d2v_feats)
+        lens = torch.zeros_like(lens)
+        #d2v_feats = torch.zeros_like(d2v_feats)
         feats = torch.cat((d2v_feats, lens), dim=1)
         x = F.relu(self.drop_fc1(self.fc1(feats)))
         x = torch.sigmoid(self.fc2(x))

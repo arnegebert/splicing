@@ -15,9 +15,8 @@ def load_chrom_seq(chrom):
             return loaded_chrom_seq[6:]
 
 data_path = '../../data'
-save_to_low = 'hipsci_majiq/exon/low.npy'
-save_to_high = 'hipsci_majiq/exon/high.npy'
-save_to_cons = 'hipsci_majiq/exon/cons.npy'
+save_to_low = 'hipsci_majiq/exon/low_4.npy'
+save_to_high = 'hipsci_majiq/exon/high_4.npy'
 
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
@@ -91,14 +90,25 @@ with open('../../majiq/voila/filtered_all.tsv') as f:
         if (e1 - s1) < (e2 - s2):
             psi = psi1
         else: psi = psi2
+
         window_around_start = chrom_seq[ex2start - introns_bef_start - 1:ex2start + exons_after_start - 1]
         window_around_end = chrom_seq[ex2end - exons_bef_end - 2:ex2end + introns_after_end - 2]
+        window_around_exon_before = chrom_seq[ex1end - 70:ex1end + 70]
+        window_around_exon_after = chrom_seq[ex3start - 70:ex3start + 70]
+
         if strand == '-':
             window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
                                                      reverse_complement(window_around_start[::-1])
+            window_around_exon_before, window_around_exon_after = \
+                reverse_complement(window_around_exon_after[::-1]), \
+                reverse_complement(window_around_exon_before[::-1])
+
         # # encode & convert to numpy arrays
         start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
         start, end = np.array(start), np.array(end)
+        start_exon, end_exon = one_hot_encode_seq(window_around_exon_before), one_hot_encode_seq(
+            window_around_exon_after)
+        start_exon, end_exon = np.array(start_exon), np.array(end_exon)
 
         l1, l2, l3 = ex2start - ex1end, ex2end - ex2start, ex3start - ex2end
         l1, l2, l3 = (l1 - intron_mean) / intron_std, (l2 - exon_mean) / exon_std, (l3 - intron_mean) / intron_std
@@ -107,8 +117,8 @@ with open('../../majiq/voila/filtered_all.tsv') as f:
         l3s.append(l3)
 
         lens_and_psi_vector = np.array([l1, l2, l3, psi])
-        start_and_end = np.concatenate((start, end))
-        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
+        start_and_ends = np.concatenate((start_exon, start, end, end_exon))
+        sample = np.concatenate((start_and_ends,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
         if psi < 0.8:
             low_exons.append(sample)
         elif psi < 1:

@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "HIPSCI_SUPPA_4_D2V_Trainer",
+        "type": "D2V_4_Trainer",
         "args": {},
         "epochs": 100,
 

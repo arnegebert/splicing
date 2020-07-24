@@ -11,3 +11,5 @@ from .HIPSCI_SUPPA_EmbeddedDataLoader import *
 from .HIPSCI_SUPPA_4_EmbeddedDataLoader import *
 from .HIPSCI_MAJIQ_DataLoader import *
 from .HIPSCI_MAJIQ_EmbeddedDataLoader import *
+from .HIPSCI_MAJIQ_4_EmbeddedDataLoader import *
+from .Vanilla_4_DataLoader import *

@@ -49,12 +49,6 @@ with open('../../suppa/formatted_second.psi') as f:
             window_around_exon_before, window_around_exon_after = \
                                                                 reverse_complement(window_around_exon_after[::-1]),\
                                                                 reverse_complement(window_around_exon_before[::-1])
-            # window_around_start, window_around_end = reverse_complement(window_around_start[::-1]), \
-            #                                          reverse_complement(window_around_end[::-1])
-            # window_around_start, window_around_end = reverse_complement(window_around_start), \
-            #                                          reverse_complement(window_around_end)
-
-        # not doing anything based on strand type kinda tends to have the best results....
 
         start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
         start_exon, end_exon = one_hot_encode_seq(window_around_exon_before), one_hot_encode_seq(window_around_exon_after)

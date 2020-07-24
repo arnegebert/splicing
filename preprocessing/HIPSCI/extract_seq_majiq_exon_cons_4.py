@@ -7,7 +7,7 @@ startt = time.time()
 psis = []
 
 data_path = '../../data'
-save_to_cons = 'hipsci_majiq/exon/cons.npy'
+save_to_cons = 'hipsci_majiq/exon/cons_4.npy'
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
 exons_bef_end = 70 # exons
@@ -50,20 +50,31 @@ with open('../../majiq/builder/constitutive_junctions_sorted_stranded.tsv') as f
 
             window_around_start = chrom_seq[dstart-introns_bef_start-1:dstart+exons_after_start-1]
             window_around_end = chrom_seq[dend-exons_bef_end-2:dend+introns_after_end-2]
+
+            window_around_exon_before = chrom_seq[prev_dend - 70:prev_dend + 70]
+            window_around_exon_after = chrom_seq[astart - 70:astart + 70]
+
             if strand == '-':
                 window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
                                                          reverse_complement(window_around_start[::-1])
+                window_around_exon_before, window_around_exon_after = \
+                    reverse_complement(window_around_exon_after[::-1]), \
+                    reverse_complement(window_around_exon_before[::-1])
 
             start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
             start, end = np.array(start), np.array(end)
+            start_exon, end_exon = one_hot_encode_seq(window_around_exon_before), one_hot_encode_seq(
+                window_around_exon_after)
+            start_exon, end_exon = np.array(start_exon), np.array(end_exon)
+
             l1, l2, l3 = dstart-prev_dend, dend-dstart, astart-dend
             l1, l2, l3 = (l1-intron_mean)/intron_std, (l2-exon_mean)/exon_std, (l3-intron_mean)/intron_std
             lens_and_psi_vector = np.array([l1, l2, l3, psi])
             l1s.append(l1)
             l2s.append(l2)
             l3s.append(l3)
-            start_and_end = np.concatenate((start, end))
-            sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
+            start_and_ends = np.concatenate((start_exon, start, end, end_exon))
+            sample = np.concatenate((start_and_ends,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
             cons_exons.append(sample)
 
             psis.append(psi)

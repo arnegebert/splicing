@@ -6,5 +6,6 @@ from .D2V_DataTrainer import *
 from .GTEx_D2V_Trainer import *
 from .ReconExon_Trainer import *
 from .HIPSCI_SUPPA_Trainer import *
-from .HIPSCI_SUPPA_4_D2V_Trainer import *
+from .D2V_4_Trainer import *
 from .HIPSCI_MAJIQ_Trainer import *
+from .Vanilla_4_Trainer import *
