@@ -90,6 +90,11 @@ class GTEx_DSC_Dataset(Dataset):
         print(f'high: {high}')
         print(f'cons: {cons}')
         print(f'all: {low+high+cons}')
+        total = low+high+cons
+        cons_perc = cons / total
+        print(f'Percentage of consecutive data: {cons_perc}')
+        if cons_perc > 0.6 or cons_perc < 0.4:
+            raise Exception('Unbalanced dataset')
 
     def __len__(self):
         return len(self.samples)

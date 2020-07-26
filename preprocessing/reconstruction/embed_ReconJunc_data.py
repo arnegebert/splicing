@@ -3,7 +3,7 @@ import csv
 import gensim.models
 import time
 from torch import as_tensor as T
-
+from utils import intron_mean, intron_std
 #todo could make this doable via command line arguments and export / document data processing process via a bash script
 startt = time.time()
 # data_path = '../../data/gtex_processed'
@@ -62,40 +62,42 @@ samples = []
 with open(f'{data_path}/{src}') as f:
     for i, l in enumerate(f):
         if i % 1000==0: print(f'Processing line {i}')
-        if i == 0:
-            avg_len, std_len = l.split(',')
-            avg_len, std_len = float(avg_len), float(std_len)
-        else:
-            j, start_seq, end_seq, psi = l.split(',')
-            s, e = j.split('_')[1:3]
-            s, e = int(s), int(e)
-            psi = float(psi[:-1])
-            is_constitutive = float(psi >= constitutive_level)
+        j, start_seq, end_seq, psi = l.split(',')
+        s, e = j.split('_')[1:3]
+        s, e = int(s), int(e)
+        psi = float(psi[:-1])
+        is_constitutive = float(psi >= constitutive_level)
 
-            if psi <= 0.2: low += 1
-            if 0.2 < psi <= 0.75: medium += 1
-            if psi > 0.75 and psi < constitutive_level: high += 1
-            if psi > constitutive_level: cons += 1
+        if psi <= 0.2: low += 1
+        if 0.2 < psi <= 0.75: medium += 1
+        if psi > 0.75 and psi < constitutive_level: high += 1
+        if psi > constitutive_level: cons += 1
 
-            label = is_constitutive if classification_task else psi
+        label = is_constitutive if classification_task else psi
 
-            l1 = (e - s - avg_len) / std_len
-            start, end = split_into_3_mers(start_seq), split_into_3_mers(end_seq)
-            start_d2v = embedding_model.infer_vector(start)
-            end_d2v = embedding_model.infer_vector(end)
-            dummy_vector = [0] * len(start_d2v)
-            dummy_vector[0] = l1
-            dummy_vector[3] = label
+        l1 = (e - s - intron_mean) / intron_std
+        start, end = split_into_3_mers(start_seq), split_into_3_mers(end_seq)
+        start_d2v = embedding_model.infer_vector(start)
+        end_d2v = embedding_model.infer_vector(end)
+        dummy_vector = [0] * len(start_d2v)
+        dummy_vector[0] = l1
+        dummy_vector[3] = label
 
-            data_vector = [start_d2v, end_d2v, dummy_vector]
-            samples.append(data_vector)
-            # if len(samples) == 3: break
+        data_vector = [start_d2v, end_d2v, dummy_vector]
+        samples.append(data_vector)
+        # if len(samples) == 3: break
 
 print(f'low: {low}')
 print(f'medium: {medium}')
 print(f'high: {high}')
 print(f'cons: {cons}')
 print(f'all: {low+medium+high+cons}')
+
+total = low+medium+high+cons
+cons_perc = cons / total
+print(f'Percentage of consecutive data: {cons_perc}')
+if cons_perc > 0.6 or cons_perc < 0.4:
+    raise Exception('Unbalanced dataset')
 
 samples = np.array(samples).astype(np.float32)
 np.save(f'../../data/{target}', samples)

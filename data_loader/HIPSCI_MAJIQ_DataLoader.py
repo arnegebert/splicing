@@ -49,6 +49,11 @@ class HIPSCI_MAJIQ_DataLoader(BaseDataLoader):
         d = int((9 * a) / (9 * (b + c)))
         d = max(1, d)
         print(d)
+        total = a + (b + c) * d
+        cons_perc = a / total
+        print(f'Percentage of consecutive data: {cons_perc}')
+        if cons_perc > 0.6 or cons_perc < 0.4:
+            raise Exception('Unbalanced dataset')
         classification_task = False
         for i in range(d): #range(1)
             train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)

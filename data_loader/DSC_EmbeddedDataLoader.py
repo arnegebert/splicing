@@ -45,6 +45,11 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
 
             d = int((9 * a) / (9 * (b + c)))
             d = max(1, d)
+            total = a + (b + c) * d
+            cons_perc = a / total
+            print(f'Percentage of consecutive data: {cons_perc}')
+            if cons_perc > 0.6 or cons_perc < 0.4:
+                raise Exception('Unbalanced dataset')
             #print(d)
             classification_task = False
             # todo change back
