@@ -1,13 +1,14 @@
 import csv
 
+indv_name = 'bezi2'
 # idea: build set of LSV ids given
 lsvs = set()
-with open('binary_exon_skipping_junc_all.txt') as f:
+with open(f'binary_exon_skipping_junc_{indv_name}.txt') as f:
     for line in f:
         lsvs.add(line[:-1])
 
 filtered = []
-with open('all.tsv') as f:
+with open(f'{indv_name}.tsv') as f:
     for i, line in enumerate(f):
         if i % 1000 == 0: print(f'Line {i}')
         line = line.split('\t')
@@ -33,7 +34,7 @@ filtered.sort(key=lambda tup: tup[-4])
 filtered.sort(key=lambda tup: tup[9])
 
 print(f'Number of LSVs after filtering: {len(filtered)}')
-with open('filtered_all.tsv', 'w') as f:
+with open(f'filtered_{indv_name}.tsv', 'w') as f:
     header = ['gene_name', 'gene_id', 'lsv_id', 'mean_psi_per_lsv_junction', 'stdev_psi_per_lsv_junction', 'lsv_type', 'num_junctions', 'num_exons', 'de_novo_junctions', 'seqid', 'strand', 'junctions_coords', 'exons_coords', 'ir_coords', 'ucsc_lsv_link\n']
     f.write('\t'.join(header))
     for (genename, geneid, lsvid, epsi, stdev, lsvtype, njunc, nexon, denovojunc,

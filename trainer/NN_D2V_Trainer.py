@@ -6,7 +6,7 @@ from data_loader.DSCDataLoader import DSCDataset, DSCDataLoader
 from utils import inf_loop, MetricTracker, split_into_3_mers
 
 
-class HIPSCI_MAJIQ_Trainer(BaseTrainer):
+class NN_Trainer(BaseTrainer):
     """
     Trainer class
     """
@@ -26,7 +26,8 @@ class HIPSCI_MAJIQ_Trainer(BaseTrainer):
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
         # self.valid_data_loader = valid_data_loader
-        self.val_all, self.val_low, self.val_high = valid_data_loader
+        self.val_all, self.val_low, self.val_high, self.val_all_diff_lib, self.val_low_diff_lib, self.val_high_diff_lib, \
+            self.val_all_diff_indv, self.val_low_diff_indv, self.val_high_diff_indv = valid_data_loader
         self.do_validation = self.val_all is not None
         self.lr_scheduler = lr_scheduler
         # self.lr_scheduler = None
@@ -36,6 +37,14 @@ class HIPSCI_MAJIQ_Trainer(BaseTrainer):
         self.valid_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_low_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_high_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+
+        self.val_all_metrics_diff_lib = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.val_low_metrics_diff_lib = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.val_high_metrics_diff_lib = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+
+        self.val_all_metrics_diff_indv = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.val_low_metrics_diff_indv = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.val_high_metrics_diff_indv = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
 
     def _train_epoch(self, epoch):
         """
@@ -49,13 +58,12 @@ class HIPSCI_MAJIQ_Trainer(BaseTrainer):
 
         for batch_idx, data in enumerate(self.data_loader):
             # start, end = data[:, :140, :4], data[:, 140:280]
-            seqs = data[:, :280].view(-1, 2, 140, 4)
-            lens, target = data[:, 280, :3], data[:, 280, 3]
-
-            seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
+            feats_d2v = data[:, :2].view(-1, 200)
+            lens, target = data[:, 2, :3], data[:, 2, 3]
+            feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
-            output = self.model(seqs, lens)
+            output = self.model(feats_d2v, lens)
             loss = self.criterion(output, target)
             loss.backward()
             self.optimizer.step()
@@ -76,20 +84,33 @@ class HIPSCI_MAJIQ_Trainer(BaseTrainer):
                     epoch,
                     self._progress(batch_idx),
                     loss.item()))
-                # will make problems for non-image data
-                # self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
             if batch_idx == self.len_epoch:
                 break
         log = self.train_metrics.result()
 
         if self.do_validation:
-            val_log_all, val_log_low, val_log_high = self._valid_epoch(epoch)
+            val_log_all, val_log_low, val_log_high, val_log_all_diff_lib, val_log_low_diff_lib, val_log_high_diff_lib, \
+                val_log_all_diff_indv, val_log_low_diff_indv, val_log_high_diff_indv = self._valid_epoch(epoch)
             log.update(**{'val_' + k: v for k, v in val_log_all.items()})
             val_log_low.pop('loss', None)
             log.update(**{'val_low_' + k: v for k, v in val_log_low.items()})
             val_log_high.pop('loss', None)
             log.update(**{'val_high_' + k: v for k, v in val_log_high.items()})
+
+            val_log_all_diff_lib.pop('loss', None)
+            log.update(**{'val_diff_lib_' + k: v for k, v in val_log_all_diff_lib.items()})
+            val_log_low_diff_lib.pop('loss', None)
+            log.update(**{'val_low_diff_lib_' + k: v for k, v in val_log_low_diff_lib.items()})
+            val_log_high_diff_lib.pop('loss', None)
+            log.update(**{'val_high_diff_lib_' + k: v for k, v in val_log_high_diff_lib.items()})
+
+            val_log_all_diff_indv.pop('loss', None)
+            log.update(**{'val_diff_indv_' + k: v for k, v in val_log_all_diff_indv.items()})
+            val_log_low_diff_indv.pop('loss', None)
+            log.update(**{'val_low__diff_indv_' + k: v for k, v in val_log_low_diff_indv.items()})
+            val_log_high_diff_indv.pop('loss', None)
+            log.update(**{'val_high_diff_indv_' + k: v for k, v in val_log_high_diff_indv.items()})
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
@@ -111,20 +132,29 @@ class HIPSCI_MAJIQ_Trainer(BaseTrainer):
             self._single_val_epoch(self.val_low, epoch, self.valid_low_metrics)
             self._single_val_epoch(self.val_high, epoch, self.valid_high_metrics)
 
+            self._single_val_epoch(self.val_all_diff_lib, epoch, self.val_all_metrics_diff_lib)
+            self._single_val_epoch(self.val_low_diff_lib, epoch, self.val_low_metrics_diff_lib)
+            self._single_val_epoch(self.val_high_diff_lib, epoch, self.val_high_metrics_diff_lib)
+
+            self._single_val_epoch(self.val_all_diff_indv, epoch, self.val_all_metrics_diff_indv)
+            self._single_val_epoch(self.val_low_diff_indv, epoch, self.val_low_metrics_diff_indv)
+            self._single_val_epoch(self.val_high_diff_indv, epoch, self.val_high_metrics_diff_indv)
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
-        return self.valid_all_metrics.result(), self.valid_low_metrics.result(), self.valid_high_metrics.result()
+        return self.valid_all_metrics.result(), self.valid_low_metrics.result(), self.valid_high_metrics.result(),\
+    self.val_all_metrics_diff_lib.result(), self.val_low_metrics_diff_lib.result(), self.val_high_metrics_diff_lib.result(), \
+   self.val_all_metrics_diff_indv.result(), self.val_low_metrics_diff_indv.result(), self.val_high_metrics_diff_indv.result()
 
     def _single_val_epoch(self, val_data, epoch, metrics):
         for batch_idx, data in enumerate(val_data):
-            seqs = data[:, :280].view(-1, 2, 140, 4)
-            lens, target = data[:, 280, :3], data[:, 280, 3]
+            feats_d2v = data[:, :2].view(-1, 200)
 
-            seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
+            lens, target = data[:, 2, :3], data[:, 2, 3]
+            feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
+            output = self.model(feats_d2v, lens)
 
-            output = self.model(seqs, lens)
             loss = self.criterion(output, target)
 
             self.writer.set_step((epoch - 1) * len(val_data) + batch_idx, 'valid')

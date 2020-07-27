@@ -39,7 +39,6 @@ def main(config):
 
     lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
-    # todo save encoded sequences as .npy to save time
     trainer = config.init_obj('trainer', module_trainer)
     trainer.set_param(model, criterion, metrics, optimizer,
                       config=config,

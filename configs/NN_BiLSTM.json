@@ -1,11 +1,13 @@
 {
-    "name": "NN_DSC",
+    "name": "NN_BiLSTM",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "DSC",
-        "args": {}
+        "type": "BiLSTM2",
+        "args": {
+            "three_len_feats": true
+        }
     },
     "data_loader": {
         "type": "NN_DataLoader",
@@ -14,13 +16,15 @@
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1
+            "num_workers": 0,
+            "classification": true,
+            "classification_treshold": 0.99
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -39,15 +43,16 @@
     "trainer": {
         "type": "NN_Trainer",
         "args": {},
-        "epochs": 200,
+        "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "min val_loss",
         "early_stop": 15,
 
         "tensorboard": true
-    }
+    },
+    "comment": ""
 }

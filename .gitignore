@@ -3,11 +3,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+majiq/bam_not_neuron
+
 salmon/quants
 salmon/human_index
 *.majiq
 *.sj
-majiq/bam
+majiq/bam_neuron
 Jha_et_al_2017
 # C extensions
 *.so
@@ -143,3 +145,7 @@ suppa/hg38.events_SE_strict.ioe
 suppa/iso_tpm.txt
 suppa/second.events_SE_strict.ioe
 *.psi
+majiq/voila/binary_exon_skipping_junc_bezi1.txt
+majiq/voila/binary_exon_skipping_junc_bezi2.txt
+majiq/voila/binary_exon_skipping_junc_lexy2.txt
+*.sql

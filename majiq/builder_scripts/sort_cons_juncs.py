@@ -3,7 +3,9 @@ from utils import timer
 juncs = []
 nproblematic_jstart = 0
 nproblematic_jend = 0
-with open('constitutive_junctions.tsv') as f:
+builder_dir = '../builder_not_neuron'
+
+with open(f'{builder_dir}/constitutive_junctions.tsv') as f:
     for i, line in enumerate(f):
         if i==0: continue
         geneid, chrom, jstart, jend, dstart, dend, astart, aend = line.replace('\n','').split('\t')
@@ -26,7 +28,7 @@ for i in range(7, 1-1, -1):
 
 prev_junc = None
 ndupl = 0
-with open('constitutive_junctions_sorted.tsv', 'w') as f:
+with open(f'{builder_dir}/cons_junc_sorted.tsv', 'w') as f:
     f.write(f'#GENEID\tCHROMOSOME\tJUNC_START\tJUNC_END\tDONOR_START\tDONOR_END\tACCEPTOR_START\tACCEPTOR_END\n')
     for (geneid, chrom, jstart, jend, dstart, dend, astart, aend) in juncs:
         if (jstart, jend) == prev_junc:

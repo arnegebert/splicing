@@ -42,15 +42,42 @@ To be able to call MAJIQ from the commandline:
 source env/bin/activate
 
 MAJIQ Buider
+---
+Neuron data:
 majiq build fix_Homo_sapiens.GRCh38.100.gff3 -c majiq.config -j 8 -o builder/ --mem-profile --dump-constitutive 
 
-# running this one for only one of the samples from above
+Not Neuron data:
+majiq build fix_Homo_sapiens.GRCh38.100.gff3 -c not_neuron.config -j 8 -o builder_not_neuron/ --mem-profile --dump-constitutive 
+
+
+# inter-majiq processing of single samples
 majiq psi builder/0.majiq -j 4 -o psi/ -n all
-
-
 voila tsv builder/splicegraph.sql psi/neural.psi.voila -f voila/ERR1775596_1.tsv
-
 voila view builder/splicegraph.sql psi/all.psi.voila
 
 
+majiq psi builder_not_neuron/bezi1.majiq -j 4 -o psi_not_neuron/ -n bezi1
+majiq psi builder_not_neuron/bezi2.majiq -j 4 -o psi_not_neuron/ -n bezi2
+majiq psi builder_not_neuron/lexy2.majiq -j 4 -o psi_not_neuron/ -n lexy2
+
+voila tsv builder_not_neuron/splicegraph.sql psi_not_neuron/bezi1.psi.voila -f voila/bezi1.tsv
+voila tsv builder_not_neuron/splicegraph.sql psi_not_neuron/bezi2.psi.voila -f voila/bezi2.tsv
+voila tsv builder_not_neuron/splicegraph.sql psi_not_neuron/lexy2.psi.voila -f voila/lexy2.tsv
+
+voila view builder_not_neuron/splicegraph.sql psi_not_neuron/bezi1.psi.voila
+voila view builder_not_neuron/splicegraph.sql psi_not_neuron/bezi2.psi.voila
+voila view builder_not_neuron/splicegraph.sql psi_not_neuron/lexy2.psi.voila
+
+
+
+## Workflow to go from MAJIQ output to dataset
+# constitutive junctions/exon:
+sort_cons_juncs.py
+add_strand_to_cons.py  -- associate each junction with a strand by finding junction in GENCODE GTF file
+extract_seq_majiq_exon_cons.py -- go from junctions to exons and extract sequence
+
+# non-cons junc/exons:
+To get alternatively spliced exon I wanted download a list of their ids from voila by filtering for binary and cassette
+filter_voila_tsv_from_voila_viewer --- use the list from voila to filter the voila tsv
+extract_seq_majiq_exon_cons.py --- use filtered voila tsv to extract seqs
 

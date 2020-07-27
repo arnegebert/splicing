@@ -8,7 +8,8 @@ class BaseDataLoader(DataLoader):
     """
     Base class for all data loaders
     """
-    def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=False, collate_fn=default_collate):
+    def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=False, collate_fn=default_collate,
+                 extra_val_datasets=None):
         self.validation_split = validation_split
         self.shuffle = shuffle
 
@@ -16,7 +17,7 @@ class BaseDataLoader(DataLoader):
         self.n_samples = len(dataset)
         self.dsc_cv = dsc_cv
         self.dataset = dataset
-
+        self.extra_val = extra_val_datasets
         # if not dsc_cv:
         self.sampler, self.valid_sampler = self._split_sampler(self.validation_split)
 
@@ -73,8 +74,18 @@ class BaseDataLoader(DataLoader):
         else:
             if not self.dsc_cv:
                 return DataLoader(sampler=self.valid_sampler, dataset=self.dataset, **self.init_kwargs)
-            else:
+            elif self.dsc_cv and not self.extra_val:
                 # return three dataloaders here based on my validation datasets
                 return DataLoader(dataset=self.val_all,  **self.init_kwargs),\
                        DataLoader(dataset=self.val_low, **self.init_kwargs),\
                        DataLoader(dataset=self.val_high,  **self.init_kwargs)
+            else:
+                # three validation sets which are standard in CV
+                val_sets = [DataLoader(dataset=self.val_all,  **self.init_kwargs),
+                       DataLoader(dataset=self.val_low, **self.init_kwargs),
+                       DataLoader(dataset=self.val_high,  **self.init_kwargs)]
+                # 6 other validation sets which I have added
+                if len(self.extra_val) != 6: raise Exception('Unexpected number of extra validation sets')
+                for extra_val_set in self.extra_val:
+                    val_sets.append(DataLoader(dataset=extra_val_set,  **self.init_kwargs))
+                return val_sets

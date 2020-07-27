@@ -1,9 +1,11 @@
 from utils import timer
 
 geneid_to_juncs = dict()
+builder_dir = '../builder_not_neuron'
+
 @timer
-def build_hash_table():
-    with open('constitutive_junctions_sorted.tsv') as f:
+def build_hash_table(builder_dir=builder_dir):
+    with open(f'{builder_dir}/cons_junc_sorted.tsv') as f:
         for i, line in enumerate(f):
             if i % 1000 == 0: print(f'Line {i}')
             # build hash table geneid -> juncs
@@ -41,9 +43,9 @@ def iterate_through_annotation_file():
     print(f'Number of double annotations: {double_annotated}')
 
 @timer
-def write_result():
+def write_result(builder_dir=builder_dir):
     unmatched_geneids = 0
-    with open(f'constitutive_junctions_sorted_stranded.tsv', 'w') as f:
+    with open(f'{builder_dir}/cons_junc_sorted_stranded.tsv', 'w') as f:
         f.write(f'#GENEID\tCHROMOSOME\tJUNC_START\tJUNC_END\tDONOR_START\tDONOR_END\tACCEPTOR_START\tACCEPTOR_END\tSTRAND\n')
         for geneid in geneid_to_juncs.keys():
             values = geneid_to_juncs[geneid]

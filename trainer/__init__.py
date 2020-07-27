@@ -9,3 +9,5 @@ from .HIPSCI_SUPPA_Trainer import *
 from .D2V_4_Trainer import *
 from .HIPSCI_MAJIQ_Trainer import *
 from .Vanilla_4_Trainer import *
+from .NN_Trainer import *
+from .NN_D2V_Trainer import *

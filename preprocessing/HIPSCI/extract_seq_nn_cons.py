@@ -7,7 +7,7 @@ startt = time.time()
 psis = []
 
 data_path = '../../data'
-save_to_cons = 'hipsci_majiq/exon/cons.npy'
+save_to_cons = 'not_neuron/exon/cons.npy'
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
 exons_bef_end = 70 # exons
@@ -29,7 +29,7 @@ prev_dstart, prev_dend = 0, 0
 prev_jstart, prev_jend = 0, 0
 overlaps = 0
 exon_mean, exon_std, intron_mean, intron_std = 145.42, 198.0, 5340., 17000.
-with open('../../majiq/builder/cons_junc_sorted_stranded.tsv') as f:
+with open('../../majiq/builder_not_neuron/cons_junc_sorted_stranded.tsv') as f:
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
     for i, l in enumerate(f):
