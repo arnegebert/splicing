@@ -9,7 +9,7 @@ import torch
 import random
 import numpy as np
 
-class NN_DataLoader(BaseDataLoader):
+class NN_EmbeddedDataLoader(BaseDataLoader):
     """
     Implements all three use cases for HIPSCI NotNeuron:
     1. Train on lib1, test on lib1

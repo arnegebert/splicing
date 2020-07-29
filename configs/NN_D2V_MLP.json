@@ -4,13 +4,13 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "MLP3",
+        "type": "MLP2",
         "args": {}
     },
     "data_loader": {
         "type": "NN_EmbeddedDataLoader",
         "args":{
-            "data_dir": "data/hipsci_majiq/exon",
+            "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,

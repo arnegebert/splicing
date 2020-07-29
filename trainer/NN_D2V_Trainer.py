@@ -6,7 +6,7 @@ from data_loader.DSCDataLoader import DSCDataset, DSCDataLoader
 from utils import inf_loop, MetricTracker, split_into_3_mers
 
 
-class NN_Trainer(BaseTrainer):
+class NN_D2V_Trainer(BaseTrainer):
     """
     Trainer class
     """
@@ -108,7 +108,7 @@ class NN_Trainer(BaseTrainer):
             val_log_all_diff_indv.pop('loss', None)
             log.update(**{'val_diff_indv_' + k: v for k, v in val_log_all_diff_indv.items()})
             val_log_low_diff_indv.pop('loss', None)
-            log.update(**{'val_low__diff_indv_' + k: v for k, v in val_log_low_diff_indv.items()})
+            log.update(**{'val_low_diff_indv_' + k: v for k, v in val_log_low_diff_indv.items()})
             val_log_high_diff_indv.pop('loss', None)
             log.update(**{'val_high_diff_indv_' + k: v for k, v in val_log_high_diff_indv.items()})
 
