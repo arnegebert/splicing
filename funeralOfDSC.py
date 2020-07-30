@@ -57,7 +57,7 @@ a = int(x_cons_data.shape[0] / 10)
 b = int(hx_cas_data.shape[0] / 10)
 c = int(lx_cas_data.shape[0] / 10)
 
-s = 0
+s = cross_validation_split
 # 9 folds for training
 train = x_cons_data[:a * s]
 train = np.concatenate((train, x_cons_data[a * (s + 1):]), axis=0)
