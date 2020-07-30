@@ -14,7 +14,7 @@ class Vanilla_4_DataLoader(BaseDataLoader):
     PSI data loading demo using BaseDataLoader
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
-                 classification=True, classification_treshold=0.95):
+                 classification=True, classification_treshold=0.95, cross_validation_split=0):
         self.data_dir = data_dir
         start = time.time()
         print(f'starting loading of data')
@@ -36,7 +36,7 @@ class Vanilla_4_DataLoader(BaseDataLoader):
         b = int(hx_cas_data.shape[0] / 10)
         c = int(lx_cas_data.shape[0] / 10)
 
-        s = 0
+        s = cross_validation_split
         # 9 folds for training
         train = x_cons_data[:a * s]
         train = np.concatenate((train, x_cons_data[a * (s + 1):]), axis=0)

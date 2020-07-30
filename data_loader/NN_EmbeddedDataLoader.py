@@ -17,10 +17,11 @@ class NN_EmbeddedDataLoader(BaseDataLoader):
     3. Train on lib1, test on lib from other individual
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
-                 classification=True, classification_treshold=0.95):
+                 classification=True, classification_treshold=0.95, cross_validation_split=0):
         self.data_dir = data_dir
         self.classification = classification
         self.class_threshold = classification_treshold
+        self.cross_validation_split = cross_validation_split
         start = time.time()
         print(f'starting loading of data')
         self.samples = []
@@ -69,7 +70,7 @@ class NN_EmbeddedDataLoader(BaseDataLoader):
         b = int(hx_cas_data.shape[0] / 10)
         c = int(lx_cas_data.shape[0] / 10)
 
-        s = 0
+        s = self.cross_validation_split
         # 9 folds for training
         train = x_cons_data[:a * s]
         train = np.concatenate((train, x_cons_data[a * (s + 1):]), axis=0)
