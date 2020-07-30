@@ -54,5 +54,6 @@
 
         "tensorboard": true
     },
-    "comment": ""
+    "comment": "",
+    "cross_validation": true
 }

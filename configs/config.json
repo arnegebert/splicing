@@ -41,7 +41,7 @@
     "trainer": {
         "type": "HIPSCI_MAJIQ_Trainer",
         "args": {},
-        "epochs": 500,
+        "epochs": 2,
 
         "save_dir": "saved/",
         "save_period": 251,
@@ -52,5 +52,6 @@
 
         "tensorboard": true
     },
-    "comment": ""
+    "comment": "",
+    "cross_validation": true
 }

@@ -36,9 +36,13 @@ class NN_EmbeddedDataLoader(BaseDataLoader):
             diff_lib_hx_cas_data = np.load('data/not_neuron/exon/embedded_high_bezi2.npy')
             diff_lib_lx_cas_data = np.load('data/not_neuron/exon/embedded_low_bezi2.npy')
 
-            diff_indv_x_cons_data = np.load('data/not_neuron/exon/embedded_cons.npy')
-            diff_indv_hx_cas_data = np.load('data/not_neuron/exon/embedded_high_lexy2.npy')
-            diff_indv_lx_cas_data = np.load('data/not_neuron/exon/embedded_low_lexy2.npy')
+            diff_indv_x_cons_data = np.load('data/hipsci_majiq/exon/embedded_cons.npy')
+            diff_indv_hx_cas_data = np.load('data/hipsci_majiq/exon/embedded_high.npy')
+            diff_indv_lx_cas_data = np.load('data/hipsci_majiq/exon/embedded_low.npy')
+            #
+            # diff_indv_x_cons_data = np.load('data/not_neuron/exon/embedded_cons.npy')
+            # diff_indv_hx_cas_data = np.load('data/not_neuron/exon/embedded_high_lexy2.npy')
+            # diff_indv_lx_cas_data = np.load('data/not_neuron/exon/embedded_low_lexy2.npy')
 
 
         self.dataset_same = self.cross_validation(x_cons_data, lx_cas_data, hx_cas_data)

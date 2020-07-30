@@ -49,5 +49,6 @@
         "early_stop": 20,
 
         "tensorboard": true
-    }
+    },
+    "cross_validation": true
 }
