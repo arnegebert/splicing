@@ -36,25 +36,31 @@ class NN_DataLoader(BaseDataLoader):
             diff_lib_hx_cas_data = np.load('data/not_neuron/exon/high_bezi2.npy')
             diff_lib_lx_cas_data = np.load('data/not_neuron/exon/low_bezi2.npy')
 
-            diff_indv_x_cons_data = np.load('data/hipsci_majiq/exon/cons.npy')
-            diff_indv_hx_cas_data = np.load('data/hipsci_majiq/exon/high.npy')
-            diff_indv_lx_cas_data = np.load('data/hipsci_majiq/exon/low.npy')
+            diff_indv_x_cons_data = np.load('data/not_neuron/exon/cons.npy')
+            diff_indv_hx_cas_data = np.load('data/not_neuron/exon/high_lexy2.npy')
+            diff_indv_lx_cas_data = np.load('data/not_neuron/exon/low_lexy2.npy')
+
+            diff_tissue_x_cons_data = np.load('data/hipsci_majiq/exon/cons.npy')
+            diff_tissue_hx_cas_data = np.load('data/hipsci_majiq/exon/high.npy')
+            diff_tissue_lx_cas_data = np.load('data/hipsci_majiq/exon/low.npy')
 
 
-            # diff_indv_x_cons_data = np.load('data/not_neuron/exon/cons.npy')
-            # diff_indv_hx_cas_data = np.load('data/not_neuron/exon/high_lexy2.npy')
-            # diff_indv_lx_cas_data = np.load('data/not_neuron/exon/low_lexy2.npy')
+
 
 
         self.dataset_same = self.cross_validation(x_cons_data, lx_cas_data, hx_cas_data)
         #train_dataset, val_all_dataset, val_low_dataset, val_high_dataset = self.cross_validation(x_cons_data, lx_cas_data, hx_cas_data)
         dataset_diff_lib = self.cross_validation(diff_lib_x_cons_data, diff_lib_lx_cas_data, diff_lib_hx_cas_data)
         dataset_diff_indv = self.cross_validation(diff_indv_x_cons_data, diff_indv_lx_cas_data, diff_indv_hx_cas_data)
+        dataset_diff_tissue = self.cross_validation(diff_tissue_x_cons_data, diff_tissue_lx_cas_data, diff_tissue_hx_cas_data)
         val_datasets_diff_lib = dataset_diff_lib[1:]
         val_datasets_diff_indv = dataset_diff_indv[1:]
+        val_datasets_diff_tissue = dataset_diff_tissue[1:]
 
         # flatten dataset elements
-        extra_val_datasets = [sample for dataset in [val_datasets_diff_lib, val_datasets_diff_indv] for sample in dataset]
+        extra_val_datasets = [sample for dataset in
+                              [val_datasets_diff_lib, val_datasets_diff_indv, val_datasets_diff_tissue]
+                              for sample in dataset]
 
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))

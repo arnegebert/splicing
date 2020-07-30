@@ -50,7 +50,7 @@
         "monitor": "min val_loss",
         "early_stop": 25,
 
-        "tensorboard": true
+        "tensorboard": false
     },
     "comment": "",
     "cross_validation": true

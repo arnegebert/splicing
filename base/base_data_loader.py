@@ -85,7 +85,7 @@ class BaseDataLoader(DataLoader):
                        DataLoader(dataset=self.val_low, **self.init_kwargs),
                        DataLoader(dataset=self.val_high,  **self.init_kwargs)]
                 # 6 other validation sets which I have added
-                if len(self.extra_val) != 6: raise Exception('Unexpected number of extra validation sets')
+                if len(self.extra_val) != 9: raise Exception('Unexpected number of extra validation sets')
                 for extra_val_set in self.extra_val:
                     val_sets.append(DataLoader(dataset=extra_val_set,  **self.init_kwargs))
                 return val_sets

@@ -1,16 +1,16 @@
 {
-    "name": "BadIdea",
+    "name": "HIPSCI_SUPPA_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "BadIdeaWithPool",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
-        "type": "HIPSCI_MAJIQ_DataLoader",
+        "type": "HIPSCI_SUPPA_DataLoader",
         "args":{
-            "data_dir": "data/hipsci_majiq/exon",
+            "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -39,9 +39,9 @@
         }
     },
     "trainer": {
-        "type": "HIPSCI_MAJIQ_Trainer",
+        "type": "HIPSCI_SUPPA_Trainer",
         "args": {},
-        "epochs": 2,
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 251,
@@ -50,7 +50,7 @@
         "monitor": "min val_loss",
         "early_stop": 15,
 
-        "tensorboard": true
+        "tensorboard": false
     },
     "comment": "",
     "cross_validation": true
