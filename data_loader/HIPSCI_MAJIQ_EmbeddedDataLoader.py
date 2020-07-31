@@ -109,7 +109,7 @@ class HIPSCI_MAJIQ_EmbeddedDataLoader(BaseDataLoader):
         val_all_dataset = DSCDataset(val_all)
         val_low_dataset = DSCDataset(val_low)
         val_high_dataset = DSCDataset(val_high)
-        print(f'Size training dataset: {len(train_dataset)}')
+        if cross_validation_split == 0:print(f'Size training dataset: {len(train_dataset)}')
         print(f'Size mixed validation dataset: {len(val_all_dataset)}')
         print(f'Size low inclusion validation dataset: {len(val_low_dataset)}')
         print(f'Size high inclusion validation dataset: {len(val_high_dataset)}')

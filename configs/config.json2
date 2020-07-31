@@ -41,7 +41,7 @@
     "trainer": {
         "type": "GTEx_DSC_Trainer",
         "args": {},
-        "epochs": 500,
+        "epochs": 1,
 
         "save_dir": "saved/",
         "save_period": 251,

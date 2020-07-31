@@ -5,6 +5,8 @@ from timeit import default_timer as timer
 import numpy as np
 import argparse
 
+from utils import reverse_complement, one_hot_encode_seq, intron_mean, intron_std
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--tissue', type=str, default='', metavar='tissue',
                     help='type of tissue filtered for')
@@ -20,15 +22,21 @@ data_path = '../../data'
 if tissue == 'brain':
     path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
     path_highly_expr_genes = '../../data/gtex_processed/brain_cortex_tpm_one_sample.csv'
-    save_to = 'gtex_processed/brain_cortex_full.csv'
+    save_to_low = 'gtex_processed/brain_cortex_full_low.csv'
+    save_to_high = 'gtex_processed/brain_cortex_full_high.csv'
+    save_to_cons = 'gtex_processed/brain_cortex_full_cons.csv'
 elif tissue == 'cerebellum':
     path_filtered_reads = f'{data_path}/gtex_processed/cerebellum_junction_reads_one_sample.csv'
     path_highly_expr_genes = '../../data/gtex_processed/cerebellum_tpm_one_sample.csv'
-    save_to = 'gtex_processed/cerebellum_full.csv'
+    save_to_low = 'gtex_processed/cerebellum_full_low.csv'
+    save_to_high = 'gtex_processed/cerebellum_full_high.csv'
+    save_to_cons = 'gtex_processed/cerebellum_full_cons.csv'
 elif tissue == 'heart':
     path_filtered_reads = f'{data_path}/gtex_processed/heart_junction_reads_one_sample.csv'
     path_highly_expr_genes = '../../data/gtex_processed/heart_tpm_one_sample.csv'
-    save_to = 'gtex_processed/heart_full.csv'
+    save_to_low = 'gtex_processed/heart_full_low.csv'
+    save_to_high = 'gtex_processed/heart_full_high.csv'
+    save_to_cons = 'gtex_processed/heart_full_cons.csv'
 
 print('-'*40)
 print(f'Processing tissue type: {tissue}')
@@ -113,6 +121,8 @@ junction_seqs = {}
 junction_psis = {}
 seqs_psis = {}
 l1_lens = []
+psis = []
+cons_exons, high_exons, low_exons = [], [], []
 
 with open(path_filtered_reads) as f:
     reader = csv.reader(f, delimiter="\n")
@@ -193,7 +203,10 @@ with open(path_filtered_reads) as f:
         window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
         window_around_end = chrom_seq[end-exons_bef_end-2:end+introns_after_end-2]
         junction_seqs[0] = [window_around_start, window_around_end]
-
+        # todo; currently no strand information in my filtered reads file // either dont do strand reversion or add this
+        if strand == '-':
+            window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
+                                                     reverse_complement(window_around_start[::-1])
         # almost always GT, but also many gc
         # print(chrom_seq[start-1:start+1])
         # almost always AG or AC
@@ -233,10 +246,40 @@ with open(path_filtered_reads) as f:
 
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)
+
+        start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
+        start, end = np.array(start), np.array(end)
+        l1, l2, l3 = 0, end - start, 0
+        l2 = (l2 - intron_mean) / intron_std
+
+        lens_and_psi_vector = np.array([l1, l2, l3, psi])
+        start_and_end = np.concatenate((start, end))
+        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
+        if psi < 0.8:
+            low_exons.append(sample)
+        elif psi < 1:
+            high_exons.append(sample)
+        else:
+            cons_exons.append(sample)
+        psis.append(psi)
         junction_psis[line[0]] = psi
         l1_lens.append(end-start)
         seqs_psis[line[0]] = (window_around_start, window_around_end, psi)
 
+low_psi_exons = np.array(low_exons)
+high_psi_exons = np.array(high_exons)
+cons_exons = np.array(cons_exons)
+psis = np.array(psis)
+
+print(f'Number of samples: {len(psis)}')
+print(f'Mean PSI: {np.mean(psis)}')
+print(f'Median PSI: {np.median(psis)}')
+
+print(f'Number of generated training samples: {len(low_psi_exons)+len(high_psi_exons)+len(cons_exons)}')  # 22700
+
+print(f'Number of low PSI exons: {len(low_exons)}')
+print(f'Number of high PSI exons: {len(high_exons)}')
+print(f'Number of cons exons: {len(cons_exons)}')
 
 print(f'Number of too short introns: {too_short_intron}')
 print(f'Number of skipped homeless junctions: {homeless_junctions} ')
@@ -258,11 +301,15 @@ std_len = np.std(l1_lens)
 print(f'Average length of l1: {avg_len}')
 print(f'Standard deviation of l1: {std_len}')
 
-with open(f'{data_path}/{save_to}', 'w') as f:
-    f.write(f'{avg_len},{std_len}\n')
-    print('Beginning to write estimated PSIs and extracted sequences')
-    for junction, (start_seq, end_seq, psi) in seqs_psis.items():
-        f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
+np.save(f'{data_path}/{save_to_low}', low_exons)
+np.save(f'{data_path}/{save_to_high}', high_exons)
+np.save(f'{data_path}/{save_to_cons}', cons_exons)
+
+# with open(f'{data_path}/{save_to}', 'w') as f:
+#     f.write(f'{avg_len},{std_len}\n')
+#     print('Beginning to write estimated PSIs and extracted sequences')
+#     for junction, (start_seq, end_seq, psi) in seqs_psis.items():
+#         f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
 
 print('Processing finished')
 endt = timer()
