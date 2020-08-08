@@ -12,3 +12,4 @@ from .Vanilla_4_Trainer import *
 from .NN_Trainer import *
 from .NN_D2V_Trainer import *
 from .GTEx_NoNumpy_Trainer import *
+from .Vanilla_Trainer import *

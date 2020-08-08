@@ -22,21 +22,16 @@ data_path = '../../data'
 if tissue == 'brain':
     path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
     path_highly_expr_genes = '../../data/gtex_processed/brain_cortex_tpm_one_sample.csv'
-    save_to_low = 'gtex_processed/brain_cortex_full_low.csv'
-    save_to_high = 'gtex_processed/brain_cortex_full_high.csv'
-    save_to_cons = 'gtex_processed/brain_cortex_full_cons.csv'
 elif tissue == 'cerebellum':
     path_filtered_reads = f'{data_path}/gtex_processed/cerebellum_junction_reads_one_sample.csv'
     path_highly_expr_genes = '../../data/gtex_processed/cerebellum_tpm_one_sample.csv'
-    save_to_low = 'gtex_processed/cerebellum_full_low.csv'
-    save_to_high = 'gtex_processed/cerebellum_full_high.csv'
-    save_to_cons = 'gtex_processed/cerebellum_full_cons.csv'
 elif tissue == 'heart':
     path_filtered_reads = f'{data_path}/gtex_processed/heart_junction_reads_one_sample.csv'
     path_highly_expr_genes = '../../data/gtex_processed/heart_tpm_one_sample.csv'
-    save_to_low = 'gtex_processed/heart_full_low.csv'
-    save_to_high = 'gtex_processed/heart_full_high.csv'
-    save_to_cons = 'gtex_processed/heart_full_cons.csv'
+
+save_to_low = f'gtex_processed/{tissue}/low.npy'
+save_to_high = f'gtex_processed/{tissue}/high.npy'
+save_to_cons = f'gtex_processed/{tissue}/cons.npy'
 
 print('-'*40)
 print(f'Processing tissue type: {tissue}')
@@ -211,10 +206,6 @@ with open(path_filtered_reads) as f:
         if strand == '-':
             window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
                                                      reverse_complement(window_around_start[::-1])
-        # almost always GT, but also many gc
-        # print(chrom_seq[start-1:start+1])
-        # almost always AG or AC
-        # print(chrom_seq[end - 2:end + 0])
 
         """ Estimation of the PSI value """
         # PSI = pos / (pos + neg)
