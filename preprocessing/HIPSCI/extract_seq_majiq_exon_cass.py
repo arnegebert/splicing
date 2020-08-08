@@ -15,9 +15,9 @@ def load_chrom_seq(chrom):
             return loaded_chrom_seq[6:]
 
 data_path = '../../data'
-sample_name = 'all'
-save_to_low = f'hipsci_majiq/exon/low.npy'
-save_to_high = f'hipsci_majiq/exon/high.npy'
+sample_name = 'all2'
+save_to_low = f'hipsci_majiq/exon/low2.npy'
+save_to_high = f'hipsci_majiq/exon/high2.npy'
 
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons

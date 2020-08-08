@@ -13,7 +13,7 @@ parser.add_argument('--tissue', type=str, default='', metavar='tissue',
 args = parser.parse_args()
 
 startt = timer()
-tissue = 'cerebellum' if not args.tissue else args.tissue
+tissue = 'brain' if not args.tissue else args.tissue
 
 assert tissue in ['brain', 'cerebellum', 'heart']
 data_path = '../../data'
@@ -69,12 +69,12 @@ gencode_genes = {}
 def load_gencode_genes():
     with open(f'../../data/gencode_genes.csv') as f:
         for line in f:
-            line = line.split('\t')
+            line = line.replace('\n','').split('\t')
             if len(line) == 1: continue
-            gene, chr, start, end = line[0], int(line[1][3:]), int(line[2]), int(line[3][:-1])
+            gene, chr, start, end, strand = line[0], int(line[1][3:]), int(line[2]), int(line[3]), line[4]
             if chr not in gencode_genes:
                 gencode_genes[chr] = []
-            gencode_genes[chr].append((gene, start, end))
+            gencode_genes[chr].append((gene, start, end, strand))
         print('Finished reading gencode genes')
 
 load_gencode_genes()
@@ -92,12 +92,12 @@ def map_from_position_to_genes(chr, start, end, idx):
     overlapping_genes = []
     for i in range(idx-1, idx-11, -1):
         if i < 0: break
-        gene, start2, end2 = gene_start_and_ends[i]
+        gene, start2, end2, strand = gene_start_and_ends[i]
         if overlap(start, end, start2, end2):
             overlapping_genes.append(gene)
     # if len(overlapping_genes) == 0:
     #     print(f'this mofo belongs to no gene')
-    return overlapping_genes, idx
+    return overlapping_genes, idx, strand
 
 def overlap(start, end, start2, end2):
     return not (end2 < start or start2 > end)

@@ -1,6 +1,6 @@
 import csv
 
-indv_name = 'bezi2'
+indv_name = 'all2'
 # idea: build set of LSV ids given
 lsvs = set()
 with open(f'binary_exon_skipping_junc_{indv_name}.txt') as f:

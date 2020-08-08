@@ -1,29 +1,29 @@
 {
-    "name": "DSCBiLSTM",
+    "name": "HIPSCI_SUPPA_4_BiLSTM",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "BiLSTM2",
+        "type": "BiLSTM3_4_SEQ",
         "args": {
             "three_len_feats": true
         }
     },
     "data_loader": {
-        "type": "DSCDataLoader",
+        "type": "Vanilla_4_DataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/brain_cortex_full.csv",
+            "data_dir": "data/hipsci_suppa",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0
+            "num_workers": 1
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
             "lr": 5e-4,
-            "weight_decay": 0.0,
+            "weight_decay": 0,
             "amsgrad": true
         }
     },
@@ -34,24 +34,23 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 200,
+            "step_size": 10000,
             "gamma": 0.1
         }
     },
     "trainer": {
-        "type": "GTEx_DSC_Trainer",
+        "type": "Vanilla_4_Trainer",
         "args": {},
-        "epochs": 1,
+        "epochs": 100,
 
         "save_dir": "saved/",
-        "save_period": 251,
+        "save_period": 101,
         "verbosity": 1,
 
         "monitor": "min val_loss",
-        "early_stop": 25,
+        "early_stop": 15,
 
         "tensorboard": false
     },
-    "comment": "",
-    "cross_validation": true
+    "cross_validation": false
 }

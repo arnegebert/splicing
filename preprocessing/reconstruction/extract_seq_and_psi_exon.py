@@ -19,7 +19,7 @@ data_path = '../../data'
 tissue = 'brain' if not args.tissue else args.tissue
 assert tissue in ['brain', 'cerebellum', 'heart']
 
-path_filtered_reads = f'{data_path}/gtex_processed/cerebellum_junction_reads_one_sample.csv'
+path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
 save_to_low = 'dsc_reconstruction_exon/brain_cortex_low.npy'
 save_to_high = 'dsc_reconstruction_exon/brain_cortex_high.npy'
 save_to_cons = 'dsc_reconstruction_exon/brain_cortex_cons.npy'
@@ -214,7 +214,7 @@ print(f'Number of junctions skipped because not part of highly expressed gene {n
 psis_gtex, psis_dsc = [], []
 l1scons, l2scons, l3scons = [], [], []
 l1scass, l2scass, l3scass = [], [], []
-
+assumed_read_length = 150
 """Going through exons after all junction reads have been accounted for"""
 def encoding_and_sequence_extraction(DSC_counts):
     cons_exons, high_psi_exons, low_psi_exons = [], [], []
@@ -234,8 +234,10 @@ def encoding_and_sequence_extraction(DSC_counts):
             # print(f'Loading chromosome {loaded_chrom} (read {read_chrom})')
             chrom_seq = load_chrom_seq(loaded_chrom)
 
-        gtex_psi = pos / (pos + neg)
-        psi = constit_level
+        exon_length = end - start
+        norm_pos, norm_neg = pos / (exon_length + assumed_read_length), neg / exon_length
+        gtex_psi = norm_pos / (norm_pos + norm_neg)
+        psi = gtex_psi#constit_level
         psis_gtex.append(gtex_psi); psis_dsc.append(constit_level)
 
         window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]

@@ -113,6 +113,6 @@ print(f'Selected tissue sample has {total_reads} total reads')
 # later i will need to extract the information from the junctions either way
 with open(save_to, 'w') as f:
     print('Beginning to write junction reads')
-    for (gene, junction, reads) in data:
-        f.write(f'{junction},{reads},{gene}\n')
+    for (gene, strand, junction, reads) in data:
+        f.write(f'{junction},{strand},{reads},{gene}\n')
 print('Processing finished')

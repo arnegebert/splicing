@@ -10,6 +10,10 @@ with open('../../data/gencode.v34.annotation.gtf') as f:
             if type != 'gene': continue
             chr, start, end = l[0], int(l[3]), int(l[4])
             freetext = l[8]
+            if l[6] != '.':
+                strand = l[6]
+            else:
+                strand = l[7]
             if include_version:
                 gene_id_idx = freetext.index(';')
                 gene_id = freetext[9:gene_id_idx-1]
@@ -21,7 +25,7 @@ with open('../../data/gencode.v34.annotation.gtf') as f:
             except ValueError:
                 continue
             start = start - 1
-            exons.append((gene_id, chr, start, end))
+            exons.append((gene_id, chr, start, end, strand))
 
 # sort by end then start to have list sorted by start and sub-ordered by end
 exons.sort(key=lambda tup: tup[3])
@@ -30,6 +34,7 @@ exons.sort(key=lambda tup: tup[1])
 
 print('Writing filtered data')
 with open('../../data/gencode_genes.csv', 'w') as f:
-    for (gene_id, chr, start, end) in exons:
-        f.write(f'{gene_id}\t{chr}\t{start}\t{end}\n')
+    for (gene_id, chr, start, end, strand) in exons:
+        f.write(f'{gene_id}\t{chr}\t{start}\t{end}\t{strand}\n')
 
+print('Done!')

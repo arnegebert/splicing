@@ -29,8 +29,8 @@ def split_into_3_mers(sentence):
 
 print('Loading data')
 cons_exons = np.load(f'../../data/{data_dir}/cons.npy')
-low_exons = np.load(f'../../data/{data_dir}/low.npy')
-high_exons = np.load(f'../../data/{data_dir}/high.npy')
+low_exons = np.load(f'../../data/{data_dir}/low2.npy')
+high_exons = np.load(f'../../data/{data_dir}/high2.npy')
 print('Finished loading data')
 
 def decode_reshape_and_embed(batch):
@@ -71,8 +71,8 @@ high_exons = decode_reshape_and_embed(high_exons)
 print('High data done')
 
 np.save(f'{data_path}/{data_dir}/embedded_cons.npy', cons_exons)
-np.save(f'{data_path}/{data_dir}/embedded_low.npy', low_exons)
-np.save(f'{data_path}/{data_dir}/embedded_high.npy', high_exons)
+np.save(f'{data_path}/{data_dir}/embedded_low2.npy', low_exons)
+np.save(f'{data_path}/{data_dir}/embedded_high2.npy', high_exons)
 
 
 endt = time.time()

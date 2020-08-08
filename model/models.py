@@ -376,7 +376,7 @@ class DSC_4_SEQ(BaseModel):
 
     def forward(self, seqs, lens):
         # [128, 2, 142, 4] or [128, 2, 140, 4]
-        lens = torch.zeros_like(lens)
+        # lens = torch.zeros_like(lens)
         bef_start, start, end, after_end = seqs[:, 0], seqs[:, 1], seqs[:, 2], seqs[:, 3]
         bef_start, start, end, after_end = bef_start.view(-1, 4, 140), start.view(-1, 4, 140), \
                                            end.view(-1, 4, 140), after_end.view(-1, 4, 140)
@@ -552,22 +552,28 @@ class BiLSTM2(BaseModel):
     def __init__(self, three_len_feats):
         super().__init__()
         self.three_feats = three_len_feats
-        if self.three_feats:
-            self.in_dim = 140
-            self.in_fc = 103
+        self.embedding_dim = 140
+        self.LSTM_dim = 50
+        self.in_dim = 140
+        self.dim_fc = 64
+        self.dropout_prob = 0.5
+        self.lstm_layer = 1
+        self.lstm_dropout = 0.2
+        if self.three_feats: # todo -- maybe depends on lstm layers too
+            self.in_fc = 2 * self.LSTM_dim + 3
         else:
-            self.in_dim = 140
-            self.in_fc = 101
-        self.embedding = nn.Linear(self.in_dim, self.in_dim, bias=True)
-        self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
+            self.in_fc = 2 * self.LSTM_dim + 1
 
-        self.lstm1 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.lstm2 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.fc1 = nn.Linear(self.in_fc, 64)
-        self.drop_fc = nn.Dropout(0.5)
-        self.fc2 = nn.Linear(64, 1)
+        self.embedding = nn.Linear(self.in_dim, self.embedding_dim, bias=True)
+        # self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
+
+        self.lstm1 = nn.LSTM(input_size=self.embedding_dim, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        self.lstm2 = nn.LSTM(input_size=self.in_dim, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
+        self.drop_fc = nn.Dropout(self.dropout_prob)
+        self.fc2 = nn.Linear(self.dim_fc, 1)
 
     def forward(self, seqs, lens):
         # [128, 142, 4] or [128, 140, 4]
@@ -577,11 +583,12 @@ class BiLSTM2(BaseModel):
 
         embedding = F.relu(self.embedding(start))
         output, (h_n, c_n) = self.lstm1(embedding)
-        x = c_n.view(-1, 50)
+        # todo -- might need to add lstm layers for grid search here
+        x = c_n.view(-1, self.LSTM_dim)
 
         embedding2 = F.relu(self.embedding(end))
         output, (h_n, c_n) = self.lstm2(embedding2)
-        xx = c_n.view(-1, 50)
+        xx = c_n.view(-1, self.LSTM_dim)
 
         feats = torch.cat((x, xx), dim=1)
         if self.three_feats:
@@ -593,7 +600,123 @@ class BiLSTM2(BaseModel):
         y = torch.sigmoid(self.fc2(y))
         return y
 
+# ok, but 113 k parameters and doesn't amaze
+class BiLSTM2_4_SEQ(BaseModel):
+    def __init__(self, three_len_feats):
+        super().__init__()
+        self.three_feats = three_len_feats
+        if self.three_feats:
+            self.in_dim = 140
+            self.in_fc = 4 * 50 + 3
+        else:
+            self.in_dim = 140
+            self.in_fc = 4 * 50 + 1
+        self.embedding = nn.Linear(self.in_dim, self.in_dim, bias=True)
+        # self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
 
+        self.lstm0 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
+                            batch_first=True, dropout=0.2)
+        self.lstm1 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
+                            batch_first=True, dropout=0.2)
+        self.lstm2 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
+                            batch_first=True, dropout=0.2)
+        self.lstm3 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
+                            batch_first=True, dropout=0.2)
+        self.fc1 = nn.Linear(self.in_fc, 64)
+        self.drop_fc = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(64, 1)
+
+    def forward(self, seqs, lens):
+        # [128, 142, 4] or [128, 140, 4]
+        # lens = torch.zeros_like(lens)
+        before_start, start, end, after_end = seqs[:, 0], seqs[:, 1], seqs[:, 2], seqs[:, 3]
+        start, end = start.view(-1, 4, self.in_dim), end.view(-1, 4, self.in_dim)
+        before_start, after_end = before_start.view(-1, 4, self.in_dim), after_end.view(-1, 4, self.in_dim)
+
+        embedding0 = F.relu(self.embedding(before_start))
+        output, (h_n, c_n) = self.lstm0(embedding0)
+        x = c_n.view(-1, 50)
+
+        embedding = F.relu(self.embedding(start))
+        output, (h_n, c_n) = self.lstm1(embedding)
+        xx = c_n.view(-1, 50)
+
+        embedding2 = F.relu(self.embedding(end))
+        output, (h_n, c_n) = self.lstm2(embedding2)
+        xxx = c_n.view(-1, 50)
+
+        embedding3 = F.relu(self.embedding(after_end))
+        output, (h_n, c_n) = self.lstm3(embedding3)
+        xxxx = c_n.view(-1, 50)
+
+        feats = torch.cat((x, xx, xxx, xxxx), dim=1)
+        if self.three_feats:
+            feats = torch.cat((feats, lens.view(-1, 3)), dim=1)
+        else:
+            feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
+        feats = feats.view(-1, self.in_fc)
+        y = self.drop_fc(F.relu(self.fc1(feats)))
+        y = torch.sigmoid(self.fc2(y))
+        return y
+
+# ok, but 113 k parameters and doesn't amaze
+class BiLSTM3_4_SEQ(BaseModel):
+    def __init__(self, three_len_feats):
+        super().__init__()
+        self.three_feats = three_len_feats
+        if self.three_feats:
+            self.in_dim = 140
+            self.in_fc = 4 * 24 + 3
+        else:
+            self.in_dim = 140
+            self.in_fc = 4 * 24 + 1
+        self.embedding_dim = 35
+        self.embedding = nn.Linear(self.in_dim, self.embedding_dim, bias=True)
+
+        self.lstm0 = nn.LSTM(input_size=self.embedding_dim, hidden_size=24//2, num_layers=1, bidirectional=True,
+                            batch_first=True, dropout=0.2)
+        self.lstm1 = nn.LSTM(input_size=self.embedding_dim, hidden_size=24//2, num_layers=1, bidirectional=True,
+                            batch_first=True, dropout=0.2)
+        self.lstm2 = nn.LSTM(input_size=self.embedding_dim, hidden_size=24//2, num_layers=1, bidirectional=True,
+                            batch_first=True, dropout=0.2)
+        self.lstm3 = nn.LSTM(input_size=self.embedding_dim, hidden_size=24//2, num_layers=1, bidirectional=True,
+                            batch_first=True, dropout=0.2)
+        self.fc1 = nn.Linear(self.in_fc, 16)
+        self.drop_fc = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(16, 1)
+
+    def forward(self, seqs, lens):
+        # [128, 142, 4] or [128, 140, 4]
+        # lens = torch.zeros_like(lens)
+        before_start, start, end, after_end = seqs[:, 0], seqs[:, 1], seqs[:, 2], seqs[:, 3]
+        start, end = start.view(-1, 4, self.in_dim), end.view(-1, 4, self.in_dim)
+        before_start, after_end = before_start.view(-1, 4, self.in_dim), after_end.view(-1, 4, self.in_dim)
+
+        embedding0 = F.relu(self.embedding(before_start))
+        output, (h_n, c_n) = self.lstm0(embedding0)
+        x = c_n.view(-1, 24)
+
+        embedding = F.relu(self.embedding(start))
+        output, (h_n, c_n) = self.lstm1(embedding)
+        xx = c_n.view(-1, 24)
+
+        embedding2 = F.relu(self.embedding(end))
+        output, (h_n, c_n) = self.lstm2(embedding2)
+        xxx = c_n.view(-1, 24)
+
+        embedding3 = F.relu(self.embedding(after_end))
+        output, (h_n, c_n) = self.lstm3(embedding3)
+        xxxx = c_n.view(-1, 24)
+
+        feats = torch.cat((x, xx, xxx, xxxx), dim=1)
+        if self.three_feats:
+            feats = torch.cat((feats, lens.view(-1, 3)), dim=1)
+        else:
+            feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
+        feats = feats.view(-1, self.in_fc)
+        y = self.drop_fc(F.relu(self.fc1(feats)))
+        y = torch.sigmoid(self.fc2(y))
+        return y
 
 # overfitting AS FUCK
 class MLP(BaseModel):
@@ -678,6 +801,27 @@ class MLP4(BaseModel):
         # x = torch.sigmoid(self.drop_fc1(self.fc1(feats)))
         # x = (self.fc2(x))
         return x
+
+# # ok, still a bit of overfitting, but just worse than MLP2
+# # AUC ~83.5 with 64, d=0.2
+# class MLP3(BaseModel):
+#     def __init__(self):
+#         super().__init__()
+#
+#         self.fc1 = nn.Linear(200+3, 16)
+#         self.fc2 = nn.Linear(16, 1)
+#         self.drop_fc1 = nn.Dropout(0.2)
+#
+#     def forward(self, d2v_feats, lens):
+#         # [B, 100] input
+#
+#         # [B, 200]
+#         # lens = torch.zeros_like(lens)
+#         #d2v_feats = torch.zeros_like(d2v_feats)
+#         feats = torch.cat((d2v_feats, lens), dim=1)
+#         x = F.relu(self.drop_fc1(self.fc1(feats)))
+#         x = torch.sigmoid(self.fc2(x))
+#         return x
 
 class MLP_4_SEQ(BaseModel):
     def __init__(self):

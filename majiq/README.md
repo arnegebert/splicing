@@ -51,8 +51,10 @@ majiq build fix_Homo_sapiens.GRCh38.100.gff3 -c not_neuron.config -j 8 -o builde
 
 
 # inter-majiq processing of single samples
+majiq psi builder/0.majiq builder/1.majiq builder/2.majiq builder/3.majiq builder/4.majiq builder/5.majiq builder/6.majiq builder/7.majiq builder/8.majiq builder/9.majiq builder/10.majiq builder/11.majiq builder/12.majiq builder/13.majiq builder/14.majiq builder/15.majiq builder/16.majiq builder/17.majiq builder/18.majiq builder/19.majiq builder/20.majiq builder/21.majiq builder/22.majiq builder/23.majiq builder/24.majiq builder/25.majiq -j 4 -o psi/ -n all2
 majiq psi builder/0.majiq -j 4 -o psi/ -n all
-voila tsv builder/splicegraph.sql psi/neural.psi.voila -f voila/ERR1775596_1.tsv
+
+voila tsv builder/splicegraph.sql psi/all.psi.voila -f voila/all.tsv
 voila view builder/splicegraph.sql psi/all.psi.voila
 
 

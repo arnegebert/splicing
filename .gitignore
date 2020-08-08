@@ -165,3 +165,12 @@ results/configs/ReconExon_DSC.json
 results/configs/ReconJunc_BiLSTM.json
 results/configs/ReconJunc_D2V_MLP.json
 results/configs/ReconJunc_DSC.json
+results/configs/ootw/DSC_BiLSTM.json
+results/configs/ootw/DSC_D2V_MLP.json
+results/configs/ootw/GTEx_BiLSTM.json
+results/configs/ootw/GTEx_Cass_DSC.json
+results/configs/ootw/GTEx_D2V_MLP.json
+results/configs/ootw/GTEx_DSC.json
+results/configs/HIPSCI_MAJIQ_4_D2V_MLP.json
+results/configs/HIPSCI_MAJIQ_4_DSC.json
+majiq/voila/binary_exon_skipping_junc_all2.txt
