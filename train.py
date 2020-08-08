@@ -54,8 +54,10 @@ def main(config):
         trainer.train()
         # not proud lol
         val_all.append(trainer.valid_all_metrics._data.values[1][2])
-        val_low.append(trainer.valid_low_metrics._data.values[1][2])
-        val_high.append(trainer.valid_high_metrics._data.values[1][2])
+        try:
+            val_low.append(trainer.valid_low_metrics._data.values[1][2])
+            val_high.append(trainer.valid_high_metrics._data.values[1][2])
+        except AttributeError: pass
     val_all, val_low, val_high = np.array(val_all), np.array(val_low), np.array(val_high)
     logger.info(f'Average val_all: {np.mean(val_all)} +- {np.std(val_all)}')
     logger.info(f'Average val_low: {np.mean(val_low)} +- {np.std(val_low)}')

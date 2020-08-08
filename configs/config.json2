@@ -1,28 +1,26 @@
 {
-    "name": "HIPSCI_SUPPA_4_BiLSTM",
+    "name": "DSC_Reconstruction_Junction",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "BiLSTM3_4_SEQ",
-        "args": {
-            "three_len_feats": true
-        }
+        "type": "GTEx_DSC",
+        "args": {}
     },
     "data_loader": {
-        "type": "Vanilla_4_DataLoader",
+        "type": "GTEx_DSC_DataLoader",
         "args":{
-            "data_dir": "data/hipsci_suppa",
+            "data_dir": "data/dsc_reconstruction_junction/brain_cortex_full.csv",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1
+            "num_workers": 0
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -39,12 +37,12 @@
         }
     },
     "trainer": {
-        "type": "Vanilla_4_Trainer",
+        "type": "GTEx_NoNumpy_Trainer",
         "args": {},
-        "epochs": 100,
+        "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "min val_loss",
@@ -52,5 +50,6 @@
 
         "tensorboard": false
     },
+    "comment": "",
     "cross_validation": false
 }

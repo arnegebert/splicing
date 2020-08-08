@@ -118,13 +118,6 @@ with open(path_filtered_reads) as f:
             current_idx_overlap = 0
             chrom_seq = load_chrom_seq(loaded_chrom)
 
-        # extract sequence around start
-        # todo: investigate why earliest start is 12058 eg for chrom 1
-        # todo: i need to do this with respect to gene boundaries ;____;
-            # however, not extremly big priorities as it essentially just some data pollution
-        # q: does it work to just remove the first and last exon boundary found for each chromosome?
-            # a: no, because that doesn't solve the problems for genes
-
         """ Filtering """
         # a minimal length of 25nt for the exons and a length of 80nt for the neighboring introns are
         # required as exons/introns shorter than 25nt/80nt are usually caused by sequencing errors and

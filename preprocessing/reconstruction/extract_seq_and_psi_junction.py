@@ -5,6 +5,8 @@ from timeit import default_timer as timer
 import numpy as np
 import matplotlib.pyplot as plt
 
+from utils import reverse_complement
+
 startt = timer()
 data_path = '../../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
@@ -90,7 +92,7 @@ def load_DSC_exons():
         reader_cons = csv.reader(f, delimiter='\t')
         cons = list(reader_cons)
         cons_divided = {}
-        for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in cons:
+        for chrom, strand, start, end, count, skip, constit_level, start_seq, end_seq, l1, l2, l3 in cons:
             chrom, start, end, count, skip, constit_level = int(chrom[3:]), int(start), int(end), int(count),\
                                                             int(skip), float(constit_level)
             if chrom not in cons_divided:
@@ -100,7 +102,7 @@ def load_DSC_exons():
         reader_cass = csv.reader(f, delimiter='\t')
         cass = list(reader_cass)
         cass_divided = {}
-        for chrom, strand, start, end, count, skip, constit_level, l1, l2, l3 in cass:
+        for chrom, strand, start, end, count, skip, constit_level, start_seq, end_seq, l1, l2, l3 in cass:
             chrom, start, end, count, skip, constit_level = int(chrom[3:]), int(start), int(end), int(count),\
                                                             int(skip), float(constit_level)
             if chrom not in cass_divided:
@@ -240,6 +242,10 @@ with open(path_filtered_reads) as f:
         window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
         window_around_end = chrom_seq[end-exons_bef_end-2:end+introns_after_end-2]
 
+        # todo stand switching
+        if strand == '-':
+            window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
+                                                     reverse_complement(window_around_start[::-1])
         # almost always GT, but also many gc
         # print(chrom_seq[start-1:start+1])
         # almost always AG or AC

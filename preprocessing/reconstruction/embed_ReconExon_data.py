@@ -4,25 +4,18 @@ import gensim.models
 import time
 from utils import one_hot_decode_seq_vanilla
 
-#todo could make this doable via command line arguments and export / document data processing process via a bash script
 startt = time.time()
 data_path = '../../data'
 
 # src = 'brain_cortex_full.csv'
 # target = 'embedded_gtex_junction_class.npy'
-# avg_len = 7853.118899261425 # Junction length measurement
-# std_len = 23917.691461462917
 
 
 # src = 'gtex_processed/brain_cortex_cassette_full.csv'
 # target = 'distributed/embedded_gtex_cass_class.npy'
-# avg_len = 5028.584836672408 # Cassette exon measurements
-# std_len = 18342.894894670942
 
 src = 'dsc_reconstruction_junction/brain_cortex_full.csv'
 target = 'dsc_reconstruction_exon/embedded_class.npy'
-avg_len = 7770.843898366985 # Junction length first iteration reconstruction dataset
-std_len = 21350.371079742523
 
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
 classification_task = True

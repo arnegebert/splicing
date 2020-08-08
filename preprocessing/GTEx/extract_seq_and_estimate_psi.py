@@ -66,38 +66,38 @@ def contains_highly_expressed_gene(genes):
     return False
 
 gencode_genes = {}
+# def load_gencode_genes():
+#     with open(f'../../data/gencode_genes.csv') as f:
+#         for line in f:
+#             line = line.replace('\n','').split('\t')
+#             if len(line) == 1: continue
+#             gene, chr, start, end, strand = line[0], int(line[1][3:]), int(line[2]), int(line[3]), line[4]
+#             if chr not in gencode_genes:
+#                 gencode_genes[chr] = []
+#             gencode_genes[chr].append((gene, start, end, strand))
+#         print('Finished reading gencode genes')
+
 def load_gencode_genes():
     with open(f'../../data/gencode_genes.csv') as f:
         for line in f:
             line = line.replace('\n','').split('\t')
             if len(line) == 1: continue
             gene, chr, start, end, strand = line[0], int(line[1][3:]), int(line[2]), int(line[3]), line[4]
-            if chr not in gencode_genes:
-                gencode_genes[chr] = []
-            gencode_genes[chr].append((gene, start, end, strand))
+            gencode_genes[gene] = strand
         print('Finished reading gencode genes')
 
 load_gencode_genes()
+
+def get_strand_based_on_gene(gene):
+    if gene in gencode_genes:
+        return gencode_genes[gene]
+    else: return None
 
 not_highly_expressed = 0
 homeless_junctions = 0
 current_idx_overlap = 0
 too_short_intron = 0
-
-def map_from_position_to_genes(chr, start, end, idx):
-    gene_start_and_ends = gencode_genes[chr]
-    while gene_start_and_ends[idx][1] <= end and idx < len(gene_start_and_ends)-1:
-        idx += 1
-
-    overlapping_genes = []
-    for i in range(idx-1, idx-11, -1):
-        if i < 0: break
-        gene, start2, end2, strand = gene_start_and_ends[i]
-        if overlap(start, end, start2, end2):
-            overlapping_genes.append(gene)
-    # if len(overlapping_genes) == 0:
-    #     print(f'this mofo belongs to no gene')
-    return overlapping_genes, idx, strand
+gene_not_in_gencode = 0
 
 def overlap(start, end, start2, end2):
     return not (end2 < start or start2 > end)
@@ -203,7 +203,11 @@ with open(path_filtered_reads) as f:
         window_around_start = chrom_seq[start-introns_bef_start-1:start+exons_after_start-1]
         window_around_end = chrom_seq[end-exons_bef_end-2:end+introns_after_end-2]
         junction_seqs[0] = [window_around_start, window_around_end]
-        # todo; currently no strand information in my filtered reads file // either dont do strand reversion or add this
+
+        strand = get_strand_based_on_gene(gene)
+        if not strand:
+            gene_not_in_gencode += 1
+            continue
         if strand == '-':
             window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
                                                      reverse_complement(window_around_start[::-1])
@@ -247,14 +251,15 @@ with open(path_filtered_reads) as f:
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)
 
-        start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
-        start, end = np.array(start), np.array(end)
+        startw, endw = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
+        startw, endw = np.array(startw), np.array(endw)
         l1, l2, l3 = 0, end - start, 0
         l2 = (l2 - intron_mean) / intron_std
 
         lens_and_psi_vector = np.array([l1, l2, l3, psi])
-        start_and_end = np.concatenate((start, end))
-        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
+        start_and_end = np.concatenate((startw, endw))
+        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4)))
+        sample = sample.astype(np.float32)
         if psi < 0.8:
             low_exons.append(sample)
         elif psi < 1:
@@ -285,6 +290,7 @@ print(f'Number of too short introns: {too_short_intron}')
 print(f'Number of skipped homeless junctions: {homeless_junctions} ')
 print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
 print(f'Number of junctions after filtering: {len(seqs_psis)}')
+print(f'Number of samples from genes not found in gencode: {gene_not_in_gencode}')
 
 # chrom 1 to 10:
 # 9023.466260727668

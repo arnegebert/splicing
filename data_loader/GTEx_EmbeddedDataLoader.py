@@ -12,7 +12,9 @@ class GTEx_EmbeddedDataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
-    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
+    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
+                 cross_validation_split=0):
+        # todo: cross_validation_split parameter ignored
         self.data_dir = data_dir
         self.dataset = GTEx_EmbeddedDataset(path=data_dir)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)

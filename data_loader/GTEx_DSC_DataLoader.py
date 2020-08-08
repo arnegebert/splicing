@@ -6,17 +6,16 @@ import time
 from torch import as_tensor as T
 import pickle
 
+from utils import exon_mean, exon_std, intron_mean, intron_std
+
 
 class GTEx_DSC_DataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
-                 classification_task=True):
-        trsfm = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])
+                 classification_task=True, cross_validation_split=0):
+        # todo; cross_validation is a meaningless parameter
         self.data_dir = data_dir
         self.dataset = GTEx_DSC_Dataset(path=data_dir, classification_task=classification_task)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
@@ -40,7 +39,7 @@ def encode_seq(seq):
 class GTEx_DSC_Dataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
 
-    def __init__(self, path, transform=None, classification_task=True):
+    def __init__(self, path, transform=None, classification_task=True, cross_validation_split=0):
         self.path = path
         start = time.time()
         print(f'starting loading of data')
@@ -61,35 +60,32 @@ class GTEx_DSC_Dataset(Dataset):
 
         with open(self.path, 'r') as f:
             for i, l in enumerate(f):
-                if i == 0:
-                    avg_len, std_len = l.split(',')
-                    avg_len, std_len = float(avg_len), float(std_len)
-                else:
-                    j, start_seq, end_seq, psi = l.split(',')
-                    s, e = j.split('_')[1:3]
-                    s, e = int(s), int(e)
-                    psi = T(float(psi[:-1])).float()
-                    is_constitutive = psi >= constitutive_level
-                    is_constitutive = T(float(is_constitutive))
+                j, start_seq, end_seq, psi = l.split(',')
+                s, e = j.split('_')[1:3]
+                s, e = int(s), int(e)
+                psi = T(float(psi[:-1])).float()
+                is_constitutive = psi >= constitutive_level
+                is_constitutive = T(float(is_constitutive))
 
-                    if psi <= 0.2: low += 1
-                    if 0.2 < psi <= 0.75: medium += 1
-                    if psi > 0.75 and psi < constitutive_level: high += 1
-                    if psi > constitutive_level: cons += 1
+                if psi <= 0.2: low += 1
+                if 0.2 < psi <= 0.75: medium += 1
+                if psi > 0.75 and psi < constitutive_level: high += 1
+                if psi > constitutive_level: cons += 1
 
-                    label = is_constitutive if classification_task else psi
+                label = is_constitutive if classification_task else psi
 
-                    l1 = (e-s-avg_len)/std_len
-                    l1 = T(l1).float()
-                    sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, label)
-                    self.samples.append(sample)
+                # todo; check that appropriate intron / exon standardization always used
+                l1 = (e-s-intron_mean)/intron_std
+                l1 = T(l1).float()
+                sample = (T((encode_seq(start_seq), encode_seq(end_seq))), l1, label)
+                self.samples.append(sample)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))
         print(f'low: {low}')
         print(f'medium: {medium}')
         print(f'high: {high}')
         print(f'cons: {cons}')
-        print(f'all: {low+high+cons}')
+        print(f'all: {low+medium+high+cons}')
         total = low+high+cons
         cons_perc = cons / total
         print(f'Percentage of consecutive data: {cons_perc}')

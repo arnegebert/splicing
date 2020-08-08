@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "GTEx_DSC_Trainer",
+        "type": "GTEx_NoNumpy_Trainer",
         "args": {},
         "epochs": 500,
 
