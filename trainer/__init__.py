@@ -1,6 +1,5 @@
 from .MNISTTrainer import *
 from .NaivePSITrainer import *
-from .DSC_DSC_Trainer import *
 from .GTEx_DSC_Trainer import *
 from .Vanilla_EmbeddedDataTrainer import *
 from .GTEx_D2V_Trainer import *
