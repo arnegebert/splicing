@@ -1,5 +1,5 @@
 {
-    "name": "DSCBiLSTM",
+    "name": "DSC_BiLSTM",
 
     "n_gpu": 1,
 
@@ -10,9 +10,9 @@
         }
     },
     "data_loader": {
-        "type": "DSCDataLoader",
+        "type": "HEXEvent_DataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/brain_cortex_full.csv",
+            "data_dir": "data/hexevent",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,

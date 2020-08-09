@@ -1,13 +1,11 @@
-from torchvision import datasets, transforms
-from base import BaseDataLoader
-from torch.utils.data import Dataset, TensorDataset
-import ast
 import time
-from torch import as_tensor as T, Tensor
-import pickle
-import torch
-import random
+
 import numpy as np
+import torch
+from torch.utils.data import Dataset
+
+from base import BaseDataLoader
+
 
 class Vanilla_4_DataLoader(BaseDataLoader):
     """

@@ -9,7 +9,7 @@ import torch
 import random
 import numpy as np
 
-class DSCDataLoader(BaseDataLoader):
+class HEXEvent_DataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
@@ -22,9 +22,9 @@ class DSCDataLoader(BaseDataLoader):
         cons, low, high = [], [], []
         data_type = 'cass'
         if True:
-            x_cons_data = np.load('data/hexevent/x_cons_data.npy')
-            hx_cas_data = np.load('data/hexevent/x_cas_data_high.npy')
-            lx_cas_data = np.load('data/hexevent/x_cas_data_low.npy')
+            x_cons_data = np.load('data/hexevent/cons.npy')
+            hx_cas_data = np.load('data/hexevent/high.npy')
+            lx_cas_data = np.load('data/hexevent/low.npy')
             # cons = extract_values_from_dsc_np_format(x_cons_data)
             # low = extract_values_from_dsc_np_format(hx_cas_data)
             # high = extract_values_from_dsc_np_format(lx_cas_data)

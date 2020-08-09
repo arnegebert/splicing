@@ -1,7 +1,7 @@
 import argparse
 import torch
 from tqdm import tqdm
-from data_loader import DSCDataLoader as module_data
+from data_loader import HEXEvent_DataLoader as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.models as module_arch
