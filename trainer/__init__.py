@@ -2,9 +2,9 @@ from .MNISTTrainer import *
 from .NaivePSITrainer import *
 from .DSC_DSC_Trainer import *
 from .GTEx_DSC_Trainer import *
-from .D2V_DataTrainer import *
+from .Vanilla_EmbeddedDataTrainer import *
 from .GTEx_D2V_Trainer import *
-from .D2V_4_Trainer import *
+from .Vanilla_4_EmbeddedDataTrainer import *
 from .Vanilla_4_Trainer import *
 from .NN_Trainer import *
 from .NN_D2V_Trainer import *

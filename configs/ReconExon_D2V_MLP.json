@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "D2V_DataTrainer",
+        "type": "Vanilla_EmbeddedDataTrainer",
         "args": {},
         "epochs": 250,
 

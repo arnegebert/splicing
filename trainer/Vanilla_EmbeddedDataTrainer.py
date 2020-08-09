@@ -6,8 +6,8 @@ from data_loader.HEXEvent_DataLoader import DSCDataset, HEXEvent_DataLoader
 from utils import inf_loop, MetricTracker, split_into_3_mers
 import gensim.models
 
-
-class D2V_4_Trainer(BaseTrainer):
+# todo rename into Vanilla_EmbeddedDataTrainer
+class Vanilla_EmbeddedDataTrainer(BaseTrainer):
     """
     Trainer class
     """
@@ -34,7 +34,6 @@ class D2V_4_Trainer(BaseTrainer):
         self.log_step = int(np.sqrt(data_loader.batch_size))
         # self.embedding_model = gensim.models.Doc2Vec.load('model/d2v-full-5epochs')
 
-
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_low_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
@@ -51,8 +50,8 @@ class D2V_4_Trainer(BaseTrainer):
         self.train_metrics.reset()
 
         for batch_idx, data in enumerate(self.data_loader):
-            feats_d2v = data[:, :4].view(-1, 400)
-            lens, target = data[:, 4, :3], data[:, 4, 3]
+            feats_d2v = data[:, :2].view(-1, 200)
+            lens, target = data[:, 2, :3], data[:, 2, 3]
             feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
@@ -71,8 +70,6 @@ class D2V_4_Trainer(BaseTrainer):
                 except ValueError:
                     print('AUC bitching around for train metrics')
                     continue
-                #self.train_metrics.update(met.__name__, met(output, target))
-
 
             if batch_idx % self.log_step == 0:
                 self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(
@@ -111,9 +108,9 @@ class D2V_4_Trainer(BaseTrainer):
         self.valid_high_metrics.reset()
         with torch.no_grad():
             for batch_idx, data_all in enumerate(self.val_all):
-                feats_d2v = data_all[:, :4].view(-1, 400)
+                feats_d2v = data_all[:, :2].view(-1, 200)
 
-                lens, target = data_all[:, 4, :3], data_all[:, 4, 3]
+                lens, target = data_all[:, 2, :3], data_all[:, 2, 3]
                 feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
                 output = self.model(feats_d2v, lens)
 
@@ -130,9 +127,9 @@ class D2V_4_Trainer(BaseTrainer):
                         continue
 
             for batch_idx, data_low in enumerate(self.val_low):
-                feats_d2v = data_low[:, :4].view(-1, 400)
+                feats_d2v = data_low[:, :2].view(-1, 200)
 
-                lens, target = data_low[:, 4, :3], data_low[:, 4, 3]
+                lens, target = data_low[:, 2, :3], data_low[:, 2, 3]
                 feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
                 output = self.model(feats_d2v, lens)
                 loss = self.criterion(output, target)
@@ -148,9 +145,9 @@ class D2V_4_Trainer(BaseTrainer):
                         continue
 
             for batch_idx, data_high in enumerate(self.val_high):
-                feats_d2v = data_high[:, :4].view(-1, 400)
+                feats_d2v = data_high[:, :2].view(-1, 200)
 
-                lens, target = data_high[:, 4, :3], data_high[:, 4, 3]
+                lens, target = data_high[:, 2, :3], data_high[:, 2, 3]
                 feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
 
                 output = self.model(feats_d2v, lens)

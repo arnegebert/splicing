@@ -8,7 +8,7 @@
         "args": {}
     },
     "data_loader": {
-        "type": "HIPSCI_SUPPA_DataLoader",
+        "type": "Vanilla_DataLoader",
         "args":{
             "data_dir": "data/hipsci_suppa",
             "batch_size": 256,
