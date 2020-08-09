@@ -10,7 +10,7 @@
         }
     },
     "data_loader": {
-        "type": "GTEx_DSC_DataLoader",
+        "type": "GTEx_NoNumpy_Junc_DataLoader",
         "args":{
             "data_dir": "data/dsc_reconstruction_junction/brain_cortex_full.csv",
             "batch_size": 256,

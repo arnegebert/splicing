@@ -1,17 +1,15 @@
-from torchvision import datasets, transforms
-from base import BaseDataLoader
-from torch.utils.data import Dataset
-import ast
 import time
+
 from torch import as_tensor as T
-import pickle
+from torch.utils.data import Dataset
 
-from utils import exon_mean, exon_std, intron_mean, intron_std
+from base import BaseDataLoader
+from utils import intron_mean, intron_std
 
 
-class GTEx_DSC_DataLoader(BaseDataLoader):
+class GTEx_NoNumpy_Junc_DataLoader(BaseDataLoader):
     """
-    PSI data loading demo using BaseDataLoader
+    Loads junction data from the non-numpy format
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
                  classification_task=True, cross_validation_split=0):
