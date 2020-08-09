@@ -8,7 +8,7 @@
         "args": {}
     },
     "data_loader": {
-        "type": "HIPSCI_MAJIQ_EmbeddedDataLoader",
+        "type": "Vanilla_EmbeddedDataLoader",
         "args":{
             "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
