@@ -10,7 +10,7 @@ import random
 import numpy as np
 import csv
 
-class DSC_EmbeddedDataLoader(BaseDataLoader):
+class Vanilla_4_EmbeddedDataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
@@ -23,10 +23,11 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
         cons, low, high = [], [], []
         data_type = 'cass'
         if True:
-            x_cons_data = np.load('data/distributed/embedded_cons_data_class.npy')
-            hx_cas_data = np.load('data/distributed/embedded_cas_data_high_class.npy')
-            lx_cas_data = np.load('data/distributed/embedded_cas_data_low_class.npy')
-
+            if data_dir:
+                x_cons_data = np.load(f'{data_dir}/embedded_cons_4.npy')
+                hx_cas_data = np.load(f'{data_dir}/embedded_high_4.npy')
+                lx_cas_data = np.load(f'{data_dir}/embedded_low_4.npy')
+            else: raise Exception('No data directory given')
             # x_cons_data = x_cons_data[:10]
             # hx_cas_data = hx_cas_data[:10]
             # lx_cas_data = lx_cas_data[:10]
@@ -46,12 +47,12 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
 
             d = int((9 * a) / (9 * (b + c)))
             d = max(1, d)
+            print(d)
             total = a + (b + c) * d
             cons_perc = a / total
             print(f'Percentage of consecutive data: {cons_perc}')
             if cons_perc > 0.6 or cons_perc < 0.4:
                 raise Exception('Unbalanced dataset')
-            #print(d)
             classification_task = False
             for i in range(d): #range(1)
                 train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)
@@ -64,12 +65,12 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
             np.random.shuffle(train)
 
             # 1 fold for testing
-
-            htest = np.concatenate((hx_cas_data[b * s:b * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
-            lt = np.concatenate((lx_cas_data[c * s:c * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
+            n_samples = 5000000
+            htest = np.concatenate((hx_cas_data[b * s:b * (s + 1)][:n_samples], x_cons_data[a * s:a * (s + 1)][:n_samples]), axis=0)
+            lt = np.concatenate((lx_cas_data[c * s:c * (s + 1)][:n_samples], x_cons_data[a * s:a * (s + 1)][:n_samples]), axis=0)
 
             test = htest
-            test = np.concatenate((test, lx_cas_data[c * s:c * (s + 1)]), axis=0)
+            test = np.concatenate((test, lx_cas_data[c * s:c * (s + 1)][:n_samples]), axis=0)
 
             cons_test = x_cons_data[a * s:a * (s + 1)]
             cas_test = np.concatenate((lx_cas_data[c * s:c * (s + 1)], hx_cas_data[b * s:b * (s + 1)]))
@@ -92,53 +93,6 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
             # val_high = htest
             # return train, test, htest, lt, cons_test, cas_test
 
-        else:
-            with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
-                for i, l in enumerate(f):
-                    j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                    psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                    seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                    lens = T((l1, l2, l3))
-                    psi = T(psi)
-                    sample = (seqs, lens, psi)
-                    cons.append(sample)
-
-            with open(f'data/hexevent/low_{data_type}_filtered_class.csv', 'r') as f:
-                for i, l in enumerate(f):
-                    j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                    psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                    seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                    lens = T((l1, l2, l3))
-                    psi = T(psi)
-                    sample = (seqs, lens, psi)
-                    low.append(sample)
-
-            with open(f'data/hexevent/high_{data_type}_filtered_class.csv', 'r') as f:
-                for i, l in enumerate(f):
-                    j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-                    psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-                    seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-                    lens = T((l1, l2, l3))
-                    psi = T(psi)
-                    sample = (seqs, lens, psi)
-                    high.append(sample)
-
-            ratio = int(len(cons) / (len(low) + len(high))) + 1
-
-            len_cons, len_low, len_high = int(len(cons)*validation_split), int(len(low)*validation_split),\
-                                          int(len(high)*validation_split)
-            cons_val, cons_train = cons[:len_cons], cons[len_cons:]
-            lval, ltrain = low[:len_low], low[len_low:]
-            hval, htrain = high[:len_high], high[len_high:]
-
-            train = cons_train
-            for _ in range(ratio):
-                train.extend(ltrain)
-                train.extend(htrain)
-
-            val_all = cons_val + lval + hval
-            val_low = cons_val + lval
-            val_high = cons_val + hval
 
         # random.seed(0)
         # random.shuffle(train)
@@ -150,6 +104,10 @@ class DSC_EmbeddedDataLoader(BaseDataLoader):
         val_all_dataset = DSCDataset(val_all)
         val_low_dataset = DSCDataset(val_low)
         val_high_dataset = DSCDataset(val_high)
+        print(f'Size training dataset: {len(train_dataset)}')
+        print(f'Size mixed validation dataset: {len(val_all_dataset)}')
+        print(f'Size low inclusion validation dataset: {len(val_low_dataset)}')
+        print(f'Size high inclusion validation dataset: {len(val_high_dataset)}')
         self.dataset = (train_dataset, val_all_dataset, val_low_dataset, val_high_dataset)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))
@@ -175,28 +133,6 @@ def decode_batch_of_seqs(batch):
             to_return.append(one_hot_decode(encoding))
     return to_return
 
-
-# Constant values taken in reference from
-# https://github.com/louadi/DSC/blob/master/training%20notebooks/cons_vs_es.ipynb
-# Don't blame me ¯\_(ツ)_/¯
-def extract_values_from_dsc_np_format(array):
-    lifehack = 500000
-    class_task = True
-    if class_task:
-        # classification
-        labels = array[:lifehack, 140, 0]
-    else:
-        # psi value
-        labels = array[:lifehack, -1, 4]
-
-    start_seq, end_seq = array[:lifehack, :140, :4], array[:lifehack, 141:281, :4]
-    start_seq, end_seq = decode_batch_of_seqs(start_seq), decode_batch_of_seqs(end_seq)
-    lens = array[:lifehack, -1, 0:3]
-    to_return = []
-    # could feed my network data with 280 + 3 + 1 dimensions
-    for start, end, len, label in zip(start_seq, end_seq, lens, labels):
-        to_return.append(((start, end), T(len).float(), T(label).float()))
-    return to_return
 
 class DSCDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """

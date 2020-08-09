@@ -46,10 +46,6 @@ class Comparison_DataLoader(BaseDataLoader):
             diff_tissue_hx_cas_data = np.load('data/hipsci_majiq/exon/high.npy')
             diff_tissue_lx_cas_data = np.load('data/hipsci_majiq/exon/low.npy')
 
-
-
-
-
         self.dataset_same = self.cross_validation(x_cons_data, lx_cas_data, hx_cas_data)
         #train_dataset, val_all_dataset, val_low_dataset, val_high_dataset = self.cross_validation(x_cons_data, lx_cas_data, hx_cas_data)
         dataset_diff_lib = self.cross_validation(diff_lib_x_cons_data, diff_lib_lx_cas_data, diff_lib_hx_cas_data)

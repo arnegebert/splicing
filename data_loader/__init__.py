@@ -14,6 +14,6 @@ from .HIPSCI_MAJIQ_EmbeddedDataLoader import *
 from .HIPSCI_MAJIQ_4_EmbeddedDataLoader import *
 from .Vanilla_4_DataLoader import *
 from .Comparison_DataLoader import *
-from .NN_EmbeddedDataLoader import *
+from .Comparison_EmbeddedDataLoader import *
 from .Vanilla_DataLoader import *
 from .Vanilla_EmbeddedDataLoader import *
