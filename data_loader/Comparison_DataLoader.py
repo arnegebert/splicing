@@ -9,12 +9,13 @@ import torch
 import random
 import numpy as np
 
-class NN_DataLoader(BaseDataLoader):
+class Comparison_DataLoader(BaseDataLoader):
     """
     Implements all three use cases for HIPSCI NotNeuron:
     1. Train on lib1, test on lib1
     2. Train on lib1, test on lib2
     3. Train on lib1, test on lib from other individual
+    4. Train on lib1, test on lib from other individual other tissue
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
                  classification=True, classification_treshold=0.95, cross_validation_split=0):

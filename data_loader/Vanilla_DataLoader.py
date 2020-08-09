@@ -1,20 +1,19 @@
-from torchvision import datasets, transforms
-from base import BaseDataLoader
-from torch.utils.data import Dataset, TensorDataset
-import ast
 import time
-from torch import as_tensor as T, Tensor
-import pickle
-import torch
-import random
+
 import numpy as np
+import torch
+from torch.utils.data import Dataset
+
+from base import BaseDataLoader
+
 
 class Vanilla_DataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     """
+
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
-                 classification=True, classification_treshold=0.95, cross_validation_split=0):
+                 classification=True, classification_treshold=0.99, cross_validation_split=0):
         self.data_dir = data_dir
         start = time.time()
         print(f'starting loading of data')
@@ -49,7 +48,7 @@ class Vanilla_DataLoader(BaseDataLoader):
         print(f'Percentage of consecutive data: {cons_perc}')
         if cons_perc > 0.6 or cons_perc < 0.4:
             raise Exception('Unbalanced dataset')
-        for i in range(resamplings): #range(1)
+        for i in range(resamplings):  # range(1)
             train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)
             train = np.concatenate((train, hx_cas_data[b * (s + 1):]), axis=0)
 
@@ -69,7 +68,6 @@ class Vanilla_DataLoader(BaseDataLoader):
 
         cons_test = x_cons_data[a * s:a * (s + 1)]
         cas_test = np.concatenate((lx_cas_data[c * s:c * (s + 1)], hx_cas_data[b * s:b * (s + 1)]))
-
 
         train = train
         # cons + low + high
@@ -95,21 +93,6 @@ class Vanilla_DataLoader(BaseDataLoader):
         # self.dataset = TensorDataset(*samples)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
 
-def one_hot_encode(nt):
-    if nt == 'A' or nt == 'a':
-        return [1.0, 0, 0, 0]
-    elif nt == 'C' or nt == 'c':
-        return [0, 1.0, 0, 0]
-    elif nt == 'G' or nt == 'g':
-        return [0, 0, 1.0, 0]
-    elif nt == 'T' or nt == 't':
-        return [0, 0, 0, 1.0]
-
-def encode_seq(seq):
-    encoding = []
-    for nt in seq:
-        encoding.append(one_hot_encode(nt))
-    return encoding
 
 class Vanilla_Dataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """

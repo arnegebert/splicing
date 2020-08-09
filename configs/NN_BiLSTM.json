@@ -10,7 +10,7 @@
         }
     },
     "data_loader": {
-        "type": "NN_DataLoader",
+        "type": "Comparison_DataLoader",
         "args":{
             "data_dir": "",
             "batch_size": 256,

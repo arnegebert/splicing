@@ -10,9 +10,9 @@
         }
     },
     "data_loader": {
-        "type": "ReconExon_DataLoader",
+        "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "",
+            "data_dir": "data/dsc_reconstruction_exon/brain",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
