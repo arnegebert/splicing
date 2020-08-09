@@ -6,7 +6,7 @@ from .Vanilla_EmbeddedDataTrainer import *
 from .GTEx_D2V_Trainer import *
 from .Vanilla_4_EmbeddedDataTrainer import *
 from .Vanilla_4_Trainer import *
-from .NN_Trainer import *
-from .NN_D2V_Trainer import *
+from .Comparison_Trainer import *
+from .Comparison_EmbeddedDataTrainer import *
 from .GTEx_NoNumpy_Trainer import *
 from .Vanilla_Trainer import *

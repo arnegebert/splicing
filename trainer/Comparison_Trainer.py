@@ -1,12 +1,11 @@
 import numpy as np
 import torch
-from torchvision.utils import make_grid
+
 from base import BaseTrainer
-from data_loader.HEXEvent_DataLoader import DSCDataset, HEXEvent_DataLoader
-from utils import inf_loop, MetricTracker, split_into_3_mers
+from utils import inf_loop, MetricTracker
 
 
-class NN_Trainer(BaseTrainer):
+class Comparison_Trainer(BaseTrainer):
     """
     Trainer class
     """

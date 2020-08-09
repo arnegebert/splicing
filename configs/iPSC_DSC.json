@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "NN_Trainer",
+        "type": "Comparison_Trainer",
         "args": {},
         "epochs": 200,
 
