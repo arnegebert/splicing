@@ -4,14 +4,6 @@ from .DSCDataLoader import *
 from .DSC_EmbeddedDataLoader import *
 from .NaivePSIDataLoader import *
 from .MNISTDataLoader import *
-from .ReconExon_DataLoader import *
-from .ReconExon_EmbeddedDataLoader import *
-from .HIPSCI_SUPPA_DataLoader import *
-from .HIPSCI_SUPPA_EmbeddedDataLoader import *
-from .HIPSCI_SUPPA_4_EmbeddedDataLoader import *
-from .HIPSCI_MAJIQ_DataLoader import *
-from .HIPSCI_MAJIQ_EmbeddedDataLoader import *
-from .HIPSCI_MAJIQ_4_EmbeddedDataLoader import *
 from .Vanilla_4_DataLoader import *
 from .Comparison_DataLoader import *
 from .Comparison_EmbeddedDataLoader import *
