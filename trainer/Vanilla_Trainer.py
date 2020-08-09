@@ -1,9 +1,8 @@
 import numpy as np
 import torch
-from torchvision.utils import make_grid
+
 from base import BaseTrainer
-from data_loader.HEXEvent_DataLoader import DSCDataset, HEXEvent_DataLoader
-from utils import inf_loop, MetricTracker, split_into_3_mers
+from utils import inf_loop, MetricTracker
 
 
 class Vanilla_Trainer(BaseTrainer):
@@ -25,11 +24,9 @@ class Vanilla_Trainer(BaseTrainer):
             # iteration-based training
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
-        # self.valid_data_loader = valid_data_loader
         self.val_all, self.val_low, self.val_high = valid_data_loader
         self.do_validation = self.val_all is not None
         self.lr_scheduler = lr_scheduler
-        # self.lr_scheduler = None
         self.log_step = int(np.sqrt(data_loader.batch_size))
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)

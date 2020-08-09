@@ -41,7 +41,7 @@
         }
     },
     "trainer": {
-        "type": "ReconExon_Trainer",
+        "type": "Vanilla_Trainer",
         "args": {},
         "epochs": 500,
 

@@ -12,6 +12,7 @@ import numpy as np
 class HEXEvent_DataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
+    Bit different than the standard I use for data loading (so can't directly replace with Vanilla_DataLoader)
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
                  cross_validation_split=0):

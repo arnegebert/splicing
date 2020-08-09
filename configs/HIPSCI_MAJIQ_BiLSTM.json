@@ -41,7 +41,7 @@
         }
     },
     "trainer": {
-        "type": "HIPSCI_MAJIQ_Trainer",
+        "type": "Vanilla_Trainer",
         "args": {},
         "epochs": 500,
 
