@@ -1,15 +1,18 @@
-from torchvision import datasets, transforms
 from base import BaseDataLoader
-from torch.utils.data import Dataset, TensorDataset
-import ast
+from torch.utils.data import Dataset
 import time
-from torch import as_tensor as T, Tensor
-import pickle
-import torch
-import random
+from torch import as_tensor as T
 import numpy as np
+import time
 
-class HEXEvent_DataLoader(BaseDataLoader):
+import numpy as np
+from torch import as_tensor as T
+from torch.utils.data import Dataset
+
+from base import BaseDataLoader
+
+
+class HEXEvent_To_GTEx_DataLoader(BaseDataLoader):
     """
     PSI data loading demo using BaseDataLoader
     Bit different than the standard I use for data loading (so can't directly replace with Vanilla_DataLoader)

@@ -1,6 +1,6 @@
 from .GTEx_EmbeddedDataLoader import *
 from .GTEx_DSC_DataLoader import *
-from .HEXEvent_DataLoader import *
+from .HEXEvent_To_GTEx_DataLoader import *
 from .DSC_EmbeddedDataLoader import *
 from .NaivePSIDataLoader import *
 from .MNISTDataLoader import *

@@ -10,7 +10,7 @@
         }
     },
     "data_loader": {
-        "type": "HEXEvent_DataLoader",
+        "type": "HEXEvent_To_GTEx_DataLoader",
         "args":{
             "data_dir": "data/hexevent",
             "batch_size": 256,

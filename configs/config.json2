@@ -1,18 +1,16 @@
 {
-    "name": "DSC_BiLSTM",
+    "name": "DSC_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "BiLSTM2",
-        "args": {
-            "three_len_feats": true
-        }
+        "type": "DSC",
+        "args": {}
     },
     "data_loader": {
-        "type": "Vanilla_DataLoader",
+        "type": "HEXEvent_To_GTEx_DataLoader",
         "args":{
-            "data_dir": "data/hexevent",
+            "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -39,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "Vanilla_Trainer",
+        "type": "GTEx_DSC_Trainer",
         "args": {},
         "epochs": 150,
 
