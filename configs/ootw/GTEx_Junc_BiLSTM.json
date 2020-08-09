@@ -1,16 +1,18 @@
 {
-    "name": "GTExBiLSTM",
+    "name": "GTEx_Junc_BiLSTM",
+
     "n_gpu": 1,
+
     "arch": {
         "type": "BiLSTM2",
         "args": {
-            "three_len_feats": false
-        }
+                    "three_len_feats": true
+                }
     },
     "data_loader": {
-        "type": "GTEx_DSC_DataLoader",
-        "args": {
-            "data_dir": "data/gtex_processed/heart_full.csv",
+        "type": "Vanilla_DataLoader",
+        "args":{
+            "data_dir": "data/gtex_processed/brain",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -19,8 +21,8 @@
     },
     "optimizer": {
         "type": "Adam",
-        "args": {
-            "lr": 0.0005,
+        "args":{
+            "lr": 1e-3,
             "weight_decay": 0.0,
             "amsgrad": true
         }
@@ -37,14 +39,17 @@
         }
     },
     "trainer": {
-        "type": "GTEx_DSC_Trainer",
+        "type": "Vanilla_Trainer",
         "args": {},
         "epochs": 500,
+
         "save_dir": "saved/",
         "save_period": 251,
         "verbosity": 1,
+
         "monitor": "min val_loss",
         "early_stop": 15,
+
         "tensorboard": false
     },
     "comment": "",

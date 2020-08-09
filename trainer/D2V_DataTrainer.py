@@ -6,7 +6,7 @@ from data_loader.DSCDataLoader import DSCDataset, DSCDataLoader
 from utils import inf_loop, MetricTracker, split_into_3_mers
 import gensim.models
 
-
+# todo rename into Vanilla_EmbeddedDataTrainer
 class D2V_DataTrainer(BaseTrainer):
     """
     Trainer class

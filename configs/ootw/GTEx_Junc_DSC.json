@@ -1,16 +1,16 @@
 {
-    "name": "GTEx_D2V_MLP",
+    "name": "GTEx_Junc_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "MLP2",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
-        "type": "GTEx_EmbeddedDataLoader",
+        "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/distributed/heart_embedded_junc_class.npy",
+            "data_dir": "data/gtex_processed/brain",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -20,8 +20,8 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
-            "weight_decay": 0,
+            "lr": 1e-3,
+            "weight_decay": 0.0,
             "amsgrad": true
         }
     },
@@ -32,17 +32,17 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 10000,
+            "step_size": 200,
             "gamma": 0.1
         }
     },
     "trainer": {
-        "type": "GTEx_D2V_Trainer",
+        "type": "Vanilla_Trainer",
         "args": {},
-        "epochs": 100,
+        "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "min val_loss",

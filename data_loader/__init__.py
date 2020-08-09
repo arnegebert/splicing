@@ -16,3 +16,4 @@ from .Vanilla_4_DataLoader import *
 from .NN_DataLoader import *
 from .NN_EmbeddedDataLoader import *
 from .Vanilla_DataLoader import *
+from .Vanilla_EmbeddedDataLoader import *
