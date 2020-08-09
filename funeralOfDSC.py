@@ -19,16 +19,16 @@ print(f'Training with device={device}')
 lr = 5e-3
 batch =256
 epochs = 150
-seed = 0
+seed = 3
 
-torch.manual_seed(0)
-np.random.seed(0)
+torch.manual_seed(seed)
+np.random.seed(seed)
 
 class MLP(torch.nn.Module):
     def __init__(self):
         super(MLP, self).__init__()
-        self.fc1 = nn.Linear(3, 12, bias=True)
-        self.fc2 = nn.Linear(12, 1, bias=False)
+        self.fc1 = nn.Linear(3, 20, bias=True)
+        self.fc2 = nn.Linear(20, 1, bias=False)
 
     def forward(self, lens):
         x = F.relu(self.fc1(lens))
@@ -57,7 +57,7 @@ a = int(x_cons_data.shape[0] / 10)
 b = int(hx_cas_data.shape[0] / 10)
 c = int(lx_cas_data.shape[0] / 10)
 
-s = cross_validation_split
+s = 0
 # 9 folds for training
 train = x_cons_data[:a * s]
 train = np.concatenate((train, x_cons_data[a * (s + 1):]), axis=0)

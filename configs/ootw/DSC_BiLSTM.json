@@ -39,7 +39,7 @@
         }
     },
     "trainer": {
-        "type": "GTEx_DSC_Trainer",
+        "type": "Vanilla_Trainer",
         "args": {},
         "epochs": 150,
 
@@ -53,5 +53,5 @@
         "tensorboard": false
     },
     "comment": "",
-    "cross_validation": true
+    "cross_validation": false
 }

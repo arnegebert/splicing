@@ -4,9 +4,8 @@ import gensim.models
 import time
 from utils import one_hot_decode_seq_vanilla
 
-#todo could make this doable via command line arguments and export / document data processing process via a bash script
 startt = time.time()
-tissue = 'brain'
+tissue = 'cerebellum'
 assert tissue in ['brain', 'heart', "cerebellum"]
 data_path = '../../data'
 data_dir = f'gtex_processed/{tissue}'
@@ -71,7 +70,7 @@ low_exons = decode_reshape_and_embed(low_exons)
 print('Low data done')
 high_exons = decode_reshape_and_embed(high_exons)
 print('High data done')
-
+print(f'Total samples: {len(cons_exons)+len(low_exons)+len(high_exons)}')
 np.save(f'{data_path}/{data_dir}/embedded_cons.npy', cons_exons)
 np.save(f'{data_path}/{data_dir}/embedded_low.npy', low_exons)
 np.save(f'{data_path}/{data_dir}/embedded_high.npy', high_exons)

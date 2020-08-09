@@ -193,37 +193,3 @@ class DSCDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.samples[idx]
-
-
-def prepare_data():
-    start = time.time()
-    print(f'starting loading of data')
-    samples = []
-    con, cass = [], []
-    with open('data/hexevent/all_cons_filtered_class.csv', 'r') as f:
-        for i, l in enumerate(f):
-            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-            lens = T((l1, l2, l3))
-            psi = T(psi)
-            sample = (seqs, lens, psi)
-            con.append(sample)
-
-    with open('data/hexevent/low_cass_filtered_class.csv', 'r') as f:
-        for i, l in enumerate(f):
-            j, start_seq, end_seq, psi, l1, l2, l3 = l.split('\t')
-            psi, l1, l2, l3 = float(psi), float(l1), float(l2), float(l3[:-1])
-            seqs = T((encode_seq(start_seq), encode_seq(end_seq)))
-            lens = T((l1, l2, l3))
-            psi = T(psi)
-            sample = (seqs, lens, psi)
-            cass.append(sample)
-
-    ratio = int(len(con) / len(cass))
-    for _ in range(ratio):
-        samples.extend(cass)
-
-    end = time.time()
-    print('total time to load data: {} secs'.format(end - start))
-    return samples

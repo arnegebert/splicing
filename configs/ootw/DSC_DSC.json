@@ -1,16 +1,16 @@
 {
-    "name": "GTEx_Junc_D2V_MLP",
+    "name": "DSC_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "MLP2",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
-        "type": "Vanilla_EmbeddedDataLoader",
+        "type": "DSCDataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/cerebellum",
+            "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -21,7 +21,7 @@
         "type": "Adam",
         "args":{
             "lr": 5e-4,
-            "weight_decay": 0,
+            "weight_decay": 0.0,
             "amsgrad": true
         }
     },
@@ -32,21 +32,21 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 10000,
+            "step_size": 200,
             "gamma": 0.1
         }
     },
     "trainer": {
-        "type": "D2V_DataTrainer",
+        "type": "GTEx_DSC_Trainer",
         "args": {},
-        "epochs": 100,
+        "epochs": 150,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "min val_loss",
-        "early_stop": 15,
+        "early_stop": 25,
 
         "tensorboard": false
     },

@@ -32,9 +32,6 @@ class Vanilla_DataLoader(BaseDataLoader):
             hx_cas_data[:, 280, 3] = (hx_cas_data[:, 280, 3] >= classification_treshold).astype(np.float32)
             lx_cas_data[:, 280, 3] = (lx_cas_data[:, 280, 3] >= classification_treshold).astype(np.float32)
 
-        # cons = extract_values_from_dsc_np_format(x_cons_data)
-        # low = extract_values_from_dsc_np_format(hx_cas_data)
-        # high = extract_values_from_dsc_np_format(lx_cas_data)
         a = int(x_cons_data.shape[0] / 10)
         b = int(hx_cas_data.shape[0] / 10)
         c = int(lx_cas_data.shape[0] / 10)
@@ -44,27 +41,26 @@ class Vanilla_DataLoader(BaseDataLoader):
         train = x_cons_data[:a * s]
         train = np.concatenate((train, x_cons_data[a * (s + 1):]), axis=0)
 
-        d = int((9 * a) / (9 * (b + c)))
-        d = max(1, d)
-        print(d)
-        total = a + (b + c) * d
+        resamplings = int((9 * a) / (9 * (b + c)))
+        resamplings = max(1, resamplings)
+        print(resamplings)
+        total = a + (b + c) * resamplings
         cons_perc = a / total
         print(f'Percentage of consecutive data: {cons_perc}')
         if cons_perc > 0.6 or cons_perc < 0.4:
             raise Exception('Unbalanced dataset')
-        classification_task = False
-        for i in range(d): #range(1)
+        for i in range(resamplings): #range(1)
             train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)
             train = np.concatenate((train, hx_cas_data[b * (s + 1):]), axis=0)
 
             train = np.concatenate((train, lx_cas_data[:c * s]), axis=0)
             train = np.concatenate((train, lx_cas_data[c * (s + 1):]), axis=0)
 
+        # ok since working with numpy arrays
         np.random.seed(0)
         np.random.shuffle(train)
 
         # 1 fold for testing
-
         htest = np.concatenate((hx_cas_data[b * s:b * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
         lt = np.concatenate((lx_cas_data[c * s:c * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
 
@@ -87,14 +83,6 @@ class Vanilla_DataLoader(BaseDataLoader):
         print(f'Size mixed validation dataset: {len(val_all)}')
         print(f'Size low inclusion validation dataset: {len(val_low)}')
         print(f'Size high inclusion validation dataset: {len(val_high)}')
-
-        # return train, test, htest, lt, cons_test, cas_test
-
-        # random.seed(0)
-        # random.shuffle(train)
-        # random.shuffle(val_all)
-        # random.shuffle(val_low)
-        # random.shuffle(val_high)
 
         train_dataset = Vanilla_Dataset(train)
         val_all_dataset = Vanilla_Dataset(val_all)
