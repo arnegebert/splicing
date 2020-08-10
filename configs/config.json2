@@ -1,26 +1,28 @@
 {
-    "name": "HIPSCI_SUPPA_4_DSC",
+    "name": "HIPSCI_MAJIQ_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "DSC_4_SEQ",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
-        "type": "Vanilla_4_DataLoader",
+        "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/hipsci_suppa",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1
+            "num_workers": 0,
+            "classification": true,
+            "classification_treshold": 0.99
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -38,13 +40,11 @@
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {
-            "four_seq": true
-        },
-        "epochs": 100,
+        "args": {},
+        "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "min val_loss",
@@ -52,5 +52,6 @@
 
         "tensorboard": false
     },
+    "comment": "",
     "cross_validation": false
 }
