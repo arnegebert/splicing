@@ -37,8 +37,10 @@
         }
     },
     "trainer": {
-        "type": "Vanilla_4_Trainer",
-        "args": {},
+        "type": "Vanilla_Trainer",
+        "args": {
+            "four_seq": true
+        },
         "epochs": 100,
 
         "save_dir": "saved/",

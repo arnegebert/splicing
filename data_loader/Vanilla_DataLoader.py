@@ -27,10 +27,11 @@ class Vanilla_DataLoader(BaseDataLoader):
             raise Exception('No data directories given!')
 
         if classification:
-            x_cons_data[:, 280, 3] = (x_cons_data[:, 280, 3] >= classification_treshold).astype(np.float32)
-            hx_cas_data[:, 280, 3] = (hx_cas_data[:, 280, 3] >= classification_treshold).astype(np.float32)
-            lx_cas_data[:, 280, 3] = (lx_cas_data[:, 280, 3] >= classification_treshold).astype(np.float32)
+            x_cons_data[:, -1, 3] = (x_cons_data[:, -1, 3] >= classification_treshold).astype(np.float32)
+            hx_cas_data[:, -1, 3] = (hx_cas_data[:, -1, 3] >= classification_treshold).astype(np.float32)
+            lx_cas_data[:, -1, 3] = (lx_cas_data[:, -1, 3] >= classification_treshold).astype(np.float32)
 
+        # cross-validation code below
         a = int(x_cons_data.shape[0] / 10)
         b = int(hx_cas_data.shape[0] / 10)
         c = int(lx_cas_data.shape[0] / 10)
