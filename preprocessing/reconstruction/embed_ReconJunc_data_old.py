@@ -1,9 +1,20 @@
-import numpy as np
-import csv
-import gensim.models
 import time
-from torch import as_tensor as T
+
+import gensim.models
+import numpy as np
+
 from utils import intron_mean, intron_std
+
+
+"""
+
+IMPORTANT:
+
+TRIED REPLACING THIS BUT GOT REALLY WEIRD RESULTS WITH 0.5 AUC (network is always predicting the same thing - 0.4950)
+
+THEREFORE KEPT THIS AND IT IS STILL USED
+
+"""
 #todo could make this doable via command line arguments and export / document data processing process via a bash script
 startt = time.time()
 # data_path = '../../data/gtex_processed'

@@ -1,20 +1,22 @@
 {
-    "name": "ReconJunc_D2V_MLP",
+    "name": "HIPSCI_MAJIQ_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "MLP2",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
-        "type": "Vanilla_EmbeddedDataLoader",
+        "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/dsc_reconstruction_junction",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0
+            "num_workers": 0,
+            "classification": true,
+            "classification_treshold": 0.99
         }
     },
     "optimizer": {
@@ -37,12 +39,12 @@
         }
     },
     "trainer": {
-        "type": "Vanilla_EmbeddedDataTrainer",
+        "type": "Vanilla_Trainer",
         "args": {},
-        "epochs": 100,
+        "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "min val_loss",

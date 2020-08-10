@@ -3,6 +3,7 @@ import torch
 
 from base import BaseTrainer
 from utils import inf_loop, MetricTracker
+from visualizations.roc_curves import plot_and_save_roc
 
 
 class Vanilla_Trainer(BaseTrainer):
@@ -13,7 +14,7 @@ class Vanilla_Trainer(BaseTrainer):
         pass
 
     def set_param(self, model, criterion, metric_ftns, optimizer, config, data_loader,
-                 valid_data_loader=None, lr_scheduler=None, len_epoch=None):
+                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
@@ -28,6 +29,7 @@ class Vanilla_Trainer(BaseTrainer):
         self.do_validation = self.val_all is not None
         self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size))
+        self.four_seq = four_seq
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
@@ -43,11 +45,12 @@ class Vanilla_Trainer(BaseTrainer):
         """
         self.model.train()
         self.train_metrics.reset()
-
         for batch_idx, data in enumerate(self.data_loader):
             # start, end = data[:, :140, :4], data[:, 140:280]
-            seqs = data[:, :280].view(-1, 2, 140, 4)
-            lens, target = data[:, 280, :3], data[:, 280, 3]
+            if not self.four_seq:
+                seqs = data[:, :280].view(-1, 2, 140, 4)
+            else: seqs = data[:, :560].view(-1, 4, 140, 4)
+            lens, target = data[:, -1, :3], data[:, -1, 3]
 
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
@@ -104,10 +107,11 @@ class Vanilla_Trainer(BaseTrainer):
         self.valid_low_metrics.reset()
         self.valid_high_metrics.reset()
         with torch.no_grad():
-            self._single_val_epoch(self.val_all, epoch, self.valid_all_metrics)
-            self._single_val_epoch(self.val_low, epoch, self.valid_low_metrics)
-            self._single_val_epoch(self.val_high, epoch, self.valid_high_metrics)
-
+            out_all, target_all = self._single_val_epoch(self.val_all, epoch, self.valid_all_metrics)
+            out_low, target_low = self._single_val_epoch(self.val_low, epoch, self.valid_low_metrics)
+            out_high, target_high = self._single_val_epoch(self.val_high, epoch, self.valid_high_metrics)
+            plot_and_save_roc((out_low, target_low, 'low'), self.checkpoint_dir, (out_all, target_all, 'all'),
+                              (out_high, target_high, 'high'))
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
@@ -115,9 +119,12 @@ class Vanilla_Trainer(BaseTrainer):
         return self.valid_all_metrics.result(), self.valid_low_metrics.result(), self.valid_high_metrics.result()
 
     def _single_val_epoch(self, val_data, epoch, metrics):
+        outputs, targets = [], []
         for batch_idx, data in enumerate(val_data):
-            seqs = data[:, :280].view(-1, 2, 140, 4)
-            lens, target = data[:, 280, :3], data[:, 280, 3]
+            if not self.four_seq:
+                seqs = data[:, :280].view(-1, 2, 140, 4)
+            else: seqs = data[:, :560].view(-1, 4, 140, 4)
+            lens, target = data[:, -1, :3], data[:, -1, 3]
 
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
 
@@ -126,6 +133,8 @@ class Vanilla_Trainer(BaseTrainer):
 
             self.writer.set_step((epoch - 1) * len(val_data) + batch_idx, 'valid')
             metrics.update('loss', loss.item())
+            outputs.extend(output.cpu().numpy().tolist())
+            targets.extend(target.cpu().numpy().tolist())
             for met in self.metric_ftns:
                 try:
                     auc_val = met(output, target)
@@ -133,6 +142,8 @@ class Vanilla_Trainer(BaseTrainer):
                 except ValueError:
                     print('AUC bitching around')
                     continue
+        return outputs, targets
+
 
     def _progress(self, batch_idx):
         base = '[{}/{} ({:.0f}%)]'
