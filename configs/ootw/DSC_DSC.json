@@ -8,7 +8,7 @@
         "args": {}
     },
     "data_loader": {
-        "type": "HEXEvent_To_GTEx_DataLoader",
+        "type": "HEXEvent2Vanilla_DataLoader",
         "args":{
             "data_dir": "",
             "batch_size": 256,
@@ -37,7 +37,7 @@
         }
     },
     "trainer": {
-        "type": "GTEx_DSC_Trainer",
+        "type": "Vanilla_Trainer",
         "args": {},
         "epochs": 150,
 
