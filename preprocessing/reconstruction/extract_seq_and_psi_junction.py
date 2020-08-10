@@ -5,7 +5,7 @@ from timeit import default_timer as timer
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils import reverse_complement, one_hot_encode_seq
+from utils import reverse_complement, one_hot_encode_seq, intron_std, intron_mean
 
 startt = timer()
 data_path = '../../data'
@@ -291,6 +291,7 @@ with open(path_filtered_reads) as f:
         startw, endw = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
         startw, endw = np.array(startw), np.array(endw)
         l1, l2, l3 = 0, end-start, 0
+        l2 = (l2-intron_mean)/intron_std
         lens_and_psi_vector = np.array([l1, l2, l3, psi])
         start_and_end = np.concatenate((startw, endw))
         sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)

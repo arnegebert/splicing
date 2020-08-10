@@ -1,16 +1,14 @@
 {
-    "name": "ReconJunc_BiLSTM",
+    "name": "ReconJunc_D2V_MLP",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "BiLSTM2",
-        "args": {
-            "three_len_feats": true
-        }
+        "type": "MLP2",
+        "args": {}
     },
     "data_loader": {
-        "type": "Vanilla_DataLoader",
+        "type": "Vanilla_EmbeddedDataLoader",
         "args":{
             "data_dir": "data/dsc_reconstruction_junction",
             "batch_size": 256,
@@ -39,12 +37,12 @@
         }
     },
     "trainer": {
-        "type": "Vanilla_Trainer",
+        "type": "Vanilla_EmbeddedDataTrainer",
         "args": {},
-        "epochs": 500,
+        "epochs": 100,
 
         "save_dir": "saved/",
-        "save_period": 251,
+        "save_period": 101,
         "verbosity": 1,
 
         "monitor": "min val_loss",
