@@ -5,13 +5,16 @@ from timeit import default_timer as timer
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils import reverse_complement
+from utils import reverse_complement, one_hot_encode_seq
 
 startt = timer()
 data_path = '../../data'
 path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
-save_to = 'dsc_reconstruction_junction/brain_cortex_full.csv'
-last_chrom = 23
+
+save_to_low = 'dsc_reconstruction_junction/low.npy'
+save_to_high = 'dsc_reconstruction_junction/high.npy'
+save_to_cons = 'dsc_reconstruction_junction/cons.npy'
+last_chrom = 24
 
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
@@ -150,9 +153,6 @@ def find_DSC_exon_belonging_to_junction2(chrom, junc_start, junc_end):
     raise ValueError('No matching exon for junction in DSC data')
 
 
-seqs_psis = {}
-l1_lens = []
-
 psis_gtex, psis_dsc = [], []
 
 with open(path_filtered_reads) as f:
@@ -160,6 +160,8 @@ with open(path_filtered_reads) as f:
     # contains list with rows of samples
     junction_reads_file = list(reader)
 
+l2s = []
+cons_exons, high_psi_exons, low_psi_exons = [], [], []
 with open(path_filtered_reads) as f:
     loaded_chrom = 1
     chrom_seq = load_chrom_seq(loaded_chrom)
@@ -285,17 +287,40 @@ with open(path_filtered_reads) as f:
 
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)
-        l1_lens.append(end-start)
+
+        startw, endw = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
+        startw, endw = np.array(startw), np.array(endw)
+        l1, l2, l3 = 0, end-start, 0
+        lens_and_psi_vector = np.array([l1, l2, l3, psi])
+        start_and_end = np.concatenate((startw, endw))
+        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
+        if psi < 0.8:
+            low_psi_exons.append(sample)
+            l2s.append(l2)
+        elif psi < 1:
+            high_psi_exons.append(sample)
+            l2s.append(l2)
+        else:
+            cons_exons.append(sample)
+            l2s.append(l2)
+
         psis_dsc.append(constit_level)
         psis_gtex.append(psi)
-        seqs_psis[line[0]] = (window_around_start, window_around_end, psi)
 
 
 print(f'Number of too short introns: {too_short_intron}')
 print(f'Number of skipped homeless junctions: {homeless_junctions} ')
 print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
 print(f'Number of skipped non-dsc junctions: {non_dsc_junction}')
-print(f'Number of junctions after filtering: {len(seqs_psis)}')
+
+print(f'Number of low PSI junctions: {len(low_psi_exons)}')
+print(f'Number of high PSI junctions: {len(high_psi_exons)}')
+print(f'Number of cons junctions: {len(cons_exons)}')
+print(f'Total number of junctions: {len(low_psi_exons) + len(high_psi_exons) + len(cons_exons)}')
+
+np.save(f'{data_path}/{save_to_low}', low_psi_exons)
+np.save(f'{data_path}/{save_to_high}', high_psi_exons)
+np.save(f'{data_path}/{save_to_cons}', cons_exons)
 
 # chrom 1 to 10:
 # 9023.466260727668
@@ -305,9 +330,9 @@ print(f'Number of junctions after filtering: {len(seqs_psis)}')
 # 7853.118899261425
 # 23917.691461462917
 
-l1_lens = np.array(l1_lens)
-avg_len = np.mean(l1_lens)
-std_len = np.std(l1_lens)
+l2s = np.array(l2s)
+avg_len = np.mean(l2s)
+std_len = np.std(l2s)
 
 
 
@@ -327,13 +352,8 @@ print(f'Median PSI value from GTEx dataset: {np.median(psis_gtex)}')
 print(f'Correlation between DSC and GTEx PSI values: {np.corrcoef(psis_dsc, psis_gtex)[0,1]}')
 print(f'Average absolute difference between DSC and GTEx PSI values: {np.mean(np.abs(psis_dsc-psis_gtex))}')
 print('---------------------------------')
-print(f'Average length of l1: {avg_len}')
-print(f'Standard deviation of l1: {std_len}')
-
-with open(f'{data_path}/{save_to}', 'w') as f:
-    print('Beginning to write estimated PSIs and extracted sequences')
-    for junction, (start_seq, end_seq, psi) in seqs_psis.items():
-        f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
+print(f'Average length of l2: {avg_len}')
+print(f'Standard deviation of l2: {std_len}')
 
 print('Processing finished')
 endt = timer()

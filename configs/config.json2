@@ -1,16 +1,18 @@
 {
-    "name": "GTEx_Cass_DSC",
+    "name": "ReconJunc_BiLSTM",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "DSC",
-        "args": {}
+        "type": "BiLSTM2",
+        "args": {
+            "three_len_feats": true
+        }
     },
     "data_loader": {
-        "type": "HEXEvent2Vanilla_DataLoader",
+        "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "",
+            "data_dir": "data/dsc_reconstruction_junction",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -32,12 +34,12 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 100,
+            "step_size": 10000,
             "gamma": 0.1
         }
     },
     "trainer": {
-        "type": "GTEx_DSC_Trainer",
+        "type": "Vanilla_Trainer",
         "args": {},
         "epochs": 500,
 
@@ -45,10 +47,11 @@
         "save_period": 251,
         "verbosity": 1,
 
-        "monitor": "max val_auc",
-        "early_stop": 20,
+        "monitor": "min val_loss",
+        "early_stop": 15,
 
         "tensorboard": false
     },
+    "comment": "",
     "cross_validation": false
 }

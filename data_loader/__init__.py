@@ -1,5 +1,4 @@
 from .GTEx_EmbeddedDataLoader import *
-from .GTEx_NoNumpy_Junc_DataLoader import *
 
 from .NaivePSIDataLoader import *
 from .MNISTDataLoader import *
