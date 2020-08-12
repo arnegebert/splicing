@@ -110,13 +110,23 @@ class Vanilla_Trainer(BaseTrainer):
             out_all, target_all = self._single_val_epoch(self.val_all, epoch, self.valid_all_metrics)
             out_low, target_low = self._single_val_epoch(self.val_low, epoch, self.valid_low_metrics)
             out_high, target_high = self._single_val_epoch(self.val_high, epoch, self.valid_high_metrics)
-            plot_and_save_roc((out_low, target_low, 'low'), self.checkpoint_dir, (out_all, target_all, 'all'),
+            self.save_pred_and_target(out_all, target_all, out_low, target_low, out_high, target_high)
+            plot_and_save_roc(self.log_dir, (out_low, target_low, 'low'), (out_all, target_all, 'all'),
                               (out_high, target_high, 'high'))
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
         return self.valid_all_metrics.result(), self.valid_low_metrics.result(), self.valid_high_metrics.result()
+
+    def save_pred_and_target(self, pred_all, target_all, pred_low, target_low, pred_high, target_high):
+        pred_target_all = np.concatenate((np.array(pred_all).flatten(), np.array(target_all)))
+        pred_target_low = np.concatenate((np.array(pred_low).flatten(), np.array(target_low)))
+        pred_target_high = np.concatenate((np.array(pred_high).flatten(), np.array(target_high)))
+        np.save(f'{self.log_dir}/pred_and_target_all.npy', pred_target_all)
+        np.save(f'{self.log_dir}/pred_and_target_low.npy', pred_target_low)
+        np.save(f'{self.log_dir}/pred_and_target_high.npy', pred_target_high)
+
 
     def _single_val_epoch(self, val_data, epoch, metrics):
         outputs, targets = [], []

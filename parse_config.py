@@ -26,6 +26,9 @@ class ConfigParser:
         save_dir = Path(self.config['trainer']['save_dir'])
 
         exper_name = self.config['name']
+        # try reading out run_id from config
+        try: run_id = self.config['run_id']
+        except KeyError: pass
         if run_id is None:  # use timestamp as default run-id
             run_id = datetime.now().strftime(r'%m%d_%H%M%S')
             # run_id = 'experiment'
@@ -80,6 +83,7 @@ class ConfigParser:
 
         # parse custom cli options into dictionary
         modification = {opt.target : getattr(args, _get_opt_name(opt.flags)) for opt in options}
+
         # initialize ConfigParser with given arguments here
         return cls(config, resume, modification)
 

@@ -1,5 +1,6 @@
 {
     "name": "HIPSCI_MAJIQ_DSC",
+    "run_id": "_final",
 
     "n_gpu": 1,
 
