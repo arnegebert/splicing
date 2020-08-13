@@ -3,10 +3,13 @@ import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
 from data_loader.HEXEvent2Vanilla_DataLoader import DSCDataset, HEXEvent2Vanilla_DataLoader
-from utils import inf_loop, MetricTracker, split_into_3_mers
+from utils import inf_loop, MetricTracker, split_into_3_mers, save_pred_and_target
 import gensim.models
 
 # todo rename into Vanilla_EmbeddedDataTrainer
+from visualizations.roc_curves import plot_and_save_roc
+
+
 class Vanilla_EmbeddedDataTrainer(BaseTrainer):
     """
     Trainer class
@@ -15,7 +18,7 @@ class Vanilla_EmbeddedDataTrainer(BaseTrainer):
         pass
 
     def set_param(self, model, criterion, metric_ftns, optimizer, config, data_loader,
-                 valid_data_loader=None, lr_scheduler=None, len_epoch=None):
+                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
@@ -33,6 +36,7 @@ class Vanilla_EmbeddedDataTrainer(BaseTrainer):
         # self.lr_scheduler = None
         self.log_step = int(np.sqrt(data_loader.batch_size))
         # self.embedding_model = gensim.models.Doc2Vec.load('model/d2v-full-5epochs')
+        self.four_seq = four_seq
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
@@ -107,66 +111,45 @@ class Vanilla_EmbeddedDataTrainer(BaseTrainer):
         self.valid_low_metrics.reset()
         self.valid_high_metrics.reset()
         with torch.no_grad():
-            for batch_idx, data_all in enumerate(self.val_all):
-                feats_d2v = data_all[:, :2].view(-1, 200)
-
-                lens, target = data_all[:, 2, :3], data_all[:, 2, 3]
-                feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
-                output = self.model(feats_d2v, lens)
-
-                loss = self.criterion(output, target)
-
-                self.writer.set_step((epoch - 1) * len(self.val_all) + batch_idx, 'valid')
-                self.valid_all_metrics.update('loss', loss.item())
-                for met in self.metric_ftns:
-                    try:
-                        auc_val = met(output, target)
-                        self.valid_all_metrics.update(met.__name__, auc_val)
-                    except ValueError:
-                        print('AUC bitching around for val all')
-                        continue
-
-            for batch_idx, data_low in enumerate(self.val_low):
-                feats_d2v = data_low[:, :2].view(-1, 200)
-
-                lens, target = data_low[:, 2, :3], data_low[:, 2, 3]
-                feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
-                output = self.model(feats_d2v, lens)
-                loss = self.criterion(output, target)
-
-                self.writer.set_step((epoch - 1) * len(self.val_low) + batch_idx, 'valid')
-                self.valid_low_metrics.update('loss', loss.item())
-                for met in self.metric_ftns:
-                    try:
-                        auc_val = met(output, target)
-                        self.valid_low_metrics.update(met.__name__, auc_val)
-                    except ValueError:
-                        print('AUC bitching around for val low')
-                        continue
-
-            for batch_idx, data_high in enumerate(self.val_high):
-                feats_d2v = data_high[:, :2].view(-1, 200)
-
-                lens, target = data_high[:, 2, :3], data_high[:, 2, 3]
-                feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
-
-                output = self.model(feats_d2v, lens)
-                loss = self.criterion(output, target)
-
-                self.writer.set_step((epoch - 1) * len(self.val_high) + batch_idx, 'valid')
-                self.valid_high_metrics.update('loss', loss.item())
-                for met in self.metric_ftns:
-                    try:
-                        auc_val = met(output, target)
-                        self.valid_high_metrics.update(met.__name__, auc_val)
-                    except ValueError:
-                        print('AUC bitching around for val high')
-                        continue
+            out_all, target_all = self._single_val_epoch(self.val_all, epoch, self.valid_all_metrics)
+            out_low, target_low = self._single_val_epoch(self.val_low, epoch, self.valid_low_metrics)
+            out_high, target_high = self._single_val_epoch(self.val_high, epoch, self.valid_high_metrics)
+            save_pred_and_target(self.log_dir, out_all, target_all, out_low, target_low, out_high, target_high)
+            plot_and_save_roc(self.log_dir, (out_low, target_low, 'low'), (out_all, target_all, 'all'),
+                              (out_high, target_high, 'high'))
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
         return self.valid_all_metrics.result(), self.valid_low_metrics.result(), self.valid_high_metrics.result()
+
+    def _single_val_epoch(self, val_data, epoch, metrics):
+        outputs, targets = [], []
+
+        for batch_idx, data in enumerate(val_data):
+            if not self.four_seq:
+                feats_d2v = data[:, :2].view(-1, 200)
+                lens, target = data[:, 2, :3], data[:, 2, 3]
+            else:
+                feats_d2v = data[:, :4].view(-1, 400)
+                lens, target = data[:, 4, :3], data[:, 4, 3]
+
+            feats_d2v, lens, target = feats_d2v.to(self.device), lens.to(self.device), target.to(self.device)
+            output = self.model(feats_d2v, lens)
+            loss = self.criterion(output, target)
+
+            self.writer.set_step((epoch - 1) * len(val_data) + batch_idx, 'valid')
+            metrics.update('loss', loss.item())
+            outputs.extend(output.cpu().numpy().tolist())
+            targets.extend(target.cpu().numpy().tolist())
+            for met in self.metric_ftns:
+                try:
+                    auc_val = met(output, target)
+                    metrics.update(met.__name__, auc_val)
+                except ValueError:
+                    print('AUC bitching around')
+                    continue
+        return outputs, targets
 
     def _progress(self, batch_idx):
         base = '[{}/{} ({:.0f}%)]'

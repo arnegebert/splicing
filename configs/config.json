@@ -1,16 +1,19 @@
 {
-    "name": "DSC_DSC",
+    "name": "DSC_BiLSTM",
 
     "n_gpu": 1,
+    "run_id": "",
 
     "arch": {
-        "type": "DSC",
-        "args": {}
+        "type": "BiLSTM4",
+        "args": {
+            "three_len_feats": true
+        }
     },
     "data_loader": {
         "type": "HEXEvent2Vanilla_DataLoader",
         "args":{
-            "data_dir": "",
+            "data_dir": "data/hexevent",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,

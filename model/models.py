@@ -557,12 +557,10 @@ class BiLSTM2(BaseModel):
         self.in_dim = 140
         self.dim_fc = 64
         self.dropout_prob = 0.5
-        self.lstm_layer = 1
+        self.lstm_layer = 2
         self.lstm_dropout = 0.2
-        if self.three_feats: # todo -- maybe depends on lstm layers too
-            self.in_fc = 2 * self.LSTM_dim + 3
-        else:
-            self.in_fc = 2 * self.LSTM_dim + 1
+        self.in_fc = 2 * self.LSTM_dim * self.lstm_layer + (3 if self.three_feats else 1)
+
 
         self.embedding = nn.Linear(self.in_dim, self.embedding_dim, bias=True)
         # self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
@@ -584,7 +582,7 @@ class BiLSTM2(BaseModel):
         embedding = F.relu(self.embedding(start))
         output, (h_n, c_n) = self.lstm1(embedding)
         # todo -- might need to add lstm layers for grid search here
-        x = c_n.view(-1, self.LSTM_dim)
+        x = c_n.view(-1, self.LSTM_dim*self.lstm_layer)
 
         embedding2 = F.relu(self.embedding(end))
         output, (h_n, c_n) = self.lstm2(embedding2)
@@ -595,10 +593,126 @@ class BiLSTM2(BaseModel):
             feats = torch.cat((feats, lens.view(-1, 3)), dim=1)
         else:
             feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
+        feats = feats.view(-1, self.in_fc*self.lstm_layer)
+        y = self.drop_fc(F.relu(self.fc1(feats)))
+        y = torch.sigmoid(self.fc2(y))
+        return y
+
+# 85.6
+class BiLSTM3(BaseModel):
+    def __init__(self, three_len_feats):
+        super().__init__()
+        self.three_feats = three_len_feats
+        self.embedding_dim = 140
+        self.LSTM_dim = 50
+        self.in_dim = 140
+        self.dim_fc = 64
+        self.dropout_prob = 0.5
+        self.lstm_layer = 1
+        self.lstm_dropout = 0.2
+        self.in_fc = 2 * self.LSTM_dim * self.lstm_layer + (3 if self.three_feats else 1)
+
+
+        self.embedding = nn.Linear(self.in_dim, self.embedding_dim, bias=True)
+        # self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
+
+        self.lstm1 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        self.lstm2 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
+        self.drop_fc = nn.Dropout(self.dropout_prob)
+        self.fc2 = nn.Linear(self.dim_fc, 1)
+
+    def forward(self, seqs, lens):
+        # [128, 142, 4] or [128, 140, 4]
+        # lens = torch.zeros_like(lens)
+        start, end = seqs[:, 0], seqs[:, 1]
+        start, end = start.view(-1, 4, self.in_dim), end.view(-1, 4, self.in_dim)
+
+        # embedding = F.relu(self.embedding(start))
+        embedding = F.relu(self.embedding(start))
+        # currently treat the 140-input as dimension, but shouldn't
+        # just want a dense mapping from sparse 4-d to dense 4-d
+        output, (h_n, c_n) = self.lstm1(embedding.view(-1, 140, 4))
+        # todo -- might need to add lstm layers for grid search here
+        # output = [256, 140, 2*50]  // 256, 4, 50???
+        x = h_n.view(-1, self.LSTM_dim*self.lstm_layer)
+        # want: a 50-dimensional output for the complete sequence (140x4)
+        # currently have: a 50-dimensional output for each element in the sequence
+
+        embedding2 = F.relu(self.embedding(end))
+        output, (h_n, c_n) = self.lstm2(embedding2)
+        xx = h_n.view(-1, self.LSTM_dim*self.lstm_layer)
+
+        feats = torch.cat((x, xx), dim=1)
+        if self.three_feats:
+            feats = torch.cat((feats, lens.view(-1, 3)), dim=1)
+        else:
+            feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
         feats = feats.view(-1, self.in_fc)
         y = self.drop_fc(F.relu(self.fc1(feats)))
         y = torch.sigmoid(self.fc2(y))
         return y
+
+# 1 layers = seems best, as high as 85.8, fastest to train
+# 2 layers = slow to train, stop at 85 after 63 epochs
+# 3 layers = stopped after 20 epochs took like 20 min and it was still only at 82
+class BiLSTM4(BaseModel):
+    def __init__(self, three_len_feats):
+        super().__init__()
+        self.three_feats = three_len_feats
+        self.LSTM_dim = 50
+        self.seq_length = 140
+        self.dim_fc = 64
+        self.dropout_prob = 0.5
+        self.lstm_layer = 1
+        self.lstm_dropout = 0.2
+        self.in_fc = 2 * self.LSTM_dim * self.lstm_layer + (3 if self.three_feats else 1)
+
+        self.embedding = nn.Linear(4, 4, bias=True)
+        # self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
+
+        self.lstm1 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        self.lstm2 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
+        self.drop_fc = nn.Dropout(self.dropout_prob)
+        self.fc2 = nn.Linear(self.dim_fc, 1)
+
+# todo currently making this better and it's fun!
+    def forward(self, seqs, lens):
+        # [128, 142, 4] or [128, 140, 4]
+        # lens = torch.zeros_like(lens)
+        start, end = seqs[:, 0], seqs[:, 1]
+        start, end = start.view(-1, self.seq_length, 4), end.view(-1, self.seq_length, 4)
+
+        # embedding = F.relu(self.embedding(start))
+        embedding = F.relu(self.embedding(start))
+        # currently treat the 140-input as dimension, but shouldn't
+        # just want a dense mapping from sparse 4-d to dense 4-d
+        output, (h_n, c_n) = self.lstm1(embedding)
+        # todo -- might need to add lstm layers for grid search here
+        # output = [256, 140, 2*50]  // 256, 4, 50???
+        x = h_n.view(-1, self.LSTM_dim*self.lstm_layer)
+        # want: a 50-dimensional output for the complete sequence (140x4)
+        # currently have: a 50-dimensional output for each element in the sequence
+
+        embedding2 = F.relu(self.embedding(end))
+        output, (h_n, c_n) = self.lstm2(embedding2)
+        xx = h_n.view(-1, self.LSTM_dim*self.lstm_layer)
+
+        feats = torch.cat((x, xx), dim=1)
+        if self.three_feats:
+            feats = torch.cat((feats, lens.view(-1, 3)), dim=1)
+        else:
+            feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
+        feats = feats.view(-1, self.in_fc)
+        y = self.drop_fc(F.relu(self.fc1(feats)))
+        y = torch.sigmoid(self.fc2(y))
+        return y
+
 
 # ok, but 113 k parameters and doesn't amaze
 class BiLSTM2_4_SEQ(BaseModel):

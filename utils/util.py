@@ -1,6 +1,7 @@
 import functools
 import json
 import time
+import numpy as np
 
 import pandas as pd
 from pathlib import Path
@@ -12,6 +13,13 @@ import math
 def overlap(start, end, start2, end2):
     return not (start > end2 or end < start2)
 
+def save_pred_and_target(log_dir, pred_all, target_all, pred_low, target_low, pred_high, target_high):
+    pred_target_all = np.concatenate((np.array(pred_all).flatten(), np.array(target_all)))
+    pred_target_low = np.concatenate((np.array(pred_low).flatten(), np.array(target_low)))
+    pred_target_high = np.concatenate((np.array(pred_high).flatten(), np.array(target_high)))
+    np.save(f'{log_dir}/pred_and_target_all.npy', pred_target_all)
+    np.save(f'{log_dir}/pred_and_target_low.npy', pred_target_low)
+    np.save(f'{log_dir}/pred_and_target_high.npy', pred_target_high)
 
 def timer(func):
     """Print the runtime of the decorated function"""

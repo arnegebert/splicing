@@ -29,7 +29,7 @@ class ConfigParser:
         # try reading out run_id from config
         try: run_id = self.config['run_id']
         except KeyError: pass
-        if run_id is None:  # use timestamp as default run-id
+        if not run_id:  # use timestamp as default run-id
             run_id = datetime.now().strftime(r'%m%d_%H%M%S')
             # run_id = 'experiment'
 

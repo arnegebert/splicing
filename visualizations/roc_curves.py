@@ -42,13 +42,13 @@ def load_and_plot_roc(name, dirs, labels):
     plt.legend(loc='best')
     plt.savefig(f'{name}.png', dpi=300, bbox_inches='tight')
 
+if __name__ == '__main__':
+    labels = ['DSC (baseline)', 'DSC (ours)', 'BiLSTM', 'D2V']
 
-labels = ['DSC (baseline)', 'DSC (ours)', 'BiLSTM', 'D2V']
+    experiments = ['DSC_DSC', 'DSC_BiLSTM', 'DSC_D2V_MLP']
+    file_name = 'pred_and_target_all.npy'
+    run_id = '_final'
+    dirs = [f'../saved/original/{file_name}']
+    for exp in experiments: dirs.append(f'../saved/log/{exp}/{run_id}/{file_name}')
 
-experiments = ['DSC_DSC', 'DSC_BiLSTM', 'DSC_D2V_MLP']
-file_name = 'pred_and_target_all.npy'
-run_id = '_final'
-dirs = [f'../saved/original/{file_name}']
-for exp in experiments: dirs.append(f'../saved/log/{exp}/{run_id}/{file_name}')
-
-load_and_plot_roc('baseline_four_models', dirs, labels)
+    load_and_plot_roc('baseline_four_models', dirs, labels)
