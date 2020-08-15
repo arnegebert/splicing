@@ -46,7 +46,7 @@
         "save_period": 251,
         "verbosity": 1,
 
-        "monitor": "min val_loss",
+        "monitor": "max val_auc",
         "early_stop": 25,
 
         "tensorboard": false
