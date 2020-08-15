@@ -681,14 +681,11 @@ class BiLSTM4(BaseModel):
         self.drop_fc = nn.Dropout(self.dropout_prob)
         self.fc2 = nn.Linear(self.dim_fc, 1)
 
-# todo currently making this better and it's fun!
     def forward(self, seqs, lens):
-        # [128, 142, 4] or [128, 140, 4]
+        # [256, 142, 4] or [256, 140, 4]
         # lens = torch.zeros_like(lens)
         start, end = seqs[:, 0], seqs[:, 1]
         start, end = start.view(-1, self.seq_length, 4), end.view(-1, self.seq_length, 4)
-
-        # embedding = F.relu(self.embedding(start))
         embedding = F.relu(self.embedding(start))
         # currently treat the 140-input as dimension, but shouldn't
         # just want a dense mapping from sparse 4-d to dense 4-d
@@ -713,6 +710,80 @@ class BiLSTM4(BaseModel):
         y = torch.sigmoid(self.fc2(y))
         return y
 
+class AttnBiLSTM(BaseModel):
+    def __init__(self, LSTM_dim=50, fc_dim=64, attn_dim=50, three_len_feats=True):
+        super().__init__()
+        self.three_feats = three_len_feats
+        self.LSTM_dim = LSTM_dim
+        self.seq_length = 140
+        self.dim_fc = fc_dim
+        self.dropout_prob = 0.5
+        self.lstm_layer = 1 # not changing this; too long training times already, really need to put my foot down here
+        # if I want to finish this thesis in time
+        self.lstm_dropout = 0.2
+        self.attn_dim = attn_dim
+        self.in_fc = self.attn_dim + (3 if self.three_feats else 1)
+
+        self.embedding = nn.Linear(4, 4, bias=True)
+        # self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
+
+        self.lstm1 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        self.lstm2 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        self.attention = AttentionBlock(2*self.seq_length, self.LSTM_dim, self.attn_dim)
+        self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
+        self.drop_fc = nn.Dropout(self.dropout_prob)
+        self.fc2 = nn.Linear(self.dim_fc, 1)
+
+    def forward(self, seqs, lens):
+        # [256, 142, 4] or [256, 140, 4]
+        # lens = torch.zeros_like(lens)
+        start, end = seqs[:, 0], seqs[:, 1]
+        start, end = start.view(-1, self.seq_length, 4), end.view(-1, self.seq_length, 4)
+        embedding = F.relu(self.embedding(start))
+        # currently treat the 140-input as dimension, but shouldn't
+        # just want a dense mapping from sparse 4-d to dense 4-d
+        output1, (h_n, c_n) = self.lstm1(embedding)
+        # todo -- might need to add lstm layers for grid search here
+        # output = [256, 140, 2*50]  // 256, 4, 50???
+        x = h_n.view(-1, self.LSTM_dim*self.lstm_layer)
+        # want: a 50-dimensional output for the complete sequence (140x4)
+        # currently have: a 50-dimensional output for each element in the sequence
+
+        embedding2 = F.relu(self.embedding(end))
+        output2, (h_n, c_n) = self.lstm2(embedding2)
+        xx = h_n.view(-1, self.LSTM_dim*self.lstm_layer)
+
+        # feats = torch.cat((x, xx), dim=1)
+        feats = torch.cat((output1, output2), dim=1)
+
+        # (batch, attn_dimension)
+        attn_seq, ws = self.attention(feats)
+        class_feats = torch.cat((attn_seq, lens), dim=1)
+        y = self.drop_fc(F.relu(self.fc1(class_feats)))
+        y = torch.sigmoid(self.fc2(y))
+        return y
+
+class AttentionBlock(BaseModel):
+    def __init__(self, seq_length, in_dim, out_dim):
+        super().__init__()
+        self.key = torch.nn.Linear(in_dim, out_dim)
+        self.value = torch.nn.Linear(in_dim, out_dim)
+        # I just have one query independent of sequence length
+        self.query = torch.nn.Linear(1, out_dim, bias=False) # perhaps other way to express this
+
+    def forward(self, options):
+        batch_size = options.shape[0]
+        values = self.value(options)
+        keys = self.key(options)
+        # since same query for each element in batch
+        queries = self.query.weight.repeat(batch_size, 1, 1)
+        unnorm_weights = torch.bmm(keys, queries)
+        attn_weights = torch.softmax(unnorm_weights, dim=1)
+        weighted_vals = values * attn_weights
+        output = torch.sum(weighted_vals, dim=1)
+        return output, attn_weights
 
 # ok, but 113 k parameters and doesn't amaze
 class BiLSTM2_4_SEQ(BaseModel):

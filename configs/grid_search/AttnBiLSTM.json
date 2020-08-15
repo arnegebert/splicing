@@ -1,8 +1,12 @@
 {
-    "name": "HIPSCI_MAJIQ_BiLSTM",
+    "name": "GridSearch_AttnBiLSTM",
 
     "n_gpu": 1,
-
+    "model_parameters": {
+      "LSTM_dim": [25, 50, 100, 150, 250],
+      "fc_dim": [64, 128],
+      "attn_dim": [25, 50, 100, 150, 250]
+    },
     "arch": {
         "type": "AttnBiLSTM",
         "args": {
@@ -24,7 +28,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-3,
+            "lr": 1e-4,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -49,7 +53,7 @@
         "save_period": 251,
         "verbosity": 1,
 
-        "monitor": "max val_auc",
+        "monitor": "min val_loss",
         "early_stop": 15,
 
         "tensorboard": false
