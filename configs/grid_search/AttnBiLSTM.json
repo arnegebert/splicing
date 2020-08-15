@@ -3,9 +3,9 @@
 
     "n_gpu": 1,
     "model_parameters": {
-      "LSTM_dim": [25, 50, 100, 150, 250],
-      "fc_dim": [64, 128],
-      "attn_dim": [25, 50, 100, 150, 250]
+      "LSTM_dim": [24, 50, 100, 150, 250],
+      "attn_dim": [24, 50, 100, 150, 250],
+      "fc_dim": [128]
     },
     "arch": {
         "type": "AttnBiLSTM",
@@ -28,7 +28,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-4,
+            "lr": 1e-3,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -58,6 +58,6 @@
 
         "tensorboard": false
     },
-    "comment": "",
+    "comment": "Grid search for real",
     "cross_validation": false
 }

@@ -31,6 +31,8 @@ def main(config):
         startt = time.time()
         # Create a hyperparameter dictionary
         hyperparameters = dict(zip(keys, v))
+        if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 50: continue
+        print(i, hyperparameters)
         # Set model config to appropriate hyperparameters
         config["arch"]["args"].update(hyperparameters)
 
@@ -40,6 +42,7 @@ def main(config):
 
         # build model architecture, then print to console
         model = config.init_obj('arch', module_arch)
+        logger.info(model)
 
         # get function handles of loss and metrics
         criterion = getattr(module_loss, config['loss'])

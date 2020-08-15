@@ -6,7 +6,11 @@
     "arch": {
         "type": "AttnBiLSTM",
         "args": {
-            "three_len_feats": true
+            "three_len_feats": true,
+            "LSTM_dim": 24,
+            "fc_dim": 64,
+            "attn_dim": 24,
+            "conv_size": 3
         }
     },
     "data_loader": {
