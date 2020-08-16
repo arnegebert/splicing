@@ -98,6 +98,7 @@ class BaseTrainer:
                 if not_improved_count > self.early_stop:
                     self.logger.info("Validation performance didn\'t improve for {} epochs. "
                                      "Training stops.".format(self.early_stop))
+                    self.logger.info(f"Best model performance: {self.mnt_best:.3f} {self.mnt_metric}")
                     self._save_checkpoint(epoch, save_best=True)
                     break
 

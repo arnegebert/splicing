@@ -53,7 +53,7 @@ def main(config):
 
         trainer.train()
         # not proud lol
-        val_all.append(trainer.valid_all_metrics._data.values[1][2])
+        val_all.append(trainer.mnt_best)
         try: # this try statement because some of my models don't have val low / high metrics
             val_low.append(trainer.valid_low_metrics._data.values[1][2])
             val_high.append(trainer.valid_high_metrics._data.values[1][2])

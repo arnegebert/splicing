@@ -7,10 +7,11 @@
         "type": "AttnBiLSTM",
         "args": {
             "three_len_feats": true,
-            "LSTM_dim": 24,
+            "LSTM_dim": 52,
             "fc_dim": 64,
-            "attn_dim": 24,
-            "conv_size": 3
+            "attn_dim": 51,
+            "conv_size": 3,
+            "n_heads": 1
         }
     },
     "data_loader": {
@@ -47,7 +48,7 @@
     "trainer": {
         "type": "Vanilla_Trainer",
         "args": {},
-        "epochs": 500,
+        "epochs": 5,
 
         "save_dir": "saved/",
         "save_period": 251,

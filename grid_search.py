@@ -24,13 +24,22 @@ def main(config):
     # setup data_loader instances
     param_grid = config["model_parameters"]
     keys, values = zip(*param_grid.items())
-    # todo: make sure output is written to a file
     val_all, val_low, val_high = [], [], []
     # Iterate through every possible combination of hyperparameters
+    logdir = config["log_directory"]
+    with open(f'{logdir}/gridsearch.tsv', 'a') as f:
+        f.write(f'LSTM_dim\tattn_dim\tfc_dim\tepochs\tval_all\tval_low\tval_high\n')
     for i, v in enumerate(itertools.product(*values)):
         startt = time.time()
         # Create a hyperparameter dictionary
         hyperparameters = dict(zip(keys, v))
+        # 24, 24, 128: 0.77, 30 epochs
+        # 24, 50 128: 0.778, 45 epochs
+        # 24, 100 128: 0.762, 67 epochs
+        # 24, 150 128: 0.752-0.73, 70 epochs
+        # 50, 24, 128: 0.796, 73 epochs
+        # got until before {'LSTM_dim': 24, 'attn_dim': 250, 'fc_dim': 128}
+        if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 24: continue
         if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 50: continue
         print(i, hyperparameters)
         # Set model config to appropriate hyperparameters
@@ -66,11 +75,13 @@ def main(config):
         endt = time.time()
         print(f'Training took {endt-startt:.3f} s')
         # not proud lol
-        val_all.append(trainer.valid_all_metrics._data.values[1][2])
+        val_all.append(trainer.mnt_best)
         try: # this try statement because some of my models don't have val low / high metrics
             val_low.append(trainer.valid_low_metrics._data.values[1][2])
             val_high.append(trainer.valid_high_metrics._data.values[1][2])
         except AttributeError: pass
+        with open(f'{logdir}/gridsearch.tsv', 'a') as f:
+            f.write(f'{hyperparameters["LSTM_dim"]}\t{hyperparameters["attn_dim"]}\t{hyperparameters["fc_dim"]}\t{trainer.epochs}\t{val_all[-1]}\t{val_low[-1]}\t{val_high[-1]}\n')
     val_all, val_low, val_high = np.array(val_all), np.array(val_low), np.array(val_high)
     logger.info(f'Average val_all: {np.mean(val_all)} +- {np.std(val_all)}')
     logger.info(f'Average val_low: {np.mean(val_low)} +- {np.std(val_low)}')

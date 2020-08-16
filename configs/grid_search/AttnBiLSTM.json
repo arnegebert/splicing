@@ -1,9 +1,10 @@
 {
     "name": "GridSearch_AttnBiLSTM",
 
+    "log_directory": "results/AttnBiLSTM",
     "n_gpu": 1,
     "model_parameters": {
-      "LSTM_dim": [24, 50, 100, 150, 250],
+      "LSTM_dim": [50, 100, 150, 250],
       "attn_dim": [24, 50, 100, 150, 250],
       "fc_dim": [128]
     },
