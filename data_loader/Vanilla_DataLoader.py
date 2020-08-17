@@ -58,13 +58,13 @@ class Vanilla_DataLoader(BaseDataLoader):
             raise Exception('Unbalanced dataset')
 
         # 9 folds for training
-        train = cons[:cons_fold_len * fold_val]
+        train = cons[:cons_fold_len * fold_test]
         train = np.concatenate((train, cons[cons_fold_len * (fold_val + 1):]), axis=0)
         for _ in range(cons_to_alternative_ratio):
-            train = np.concatenate((train, high[:high_fold_len * fold_val]), axis=0)
+            train = np.concatenate((train, high[:high_fold_len * fold_test]), axis=0)
             train = np.concatenate((train, high[high_fold_len * (fold_val + 1):]), axis=0)
 
-            train = np.concatenate((train, low[:low_fold_len * fold_val]), axis=0)
+            train = np.concatenate((train, low[:low_fold_len * fold_test]), axis=0)
             train = np.concatenate((train, low[low_fold_len * (fold_val + 1):]), axis=0)
 
         np.random.seed(0)
@@ -74,18 +74,24 @@ class Vanilla_DataLoader(BaseDataLoader):
         val_low = np.concatenate((low[low_fold_len * fold_val:low_fold_len * (fold_val + 1)], cons[cons_fold_len * fold_val:cons_fold_len * (fold_val + 1)]), axis=0)
         val_all = np.concatenate((val_high, low[low_fold_len * fold_val:low_fold_len * (fold_val + 1)]), axis=0)
 
+        test_high = np.concatenate((high[high_fold_len * fold_test:high_fold_len * (fold_test + 1)], cons[cons_fold_len * fold_test:cons_fold_len * (fold_test + 1)]), axis=0)
+        test_low = np.concatenate((low[low_fold_len * fold_test:low_fold_len * (fold_test + 1)], cons[cons_fold_len * fold_test:cons_fold_len * (fold_test + 1)]), axis=0)
+        test_all = np.concatenate((val_high, low[low_fold_len * fold_test:low_fold_len * (fold_test + 1)]), axis=0)
+
         print(f'Size training dataset: {len(train)}')
         print(f'Size mixed validation dataset: {len(val_all)}')
         print(f'Size low inclusion validation dataset: {len(val_low)}')
         print(f'Size high inclusion validation dataset: {len(val_high)}')
 
-        train_dataset = Vanilla_Dataset(train)
-        val_all_dataset = Vanilla_Dataset(val_all)
-        val_low_dataset = Vanilla_Dataset(val_low)
-        val_high_dataset = Vanilla_Dataset(val_high)
-        return train_dataset, val_all_dataset, val_low_dataset, val_high_dataset
+        train_dataset = VanillaDataset(train)
+        val_all_dataset, val_low_dataset, val_high_dataset = VanillaDataset(val_all), VanillaDataset(val_low), \
+                                                             VanillaDataset(val_high)
+        test_all_dataset, test_low_dataset, test_high_dataset = VanillaDataset(test_all), VanillaDataset(test_low), \
+                                                             VanillaDataset(test_high)
+        return train_dataset, val_all_dataset, val_low_dataset, val_high_dataset,\
+                test_all_dataset, test_low_dataset, test_high_dataset
 
-class Vanilla_Dataset(Dataset):
+class VanillaDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
 
     def __init__(self, samples):

@@ -37,7 +37,8 @@ class BaseDataLoader(DataLoader):
         else:
             # choose a pytorch thing that suits me
             # use self.samples here
-            self.train, self.val_all, self.val_low, self.val_high = dataset
+            self.train, self.val_all, self.val_low, self.val_high, \
+            self.test_all, self.test_low, self.test_high, = dataset
             super().__init__(dataset=self.train, **self.init_kwargs)
 
     def _split_sampler(self, split):
@@ -78,7 +79,10 @@ class BaseDataLoader(DataLoader):
                 # return three dataloaders here based on my validation datasets
                 return DataLoader(dataset=self.val_all,  **self.init_kwargs),\
                        DataLoader(dataset=self.val_low, **self.init_kwargs),\
-                       DataLoader(dataset=self.val_high,  **self.init_kwargs)
+                       DataLoader(dataset=self.val_high,  **self.init_kwargs),\
+                       DataLoader(dataset=self.test_all,  **self.init_kwargs),\
+                       DataLoader(dataset=self.test_low, **self.init_kwargs),\
+                       DataLoader(dataset=self.test_high,  **self.init_kwargs)
             else:
                 # three validation sets which are standard in CV
                 val_sets = [DataLoader(dataset=self.val_all,  **self.init_kwargs),
