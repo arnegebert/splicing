@@ -4,7 +4,7 @@ import torch
 from base import BaseTrainer
 from utils import inf_loop, MetricTracker, save_pred_and_target
 from visualizations.roc_curves import plot_and_save_roc
-import itertools
+
 
 class Vanilla_Trainer(BaseTrainer):
     """
@@ -25,15 +25,17 @@ class Vanilla_Trainer(BaseTrainer):
             # iteration-based training
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
-        self.val_loaders, self.test_loaders = valid_data_loader
-        self.do_validation = self.val_loaders is not None
+        self.val_all, self.val_low, self.val_high, self.test, _, __ = valid_data_loader
+        self.do_validation = self.val_all is not None
         self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size))
         self.four_seq = four_seq
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.val_metrics = [MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer) for _ in self.val_loaders]
-        self.test_metrics = [MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer) for _ in self.test_loaders]
+        self.test_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.valid_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.valid_low_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.valid_high_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
 
     def _train_epoch(self, epoch):
         """
@@ -83,23 +85,11 @@ class Vanilla_Trainer(BaseTrainer):
         log = self.train_metrics.result()
 
         if self.do_validation:
-            # val_log_all, val_log_low, val_log_high, test_log = self._valid_epoch(epoch)
-            # log.update(**{'val_' + k: v for k, v in val_log_all.items() if k != 'loss'})
-            # log.update(**{'val_low_' + k: v for k, v in val_log_low.items()})
-            # log.update(**{'val_high_' + k: v for k, v in val_log_high.items()})
-            # log.update(**{'test_' + k: v for k, v in test_log.items() if k != 'loss'})
-
-            val_logs, test_logs = self._valid_epoch(epoch)
-            for res, name in zip(val_logs, ['', 'low_', 'high_']):
-                log.update(**{f'val_{name}' + k: v for k, v in res.items() if k != 'loss'})
-
-            for res, name in zip(test_logs, ['', 'low_', 'high_']):
-                log.update(**{f'test_{name}' + k: v for k, v in res.items() if k != 'loss'})
-
-            # log.update(**{'val_' + k: v for k, v in val_log_all.items() if k != 'loss'})
-            # log.update(**{'val_low_' + k: v for k, v in val_log_low.items()})
-            # log.update(**{'val_high_' + k: v for k, v in val_log_high.items()})
-            # log.update(**{'test_' + k: v for k, v in test_log.items() if k != 'loss'})
+            val_log_all, val_log_low, val_log_high, test_log = self._valid_epoch(epoch)
+            log.update(**{'val_' + k: v for k, v in val_log_all.items()})
+            log.update(**{'val_low_' + k: v for k, v in val_log_low.items()})
+            log.update(**{'val_high_' + k: v for k, v in val_log_high.items()})
+            log.update(**{'test_' + k: v for k, v in test_log.items()})
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
@@ -113,33 +103,23 @@ class Vanilla_Trainer(BaseTrainer):
         :return: A log that contains information about validation
         """
         self.model.eval()
-        for metric in itertools.chain(self.val_metrics, self.test_metrics):
-            metric.reset()
+        self.valid_all_metrics.reset()
+        self.valid_low_metrics.reset()
+        self.valid_high_metrics.reset()
+        self.test_metrics.reset()
         with torch.no_grad():
-            test_preds, test_targets = [], []
-            for i, (loader, metric) in enumerate(zip(self.test_loaders, self.test_metrics)):
-                pred, target = self._single_val_epoch(loader, epoch, metric)
-                if i <= 3:
-                    test_preds.append(pred)
-                    test_targets.append(target)
-
-            # save_pred_and_target(self.log_dir, test_preds, test_targets)
-            # plot_and_save_roc(self.log_dir, test_preds, test_targets, ['all', 'low', 'high'])
-
-
-            # out_all, target_all = self._single_val_epoch(self.val_all, epoch, self.valid_all_metrics)
-            # out_low, target_low = self._single_val_epoch(self.val_low, epoch, self.valid_low_metrics)
-            # out_high, target_high = self._single_val_epoch(self.val_high, epoch, self.valid_high_metrics)
-            # self._single_val_epoch(self.test, epoch, self.test_metrics)
-            for i, (loader, metric) in enumerate(zip(self.val_loaders, self.val_metrics)):
-                _, __ = self._single_val_epoch(loader, epoch, metric)
-
+            out_all, target_all = self._single_val_epoch(self.val_all, epoch, self.valid_all_metrics)
+            out_low, target_low = self._single_val_epoch(self.val_low, epoch, self.valid_low_metrics)
+            out_high, target_high = self._single_val_epoch(self.val_high, epoch, self.valid_high_metrics)
+            self._single_val_epoch(self.test, epoch, self.test_metrics)
+            save_pred_and_target(self.log_dir, out_all, target_all, out_low, target_low, out_high, target_high)
+            plot_and_save_roc(self.log_dir, (out_low, target_low, 'low'), (out_all, target_all, 'all'),
+                              (out_high, target_high, 'high'))
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
-        return [metric.result() for metric in self.val_metrics], [metric.result() for metric in self.test_metrics]
-        # return self.valid_all_metrics.result(), self.valid_low_metrics.result(), self.valid_high_metrics.result(), self.test_metrics.result()
+        return self.valid_all_metrics.result(), self.valid_low_metrics.result(), self.valid_high_metrics.result(), self.test_metrics.result()
 
     def _single_val_epoch(self, val_data, epoch, metrics):
         outputs, targets = [], []
@@ -155,8 +135,7 @@ class Vanilla_Trainer(BaseTrainer):
             loss = self.criterion(output, target)
 
             self.writer.set_step((epoch - 1) * len(val_data) + batch_idx, 'valid')
-            if 'loss' in metrics: # not tracking loss e.g. for val_low
-                metrics.update('loss', loss.item())
+            metrics.update('loss', loss.item())
             outputs.extend(output.cpu().numpy().tolist())
             targets.extend(target.cpu().numpy().tolist())
             for met in self.metric_ftns:
