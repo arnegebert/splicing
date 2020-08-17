@@ -14,10 +14,11 @@ class Vanilla_Trainer(BaseTrainer):
         pass
 
     def set_param(self, model, criterion, metric_ftns, optimizer, config, data_loader,
-                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False):
+                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False, embedded=False):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
+        self.embedded = embedded
         if len_epoch is None:
             # epoch-based training
             self.len_epoch = len(self.data_loader)
@@ -48,10 +49,14 @@ class Vanilla_Trainer(BaseTrainer):
         self.train_metrics.reset()
         for batch_idx, data in enumerate(self.data_loader):
             # start, end = data[:, :140, :4], data[:, 140:280]
-            if not self.four_seq:
-                seqs = data[:, :280].view(-1, 2, 140, 4)
-            else: seqs = data[:, :560].view(-1, 4, 140, 4)
-            lens, target = data[:, -1, :3], data[:, -1, 3]
+            if self.embedded:
+                seqs = data[:, :2].view(-1, 200)
+                lens, target = data[:, 2, :3], data[:, 2, 3]
+            else:
+                if not self.four_seq:
+                    seqs = data[:, :280].view(-1, 2, 140, 4)
+                else: seqs = data[:, :560].view(-1, 4, 140, 4)
+                lens, target = data[:, -1, :3], data[:, -1, 3]
 
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
@@ -124,10 +129,14 @@ class Vanilla_Trainer(BaseTrainer):
     def _single_val_epoch(self, val_data, epoch, metrics):
         outputs, targets = [], []
         for batch_idx, data in enumerate(val_data):
-            if not self.four_seq:
-                seqs = data[:, :280].view(-1, 2, 140, 4)
-            else: seqs = data[:, :560].view(-1, 4, 140, 4)
-            lens, target = data[:, -1, :3], data[:, -1, 3]
+            if self.embedded:
+                seqs = data[:, :2].view(-1, 200)
+                lens, target = data[:, 2, :3], data[:, 2, 3]
+            else:
+                if not self.four_seq:
+                    seqs = data[:, :280].view(-1, 2, 140, 4)
+                else: seqs = data[:, :560].view(-1, 4, 140, 4)
+                lens, target = data[:, -1, :3], data[:, -1, 3]
 
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
 

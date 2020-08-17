@@ -8,13 +8,14 @@
         "args": {}
     },
     "data_loader": {
-        "type": "Vanilla_4_EmbeddedDataLoader",
+        "type": "Vanilla_4_DataLoader",
         "args":{
             "data_dir": "data/hipsci-suppa",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1
+            "num_workers": 1,
+            "embedded": true
         }
     },
     "optimizer": {

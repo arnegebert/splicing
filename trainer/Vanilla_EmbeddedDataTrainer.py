@@ -1,12 +1,8 @@
 import numpy as np
 import torch
-from torchvision.utils import make_grid
-from base import BaseTrainer
-from data_loader.HEXEvent2Vanilla_DataLoader import DSCDataset, HEXEvent2Vanilla_DataLoader
-from utils import inf_loop, MetricTracker, split_into_3_mers, save_pred_and_target
-import gensim.models
 
-# todo rename into Vanilla_EmbeddedDataTrainer
+from base import BaseTrainer
+from utils import inf_loop, MetricTracker, save_pred_and_target
 from visualizations.roc_curves import plot_and_save_roc
 
 

@@ -8,13 +8,14 @@
         "args": {}
     },
     "data_loader": {
-        "type": "Comparison_EmbeddedDataLoader",
+        "type": "Comparison_DataLoader",
         "args":{
             "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1
+            "num_workers": 1,
+            "embedded": true
         }
     },
     "optimizer": {

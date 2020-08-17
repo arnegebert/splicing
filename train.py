@@ -54,6 +54,7 @@ def main(config):
         trainer.train()
         # not proud lol
         # todo: find best or adapt so that best is found
+        raise Exception('Best test monitor functionality not implemented yet')
         test_all.append(trainer.mnt_best)
         try: # this try statement because some of my models don't have test low / high metrics
             test_low.append(trainer.test_low_metrics._data.values[0][2])
