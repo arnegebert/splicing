@@ -67,6 +67,7 @@ def inf_loop(data_loader):
 class MetricTracker:
     def __init__(self, *keys, writer=None):
         self.writer = writer
+        self.metrics = keys
         self._data = pd.DataFrame(index=keys, columns=['total', 'counts', 'average'])
         self.reset()
         
@@ -87,3 +88,6 @@ class MetricTracker:
     
     def result(self):
         return dict(self._data.average)
+
+    def __contains__(self, item):
+        return item in self.metrics
