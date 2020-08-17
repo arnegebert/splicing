@@ -1,10 +1,9 @@
 import time
 
 import numpy as np
-import torch
-from torch.utils.data import Dataset
 
 from base import BaseDataLoader
+from data_loader import Vanilla_Dataset
 
 
 class Vanilla_DataLoader(BaseDataLoader):
@@ -18,6 +17,8 @@ class Vanilla_DataLoader(BaseDataLoader):
         start = time.time()
         print(f'starting loading of data')
         self.samples = []
+        self.class_threshold = classification_treshold
+        self.cross_validation_split = cross_validation_split
 
         if data_dir:
             x_cons_data = np.load(f'{data_dir}/cons.npy')
@@ -26,56 +27,52 @@ class Vanilla_DataLoader(BaseDataLoader):
         else:
             raise Exception('No data directories given!')
 
-        if classification:
-            x_cons_data[:, 280, 3] = (x_cons_data[:, 280, 3] >= classification_treshold).astype(np.float32)
-            hx_cas_data[:, 280, 3] = (hx_cas_data[:, 280, 3] >= classification_treshold).astype(np.float32)
-            lx_cas_data[:, 280, 3] = (lx_cas_data[:, 280, 3] >= classification_treshold).astype(np.float32)
+        self.dataset = self.cross_validation(x_cons_data, lx_cas_data, hx_cas_data)
+        end = time.time()
+        print('total time to load data: {} secs'.format(end - start))
+        # samples = prepare_data()
+        # self.dataset = TensorDataset(*samples)
+        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
 
-        a = int(x_cons_data.shape[0] / 10)
-        b = int(hx_cas_data.shape[0] / 10)
-        c = int(lx_cas_data.shape[0] / 10)
+    def cross_validation(self, cons, low, high):
+        if self.classification:
+            cons[:, 280, 3] = (cons[:, 280, 3] >= self.class_threshold).astype(np.float32)
+            high[:, 280, 3] = (high[:, 280, 3] >= self.class_threshold).astype(np.float32)
+            low[:, 280, 3] = (low[:, 280, 3] >= self.class_threshold).astype(np.float32)
 
-        s = cross_validation_split
-        # 9 folds for training
-        train = x_cons_data[:a * s]
-        train = np.concatenate((train, x_cons_data[a * (s + 1):]), axis=0)
+        cons_fold_len = int(cons.shape[0] / 10)
+        high_fold_len = int(high.shape[0] / 10)
+        low_fold_len = int(low.shape[0] / 10)
 
-        resamplings = int((9 * a) / (9 * (b + c)))
-        resamplings = max(1, resamplings)
-        print(resamplings)
-        total = a + (b + c) * resamplings
-        cons_perc = a / total
+        # 1 fold for validation & early stopping
+        fold_val = self.cross_validation_split
+
+        cons_to_alternative_ratio = int(cons_fold_len/(high_fold_len + low_fold_len))
+        # avoid it being rounded down to 0
+        cons_to_alternative_ratio = max(1, cons_to_alternative_ratio)
+        print(f'cons_to_alternative_ratio: {cons_to_alternative_ratio}')
+        total = cons_fold_len + (high_fold_len + low_fold_len) * cons_to_alternative_ratio
+        cons_perc = cons_fold_len / total
         print(f'Percentage of consecutive data: {cons_perc}')
         if cons_perc > 0.6 or cons_perc < 0.4:
             raise Exception('Unbalanced dataset')
-        for i in range(resamplings):  # range(1)
-            train = np.concatenate((train, hx_cas_data[:b * s]), axis=0)
-            train = np.concatenate((train, hx_cas_data[b * (s + 1):]), axis=0)
 
-            train = np.concatenate((train, lx_cas_data[:c * s]), axis=0)
-            train = np.concatenate((train, lx_cas_data[c * (s + 1):]), axis=0)
+        # 9 folds for training
+        train = cons[:cons_fold_len * fold_val]
+        train = np.concatenate((train, cons[cons_fold_len * (fold_val + 1):]), axis=0)
+        for _ in range(cons_to_alternative_ratio):
+            train = np.concatenate((train, high[:high_fold_len * fold_val]), axis=0)
+            train = np.concatenate((train, high[high_fold_len * (fold_val + 1):]), axis=0)
 
-        # ok since working with numpy arrays
+            train = np.concatenate((train, low[:low_fold_len * fold_val]), axis=0)
+            train = np.concatenate((train, low[low_fold_len * (fold_val + 1):]), axis=0)
+
         np.random.seed(0)
         np.random.shuffle(train)
 
-        # 1 fold for testing
-        htest = np.concatenate((hx_cas_data[b * s:b * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
-        lt = np.concatenate((lx_cas_data[c * s:c * (s + 1)], x_cons_data[a * s:a * (s + 1)]), axis=0)
-
-        test = htest
-        test = np.concatenate((test, lx_cas_data[c * s:c * (s + 1)]), axis=0)
-
-        cons_test = x_cons_data[a * s:a * (s + 1)]
-        cas_test = np.concatenate((lx_cas_data[c * s:c * (s + 1)], hx_cas_data[b * s:b * (s + 1)]))
-
-        train = train
-        # cons + low + high
-        val_all = test
-        # cons + low
-        val_low = lt
-        # cons + high
-        val_high = htest
+        val_high = np.concatenate((high[high_fold_len * fold_val:high_fold_len * (fold_val + 1)], cons[cons_fold_len * fold_val:cons_fold_len * (fold_val + 1)]), axis=0)
+        val_low = np.concatenate((low[low_fold_len * fold_val:low_fold_len * (fold_val + 1)], cons[cons_fold_len * fold_val:cons_fold_len * (fold_val + 1)]), axis=0)
+        val_all = np.concatenate((val_high, low[low_fold_len * fold_val:low_fold_len * (fold_val + 1)]), axis=0)
 
         print(f'Size training dataset: {len(train)}')
         print(f'Size mixed validation dataset: {len(val_all)}')
@@ -86,22 +83,4 @@ class Vanilla_DataLoader(BaseDataLoader):
         val_all_dataset = Vanilla_Dataset(val_all)
         val_low_dataset = Vanilla_Dataset(val_low)
         val_high_dataset = Vanilla_Dataset(val_high)
-        self.dataset = (train_dataset, val_all_dataset, val_low_dataset, val_high_dataset)
-        end = time.time()
-        print('total time to load data: {} secs'.format(end - start))
-        # samples = prepare_data()
-        # self.dataset = TensorDataset(*samples)
-        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
-
-
-class Vanilla_Dataset(Dataset):
-    """ Implementation of Dataset class for the synthetic dataset. """
-
-    def __init__(self, samples):
-        self.samples = torch.tensor(samples)
-
-    def __len__(self):
-        return len(self.samples)
-
-    def __getitem__(self, idx):
-        return self.samples[idx]
+        return train_dataset, val_all_dataset, val_low_dataset, val_high_dataset
