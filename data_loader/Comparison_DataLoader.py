@@ -1,9 +1,9 @@
 import time
 
 import numpy as np
-
+from torch.utils.data import Dataset
+import torch
 from base import BaseDataLoader
-from data_loader import Vanilla_Dataset
 
 class Comparison_DataLoader(BaseDataLoader):
     """
@@ -111,3 +111,16 @@ class Comparison_DataLoader(BaseDataLoader):
         val_low_dataset = Vanilla_Dataset(val_low)
         val_high_dataset = Vanilla_Dataset(val_high)
         return train_dataset, val_all_dataset, val_low_dataset, val_high_dataset
+
+
+class Vanilla_Dataset(Dataset):
+    """ Implementation of Dataset class for the synthetic dataset. """
+
+    def __init__(self, samples):
+        self.samples = torch.tensor(samples)
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        return self.samples[idx]

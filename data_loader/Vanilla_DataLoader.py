@@ -1,10 +1,10 @@
 import time
 
 import numpy as np
+from torch.utils.data import Dataset
+import torch
 
 from base import BaseDataLoader
-from data_loader import Vanilla_Dataset
-
 
 class Vanilla_DataLoader(BaseDataLoader):
     """
@@ -35,17 +35,17 @@ class Vanilla_DataLoader(BaseDataLoader):
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
 
     def cross_validation(self, cons, low, high):
-        if self.classification:
-            cons[:, 280, 3] = (cons[:, 280, 3] >= self.class_threshold).astype(np.float32)
-            high[:, 280, 3] = (high[:, 280, 3] >= self.class_threshold).astype(np.float32)
-            low[:, 280, 3] = (low[:, 280, 3] >= self.class_threshold).astype(np.float32)
+        cons[:, 280, 3] = (cons[:, 280, 3] >= self.class_threshold).astype(np.float32)
+        high[:, 280, 3] = (high[:, 280, 3] >= self.class_threshold).astype(np.float32)
+        low[:, 280, 3] = (low[:, 280, 3] >= self.class_threshold).astype(np.float32)
 
         cons_fold_len = int(cons.shape[0] / 10)
         high_fold_len = int(high.shape[0] / 10)
         low_fold_len = int(low.shape[0] / 10)
 
         # 1 fold for validation & early stopping
-        fold_val = self.cross_validation_split
+        fold_val = 0
+        fold_test = 1
 
         cons_to_alternative_ratio = int(cons_fold_len/(high_fold_len + low_fold_len))
         # avoid it being rounded down to 0
@@ -84,3 +84,15 @@ class Vanilla_DataLoader(BaseDataLoader):
         val_low_dataset = Vanilla_Dataset(val_low)
         val_high_dataset = Vanilla_Dataset(val_high)
         return train_dataset, val_all_dataset, val_low_dataset, val_high_dataset
+
+class Vanilla_Dataset(Dataset):
+    """ Implementation of Dataset class for the synthetic dataset. """
+
+    def __init__(self, samples):
+        self.samples = torch.tensor(samples)
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        return self.samples[idx]

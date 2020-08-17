@@ -1,11 +1,18 @@
 {
-    "name": "HIPSCI_MAJIQ_DSC",
+    "name": "HIPSCI_MAJIQ_BiLSTM",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "DSC",
-        "args": {}
+        "type": "AttnBiLSTMWithHeads",
+        "args": {
+            "three_len_feats": true,
+            "LSTM_dim": 50,
+            "fc_dim": 64,
+            "attn_dim": 100,
+            "n_heads": 2,
+            "head_dim": 50
+        }
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",
