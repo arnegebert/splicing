@@ -27,6 +27,10 @@ class BaseTrainer:
         self.save_period = cfg_trainer['save_period']
         self.monitor = cfg_trainer.get('monitor', 'off')
 
+        self.logged_metrics = {metric:-float('inf') for metric in cfg_trainer["logged_metrics"]}
+        # self.logged_metrics = cfg_trainer["logged_metrics"]
+        # self.logged_metrics_best = [-float('inf')]*len(self.logged_metrics)
+
         # configuration to monitor model performance and save best
         if self.monitor == 'off':
             self.mnt_mode = 'off'
@@ -75,6 +79,14 @@ class BaseTrainer:
             for key, value in log.items():
                 self.logger.info('    {:15s}: {}'.format(str(key), value))
 
+            # update metrics for which best values are tracked separately
+            # assumption: metric should be maximized
+            self.logged_metrics = {metric:max(value, log[metric]) for (metric, value) in self.logged_metrics.items()}
+            # for metric, value in enumerate(self.logged_metrics.items()):
+            #     try:
+            #         self.logged_metrics[metric] = max(log[metric], value)
+            #     except KeyError: self.logger.warning(f'Metrics {metric} not found.')
+
             # evaluate model performance according to configured metric, save best checkpoint as model_best
             best = False
             if self.mnt_mode != 'off':
@@ -99,6 +111,8 @@ class BaseTrainer:
                     self.logger.info("Validation performance didn\'t improve for {} epochs. "
                                      "Training stops.".format(self.early_stop))
                     self.logger.info(f"Best model performance: {self.mnt_best:.3f} {self.mnt_metric}")
+                    for metric, value in self.logged_metrics.items():
+                        self.logger.info(f"Best value of metric {metric}:{value:.3f}")
                     self._save_checkpoint(epoch, save_best=True)
                     break
 

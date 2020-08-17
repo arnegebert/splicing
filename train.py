@@ -52,14 +52,11 @@ def main(config):
                           lr_scheduler=lr_scheduler)
 
         trainer.train()
-        # not proud lol
-        # todo: find best or adapt so that best is found
-        raise Exception('Best test monitor functionality not implemented yet')
-        test_all.append(trainer.mnt_best)
+        test_all.append(trainer.logged_metrics["test_auc"])
         try: # this try statement because some of my models don't have test low / high metrics
-            test_low.append(trainer.test_low_metrics._data.values[0][2])
-            test_high.append(trainer.test_high_metrics._data.values[0][2])
-        except AttributeError: pass
+            test_low.append(trainer.logged_metrics["test_low_auc"])
+            test_high.append(trainer.logged_metrics["test_high_auc"])
+        except KeyError: pass
     test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
     logger.info(f'Average test_all: {np.mean(test_all)} +- {np.std(test_all)}')
     logger.info(f'Average test_low: {np.mean(test_low)} +- {np.std(test_low)}')

@@ -81,12 +81,11 @@ def main(config):
         trainer.train()
         endt = time.time()
         print(f'Training took {endt-startt:.3f} s')
-        # not proud lol
-        test_all.append(trainer.mnt_best)
+        test_all.append(trainer.logged_metrics["test_auc"])
         try: # this try statement because some of my models don't have test low / high metrics
-            test_low.append(trainer.test_low_metrics._data.values[0][2])
-            test_high.append(trainer.test_high_metrics._data.values[0][2])
-        except AttributeError: pass
+            test_low.append(trainer.logged_metrics["test_low_auc"])
+            test_high.append(trainer.logged_metrics["test_high_auc"])
+        except KeyError: pass
         with open(f'{logdir}/gridsearch.tsv', 'a') as f:
             f.write(f'{(endt-startt)/60:.0f}\t{hyperparameters["n_heads"]}\t{hyperparameters["head_dim"]}\t'
                     f'{hyperparameters["LSTM_dim"]}\t{hyperparameters["attn_dim"]}\t{hyperparameters["fc_dim"]}'
