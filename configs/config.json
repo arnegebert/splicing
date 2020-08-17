@@ -1,28 +1,28 @@
 {
-    "name": "HIPSCI_MAJIQ_DSC",
+    "name": "DSC_D2V_MLP",
 
     "n_gpu": 1,
+    "run_id": "",
 
     "arch": {
-        "type": "DSC",
+        "type": "MLP2",
         "args": {}
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/hipsci_majiq/exon",
+            "data_dir": "data/distributed/original",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0,
-            "classification": true,
-            "classification_treshold": 0.99
+            "num_workers": 1,
+            "embedded": true
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-3,
+            "lr": 5e-4,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -40,11 +40,12 @@
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {},
-        "epochs": 500,
+        "args": {
+            "embedded": true
+        },        "epochs": 100,
 
         "save_dir": "saved/",
-        "save_period": 251,
+        "save_period": 101,
         "verbosity": 1,
 
         "monitor": "max val_auc",

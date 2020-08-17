@@ -12,18 +12,20 @@ class Vanilla_DataLoader(BaseDataLoader):
     """
 
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
-                 classification=True, classification_treshold=0.99, cross_validation_split=0):
+                 classification=True, classification_treshold=0.99, cross_validation_split=0, embedded=False):
         self.data_dir = data_dir
         start = time.time()
         print(f'starting loading of data')
         self.samples = []
         self.class_threshold = classification_treshold
         self.cross_validation_split = cross_validation_split
+        self.embedded = embedded
 
         if data_dir:
-            x_cons_data = np.load(f'{data_dir}/cons.npy')
-            hx_cas_data = np.load(f'{data_dir}/high.npy')
-            lx_cas_data = np.load(f'{data_dir}/low.npy')
+            prefix = "embedded_" if embedded else ""
+            x_cons_data = np.load(f'{data_dir}/{prefix}cons.npy')
+            hx_cas_data = np.load(f'{data_dir}/{prefix}high.npy')
+            lx_cas_data = np.load(f'{data_dir}/{prefix}low.npy')
         else:
             raise Exception('No data directories given!')
 
@@ -34,14 +36,15 @@ class Vanilla_DataLoader(BaseDataLoader):
         # self.dataset = TensorDataset(*samples)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
 
-    def cross_validation(self, cons, low, high):
-        cons[:, 280, 3] = (cons[:, 280, 3] >= self.class_threshold).astype(np.float32)
-        high[:, 280, 3] = (high[:, 280, 3] >= self.class_threshold).astype(np.float32)
-        low[:, 280, 3] = (low[:, 280, 3] >= self.class_threshold).astype(np.float32)
+    def cross_validation(self, cons, low, high, folds=10):
+        if not self.embedded:
+            cons[:, 280, 3] = (cons[:, 280, 3] >= self.class_threshold).astype(np.float32)
+            high[:, 280, 3] = (high[:, 280, 3] >= self.class_threshold).astype(np.float32)
+            low[:, 280, 3] = (low[:, 280, 3] >= self.class_threshold).astype(np.float32)
 
-        cons_fold_len = int(cons.shape[0] / 10)
-        high_fold_len = int(high.shape[0] / 10)
-        low_fold_len = int(low.shape[0] / 10)
+        cons_fold_len = int(cons.shape[0] / folds)
+        high_fold_len = int(high.shape[0] / folds)
+        low_fold_len = int(low.shape[0] / folds)
 
         # 1 fold for validation & early stopping
         fold_val = 0

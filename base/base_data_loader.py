@@ -38,6 +38,7 @@ class BaseDataLoader(DataLoader):
             # choose a pytorch thing that suits me
             # use self.samples here
             self.train, self.test_all, self.test_low, self.test_high, self.val_all = dataset
+            # self.val_all = [None]
             super().__init__(dataset=self.train, **self.init_kwargs)
 
     def _split_sampler(self, split):

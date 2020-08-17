@@ -26,7 +26,7 @@ class Vanilla_EmbeddedDataTrainer(BaseTrainer):
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
         # self.valid_data_loader = valid_data_loader
-        self.val_all, self.val_low, self.val_high = valid_data_loader
+        self.val_all, self.val_low, self.val_high, _ = valid_data_loader
         self.do_validation = self.val_all is not None
         self.lr_scheduler = lr_scheduler
         # self.lr_scheduler = None

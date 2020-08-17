@@ -38,9 +38,10 @@
         }
     },
     "trainer": {
-        "type": "Vanilla_EmbeddedDataTrainer",
-        "args": {},
-        "epochs": 200,
+        "type": "Vanilla_Trainer",
+        "args": {
+            "embedded": true
+        },        "epochs": 200,
 
         "save_dir": "saved/",
         "save_period": 101,

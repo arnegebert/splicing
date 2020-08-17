@@ -38,8 +38,10 @@
         }
     },
     "trainer": {
-        "type": "Comparison_EmbeddedDataTrainer",
-        "args": {},
+        "type": "Comparison_Trainer",
+        "args": {
+            "embedded": true
+        },
         "epochs": 200,
 
         "save_dir": "saved/",

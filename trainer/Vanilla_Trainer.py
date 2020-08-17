@@ -10,15 +10,14 @@ class Vanilla_Trainer(BaseTrainer):
     """
     Trainer class
     """
-    def __init__(self):
-        pass
+    def __init__(self, embedded=False):
+        self.embedded = embedded
 
     def set_param(self, model, criterion, metric_ftns, optimizer, config, data_loader,
-                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False, embedded=False):
+                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False, ):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
-        self.embedded = embedded
         if len_epoch is None:
             # epoch-based training
             self.len_epoch = len(self.data_loader)
@@ -48,16 +47,7 @@ class Vanilla_Trainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
         for batch_idx, data in enumerate(self.data_loader):
-            # start, end = data[:, :140, :4], data[:, 140:280]
-            if self.embedded:
-                seqs = data[:, :2].view(-1, 200)
-                lens, target = data[:, 2, :3], data[:, 2, 3]
-            else:
-                if not self.four_seq:
-                    seqs = data[:, :280].view(-1, 2, 140, 4)
-                else: seqs = data[:, :560].view(-1, 4, 140, 4)
-                lens, target = data[:, -1, :3], data[:, -1, 3]
-
+            seqs, lens, target = self.convert_to_model_input_format(data)
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
@@ -129,15 +119,7 @@ class Vanilla_Trainer(BaseTrainer):
     def _single_val_epoch(self, val_data, epoch, metrics):
         outputs, targets = [], []
         for batch_idx, data in enumerate(val_data):
-            if self.embedded:
-                seqs = data[:, :2].view(-1, 200)
-                lens, target = data[:, 2, :3], data[:, 2, 3]
-            else:
-                if not self.four_seq:
-                    seqs = data[:, :280].view(-1, 2, 140, 4)
-                else: seqs = data[:, :560].view(-1, 4, 140, 4)
-                lens, target = data[:, -1, :3], data[:, -1, 3]
-
+            seqs, lens, target = self.convert_to_model_input_format(data)
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
 
             output = self.model(seqs, lens)
@@ -156,6 +138,21 @@ class Vanilla_Trainer(BaseTrainer):
                     continue
         return outputs, targets
 
+    def convert_to_model_input_format(self, data):
+        if self.embedded:
+            if not self.four_seq:
+                seqs = data[:, :2].view(-1, 200)
+                lens, target = data[:, 2, :3], data[:, 2, 3]
+            else:
+                seqs = data[:, :4].view(-1, 400)
+                lens, target = data[:, 4, :3], data[:, 4, 3]
+        else:
+            if not self.four_seq:
+                seqs = data[:, :280].view(-1, 2, 140, 4)
+            else:
+                seqs = data[:, :560].view(-1, 4, 140, 4)
+            lens, target = data[:, -1, :3], data[:, -1, 3]
+        return seqs, lens, target
 
     def _progress(self, batch_idx):
         base = '[{}/{} ({:.0f}%)]'
