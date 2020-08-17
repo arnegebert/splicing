@@ -34,8 +34,8 @@ class Vanilla_Trainer(BaseTrainer):
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.test_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.valid_low_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.valid_high_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.valid_low_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.valid_high_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
 
     def _train_epoch(self, epoch):
         """
@@ -87,11 +87,8 @@ class Vanilla_Trainer(BaseTrainer):
         if self.do_validation:
             val_log_all, val_log_low, val_log_high, test_log = self._valid_epoch(epoch)
             log.update(**{'val_' + k: v for k, v in val_log_all.items()})
-            val_log_low.pop('loss', None)
             log.update(**{'val_low_' + k: v for k, v in val_log_low.items()})
-            val_log_high.pop('loss', None)
             log.update(**{'val_high_' + k: v for k, v in val_log_high.items()})
-            test_log.pop('loss', None)
             log.update(**{'test_' + k: v for k, v in test_log.items()})
 
         if self.lr_scheduler is not None:
