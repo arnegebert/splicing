@@ -24,11 +24,11 @@ def main(config):
     # setup data_loader instances
     param_grid = config["model_parameters"]
     keys, values = zip(*param_grid.items())
-    val_all, val_low, val_high = [], [], []
+    test_all, test_low, test_high = [], [], []
     # Iterate through every possible combination of hyperparameters
     logdir = config["log_directory"]
     with open(f'{logdir}/gridsearch.tsv', 'a') as f:
-        f.write(f'time (min)\tn_heads\thead_dim\tLSTM_dim\tattn_dim\tfc_dim\ttrain\tval_all\tval_low\tval_high\n')
+        f.write(f'time (min)\tn_heads\thead_dim\tLSTM_dim\tattn_dim\tfc_dim\ttrain\ttest_all\ttest_low\ttest_high\n')
     for i, v in enumerate(itertools.product(*values)):
         startt = time.time()
         # Create a hyperparameter dictionary
@@ -39,7 +39,7 @@ def main(config):
         # 24, 150 128: 0.752-0.73, 70 epochs
         # 50, 24, 128: 0.796, 73 epochs
         # got until before {'LSTM_dim': 150, 'attn_dim': 24, 'fc_dim': 128}
-        # LSTM_dim	attn_dim	fc_dim	train	val_all	val_low	val_high
+        # LSTM_dim	attn_dim	fc_dim	train	test_all	test_low	test_high
         # 50	100	128	0.9018483481439056	0.8467298729794085	0.9158084794829681	0.7378245622436166
 
         # dropout 0.3 used from here on
@@ -82,22 +82,22 @@ def main(config):
         endt = time.time()
         print(f'Training took {endt-startt:.3f} s')
         # not proud lol
-        val_all.append(trainer.mnt_best)
-        try: # this try statement because some of my models don't have val low / high metrics
-            val_low.append(trainer.valid_low_metrics._data.values[1][2])
-            val_high.append(trainer.valid_high_metrics._data.values[1][2])
+        test_all.append(trainer.mnt_best)
+        try: # this try statement because some of my models don't have test low / high metrics
+            test_low.append(trainer.test_low_metrics._data.values[0][2])
+            test_high.append(trainer.test_high_metrics._data.values[0][2])
         except AttributeError: pass
         with open(f'{logdir}/gridsearch.tsv', 'a') as f:
             f.write(f'{(endt-startt)/60:.0f}\t{hyperparameters["n_heads"]}\t{hyperparameters["head_dim"]}\t'
                     f'{hyperparameters["LSTM_dim"]}\t{hyperparameters["attn_dim"]}\t{hyperparameters["fc_dim"]}'
-                    f'\t{trainer.train_metrics._data.values[1][2]}\t{val_all[-1]}\t{val_low[-1]}\t{val_high[-1]}\n')
-    val_all, val_low, val_high = np.array(val_all), np.array(val_low), np.array(val_high)
-    logger.info(f'Average val_all: {np.mean(val_all)} +- {np.std(val_all)}')
-    logger.info(f'Average val_low: {np.mean(val_low)} +- {np.std(val_low)}')
-    logger.info(f'Average val_high: {np.mean(val_high)} +- {np.std(val_high)}')
-    logger.info(f'All observed values: {val_all}')
-    logger.info(f'All observed low values: {val_low}')
-    logger.info(f'All observed high values: {val_high}')
+                    f'\t{trainer.train_metrics._data.values[1][2]}\t{test_all[-1]}\t{test_low[-1]}\t{test_high[-1]}\n')
+    test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
+    logger.info(f'Average test_all: {np.mean(test_all)} +- {np.std(test_all)}')
+    logger.info(f'Average test_low: {np.mean(test_low)} +- {np.std(test_low)}')
+    logger.info(f'Average test_high: {np.mean(test_high)} +- {np.std(test_high)}')
+    logger.info(f'All observed values: {test_all}')
+    logger.info(f'All observed low values: {test_low}')
+    logger.info(f'All observed high values: {test_high}')
 
 
 if __name__ == '__main__':

@@ -37,8 +37,7 @@ class BaseDataLoader(DataLoader):
         else:
             # choose a pytorch thing that suits me
             # use self.samples here
-            self.train, self.val_all, self.val_low, self.val_high, \
-            self.test_all, self.test_low, self.test_high, = dataset
+            self.train, self.test_all, self.test_low, self.test_high, self.val_all = dataset
             super().__init__(dataset=self.train, **self.init_kwargs)
 
     def _split_sampler(self, split):
@@ -74,17 +73,20 @@ class BaseDataLoader(DataLoader):
             return None
         else:
             if not self.dsc_cv:
+                raise Exception('Deprecated functionality')
                 return DataLoader(sampler=self.valid_sampler, dataset=self.dataset, **self.init_kwargs)
             elif self.dsc_cv and not self.extra_val:
                 # return three dataloaders here based on my validation datasets
-                return DataLoader(dataset=self.val_all,  **self.init_kwargs),\
-                       DataLoader(dataset=self.val_low, **self.init_kwargs),\
-                       DataLoader(dataset=self.val_high,  **self.init_kwargs),\
-                       DataLoader(dataset=self.test_all,  **self.init_kwargs),\
+                return DataLoader(dataset=self.test_all,  **self.init_kwargs),\
                        DataLoader(dataset=self.test_low, **self.init_kwargs),\
-                       DataLoader(dataset=self.test_high,  **self.init_kwargs)
+                       DataLoader(dataset=self.test_high,  **self.init_kwargs),\
+                       DataLoader(dataset=self.val_all,  **self.init_kwargs)#,\
+                       # DataLoader(dataset=self.test_low, **self.init_kwargs),\
+                       # DataLoader(dataset=self.test_high,  **self.init_kwargs)
             else:
                 # three validation sets which are standard in CV
+                # todo: fix
+                raise Exception('Not yet updated to test set ages')
                 val_sets = [DataLoader(dataset=self.val_all,  **self.init_kwargs),
                        DataLoader(dataset=self.val_low, **self.init_kwargs),
                        DataLoader(dataset=self.val_high,  **self.init_kwargs)]

@@ -23,7 +23,7 @@ def main(config):
 
     # setup data_loader instances
     iters = 10 if config['cross_validation'] else 1
-    val_all, val_low, val_high = [], [], []
+    test_all, test_low, test_high = [], [], []
     for i in range(iters):
         config['data_loader']['args']['cross_validation_split'] = i
         data_loader = config.init_obj('data_loader', module_loader)
@@ -53,15 +53,16 @@ def main(config):
 
         trainer.train()
         # not proud lol
-        val_all.append(trainer.mnt_best)
-        try: # this try statement because some of my models don't have val low / high metrics
-            val_low.append(trainer.valid_low_metrics._data.values[1][2])
-            val_high.append(trainer.valid_high_metrics._data.values[1][2])
+        # todo: find best or adapt so that best is found
+        test_all.append(trainer.mnt_best)
+        try: # this try statement because some of my models don't have test low / high metrics
+            test_low.append(trainer.test_low_metrics._data.values[0][2])
+            test_high.append(trainer.test_high_metrics._data.values[0][2])
         except AttributeError: pass
-    val_all, val_low, val_high = np.array(val_all), np.array(val_low), np.array(val_high)
-    logger.info(f'Average val_all: {np.mean(val_all)} +- {np.std(val_all)}')
-    logger.info(f'Average val_low: {np.mean(val_low)} +- {np.std(val_low)}')
-    logger.info(f'Average val_high: {np.mean(val_high)} +- {np.std(val_high)}')
+    test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
+    logger.info(f'Average test_all: {np.mean(test_all)} +- {np.std(test_all)}')
+    logger.info(f'Average test_low: {np.mean(test_low)} +- {np.std(test_low)}')
+    logger.info(f'Average test_high: {np.mean(test_high)} +- {np.std(test_high)}')
 
 
 if __name__ == '__main__':

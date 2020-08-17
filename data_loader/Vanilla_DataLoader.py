@@ -58,14 +58,14 @@ class Vanilla_DataLoader(BaseDataLoader):
             raise Exception('Unbalanced dataset')
 
         # 9 folds for training
-        train = cons[:cons_fold_len * fold_test]
-        train = np.concatenate((train, cons[cons_fold_len * (fold_val + 1):]), axis=0)
+        train = cons[:cons_fold_len * fold_val]
+        train = np.concatenate((train, cons[cons_fold_len * (fold_test + 1):]), axis=0)
         for _ in range(cons_to_alternative_ratio):
-            train = np.concatenate((train, high[:high_fold_len * fold_test]), axis=0)
-            train = np.concatenate((train, high[high_fold_len * (fold_val + 1):]), axis=0)
+            train = np.concatenate((train, high[:high_fold_len * fold_val]), axis=0)
+            train = np.concatenate((train, high[high_fold_len * (fold_test + 1):]), axis=0)
 
-            train = np.concatenate((train, low[:low_fold_len * fold_test]), axis=0)
-            train = np.concatenate((train, low[low_fold_len * (fold_val + 1):]), axis=0)
+            train = np.concatenate((train, low[:low_fold_len * fold_val]), axis=0)
+            train = np.concatenate((train, low[low_fold_len * (fold_test + 1):]), axis=0)
 
         np.random.seed(0)
         np.random.shuffle(train)
@@ -88,8 +88,9 @@ class Vanilla_DataLoader(BaseDataLoader):
                                                              VanillaDataset(val_high)
         test_all_dataset, test_low_dataset, test_high_dataset = VanillaDataset(test_all), VanillaDataset(test_low), \
                                                              VanillaDataset(test_high)
-        return train_dataset, val_all_dataset, val_low_dataset, val_high_dataset,\
-                test_all_dataset, test_low_dataset, test_high_dataset
+        return train_dataset, test_all_dataset, test_low_dataset, test_high_dataset,\
+               val_all_dataset#, val_low_dataset, val_high_dataset
+
 
 class VanillaDataset(Dataset):
     """ Implementation of Dataset class for the synthetic dataset. """
