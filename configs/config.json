@@ -4,14 +4,14 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "AttnBiLSTM",
+        "type": "AttnBiLSTMWithHeads",
         "args": {
             "three_len_feats": true,
-            "LSTM_dim": 52,
+            "LSTM_dim": 50,
             "fc_dim": 64,
-            "attn_dim": 51,
-            "conv_size": 3,
-            "n_heads": 1
+            "attn_dim": 100,
+            "n_heads": 2,
+            "head_dim": 50
         }
     },
     "data_loader": {
@@ -48,7 +48,7 @@
     "trainer": {
         "type": "Vanilla_Trainer",
         "args": {},
-        "epochs": 5,
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 251,

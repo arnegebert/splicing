@@ -1,17 +1,18 @@
 {
-    "name": "GridSearch_AttnBiLSTM",
+    "name": "GridSearch_AttnBiLSTMWithHeads",
 
-    "log_directory": "results/AttnBiLSTM",
+    "log_directory": "results/AttnBiLSTMWithHeads",
     "n_gpu": 1,
     "model_parameters": {
-      "LSTM_dim": [150, 250],
-      "attn_dim": [12, 24, 50, 100, 150],
-      "n_heads": [1],
+      "LSTM_dim": [50, 100, 150, 250],
+      "attn_dim": [100, 150],
+      "n_heads": [2, 3, 4],
+      "head_dim": [12, 24, 50, 100],
       "fc_dim": [128],
       "attn_dropout": [0]
     },
     "arch": {
-        "type": "AttnBiLSTM",
+        "type": "AttnBiLSTMWithHeads",
         "args": {
             "three_len_feats": true
         }

@@ -710,11 +710,12 @@ class BiLSTM4(BaseModel):
         return y
 
 class AttnBiLSTM(BaseModel):
-    def __init__(self, LSTM_dim=50, fc_dim=64, attn_dim=50, conv_size=5, n_heads=1, three_len_feats=True):
+    def __init__(self, LSTM_dim=50, fc_dim=64, attn_dim=50, conv_size=5, n_heads=1, attn_dropout=0.3, three_len_feats=True):
         super().__init__()
         assert conv_size % 2 == 1, "Only uneven convolution sizes allowed for reasons of padding"
         self.three_feats = three_len_feats
         self.conv_size = conv_size
+        self.attn_dropout = attn_dropout
         self.n_heads = n_heads
         self.LSTM_dim = LSTM_dim
         self.seq_length = 140
@@ -732,11 +733,11 @@ class AttnBiLSTM(BaseModel):
                              bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
         self.lstm2 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
                              bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
-        # self.attention = AttentionBlock(self.LSTM_dim, self.attn_dim)
+        self.attention = AttentionBlock(self.LSTM_dim, self.attn_dim, self.attn_dropout)
         # self.attention = AttentionBlockWithoutQuery(self.LSTM_dim, self.attn_dim)
         # self.attention = AttentionBlockWithHeads(self.LSTM_dim, self.attn_dim, self.n_heads)
         # self.attention = AttentionBlockWithConv(self.seq_length, self.LSTM_dim, self.attn_dim, self.conv_size)
-        self.attention = AttentionBlockWithConvAndSequenceSeparation(self.seq_length, self.LSTM_dim, self.attn_dim, self.conv_size)
+        # self.attention = AttentionBlockWithConvAndSequenceSeparation(self.seq_length, self.LSTM_dim, self.attn_dim, self.conv_size)
 
         self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
         self.drop_fc = nn.Dropout(self.dropout_prob)
@@ -767,11 +768,13 @@ class AttnBiLSTM(BaseModel):
         return y
 
 class AttentionBlock(BaseModel):
-    def __init__(self, in_dim, out_dim):
+    def __init__(self, in_dim, out_dim, dropout):
         super().__init__()
         self.key = torch.nn.Linear(in_dim, out_dim)
         self.value = torch.nn.Linear(in_dim, out_dim)
         # I just have one query independent of sequence length
+        self.drop = nn.Dropout(dropout)
+
         self.query = torch.nn.Linear(1, out_dim, bias=False) # perhaps other way to express this
 
     def forward(self, input_seq):
@@ -782,12 +785,13 @@ class AttentionBlock(BaseModel):
         queries = self.query.weight.repeat(batch_size, 1, 1) # attn_weights[0, 5] * values[0, 5] = weighted_vals[0, 5]
         unnorm_weights = torch.bmm(keys, queries)
         attn_weights = torch.softmax(unnorm_weights, dim=1)
+        attn_weights = self.drop(attn_weights)
         weighted_vals = values * attn_weights
         output = torch.sum(weighted_vals, dim=1)
         return output, attn_weights
 
 class AttentionBlockWithoutQuery(BaseModel):
-    def __init__(self, in_dim, out_dim):
+    def __init__(self, in_dim, out_dim, dropout):
         super().__init__()
         self.key = torch.nn.Linear(in_dim, 1)
         self.value = torch.nn.Linear(in_dim, out_dim)
@@ -802,13 +806,87 @@ class AttentionBlockWithoutQuery(BaseModel):
         output = torch.sum(weighted_vals, dim=1)
         return output, attn_weights
 
-class AttentionBlockWithHeads(BaseModel):
-    def __init__(self, in_dim, out_dim, n_heads):
+
+class AttnBiLSTMWithHeads(BaseModel):
+    def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=50, n_heads=1, head_dim=50, attn_dropout=0, three_len_feats=True):
         super().__init__()
+        self.three_feats = three_len_feats
+        self.head_dim = head_dim
+        self.attn_dropout = attn_dropout
         self.n_heads = n_heads
-        self.keys = clones(torch.nn.Linear(in_dim, out_dim), n_heads)
-        self.values = clones(torch.nn.Linear(in_dim, out_dim), n_heads)
-        self.queries = clones(torch.nn.Linear(1, out_dim, bias=False), n_heads)
+        self.LSTM_dim = LSTM_dim
+        self.seq_length = 140
+        self.dim_fc = fc_dim
+        self.dropout_prob = 0.5
+        self.lstm_layer = 1 # not changing this; too long training times already, really need to put my foot down here
+        # if I want to finish this thesis in time
+        self.lstm_dropout = 0.2
+        self.attn_dim = attn_dim
+        self.in_fc = attn_dim + (3 if self.three_feats else 1)
+
+        self.embedding = nn.Linear(4, 4, bias=True)
+
+        self.lstm1 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        self.lstm2 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
+                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+        # self.attention = AttentionBlock(self.LSTM_dim, self.attn_dim, self.attn_dropout)
+        # self.attention = AttentionBlockWithoutQuery(self.LSTM_dim, self.attn_dim)
+        self.attention = AttentionBlockWithHeads(self.LSTM_dim, self.attn_dim, self.n_heads, self.head_dim)
+        # self.attention = AttentionBlockWithConv(self.seq_length, self.LSTM_dim, self.attn_dim, self.conv_size)
+        # self.attention = AttentionBlockWithConvAndSequenceSeparation(self.seq_length, self.LSTM_dim, self.attn_dim, self.conv_size)
+
+        self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
+        self.drop_fc = nn.Dropout(self.dropout_prob)
+        self.fc2 = nn.Linear(self.dim_fc, 1)
+
+
+    def forward(self, seqs, lens):
+        # [256, 142, 4] or [256, 140, 4]
+        # lens = torch.zeros_like(lens)
+        start, end = seqs[:, 0], seqs[:, 1]
+        start, end = start.view(-1, self.seq_length, 4), end.view(-1, self.seq_length, 4)
+        embedding = F.relu(self.embedding(start))
+        # currently treat the 140-input as dimension, but shouldn't
+        # just want a dense mapping from sparse 4-d to dense 4-d
+        output1, (h_n, c_n) = self.lstm1(embedding)
+        # output = [256, 140, 2*50]  // 256, 4, 50???
+
+        embedding2 = F.relu(self.embedding(end))
+        output2, (h_n, c_n) = self.lstm2(embedding2)
+
+        feats = torch.cat((output1, output2), dim=1)
+
+        # (batch, attn_dimension)
+        attn_seq, ws = self.attention(feats)
+        class_feats = torch.cat((attn_seq, lens), dim=1)
+        y = self.drop_fc(F.relu(self.fc1(class_feats)))
+        y = torch.sigmoid(self.fc2(y))
+        return y
+
+class AttentionBlockWithHeads(BaseModel):
+    def __init__(self, in_dim, out_dim, n_heads, head_dim):
+        super().__init__()
+
+        # variant 0:
+        # issue with this: similar to 1.2, but would need extra parameter
+        # it is the most flexible one though
+        self.n_heads = n_heads
+        self.keys = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
+        self.values = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
+        self.queries = clones(torch.nn.Linear(1, head_dim, bias=False), n_heads)
+        self.head_unifier = torch.nn.Linear(head_dim*n_heads, out_dim)
+
+        # variant 1.1:
+        # issue with this: not very flexible
+        # self.head_unifier = torch.nn.Linear(out_dim*n_heads, out_dim)
+        # variant 1.2:
+        # issue with this is not very flexible
+        # assert out_dim % n_heads == 0
+        # self.keys = clones(torch.nn.Linear(in_dim, out_dim/n_heads), n_heads)
+        # self.values = clones(torch.nn.Linear(in_dim, out_dim/n_heads), n_heads)
+        # self.queries = clones(torch.nn.Linear(1, out_dim/n_heads, bias=False), n_heads)
+        # self.head_unifier = torch.nn.Linear(out_dim/n_heads*n_heads, out_dim)
 
     def forward(self, input_seq):
         batch_size = input_seq.shape[0]
@@ -826,7 +904,8 @@ class AttentionBlockWithHeads(BaseModel):
             outputs.append(output)
             attn_ws.append(attn_w)
 
-        output = torch.cat(outputs, dim=1)
+        zs = torch.cat(outputs, dim=1)
+        output = self.head_unifier(zs)
         return output, attn_ws
 
 def clones(module, N):
