@@ -79,16 +79,7 @@ def overlap(start, end, start2, end2):
 def load_chrom_seq(chrom):
     with open(f'{data_path}/chromosomes/chr{chrom}.fa') as f:
         loaded_chrom_seq = f.read().replace('\n', '')
-        # reader = csv.reader(f, delimiter=" ")
-        # lines = list(reader)
-        # complete = ''.join(lines)
-        # contains list with rows of samples
-        # log10 solution would be cleaner, but this is more readable
-        # cutting out '>chr<chrom>'
-        if chrom < 10:
-            return loaded_chrom_seq[5:]
-        else:
-            return loaded_chrom_seq[6:]
+        return loaded_chrom_seq.replace(f'<chr{chrom}','', 1)
 
 def load_DSC_exons():
     with open(f'../../data/dsc_reconstruction_junction/cons_exons.csv') as f:

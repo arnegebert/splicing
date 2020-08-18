@@ -1,14 +1,15 @@
-import numpy as np
-import csv
-import gensim.models
 import time
+
+import gensim.models
+import numpy as np
+
 from utils import one_hot_decode_seq_vanilla
 
 startt = time.time()
 tissue = 'cerebellum'
 assert tissue in ['brain', 'heart', "cerebellum"]
 data_path = '../../data'
-data_dir = f'gtex_processed/{tissue}'
+data_dir = f'gtex_processed/junc/{tissue}'
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
 classification_task = True
 constitutive_level = 0.99
@@ -29,9 +30,9 @@ def split_into_3_mers(sentence):
     return words
 
 print('Loading data')
-cons_exons = np.load(f'../../data/{data_dir}/cons.npy')
-low_exons = np.load(f'../../data/{data_dir}/low.npy')
-high_exons = np.load(f'../../data/{data_dir}/high.npy')
+cons_exons = np.load(f'{data_path}/{data_dir}/cons.npy')
+low_exons = np.load(f'{data_path}/{data_dir}/low.npy')
+high_exons = np.load(f'{data_path}/{data_dir}/high.npy')
 print('Finished loading data')
 
 def decode_reshape_and_embed(batch):

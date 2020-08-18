@@ -18,7 +18,6 @@ tissue = 'brain' if not args.tissue else args.tissue
 assert tissue in ['brain', 'cerebellum', 'heart']
 data_path = '../../data'
 
-
 if tissue == 'brain':
     path_filtered_reads = f'{data_path}/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
     path_highly_expr_genes = '../../data/gtex_processed/brain_cortex_tpm_one_sample.csv'
@@ -29,15 +28,13 @@ elif tissue == 'heart':
     path_filtered_reads = f'{data_path}/gtex_processed/heart_junction_reads_one_sample.csv'
     path_highly_expr_genes = '../../data/gtex_processed/heart_tpm_one_sample.csv'
 
-save_to_low = f'gtex_processed/{tissue}/low.npy'
-save_to_high = f'gtex_processed/{tissue}/high.npy'
-save_to_cons = f'gtex_processed/{tissue}/cons.npy'
+save_to_low = f'gtex_processed/junc/{tissue}/low.npy'
+save_to_high = f'gtex_processed/junc/{tissue}/high.npy'
+save_to_cons = f'gtex_processed/junc/{tissue}/cons.npy'
 
 print('-'*40)
 print(f'Processing tissue type: {tissue}')
 print('-'*40)
-
-last_chrom = 23
 
 introns_bef_start = 70 # introns
 exons_after_start = 70 # exons
@@ -101,16 +98,7 @@ def overlap(start, end, start2, end2):
 def load_chrom_seq(chrom):
     with open(f'{data_path}/chromosomes/chr{chrom}.fa') as f:
         loaded_chrom_seq = f.read().replace('\n', '')
-        # reader = csv.reader(f, delimiter=" ")
-        # lines = list(reader)
-        # complete = ''.join(lines)
-        # contains list with rows of samples
-        # log10 solution would be cleaner, but this is more readable
-        # cutting out '>chr<chrom>'
-        if chrom < 10:
-            return loaded_chrom_seq[5:]
-        else:
-            return loaded_chrom_seq[6:]
+        return loaded_chrom_seq.replace(f'<chr{chrom}','', 1)
 
 junction_seqs = {}
 junction_psis = {}
@@ -137,7 +125,6 @@ with open(path_filtered_reads) as f:
             read_chrom = int(junction[0][3:])
         except ValueError:
             break
-        if read_chrom == last_chrom: break
         start, end = int(junction[1]), int(junction[2])
         read_count = int(line[1])
         # if chromosome changes, update loaded sequence until chromosome 22 reached

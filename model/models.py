@@ -818,16 +818,15 @@ class AttnBiLSTMWithHeads(BaseModel):
         self.dropout_prob = 0.5
         self.lstm_layer = 1 # not changing this; too long training times already, really need to put my foot down here
         # if I want to finish this thesis in time
-        self.lstm_dropout = 0.2
         self.attn_dim = attn_dim
         self.in_fc = attn_dim + (3 if self.three_feats else 1)
 
         self.embedding = nn.Linear(4, 4, bias=True)
 
         self.lstm1 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
-                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+                             bidirectional=True, batch_first=True)
         self.lstm2 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
-                             bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
+                             bidirectional=True, batch_first=True)
         # self.attention = AttentionBlock(self.LSTM_dim, self.attn_dim, self.attn_dropout)
         # self.attention = AttentionBlockWithoutQuery(self.LSTM_dim, self.attn_dim)
         self.attention = AttentionBlockWithHeads(self.LSTM_dim, self.attn_dim, self.n_heads, self.head_dim)

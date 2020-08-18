@@ -10,7 +10,7 @@
     "data_loader": {
         "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/cerebellum",
+            "data_dir": "data/gtex_processed/junc/cerebellum",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
