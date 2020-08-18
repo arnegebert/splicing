@@ -2,12 +2,14 @@
     "name": "FineTuning_AttnBiLSTM",
 
     "log_directory": "results/FineTuning_AttnBiLSTM/onehead",
+    "log_file": "onehead",
     "n_gpu": 1,
 
     "model_parameters": {
         "LSTM_dim": [50],
         "attn_dim": [100],
-        "fc_dim": [128]
+        "fc_dim": [128],
+        "attn_dropout": [0.2]
     },
     "arch": {
         "type": "AttnBiLSTM",

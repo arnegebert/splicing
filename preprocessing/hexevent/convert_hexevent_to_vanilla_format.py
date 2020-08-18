@@ -24,6 +24,12 @@ cons = convert_hexevent_to_vanilla_format(cons)
 low = convert_hexevent_to_vanilla_format(low)
 high = convert_hexevent_to_vanilla_format(high)
 
+total = len(cons) + len(high) + len(low)
+print(f'Total number of exons: {total}')
+print(f'Number of low PSI exons: {len(cons)}')
+print(f'Number of high PSI exons: {len(high)}')
+print(f'Number of cons exons: {len(low)}')
+
 np.save(f'{src}/cons.npy', cons)
 np.save(f'{src}/low.npy', low)
 np.save(f'{src}/high.npy', high)

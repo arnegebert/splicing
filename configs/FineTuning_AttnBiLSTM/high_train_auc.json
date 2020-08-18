@@ -2,13 +2,15 @@
     "name": "GridSearch_AttnBiLSTMWithHeads",
 
     "log_directory": "results/FineTuning_AttnBiLSTM",
+    "log_file": "high_train_auc",
     "n_gpu": 1,
     "model_parameters": {
       "LSTM_dim": [150],
       "attn_dim": [100],
-      "n_heads": [3, 4],
+      "n_heads": [4],
       "head_dim": [24],
-      "fc_dim": [128]
+      "fc_dim": [128],
+      "attn_dropout": [0.3]
     },
     "arch": {
         "type": "AttnBiLSTMWithHeads",

@@ -175,3 +175,4 @@ results/configs/HIPSCI_MAJIQ_4_D2V_MLP.json
 results/configs/HIPSCI_MAJIQ_4_DSC.json
 majiq/voila/binary_exon_skipping_junc_all2.txt
 majiq/psi/.~lock.neural.psi.tsv#
+*.npy

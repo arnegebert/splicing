@@ -42,6 +42,11 @@ def load_and_plot_roc(name, dirs, labels):
     plt.legend(loc='best')
     plt.savefig(f'{name}.png', dpi=300, bbox_inches='tight')
 
+def plot_attention(attn_weights):
+    attn_weights = attn_weights[0, 0]
+    plt.plot(attn_weights)
+    plt.show()
+
 if __name__ == '__main__':
     labels = ['DSC (baseline)', 'DSC (ours)', 'BiLSTM', 'D2V']
 

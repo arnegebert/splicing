@@ -3,8 +3,9 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import random
 from base import BaseModel
+from visualizations.roc_curves import plot_attention
 
 
 class MNISTModel(BaseModel):
@@ -763,7 +764,7 @@ class AttnBiLSTM(BaseModel):
         class_feats = torch.cat((attn_seq, lens), dim=1)
         y = self.drop_fc(F.relu(self.fc1(class_feats)))
         y = torch.sigmoid(self.fc2(y))
-        return y
+        return y, ws
 
 class AttentionBlock(BaseModel):
     def __init__(self, in_dim, out_dim, dropout):
@@ -783,27 +784,13 @@ class AttentionBlock(BaseModel):
         queries = self.query.weight.repeat(batch_size, 1, 1) # attn_weights[0, 5] * values[0, 5] = weighted_vals[0, 5]
         unnorm_weights = torch.bmm(keys, queries)
         attn_weights = torch.softmax(unnorm_weights, dim=1)
-        attn_weights = self.drop(attn_weights)
-        weighted_vals = values * attn_weights
+        # if random.randint(900, 1000) in [997, 998, 999]:
+        #     plot_attention(attn_weights.cpu().detach().numpy())
+        attn_weights_drop = self.drop(attn_weights)
+
+        weighted_vals = values * attn_weights_drop
         output = torch.sum(weighted_vals, dim=1)
         return output, attn_weights
-
-class AttentionBlockWithoutQuery(BaseModel):
-    def __init__(self, in_dim, out_dim, dropout):
-        super().__init__()
-        self.key = torch.nn.Linear(in_dim, 1)
-        self.value = torch.nn.Linear(in_dim, out_dim)
-        # I just have one query independent of sequence length
-
-    def forward(self, input_seq):
-        values = self.value(input_seq)
-        unnorm_weights = self.key(input_seq)
-
-        attn_weights = torch.softmax(unnorm_weights, dim=1)
-        weighted_vals = values * attn_weights
-        output = torch.sum(weighted_vals, dim=1)
-        return output, attn_weights
-
 
 class AttnBiLSTMWithHeads(BaseModel):
     def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=50, n_heads=1, head_dim=50, attn_dropout=0, three_len_feats=True):
@@ -829,7 +816,7 @@ class AttnBiLSTMWithHeads(BaseModel):
                              bidirectional=True, batch_first=True)
         # self.attention = AttentionBlock(self.LSTM_dim, self.attn_dim, self.attn_dropout)
         # self.attention = AttentionBlockWithoutQuery(self.LSTM_dim, self.attn_dim)
-        self.attention = AttentionBlockWithHeads(self.LSTM_dim, self.attn_dim, self.n_heads, self.head_dim)
+        self.attention = AttentionBlockWithHeads(self.LSTM_dim, self.attn_dim, self.n_heads, self.head_dim, self.attn_dropout)
         # self.attention = AttentionBlockWithConv(self.seq_length, self.LSTM_dim, self.attn_dim, self.conv_size)
         # self.attention = AttentionBlockWithConvAndSequenceSeparation(self.seq_length, self.LSTM_dim, self.attn_dim, self.conv_size)
 
@@ -862,7 +849,7 @@ class AttnBiLSTMWithHeads(BaseModel):
         return y
 
 class AttentionBlockWithHeads(BaseModel):
-    def __init__(self, in_dim, out_dim, n_heads, head_dim):
+    def __init__(self, in_dim, out_dim, n_heads, head_dim, dropout):
         super().__init__()
 
         # variant 0:
@@ -873,6 +860,7 @@ class AttentionBlockWithHeads(BaseModel):
         self.values = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
         self.queries = clones(torch.nn.Linear(1, head_dim, bias=False), n_heads)
         self.head_unifier = torch.nn.Linear(head_dim*n_heads, out_dim)
+        self.drop = torch.nn.Dropout(dropout)
 
         # variant 1.1:
         # issue with this: not very flexible
@@ -896,7 +884,8 @@ class AttentionBlockWithHeads(BaseModel):
             queries = self.queries[i].weight.repeat(batch_size, 1, 1) # attn_weights[0, 5] * values[0, 5] = weighted_vals[0, 5]
             unnorm_weights = torch.bmm(keys, queries)
             attn_w = torch.softmax(unnorm_weights, dim=1)
-            weighted_vals = values * attn_w
+            drop_attn_w = self.drop(attn_w)
+            weighted_vals = values * drop_attn_w
             output = torch.sum(weighted_vals, dim=1)
             outputs.append(output)
             attn_ws.append(attn_w)
@@ -908,6 +897,23 @@ class AttentionBlockWithHeads(BaseModel):
 def clones(module, N):
     """Produce N identical layers."""
     return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
+
+
+class AttentionBlockWithoutQuery(BaseModel):
+    def __init__(self, in_dim, out_dim, dropout):
+        super().__init__()
+        self.key = torch.nn.Linear(in_dim, 1)
+        self.value = torch.nn.Linear(in_dim, out_dim)
+        # I just have one query independent of sequence length
+
+    def forward(self, input_seq):
+        values = self.value(input_seq)
+        unnorm_weights = self.key(input_seq)
+
+        attn_weights = torch.softmax(unnorm_weights, dim=1)
+        weighted_vals = values * attn_weights
+        output = torch.sum(weighted_vals, dim=1)
+        return output, attn_weights
 
 class AttentionBlockWithoutQueryWithHeads(BaseModel):
     def __init__(self, in_dim, out_dim, n_heads):

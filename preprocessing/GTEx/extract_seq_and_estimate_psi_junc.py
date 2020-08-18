@@ -13,7 +13,7 @@ parser.add_argument('--tissue', type=str, default='', metavar='tissue',
 args = parser.parse_args()
 
 startt = timer()
-tissue = 'brain' if not args.tissue else args.tissue
+tissue = 'cerebellum' if not args.tissue else args.tissue
 
 assert tissue in ['brain', 'cerebellum', 'heart']
 data_path = '../../data'

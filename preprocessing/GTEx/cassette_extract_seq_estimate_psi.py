@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--tissue', type=str, default='', metavar='tissue',
                     help='type of tissue filtered for')
 args = parser.parse_args()
-tissue = 'brain' if not args.tissue else args.tissue
+tissue = 'heart' if not args.tissue else args.tissue
 
 assert tissue in ['brain', 'cerebellum', 'heart']
 

@@ -6,9 +6,9 @@ from matplotlib import ticker
 
 src_paths = ['../data/hexevent', '../data/gtex_processed/exon/brain', '../data/hipsci_suppa',
              '../data/hipsci_majiq/exon',]
-names = ['HEXEvent', 'GTEx (brain)', 'HipSci SUPPA (neuron)', 'HipSci MAJIQ (neuron)']
+names = ['HEXEvent', 'GTEx (brain cortex)', 'HipSci SUPPA (iPSC neuron)', 'HipSci MAJIQ (iPSC neuron)']
 
-use_seaborn = False
+use_seaborn = True
 # tending towards seaborn atm
 if use_seaborn:
     plt.style.use('seaborn')

@@ -10,11 +10,12 @@ class Vanilla_Trainer(BaseTrainer):
     """
     Trainer class
     """
-    def __init__(self, embedded=False):
+    def __init__(self, embedded=False, attention=False):
         self.embedded = embedded
+        self.attention = attention
 
     def set_param(self, model, criterion, metric_ftns, optimizer, config, data_loader,
-                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False, ):
+                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
@@ -52,6 +53,9 @@ class Vanilla_Trainer(BaseTrainer):
             self.optimizer.zero_grad()
 
             output = self.model(seqs, lens)
+            if self.attention:
+                output, attn_ws = output
+
             loss = self.criterion(output, target)
             loss.backward()
             self.optimizer.step()
@@ -118,11 +122,19 @@ class Vanilla_Trainer(BaseTrainer):
 
     def _single_val_epoch(self, val_data, epoch, metrics):
         outputs, targets = [], []
+        attn_ws_b = []
         for batch_idx, data in enumerate(val_data):
             seqs, lens, target = self.convert_to_model_input_format(data)
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
 
             output = self.model(seqs, lens)
+            if self.attention:
+                output, attn_ws = output
+                attn_ws = attn_ws.data.cpu().numpy()
+                attn_ws_b.append(attn_ws)
+
+
+
             loss = self.criterion(output, target)
 
             self.writer.set_step((epoch - 1) * len(val_data) + batch_idx, 'valid')
@@ -136,6 +148,11 @@ class Vanilla_Trainer(BaseTrainer):
                 except ValueError:
                     print('AUC bitching around')
                     continue
+        if self.attention and metrics == self.test_all_metrics:
+            attn_ws_b = np.concatenate(attn_ws_b, axis=0)
+            np.save(f'attn_ws_{epoch}.npy', attn_ws_b)
+        del attn_ws_b
+
         return outputs, targets
 
     def convert_to_model_input_format(self, data):

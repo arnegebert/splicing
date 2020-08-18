@@ -26,20 +26,20 @@ def main(config):
     keys, values = zip(*param_grid.items())
     test_all, test_low, test_high = [], [], []
     # Iterate through every possible combination of hyperparameters
-    logdir = config["log_directory"]
-    with open(f'{logdir}/gridsearch.tsv', 'a') as f:
+    logdir, logfile = config["log_directory"], config["log_file"]
+    with open(f'{logdir}/{logfile}.tsv', 'a') as f:
         col_params = "\t".join(keys)
         col_metris = "\t".join(["train", "val", "test_all", "test_low", "test_high"])
         f.write(f'time (min)\t{col_params}\t{col_metris}\n')
         # f.write(f'time (min)\tn_heads\thead_dim\tLSTM_dim\tattn_dim\tfc_dim\ttrain\tval\ttest_all\ttest_low\ttest_high\n')
     for i, v in enumerate(itertools.product(*values)):
-        startt = time.time()
         # Create a hyperparameter dictionary
         hyperparameters = dict(zip(keys, v))
 
         print(i, hyperparameters)
         iters = 1 if not config["cross_validation"] else 9
         for i in range(iters):
+            startt = time.time()
             config['data_loader']['args']['cross_validation_split'] = i
             # Set model config to appropriate hyperparameters
             config["arch"]["args"].update(hyperparameters)
@@ -77,7 +77,7 @@ def main(config):
                 test_low.append(trainer.logged_metrics["test_low_auc"])
                 test_high.append(trainer.logged_metrics["test_high_auc"])
             except KeyError: pass
-            with open(f'{logdir}/gridsearch.tsv', 'a') as f:
+            with open(f'{logdir}/{logfile}.tsv', 'a') as f:
                 param_vals = "\t".join([f'{param}' for param in v])
                 metric_vals = [trainer.train_metrics._data.values[1][2], trainer.mnt_best, test_all[-1], test_low[-1], test_high[-1]]
                 metric_vals = '\t'.join([f'{val}' for val in metric_vals])
