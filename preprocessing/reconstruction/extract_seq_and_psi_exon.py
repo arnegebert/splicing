@@ -1,12 +1,12 @@
 # given junction reads from the correct samples, extract the corresponding intron-exon sequences from the genome
-import csv
-import linecache
-from timeit import default_timer as timer
-import numpy as np
-from utils import reverse_complement, one_hot_encode_seq
-import matplotlib.pyplot as plt
 import argparse
+import csv
+from timeit import default_timer as timer
 
+import matplotlib.pyplot as plt
+import numpy as np
+
+from utils import reverse_complement, one_hot_encode_seq
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--tissue', type=str, default='', metavar='tissue',

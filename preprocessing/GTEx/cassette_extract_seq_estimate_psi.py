@@ -270,8 +270,14 @@ print(f'Cass:')
 print(f'L1avg: {l1avgcass}, l2avg: {l2avgcass}, l3avg: {l3avgcass}')
 print(f'L1 median: {l1mediancass}, l2 median: {l2mediancass}, l3 median: {l3mediancass}')
 
-# print(f'Intron mean: {intron_mean}')
-# print(f'Intron std: {intron_std}')
+l1s, l2s, l3s = np.concatenate((l1scons, l1scass)), np.concatenate((l2scons, l2scass)), np.concatenate((l3scons, l3scass))
+l1avg, l2avg, l3avg = np.average(l1s), np.average(l2s), np.average(l3s)
+l1med, l2med, l3med = np.median(l1s), np.median(l2s), np.median(l3s)
+l1std, l2std, l3std = np.std(l1s), np.std(l2s), np.std(l3s)
+
+print(f'Cons + Cass')
+print(f'L1avg: {l1avg} +- {l1std}, l2avg: {l2avg} +- {l2std}, l3avg: {l3avg} +- {l3std}')
+print(f'L1 median: {l1med}, l2 median: {l2med}, l3 median: {l3med}')
 
 np.save(f'{data_path}/{save_to_low}', low_exons)
 np.save(f'{data_path}/{save_to_high}', high_exons)

@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 # will plot hexevent / gtx / majiq / suppa as most variation + 4 fit better into plot
 from matplotlib import ticker
 
-src_paths = ['../data/hexevent', '../data/gtex_processed/brain', '../data/hipsci_suppa',
+src_paths = ['../data/hexevent', '../data/gtex_processed/exon/brain', '../data/hipsci_suppa',
              '../data/hipsci_majiq/exon',]
-names = ['HEXEvent', 'GTEx (exon)', 'HipSci SUPPA (exon)', 'HipSci MAJIQ (exon)']
+names = ['HEXEvent', 'GTEx (brain)', 'HipSci SUPPA (neuron)', 'HipSci MAJIQ (neuron)']
 
-use_seaborn = True
+use_seaborn = False
 # tending towards seaborn atm
 if use_seaborn:
     plt.style.use('seaborn')
