@@ -7,6 +7,9 @@ cons = np.load(f'{src}/cons_original_format.npy')
 high = np.load(f'{src}/high_original_format.npy')
 low = np.load(f'{src}/low_original_format.npy')
 
+# original data somehow has 0 there
+cons[:, -1, 4] = 1
+
 def convert_hexevent_to_vanilla_format(array):
     lifehack = 500000
     psi = array[:lifehack, -1, 4]

@@ -9,7 +9,7 @@ src_paths = ['../data/hexevent', '../data/gtex_processed/brain', '../data/hipsci
 names = ['HEXEvent', 'GTEx (exon)', 'HipSci SUPPA (exon)', 'HipSci MAJIQ (exon)']
 
 # https://matplotlib.org/3.1.0/gallery/subplots_axes_and_figures/subplots_demo.html
-fig, axs = plt.subplots(2, 2)
+fig, axs = plt.subplots(2, 2, sharey=True, sharex=True)
 for i, (src_path, name) in enumerate(zip(src_paths, names)):
     cons = np.load(f'{src_path}/cons.npy')
     low = np.load(f'{src_path}/low.npy')
@@ -19,7 +19,7 @@ for i, (src_path, name) in enumerate(zip(src_paths, names)):
     axs[ax0, ax1].hist(psis)
     axs[ax0, ax1].set_title(name)
     # https://malithjayaweera.com/2018/09/add-matplotlib-percentage-ticks-histogram/
-    axs[ax0, ax1].yaxis.set_major_formatter(ticker.PercentFormatter(xmax=len(psis)))
+    # axs[ax0, ax1].yaxis.set_major_formatter(ticker.PercentFormatter(xmax=len(psis)))
 
 # want to have x-axis display relative number of data points and should be the same across all datasets
 for ax in axs.flat:
