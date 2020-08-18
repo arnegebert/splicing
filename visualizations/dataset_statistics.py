@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 src_paths = ['../data/hexevent', '../data/gtex_processed/brain', '../data/hipsci_suppa',
              '../data/hipsci_majiq/exon',]
 names = ['HEXEvent', 'GTEx (exon)', 'HipSci SUPPA (exon)', 'HipSci MAJIQ (exon)']
-# '../../data/iPSC/exon'
 
 # https://matplotlib.org/3.1.0/gallery/subplots_axes_and_figures/subplots_demo.html
 fig, axs = plt.subplots(2, 2)
@@ -13,9 +12,7 @@ for i, (src_path, name) in enumerate(zip(src_paths, names)):
     cons = np.load(f'{src_path}/cons.npy')
     low = np.load(f'{src_path}/low.npy')
     high = np.load(f'{src_path}/high.npy')
-    if i == 0: # for hexevent data
-        psis = np.concatenate((cons[:,-1, 4], low[:, -1, 4], high[:, -1, 4]), axis=0)
-    else: psis = np.concatenate((cons[:, -1, 3], low[:, -1, 3], high[:, -1, 3]), axis=0)
+    psis = np.concatenate((cons[:, -1, 3], low[:, -1, 3], high[:, -1, 3]), axis=0)
     ax0, ax1 = 1 if i >= 2 else 0, i % 2
     axs[ax0, ax1].hist(psis)
     axs[ax0, ax1].set_title(name)
@@ -27,6 +24,7 @@ for ax in axs.flat:
 for ax in axs.flat:
     ax.label_outer()
 
+# todo; make all axes scale in the same way
 # with open('../data/gtex_origin/brain_cortex_junction_seqs.csv') as f:
 #     for l in f:
 #         # j, start_seq, end_seq, psi = l.split(',')

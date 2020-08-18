@@ -28,7 +28,7 @@ def main(config):
     # Iterate through every possible combination of hyperparameters
     logdir = config["log_directory"]
     with open(f'{logdir}/gridsearch.tsv', 'a') as f:
-        f.write(f'time (min)\tn_heads\thead_dim\tLSTM_dim\tattn_dim\tfc_dim\ttrain\ttest_all\ttest_low\ttest_high\n')
+        f.write(f'time (min)\tn_heads\thead_dim\tLSTM_dim\tattn_dim\tfc_dim\ttrain\tval\ttest_all\ttest_low\ttest_high\n')
     for i, v in enumerate(itertools.product(*values)):
         startt = time.time()
         # Create a hyperparameter dictionary
@@ -45,10 +45,12 @@ def main(config):
         # dropout 0.3 used from here on
         # if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 24: continue
         # if hyperparameters["LSTM_dim"] == 150 and hyperparameters["attn_dim"] <= 50: continue
-        if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 100 and \
-                hyperparameters["n_heads"] == 2: continue
-        if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 100 and \
-                hyperparameters["n_heads"] == 3 and hyperparameters["head_dim"] <= 24: continue
+        if hyperparameters["LSTM_dim"] < 250 or hyperparameters["attn_dim"] < 150 or hyperparameters["n_heads"] == 2: continue
+
+        # if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 100 and \
+        #         hyperparameters["n_heads"] == 2: continue
+        # if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 100 and \
+        #         hyperparameters["n_heads"] == 3 and hyperparameters["head_dim"] <= 24: continue
         print(i, hyperparameters)
         # Set model config to appropriate hyperparameters
         config["arch"]["args"].update(hyperparameters)
@@ -89,7 +91,8 @@ def main(config):
         with open(f'{logdir}/gridsearch.tsv', 'a') as f:
             f.write(f'{(endt-startt)/60:.0f}\t{hyperparameters["n_heads"]}\t{hyperparameters["head_dim"]}\t'
                     f'{hyperparameters["LSTM_dim"]}\t{hyperparameters["attn_dim"]}\t{hyperparameters["fc_dim"]}'
-                    f'\t{trainer.train_metrics._data.values[1][2]}\t{test_all[-1]}\t{test_low[-1]}\t{test_high[-1]}\n')
+                    f'\t{trainer.train_metrics._data.values[1][2]}\t{trainer.mnt_best}'
+                    f'\t{test_all[-1]}\t{test_low[-1]}\t{test_high[-1]}\n')
     test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
     logger.info(f'Average test_all: {np.mean(test_all)} +- {np.std(test_all)}')
     logger.info(f'Average test_low: {np.mean(test_low)} +- {np.std(test_low)}')
