@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # will plot hexevent / gtx / majiq / suppa as most variation + 4 fit better into plot
+from matplotlib import ticker
+
 src_paths = ['../data/hexevent', '../data/gtex_processed/brain', '../data/hipsci_suppa',
              '../data/hipsci_majiq/exon',]
 names = ['HEXEvent', 'GTEx (exon)', 'HipSci SUPPA (exon)', 'HipSci MAJIQ (exon)']
@@ -16,7 +18,10 @@ for i, (src_path, name) in enumerate(zip(src_paths, names)):
     ax0, ax1 = 1 if i >= 2 else 0, i % 2
     axs[ax0, ax1].hist(psis)
     axs[ax0, ax1].set_title(name)
+    # https://malithjayaweera.com/2018/09/add-matplotlib-percentage-ticks-histogram/
+    axs[ax0, ax1].yaxis.set_major_formatter(ticker.PercentFormatter(xmax=len(psis)))
 
+# want to have x-axis display relative number of data points and should be the same across all datasets
 for ax in axs.flat:
     ax.set(xlabel='PSI value', ylabel='number of data points')
 
