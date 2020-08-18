@@ -131,8 +131,6 @@ majiq/builder/constitutive_junctions.tsv
 majiq/builder/constitutive_junctions_sorted.tsv
 majiq/fix_Homo_sapiens.GRCh38.100.chr.gff3
 *.gff3
-*.tsv#
-*.tsv
 *.voila
 *.gz
 salmon/human_index/mphf.bin
@@ -149,6 +147,8 @@ majiq/voila/binary_exon_skipping_junc_bezi1.txt
 majiq/voila/binary_exon_skipping_junc_bezi2.txt
 majiq/voila/binary_exon_skipping_junc_lexy2.txt
 *.sql
+majiq/*/*.tsv
+data/*.tsv
 results/configs/HIPSCI_MAJIQ_BiLSTM.json
 results/configs/HIPSCI_MAJIQ_D2V_MLP.json
 results/configs/HIPSCI_MAJIQ_DSC.json
@@ -174,3 +174,4 @@ results/configs/ootw/GTEx_DSC.json
 results/configs/HIPSCI_MAJIQ_4_D2V_MLP.json
 results/configs/HIPSCI_MAJIQ_4_DSC.json
 majiq/voila/binary_exon_skipping_junc_all2.txt
+majiq/psi/.~lock.neural.psi.tsv#

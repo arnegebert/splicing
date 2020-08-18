@@ -1,0 +1,1 @@
+time (min)	LSTM_dim	attn_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high

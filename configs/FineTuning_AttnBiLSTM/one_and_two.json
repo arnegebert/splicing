@@ -1,17 +1,18 @@
 {
-    "name": "FineTuning_AttnBiLSTM",
+    "name": "GridSearch_AttnBiLSTMWithHeads",
 
     "log_directory": "results/FineTuning_AttnBiLSTM",
     "n_gpu": 1,
-
     "model_parameters": {
-        "LSTM_dim": [50],
-        "attn_dim": [100],
-        "fc_dim": [128],
-        "attn_dropout": [0]
+      "LSTM_dim": [50],
+      "attn_dim": [50],
+      "n_heads": [3],
+      "head_dim": [50, 100],
+      "fc_dim": [128],
+      "attn_dropout": [0]
     },
     "arch": {
-        "type": "AttnBiLSTM",
+        "type": "AttnBiLSTMWithHeads",
         "args": {
             "three_len_feats": true
         }
