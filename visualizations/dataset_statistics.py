@@ -8,8 +8,14 @@ src_paths = ['../data/hexevent', '../data/gtex_processed/brain', '../data/hipsci
              '../data/hipsci_majiq/exon',]
 names = ['HEXEvent', 'GTEx (exon)', 'HipSci SUPPA (exon)', 'HipSci MAJIQ (exon)']
 
+use_seaborn = True
+# tending towards seaborn atm
+if use_seaborn:
+    plt.style.use('seaborn')
+
 # https://matplotlib.org/3.1.0/gallery/subplots_axes_and_figures/subplots_demo.html
 fig, axs = plt.subplots(2, 2, sharey=True, sharex=True)
+
 for i, (src_path, name) in enumerate(zip(src_paths, names)):
     cons = np.load(f'{src_path}/cons.npy')
     low = np.load(f'{src_path}/low.npy')
@@ -29,13 +35,10 @@ for ax in axs.flat:
 for ax in axs.flat:
     ax.label_outer()
 
-# todo; make all axes scale in the same way
-# with open('../data/gtex_origin/brain_cortex_junction_seqs.csv') as f:
-#     for l in f:
-#         # j, start_seq, end_seq, psi = l.split(',')
-#         j, start_seq, end_seq, psi = l.split('\t')
-#         psis.append(float(psi[:-1]))
-#
+suffix = '_seaborn' if use_seaborn else ''
+plt.savefig(f'dataset_histograms{suffix}.png', dpi=300, bbox='tight')
+plt.show(dpi=300)
+
 # psis = np.array(psis)
 # length = len(psis)
 # print(f'number of values: {length}')
@@ -50,4 +53,3 @@ for ax in axs.flat:
 # plt.hist(psis)
 # plt.xlabel('PSI value')
 # plt.ylabel('number of data points')
-plt.show()
