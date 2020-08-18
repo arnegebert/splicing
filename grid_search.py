@@ -37,54 +37,52 @@ def main(config):
         # Create a hyperparameter dictionary
         hyperparameters = dict(zip(keys, v))
 
-        # if hyperparameters["LSTM_dim"] < 250 or hyperparameters["attn_dim"] < 150 or hyperparameters["n_heads"] == 2: continue
-
         print(i, hyperparameters)
-        # Set model config to appropriate hyperparameters
-        config["arch"]["args"].update(hyperparameters)
+        iters = 1 if not config["cross_validation"] else 9
+        for i in range(iters):
+            config['data_loader']['args']['cross_validation_split'] = i
+            # Set model config to appropriate hyperparameters
+            config["arch"]["args"].update(hyperparameters)
 
-        data_loader = config.init_obj('data_loader', module_loader)
-        valid_data_loader = data_loader.split_validation()
+            data_loader = config.init_obj('data_loader', module_loader)
+            valid_data_loader = data_loader.split_validation()
 
-        # build model architecture, then print to console
-        model = config.init_obj('arch', module_arch)
-        logger.info(model)
+            # build model architecture, then print to console
+            model = config.init_obj('arch', module_arch)
+            logger.info(model)
 
-        # get function handles of loss and metrics
-        criterion = getattr(module_loss, config['loss'])
-        metrics = [getattr(module_metric, met) for met in config['metrics']]
+            # get function handles of loss and metrics
+            criterion = getattr(module_loss, config['loss'])
+            metrics = [getattr(module_metric, met) for met in config['metrics']]
 
-        # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
-        trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-        optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
+            # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
+            trainable_params = filter(lambda p: p.requires_grad, model.parameters())
+            optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
 
-        lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
+            lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
-        trainer = config.init_obj('trainer', module_trainer)
+            trainer = config.init_obj('trainer', module_trainer)
 
-        trainer.set_param(model, criterion, metrics, optimizer,
-                          config=config,
-                          data_loader=data_loader,
-                          valid_data_loader=valid_data_loader,
-                          lr_scheduler=lr_scheduler)
+            trainer.set_param(model, criterion, metrics, optimizer,
+                              config=config,
+                              data_loader=data_loader,
+                              valid_data_loader=valid_data_loader,
+                              lr_scheduler=lr_scheduler)
 
-        trainer.train()
-        endt = time.time()
-        print(f'Training took {endt-startt:.3f} s')
-        test_all.append(trainer.logged_metrics["test_auc"])
-        try: # this try statement because some of my models don't have test low / high metrics
-            test_low.append(trainer.logged_metrics["test_low_auc"])
-            test_high.append(trainer.logged_metrics["test_high_auc"])
-        except KeyError: pass
-        with open(f'{logdir}/gridsearch.tsv', 'a') as f:
-            param_vals = "\t".join([f'{param}' for param in v])
-            metric_vals = [trainer.train_metrics._data.values[1][2], trainer.mnt_best, test_all[-1], test_low[-1], test_high[-1]]
-            metric_vals = '\t'.join([f'{val}' for val in metric_vals])
-            f.write(f'{(endt-startt)/60:.0f}\t{param_vals}\t{metric_vals}\n')
-            # f.write(f'{(endt-startt)/60:.0f}\t{hyperparameters["n_heads"]}\t{hyperparameters["head_dim"]}\t'
-            #         f'{hyperparameters["LSTM_dim"]}\t{hyperparameters["attn_dim"]}\t{hyperparameters["fc_dim"]}'
-            #         f'\t{trainer.train_metrics._data.values[1][2]}\t{trainer.mnt_best}'
-            #         f'\t{test_all[-1]}\t{test_low[-1]}\t{test_high[-1]}\n')
+            trainer.train()
+            endt = time.time()
+            print(f'Training took {endt-startt:.3f} s')
+            test_all.append(trainer.logged_metrics["test_auc"])
+            try: # this try statement because some of my models don't have test low / high metrics
+                test_low.append(trainer.logged_metrics["test_low_auc"])
+                test_high.append(trainer.logged_metrics["test_high_auc"])
+            except KeyError: pass
+            with open(f'{logdir}/gridsearch.tsv', 'a') as f:
+                param_vals = "\t".join([f'{param}' for param in v])
+                metric_vals = [trainer.train_metrics._data.values[1][2], trainer.mnt_best, test_all[-1], test_low[-1], test_high[-1]]
+                metric_vals = '\t'.join([f'{val}' for val in metric_vals])
+                f.write(f'{(endt-startt)/60:.0f}\t{param_vals}\t{metric_vals}\n')
+
     test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
     logger.info(f'Average test_all: {np.mean(test_all)} +- {np.std(test_all)}')
     logger.info(f'Average test_low: {np.mean(test_low)} +- {np.std(test_low)}')
@@ -104,7 +102,6 @@ if __name__ == '__main__':
                       help='indices of GPUs to enable (default: all)')
     args.add_argument('-rid', '--run_id', default=None, type=str,
                       help='run_id of the experiment')
-
 
     start = time.time()
     # custom cli options to modify configuration from default values given in json file.

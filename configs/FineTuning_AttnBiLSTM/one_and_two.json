@@ -8,8 +8,7 @@
       "attn_dim": [50],
       "n_heads": [3],
       "head_dim": [50, 100],
-      "fc_dim": [128],
-      "attn_dropout": [0]
+      "fc_dim": [128]
     },
     "arch": {
         "type": "AttnBiLSTMWithHeads",
