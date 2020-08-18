@@ -710,13 +710,12 @@ class BiLSTM4(BaseModel):
         return y
 
 class AttnBiLSTM(BaseModel):
-    def __init__(self, LSTM_dim=50, fc_dim=64, attn_dim=50, conv_size=5, n_heads=1, attn_dropout=0.3, three_len_feats=True):
+    def __init__(self, LSTM_dim=50, fc_dim=64, attn_dim=50, conv_size=3, attn_dropout=0, three_len_feats=True):
         super().__init__()
         assert conv_size % 2 == 1, "Only uneven convolution sizes allowed for reasons of padding"
         self.three_feats = three_len_feats
         self.conv_size = conv_size
         self.attn_dropout = attn_dropout
-        self.n_heads = n_heads
         self.LSTM_dim = LSTM_dim
         self.seq_length = 140
         self.dim_fc = fc_dim
@@ -725,7 +724,7 @@ class AttnBiLSTM(BaseModel):
         # if I want to finish this thesis in time
         self.lstm_dropout = 0.2
         self.attn_dim = attn_dim
-        self.in_fc = attn_dim * n_heads + (3 if self.three_feats else 1)
+        self.in_fc = attn_dim + (3 if self.three_feats else 1)
 
         self.embedding = nn.Linear(4, 4, bias=True)
 

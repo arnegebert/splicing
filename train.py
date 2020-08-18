@@ -22,9 +22,9 @@ def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
-    iters = 10 if config['cross_validation'] else 1
+    folds = 9 if config['cross_validation'] else 1
     test_all, test_low, test_high = [], [], []
-    for i in range(iters):
+    for i in range(folds):
         config['data_loader']['args']['cross_validation_split'] = i
         data_loader = config.init_obj('data_loader', module_loader)
         valid_data_loader = data_loader.split_validation()
@@ -61,6 +61,9 @@ def main(config):
     logger.info(f'Average test_all: {np.mean(test_all)} +- {np.std(test_all)}')
     logger.info(f'Average test_low: {np.mean(test_low)} +- {np.std(test_low)}')
     logger.info(f'Average test_high: {np.mean(test_high)} +- {np.std(test_high)}')
+    logger.info(f'All values test_all: {test_all}')
+    logger.info(f'All values test_low: {test_low}')
+    logger.info(f'All values test_high: {test_high}')
 
 
 if __name__ == '__main__':

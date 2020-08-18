@@ -28,29 +28,17 @@ def main(config):
     # Iterate through every possible combination of hyperparameters
     logdir = config["log_directory"]
     with open(f'{logdir}/gridsearch.tsv', 'a') as f:
-        f.write(f'time (min)\tn_heads\thead_dim\tLSTM_dim\tattn_dim\tfc_dim\ttrain\tval\ttest_all\ttest_low\ttest_high\n')
+        col_params = "\t".join(keys)
+        col_metris = "\t".join(["train", "val", "test_all", "test_low", "test_high"])
+        f.write(f'time (min)\t{col_params}\t{col_metris}\n')
+        # f.write(f'time (min)\tn_heads\thead_dim\tLSTM_dim\tattn_dim\tfc_dim\ttrain\tval\ttest_all\ttest_low\ttest_high\n')
     for i, v in enumerate(itertools.product(*values)):
         startt = time.time()
         # Create a hyperparameter dictionary
         hyperparameters = dict(zip(keys, v))
-        # 24, 24, 128: 0.77, 30 epochs
-        # 24, 50 128: 0.778, 45 epochs
-        # 24, 100 128: 0.762, 67 epochs
-        # 24, 150 128: 0.752-0.73, 70 epochs
-        # 50, 24, 128: 0.796, 73 epochs
-        # got until before {'LSTM_dim': 150, 'attn_dim': 24, 'fc_dim': 128}
-        # LSTM_dim	attn_dim	fc_dim	train	test_all	test_low	test_high
-        # 50	100	128	0.9018483481439056	0.8467298729794085	0.9158084794829681	0.7378245622436166
 
-        # dropout 0.3 used from here on
-        # if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 24: continue
-        # if hyperparameters["LSTM_dim"] == 150 and hyperparameters["attn_dim"] <= 50: continue
-        if hyperparameters["LSTM_dim"] < 250 or hyperparameters["attn_dim"] < 150 or hyperparameters["n_heads"] == 2: continue
+        # if hyperparameters["LSTM_dim"] < 250 or hyperparameters["attn_dim"] < 150 or hyperparameters["n_heads"] == 2: continue
 
-        # if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 100 and \
-        #         hyperparameters["n_heads"] == 2: continue
-        # if hyperparameters["LSTM_dim"] == 50 and hyperparameters["attn_dim"] == 100 and \
-        #         hyperparameters["n_heads"] == 3 and hyperparameters["head_dim"] <= 24: continue
         print(i, hyperparameters)
         # Set model config to appropriate hyperparameters
         config["arch"]["args"].update(hyperparameters)
@@ -89,10 +77,14 @@ def main(config):
             test_high.append(trainer.logged_metrics["test_high_auc"])
         except KeyError: pass
         with open(f'{logdir}/gridsearch.tsv', 'a') as f:
-            f.write(f'{(endt-startt)/60:.0f}\t{hyperparameters["n_heads"]}\t{hyperparameters["head_dim"]}\t'
-                    f'{hyperparameters["LSTM_dim"]}\t{hyperparameters["attn_dim"]}\t{hyperparameters["fc_dim"]}'
-                    f'\t{trainer.train_metrics._data.values[1][2]}\t{trainer.mnt_best}'
-                    f'\t{test_all[-1]}\t{test_low[-1]}\t{test_high[-1]}\n')
+            param_vals = "\t".join([f'{param}' for param in v])
+            metric_vals = [trainer.train_metrics._data.values[1][2], trainer.mnt_best, test_all[-1], test_low[-1], test_high[-1]]
+            metric_vals = '\t'.join([f'{val}' for val in metric_vals])
+            f.write(f'{(endt-startt)/60:.0f}\t{param_vals}\t{metric_vals}\n')
+            # f.write(f'{(endt-startt)/60:.0f}\t{hyperparameters["n_heads"]}\t{hyperparameters["head_dim"]}\t'
+            #         f'{hyperparameters["LSTM_dim"]}\t{hyperparameters["attn_dim"]}\t{hyperparameters["fc_dim"]}'
+            #         f'\t{trainer.train_metrics._data.values[1][2]}\t{trainer.mnt_best}'
+            #         f'\t{test_all[-1]}\t{test_low[-1]}\t{test_high[-1]}\n')
     test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
     logger.info(f'Average test_all: {np.mean(test_all)} +- {np.std(test_all)}')
     logger.info(f'Average test_low: {np.mean(test_low)} +- {np.std(test_low)}')
@@ -104,8 +96,8 @@ def main(config):
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser(description='PyTorch Template')
-    args.add_argument('-c', '--config', default='configs/grid_search/AttnBiLSTM.json', type=str,
-                      help='config file path (default: AttnBiLSTM.json)')
+    args.add_argument('-c', '--config', default='configs/grid_search/dummy.json', type=str,
+                      help='config file path (default: dummy.json)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')
     args.add_argument('-d', '--device', default=None, type=str,
