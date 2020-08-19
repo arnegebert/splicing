@@ -123,6 +123,7 @@ class Vanilla_Trainer(BaseTrainer):
     def _single_val_epoch(self, val_data, epoch, metrics):
         outputs, targets = [], []
         attn_ws_b = []
+        datab = []
         for batch_idx, data in enumerate(val_data):
             seqs, lens, target = self.convert_to_model_input_format(data)
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
@@ -131,6 +132,8 @@ class Vanilla_Trainer(BaseTrainer):
             if self.attention:
                 output, attn_ws = output
                 attn_ws = attn_ws.data.cpu().numpy()
+                databs = data.data.cpu().numpy()
+                datab.append(databs)
                 attn_ws_b.append(attn_ws)
 
 
@@ -150,7 +153,8 @@ class Vanilla_Trainer(BaseTrainer):
                     continue
         if self.attention and metrics == self.test_all_metrics:
             attn_ws_b = np.concatenate(attn_ws_b, axis=0)
-            np.save(f'attn_ws_{epoch}.npy', attn_ws_b)
+            # np.save(f'val_all_data.npy', np.concatenate(datab, axis=0))
+            # np.save(f'attn_ws_{epoch}.npy', attn_ws_b)
         del attn_ws_b
 
         return outputs, targets

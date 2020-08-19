@@ -8,10 +8,11 @@
         "args": {
             "three_len_feats": true,
             "LSTM_dim": 50,
-            "fc_dim": 64,
-            "attn_dim": 100,
-            "n_heads": 2,
-            "head_dim": 50
+            "fc_dim": 128,
+            "attn_dim": 50,
+            "n_heads": 3,
+            "head_dim": 100,
+            "attn_dropout": 0.2
         }
     },
     "data_loader": {
@@ -29,7 +30,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-3,
+            "lr": 5e-4,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -61,5 +62,5 @@
         "tensorboard": false
     },
     "comment": "",
-    "cross_validation": false
+    "cross_validation": true
 }

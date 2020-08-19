@@ -84,12 +84,12 @@ def main(config):
                 f.write(f'{(endt-startt)/60:.0f}\t{param_vals}\t{metric_vals}\n')
 
     test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
-    logger.info(f'Average test_all: {np.mean(test_all)} +- {np.std(test_all)}')
-    logger.info(f'Average test_low: {np.mean(test_low)} +- {np.std(test_low)}')
-    logger.info(f'Average test_high: {np.mean(test_high)} +- {np.std(test_high)}')
-    logger.info(f'All observed values: {test_all}')
-    logger.info(f'All observed low values: {test_low}')
-    logger.info(f'All observed high values: {test_high}')
+    logger.info(f'Average test_all: {np.mean(test_all):.3f} +- {np.std(test_all):.3f}')
+    logger.info(f'Average test_low: {np.mean(test_low):.3f} +- {np.std(test_low):.3f}')
+    logger.info(f'Average test_high: {np.mean(test_high):.3f} +- {np.std(test_high):.3f}')
+    logger.info(f'All values test_all: {test_all}')
+    logger.info(f'All values test_low: {test_low}')
+    logger.info(f'All values test_high: {test_high}')
 
 
 if __name__ == '__main__':

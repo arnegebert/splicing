@@ -1,15 +1,15 @@
 {
-    "name": "dummy",
+    "name": "GridSearch_AttnBiLSTMWithHeads",
 
-    "log_directory": "results/dummy",
+    "log_directory": "results/FineTuning_AttnBiLSTM",
+    "log_file": "one",
     "n_gpu": 1,
     "model_parameters": {
-      "LSTM_dim": [50, 100, 150, 250],
-      "attn_dim": [100, 150],
-      "n_heads": [2, 3, 4],
-      "head_dim": [12, 24, 50, 100],
-      "fc_dim": [128],
-      "attn_dropout": [0]
+      "LSTM_dim": [50],
+      "attn_dim": [50],
+      "n_heads": [3],
+      "head_dim": [50],
+      "fc_dim": [128]
     },
     "arch": {
         "type": "AttnBiLSTMWithHeads",
@@ -51,7 +51,7 @@
     "trainer": {
         "type": "Vanilla_Trainer",
         "args": {},
-        "epochs": 2,
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 251,
@@ -63,6 +63,6 @@
 
         "tensorboard": false
     },
-    "comment": "Grid search for real",
-    "cross_validation": false
+    "comment": "",
+    "cross_validation": true
 }

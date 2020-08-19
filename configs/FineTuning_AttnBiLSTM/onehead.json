@@ -50,7 +50,9 @@
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {},
+        "args": {
+            "attention": true
+        },
         "epochs": 500,
 
         "save_dir": "saved/",

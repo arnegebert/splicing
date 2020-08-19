@@ -725,6 +725,7 @@ class AttnBiLSTM(BaseModel):
         # if I want to finish this thesis in time
         self.attn_dim = attn_dim
         self.in_fc = attn_dim + (3 if self.three_feats else 1)
+        self.bn = torch.nn.BatchNorm1d(LSTM_dim)
 
         self.embedding = nn.Linear(4, 4, bias=True)
 
@@ -758,6 +759,7 @@ class AttnBiLSTM(BaseModel):
         output2, (h_n, c_n) = self.lstm2(embedding2)
 
         feats = torch.cat((output1, output2), dim=1)
+        feats = self.bn(feats.view(-1, self.LSTM_dim, self.seq_length*2)).view(-1, self.seq_length*2, self.LSTM_dim)
 
         # (batch, attn_dimension)
         attn_seq, ws = self.attention(feats)
@@ -773,7 +775,6 @@ class AttentionBlock(BaseModel):
         self.value = torch.nn.Linear(in_dim, out_dim)
         # I just have one query independent of sequence length
         self.drop = nn.Dropout(dropout)
-
         self.query = torch.nn.Linear(1, out_dim, bias=False) # perhaps other way to express this
 
     def forward(self, input_seq):
@@ -807,7 +808,7 @@ class AttnBiLSTMWithHeads(BaseModel):
         # if I want to finish this thesis in time
         self.attn_dim = attn_dim
         self.in_fc = attn_dim + (3 if self.three_feats else 1)
-
+        self.bn = torch.nn.BatchNorm1d(LSTM_dim)
         self.embedding = nn.Linear(4, 4, bias=True)
 
         self.lstm1 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
@@ -840,7 +841,7 @@ class AttnBiLSTMWithHeads(BaseModel):
         output2, (h_n, c_n) = self.lstm2(embedding2)
 
         feats = torch.cat((output1, output2), dim=1)
-
+        feats = self.bn(feats.view(-1, self.LSTM_dim, self.seq_length*2)).view(-1, self.seq_length*2, self.LSTM_dim)
         # (batch, attn_dimension)
         attn_seq, ws = self.attention(feats)
         class_feats = torch.cat((attn_seq, lens), dim=1)

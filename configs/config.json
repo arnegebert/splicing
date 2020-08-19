@@ -1,15 +1,17 @@
 {
-    "name": "AttnBiLSTM",
+    "name": "HIPSCI_MAJIQ_BiLSTM",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "AttnBiLSTM",
+        "type": "AttnBiLSTMWithHeads",
         "args": {
             "three_len_feats": true,
-            "LSTM_dim": 50,
-            "fc_dim": 64,
+            "n_heads": 4,
+            "head_dim": 24,
+            "LSTM_dim": 150,
             "attn_dim": 100,
+            "fc_dim": 128,
             "attn_dropout": 0.2
         }
     },
@@ -28,7 +30,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-3,
+            "lr": 5e-4,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -46,9 +48,7 @@
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {
-            "attention": true
-        },
+        "args": {},
         "epochs": 500,
 
         "save_dir": "saved/",
@@ -62,5 +62,5 @@
         "tensorboard": false
     },
     "comment": "",
-    "cross_validation": false
+    "cross_validation": true
 }
