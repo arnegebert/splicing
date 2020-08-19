@@ -58,7 +58,7 @@ class Vanilla_DataLoader(BaseDataLoader):
         cons_perc = cons_fold_len / total
         print(f'Percentage of consecutive data: {cons_perc}')
         if cons_perc > 0.6 or cons_perc < 0.4:
-            raise Exception('Unbalanced dataset')
+            raise Exception(f'Unbalanced dataset')
 
         # 9 folds for training
         train = cons[:cons_fold_len * fold_val]

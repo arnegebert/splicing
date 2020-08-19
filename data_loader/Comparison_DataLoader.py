@@ -27,17 +27,17 @@ class Comparison_DataLoader(BaseDataLoader):
         if data_dir:
             raise Exception('reeeeeeeeeeeeeeeeeeeee')
         else:
-            cons = np.load('data/not_neuron/exon/cons.npy')
-            high = np.load('data/not_neuron/exon/high_bezi1.npy')
-            low = np.load('data/not_neuron/exon/low_bezi1.npy')
+            cons = np.load('data/iPSC/exon/cons.npy')
+            high = np.load('data/iPSC/exon/high_bezi1.npy')
+            low = np.load('data/iPSC/exon/low_bezi1.npy')
 
-            diff_lib_cons = np.load('data/not_neuron/exon/cons.npy')
-            diff_lib_high = np.load('data/not_neuron/exon/high_bezi2.npy')
-            diff_lib_low = np.load('data/not_neuron/exon/low_bezi2.npy')
+            diff_lib_cons = np.load('data/iPSC/exon/cons.npy')
+            diff_lib_high = np.load('data/iPSC/exon/high_bezi2.npy')
+            diff_lib_low = np.load('data/iPSC/exon/low_bezi2.npy')
 
-            diff_indv_cons = np.load('data/not_neuron/exon/cons.npy')
-            diff_indv_high = np.load('data/not_neuron/exon/high_lexy2.npy')
-            diff_indv_low = np.load('data/not_neuron/exon/low_lexy2.npy')
+            diff_indv_cons = np.load('data/iPSC/exon/cons.npy')
+            diff_indv_high = np.load('data/iPSC/exon/high_lexy2.npy')
+            diff_indv_low = np.load('data/iPSC/exon/low_lexy2.npy')
 
             diff_tissue_cons = np.load('data/hipsci_majiq/exon/cons.npy')
             diff_tissue_high = np.load('data/hipsci_majiq/exon/high.npy')

@@ -1,40 +1,28 @@
 {
-    "name": "GridSearch_AttnBiLSTMWithHeads",
+    "name": "HIPSCI_SUPPA_Attn",
 
-    "log_directory": "results/FineTuning_AttnBiLSTM",
-    "log_file": "three_suppa",
     "n_gpu": 1,
-    "model_parameters": {
-      "LSTM_dim": [50],
-      "attn_dim": [100],
-      "n_heads": [4],
-      "head_dim": [50],
-      "fc_dim": [128],
-        "attn_dropout": [0]
-    },
+    "run_id": "",
+
     "arch": {
         "type": "AttnBiLSTMWithHeads",
-        "args": {
-            "three_len_feats": true
-        }
+        "args": {}
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/exon/brain",
+            "data_dir": "data/hipsci_suppa",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0,
-            "classification": true,
-            "classification_treshold": 0.99
+            "num_workers": 0
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-3,
-            "weight_decay": 0,
+            "lr": 5e-4,
+            "weight_decay": 0.0,
             "amsgrad": true
         }
     },
@@ -45,14 +33,16 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 10000,
+            "step_size": 200,
             "gamma": 0.1
         }
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {},
-        "epochs": 500,
+        "args": {
+            "attention": true
+        },
+        "epochs": 150,
 
         "save_dir": "saved/",
         "save_period": 251,
@@ -65,5 +55,5 @@
         "tensorboard": false
     },
     "comment": "",
-    "cross_validation": true
+    "cross_validation": false
 }

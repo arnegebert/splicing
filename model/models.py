@@ -794,7 +794,7 @@ class AttentionBlock(BaseModel):
         return output, attn_weights
 
 class AttnBiLSTMWithHeads(BaseModel):
-    def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=50, n_heads=1, head_dim=50, attn_dropout=0, three_len_feats=True):
+    def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=100, n_heads=4, head_dim=50, attn_dropout=0, three_len_feats=True):
         super().__init__()
         self.three_feats = three_len_feats
         self.head_dim = head_dim

@@ -1,0 +1,196 @@
+starting loading of data
+Percentage of consecutive data: 0.5253827558420628
+3
+total time to load data: 31.284741401672363 secs
+BiLSTM2(
+  (embedding): Linear(in_features=140, out_features=140, bias=True)
+  (embedding2): Linear(in_features=140, out_features=140, bias=True)
+  (lstm1): LSTM(140, 25, batch_first=True, dropout=0.2, bidirectional=True)
+  (lstm2): LSTM(140, 25, batch_first=True, dropout=0.2, bidirectional=True)
+  (fc1): Linear(in_features=103, out_features=64, bias=True)
+  (drop_fc): Dropout(p=0.5, inplace=False)
+  (fc2): Linear(in_features=64, out_features=1, bias=True)
+)
+Trainable parameters: 113001
+------------------------------------------------------------------------------
+    epoch          : 1
+    loss           : 0.6900646834428074
+    auc            : 0.5462739333114236
+    val_loss       : 0.6598621875047683
+    val_auc        : 0.6368055492318769
+    val_low_auc    : 0.6805046919953778
+    val_high_auc   : 0.5609807135908509
+------------------------------------------------------------------------------
+    epoch          : 2
+    loss           : 0.6812554527330035
+    auc            : 0.6209861991358113
+    val_loss       : 0.6479656487703324
+    val_auc        : 0.6863904002092662
+    val_low_auc    : 0.7112692167924758
+    val_high_auc   : 0.5835362151480681
+------------------------------------------------------------------------------
+    epoch          : 3
+    loss           : 0.6684925938380584
+    auc            : 0.6681715399602305
+    val_loss       : 0.6360387027263641
+    val_auc        : 0.6988270465005517
+    val_low_auc    : 0.7271592479785712
+    val_high_auc   : 0.6026071008321237
+------------------------------------------------------------------------------
+    epoch          : 4
+    loss           : 0.6551228004102488
+    auc            : 0.6976326979462338
+    val_loss       : 0.6286552727222443
+    val_auc        : 0.7380358906984904
+    val_low_auc    : 0.7415630539031095
+    val_high_auc   : 0.6196127720464764
+------------------------------------------------------------------------------
+    epoch          : 5
+    loss           : 0.6412629698979035
+    auc            : 0.7232535310079942
+    val_loss       : 0.6077102959156037
+    val_auc        : 0.7632133639170535
+    val_low_auc    : 0.7528754811580431
+    val_high_auc   : 0.6379935543288818
+------------------------------------------------------------------------------
+    epoch          : 6
+    loss           : 0.6288230196210264
+    auc            : 0.742460221513447
+    val_loss       : 0.6067360669374466
+    val_auc        : 0.7727916584125584
+    val_low_auc    : 0.7606017925777073
+    val_high_auc   : 0.6524726974612233
+------------------------------------------------------------------------------
+    epoch          : 7
+    loss           : 0.6156264120385847
+    auc            : 0.7569268782355678
+    val_loss       : 0.6008816659450531
+    val_auc        : 0.7834950759399731
+    val_low_auc    : 0.7670016500906807
+    val_high_auc   : 0.6680866153096866
+------------------------------------------------------------------------------
+    epoch          : 8
+    loss           : 0.6024644342997602
+    auc            : 0.7708623049862329
+    val_loss       : 0.5925979077816009
+    val_auc        : 0.797178818176646
+    val_low_auc    : 0.772858566439205
+    val_high_auc   : 0.6821160056790327
+------------------------------------------------------------------------------
+    epoch          : 9
+    loss           : 0.591386207642446
+    auc            : 0.7805587923535791
+    val_loss       : 0.5782992854714394
+    val_auc        : 0.7965330821880842
+    val_low_auc    : 0.7774239201890398
+    val_high_auc   : 0.6927025416350574
+------------------------------------------------------------------------------
+    epoch          : 10
+    loss           : 0.582407254754132
+    auc            : 0.7881277874023838
+    val_loss       : 0.5785174101591111
+    val_auc        : 0.8028555857930806
+    val_low_auc    : 0.7807046227657484
+    val_high_auc   : 0.7015453017786656
+------------------------------------------------------------------------------
+    epoch          : 11
+    loss           : 0.56954201566809
+    auc            : 0.7943056792784885
+    val_loss       : 0.5570388540625573
+    val_auc        : 0.8192497065414006
+    val_low_auc    : 0.785817738953388
+    val_high_auc   : 0.7109409253870269
+------------------------------------------------------------------------------
+    epoch          : 12
+    loss           : 0.5635889502427051
+    auc            : 0.8007285863555265
+    val_loss       : 0.5606867760419846
+    val_auc        : 0.815437271442897
+    val_low_auc    : 0.7893169604675548
+    val_high_auc   : 0.7177464959844909
+------------------------------------------------------------------------------
+    epoch          : 13
+    loss           : 0.5559327142839213
+    auc            : 0.8059407884526572
+    val_loss       : 0.5406448289752006
+    val_auc        : 0.8321178735519534
+    val_low_auc    : 0.7939526741881073
+    val_high_auc   : 0.7250648600226485
+------------------------------------------------------------------------------
+    epoch          : 14
+    loss           : 0.5535842248501669
+    auc            : 0.8095917741705286
+    val_loss       : 0.5472878828644753
+    val_auc        : 0.8217280882251969
+    val_low_auc    : 0.7967691967655123
+    val_high_auc   : 0.730701223671406
+------------------------------------------------------------------------------
+    epoch          : 15
+    loss           : 0.5483569812228661
+    auc            : 0.8119577741258899
+    val_loss       : 0.5509293839335442
+    val_auc        : 0.8211796737984853
+    val_low_auc    : 0.7990765718418996
+    val_high_auc   : 0.7354288137089122
+------------------------------------------------------------------------------
+    epoch          : 16
+    loss           : 0.5434586815251649
+    auc            : 0.8159949243157535
+    val_loss       : 0.54011260420084
+    val_auc        : 0.8263448503845886
+    val_low_auc    : 0.8015634714623014
+    val_high_auc   : 0.7400070669143743
+------------------------------------------------------------------------------
+    epoch          : 17
+    loss           : 0.5402266921205375
+    auc            : 0.8173665770043391
+    val_loss       : 0.5498900040984154
+    val_auc        : 0.8211418887382779
+    val_low_auc    : 0.8034526796356313
+    val_high_auc   : 0.7439070692754798
+------------------------------------------------------------------------------
+    epoch          : 18
+    loss           : 0.5362713181108009
+    auc            : 0.8217384185254745
+    val_loss       : 0.5395499140024185
+    val_auc        : 0.832435195144621
+    val_low_auc    : 0.8056555484067949
+    val_high_auc   : 0.7479879502208039
+------------------------------------------------------------------------------
+    epoch          : 19
+    loss           : 0.534824668109872
+    auc            : 0.8227408779092809
+    val_loss       : 0.5384575337171554
+    val_auc        : 0.833521544325335
+    val_low_auc    : 0.8077814807408561
+    val_high_auc   : 0.7516659536236662
+------------------------------------------------------------------------------
+    epoch          : 20
+    loss           : 0.5323445137220485
+    auc            : 0.8245333458842162
+    val_loss       : 0.5431147664785385
+    val_auc        : 0.8354145687867132
+    val_low_auc    : 0.8098919530820966
+    val_high_auc   : 0.7556273966854347
+/home/arne/anaconda3/envs/splicing/lib/python3.7/site-packages/torch/nn/modules/rnn.py:50: UserWarning: dropout option adds dropout after all but last recurrent layer, so non-zero dropout expects num_layers greater than 1, but got dropout=0.2 and num_layers=1
+  "num_layers={}".format(dropout, num_layers))
+Traceback (most recent call last):
+  File "train.py", line 88, in <module>
+    main(config)
+  File "train.py", line 54, in main
+    trainer.train()
+  File "/home/arne/Documents/GitHub/splicing/base/base_trainer.py", line 66, in train
+    result = self._train_epoch(epoch)
+  File "/home/arne/Documents/GitHub/splicing/trainer/GTEx_DSC_Trainer.py", line 78, in _train_epoch
+    val_log_all, val_log_low, val_log_high = self._valid_epoch(epoch)
+  File "/home/arne/Documents/GitHub/splicing/trainer/GTEx_DSC_Trainer.py", line 132, in _valid_epoch
+    self.valid_high_metrics.update(met.__name__, met(output, target))
+  File "/home/arne/Documents/GitHub/splicing/model/metric.py", line 26, in auc
+    return metrics.roc_auc_score(target.cpu(), output.cpu())
+  File "/home/arne/anaconda3/envs/splicing/lib/python3.7/site-packages/sklearn/metrics/_ranking.py", line 390, in roc_auc_score
+    sample_weight=sample_weight)
+  File "/home/arne/anaconda3/envs/splicing/lib/python3.7/site-packages/sklearn/metrics/_base.py", line 77, in _average_binary_score
+    return binary_metric(y_true, y_score, sample_weight=sample_weight)
+  File "/home/arne/anaconda3/envs/splicing/lib/python3.7/site-packages/sklearn/metrics/_ranking.py", line 221, in _binary_roc_auc_score
+    raise ValueError("Only one class present in y_true. ROC AUC score "
+ValueError: Only one class present in y_true. ROC AUC score is not defined in that case.

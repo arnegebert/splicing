@@ -1,0 +1,8 @@
+time (min)	LSTM_dim	attn_dim	n_heads	head_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high
+time (min)	LSTM_dim	attn_dim	n_heads	head_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high
+time (min)	LSTM_dim	attn_dim	n_heads	head_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high
+time (min)	LSTM_dim	attn_dim	n_heads	head_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high
+time (min)	LSTM_dim	attn_dim	n_heads	head_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high
+time (min)	LSTM_dim	attn_dim	n_heads	head_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high
+time (min)	LSTM_dim	attn_dim	n_heads	head_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high
+time (min)	LSTM_dim	attn_dim	n_heads	head_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high

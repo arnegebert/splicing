@@ -50,7 +50,7 @@ def plot_attention(attn_weights):
 if __name__ == '__main__':
     labels = ['DSC (baseline)', 'DSC (ours)', 'BiLSTM', 'D2V']
 
-    experiments = ['DSC_DSC', 'DSC_BiLSTM', 'DSC_D2V_MLP']
+    experiments = ['HEXEvent_DSC', 'HEXEvent_BiLSTM', 'HEXEvent_D2V_MLP']
     file_name = 'pred_and_target_all.npy'
     run_id = '_final'
     dirs = [f'../saved/original/{file_name}']
