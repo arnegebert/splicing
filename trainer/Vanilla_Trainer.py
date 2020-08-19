@@ -132,9 +132,10 @@ class Vanilla_Trainer(BaseTrainer):
             if self.attention:
                 output, attn_ws = output
                 attn_ws = attn_ws.data.cpu().numpy()
-                databs = data.data.cpu().numpy()
-                datab.append(databs)
                 attn_ws_b.append(attn_ws)
+
+                # databs = data.data.cpu().numpy()
+                # datab.append(databs)
 
 
 

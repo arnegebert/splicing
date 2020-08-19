@@ -1,17 +1,21 @@
 {
-    "name": "GTEx_Junc_Attn",
+    "name": "HIPSCI_MAJIQ_NoQuery",
 
     "n_gpu": 1,
     "run_id": "",
 
     "arch": {
         "type": "AttnBiLSTM",
-        "args": {}
+        "args": {
+          "lstm_dim": 50,
+          "attn_dim": 100,
+          "attn_mode": "no_query"
+        }
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/junc/brain",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,

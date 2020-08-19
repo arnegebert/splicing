@@ -2,7 +2,7 @@
     "name": "GridSearch_AttnBiLSTMWithHeads",
 
     "log_directory": "results/FineTuning_AttnBiLSTM",
-    "log_file": "three_suppa",
+    "log_file": "three",
     "n_gpu": 1,
     "model_parameters": {
       "LSTM_dim": [50],
@@ -13,15 +13,13 @@
         "attn_dropout": [0]
     },
     "arch": {
-        "type": "AttnBiLSTMWithHeads",
-        "args": {
-            "three_len_feats": true
-        }
+        "type": "AttnBiLSTM",
+        "args": {}
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/exon/brain",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -51,7 +49,9 @@
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {},
+        "args": {
+            "attention": true
+        },
         "epochs": 500,
 
         "save_dir": "saved/",

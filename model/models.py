@@ -712,10 +712,10 @@ class BiLSTM4(BaseModel):
 
 class AttnBiLSTM(BaseModel):
     def __init__(self, LSTM_dim=50, fc_dim=64, attn_dim=50, conv_size=3, attn_dropout=0, n_heads=4, head_dim=50,
-                 seq_length=140, fc_dropout=0.5, attention_mode='heads'):
+                 seq_length=140, fc_dropout=0.5, attn_mode='heads'):
         super().__init__()
         assert conv_size % 2 == 1, "Only uneven convolution sizes allowed because uneven conv same padding support implemented"
-        assert attention_mode in ['heads', 'no_query', 'single_head', 'conv']
+        assert attn_mode in ['heads', 'no_query', 'single_head', 'conv']
         self.conv_size = conv_size
         self.attn_dropout = attn_dropout
         self.head_dim = head_dim
@@ -727,6 +727,7 @@ class AttnBiLSTM(BaseModel):
         self.dropout_prob = fc_dropout
         self.attn_dim = attn_dim
         self.in_fc = attn_dim + 3
+        self.attn_mode = attn_mode
         self.bn = torch.nn.BatchNorm1d(LSTM_dim)
 
         self.embedding = nn.Linear(4, 4, bias=True)
@@ -738,13 +739,13 @@ class AttnBiLSTM(BaseModel):
         self.lstm2 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2,
                              bidirectional=True, batch_first=True)
 
-        if attention_mode == 'single_head':
+        if attn_mode == 'single_head':
             self.attention = AttentionBlock(LSTM_dim, attn_dim, attn_dropout)
-        elif attention_mode == 'no_query':
+        elif attn_mode == 'no_query':
             self.attention = AttentionBlockWithoutQuery(LSTM_dim, attn_dim)
-        elif attention_mode == 'heads':
+        elif attn_mode == 'heads':
             self.attention = AttentionBlockWithHeads(LSTM_dim, attn_dim, n_heads, head_dim, attn_dropout)
-        elif attention_mode == 'conv':
+        elif attn_mode == 'conv':
             self.attention = AttentionBlockWithConv(seq_length, LSTM_dim, attn_dim, conv_size)
 
         self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
@@ -864,8 +865,8 @@ class AttentionBlockWithHeads(BaseModel):
         # issue with this: similar to 1.2, but would need extra parameter
         # it is the most flexible one though
         self.n_heads = n_heads
-        self.keys = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
-        self.values = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
+        self.keys = clones(torch.nn.Linear(in_dim, head_dim, bias=False), n_heads)
+        self.values = clones(torch.nn.Linear(in_dim, head_dim, bias=False), n_heads)
         self.queries = clones(torch.nn.Linear(1, head_dim, bias=False), n_heads)
         self.head_unifier = torch.nn.Linear(head_dim*n_heads, out_dim)
         self.drop = torch.nn.Dropout(dropout)
@@ -899,6 +900,7 @@ class AttentionBlockWithHeads(BaseModel):
             attn_ws.append(attn_w)
 
         zs = torch.cat(outputs, dim=1)
+        attn_ws = torch.cat(attn_ws, dim=1)
         output = self.head_unifier(zs)
         return output, attn_ws
 

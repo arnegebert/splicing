@@ -14,9 +14,7 @@
     },
     "arch": {
         "type": "AttnBiLSTMWithHeads",
-        "args": {
-            "three_len_feats": true
-        }
+        "args": {}
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",
@@ -51,7 +49,9 @@
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {},
+        "args": {
+            "attention": true
+        },
         "epochs": 500,
 
         "save_dir": "saved/",

@@ -13,9 +13,7 @@
     },
     "arch": {
         "type": "AttnBiLSTM",
-        "args": {
-            "three_len_feats": true
-        }
+        "args": {}
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",

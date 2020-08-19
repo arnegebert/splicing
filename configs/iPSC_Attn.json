@@ -5,7 +5,7 @@
     "run_id": "",
 
     "arch": {
-        "type": "AttnBiLSTMWithHeads",
+        "type": "AttnBiLSTM",
         "args": {}
     },
     "data_loader": {
