@@ -1,17 +1,15 @@
 {
-    "name": "HIPSCI_MAJIQ_BiLSTM",
+    "name": "HIPSCI_MAJIQ_SingleHead",
 
     "n_gpu": 1,
+    "run_id": "",
 
     "arch": {
-        "type": "AttnBiLSTMWithHeads",
+        "type": "AttnBiLSTM",
         "args": {
-            "n_heads": 4,
-            "head_dim": 24,
-            "LSTM_dim": 150,
-            "attn_dim": 100,
-            "fc_dim": 128,
-            "attn_dropout": 0.2
+          "lstm_dim": 50,
+          "attn_dim": 100,
+          "attn_mode": "single_head"
         }
     },
     "data_loader": {
@@ -21,16 +19,14 @@
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0,
-            "classification": true,
-            "classification_treshold": 0.99
+            "num_workers": 0
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
             "lr": 5e-4,
-            "weight_decay": 0,
+            "weight_decay": 0.0,
             "amsgrad": true
         }
     },
@@ -41,21 +37,23 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 10000,
+            "step_size": 200,
             "gamma": 0.1
         }
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {},
-        "epochs": 1,
+        "args": {
+            "attention": true
+        },
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 251,
         "verbosity": 1,
 
         "monitor": "max val_auc",
-        "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc"],
+        "logged_metrics": ["test_auc", "test_low_auc", "test_high_auc"],
         "early_stop": 15,
 
         "tensorboard": false

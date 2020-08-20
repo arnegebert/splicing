@@ -1,21 +1,19 @@
 {
-    "name": "GridSearch_AttnBiLSTMWithHeads",
+    "name": "FineTuning_AttnBiLSTM",
 
-    "log_directory": "results/FineTuning_AttnBiLSTM",
-    "log_file": "one",
+    "log_directory": "results/FineTuning_AttnBiLSTM/onehead",
+    "log_file": "onehead",
     "n_gpu": 1,
+
     "model_parameters": {
-      "LSTM_dim": [50],
-      "attn_dim": [50],
-      "n_heads": [3],
-      "head_dim": [50],
-      "fc_dim": [128]
+        "LSTM_dim": [50],
+        "attn_dim": [100],
+        "fc_dim": [128],
+        "attn_dropout": [0.2]
     },
     "arch": {
-        "type": "AttnBiLSTMWithHeads",
-        "args": {
-            "three_len_feats": true
-        }
+        "type": "AttnBiLSTM",
+        "args": {}
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",
@@ -50,7 +48,9 @@
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {},
+        "args": {
+            "attention": true
+        },
         "epochs": 500,
 
         "save_dir": "saved/",

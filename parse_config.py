@@ -31,13 +31,13 @@ class ConfigParser:
         except KeyError: pass
         if not run_id:  # use timestamp as default run-id
             run_id = datetime.now().strftime(r'%m%d_%H%M%S')
-            # run_id = 'experiment'
 
         self._save_dir = save_dir / 'models' / exper_name / run_id
         self._log_dir = save_dir / 'log' / exper_name / run_id
 
         # make directory for saving checkpoints and log.
-        exist_ok = run_id == ''
+        exist_ok = True #run_id == ''
+        print('FIX EXIST OK IN PARSE CONFIG'*100)
         self.save_dir.mkdir(parents=True, exist_ok=exist_ok)
         self.log_dir.mkdir(parents=True, exist_ok=exist_ok)
 
@@ -83,6 +83,10 @@ class ConfigParser:
 
         # parse custom cli options into dictionary
         modification = {opt.target : getattr(args, _get_opt_name(opt.flags)) for opt in options}
+
+        # configuration from me (and not sure if smart)
+        if args.run_id:
+            config['run_id'] = args.run_id
 
         # initialize ConfigParser with given arguments here
         return cls(config, resume, modification)

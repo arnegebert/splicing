@@ -3,9 +3,8 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import random
+
 from base import BaseModel
-from visualizations.roc_curves import plot_attention
 
 
 class MNISTModel(BaseModel):
@@ -711,7 +710,7 @@ class BiLSTM4(BaseModel):
         return y
 
 class AttnBiLSTM(BaseModel):
-    def __init__(self, LSTM_dim=50, fc_dim=64, attn_dim=50, conv_size=3, attn_dropout=0, n_heads=4, head_dim=50,
+    def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=100, conv_size=3, attn_dropout=0.2, n_heads=4, head_dim=50,
                  seq_length=140, fc_dropout=0.5, attn_mode='heads'):
         super().__init__()
         assert conv_size % 2 == 1, "Only uneven convolution sizes allowed because uneven conv same padding support implemented"
@@ -730,7 +729,7 @@ class AttnBiLSTM(BaseModel):
         self.attn_mode = attn_mode
         self.bn = torch.nn.BatchNorm1d(LSTM_dim)
 
-        self.embedding = nn.Linear(4, 4, bias=True)
+        self.embedding = nn.Linear(4, 4)
 
         assert LSTM_dim % 2 == 0, "Only even LSTM dim lengths allowed to avoid rounding issues"
         # halving because BiLSTM
@@ -755,14 +754,11 @@ class AttnBiLSTM(BaseModel):
 
     def forward(self, seqs, lens):
         # [256, 142, 4] or [256, 140, 4]
-        # lens = torch.zeros_like(lens)
         start, end = seqs[:, 0], seqs[:, 1]
         start, end = start.view(-1, self.seq_length, 4), end.view(-1, self.seq_length, 4)
         embedding = F.relu(self.embedding(start))
-        # currently treat the 140-input as dimension, but shouldn't
-        # just want a dense mapping from sparse 4-d to dense 4-d
-        output1, (h_n, c_n) = self.lstm1(embedding)
         # output = [256, 140, 2*50]  // 256, 4, 50???
+        output1, (h_n, c_n) = self.lstm1(embedding)
 
         embedding2 = F.relu(self.embedding(end))
         output2, (h_n, c_n) = self.lstm2(embedding2)
@@ -777,120 +773,25 @@ class AttnBiLSTM(BaseModel):
         y = torch.sigmoid(self.fc2(y))
         return y, ws
 
-class AttentionBlock(BaseModel):
-    def __init__(self, in_dim, out_dim, dropout):
-        super().__init__()
-        self.key = torch.nn.Linear(in_dim, out_dim)
-        self.value = torch.nn.Linear(in_dim, out_dim)
-        # I just have one query independent of sequence length
-        self.drop = nn.Dropout(dropout)
-        self.query = torch.nn.Linear(1, out_dim, bias=False) # perhaps other way to express this
-
-    def forward(self, input_seq):
-        batch_size = input_seq.shape[0]
-        values = self.value(input_seq)
-        keys = self.key(input_seq)
-        # since same query for each element in batch
-        queries = self.query.weight.repeat(batch_size, 1, 1) # attn_weights[0, 5] * values[0, 5] = weighted_vals[0, 5]
-        unnorm_weights = torch.bmm(keys, queries)
-        attn_weights = torch.softmax(unnorm_weights, dim=1)
-        # if random.randint(900, 1000) in [997, 998, 999]:
-        #     plot_attention(attn_weights.cpu().detach().numpy())
-        attn_weights_drop = self.drop(attn_weights)
-
-        weighted_vals = values * attn_weights_drop
-        output = torch.sum(weighted_vals, dim=1)
-        return output, attn_weights
-
-class AttnBiLSTMWithHeads(BaseModel):
-    def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=100, n_heads=4, head_dim=50, attn_dropout=0):
-        super().__init__()
-        self.head_dim = head_dim
-        self.attn_dropout = attn_dropout
-        self.n_heads = n_heads
-        self.LSTM_dim = LSTM_dim
-        self.seq_length = 140
-        self.dim_fc = fc_dim
-        self.dropout_prob = 0.5
-        self.lstm_layer = 1 # not changing this; too long training times already, really need to put my foot down here
-        # if I want to finish this thesis in time
-        self.attn_dim = attn_dim
-        self.in_fc = attn_dim + 3
-        self.bn = torch.nn.BatchNorm1d(LSTM_dim)
-        self.embedding = nn.Linear(4, 4, bias=True)
-
-        self.lstm1 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
-                             bidirectional=True, batch_first=True)
-        self.lstm2 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
-                             bidirectional=True, batch_first=True)
-        # self.attention = AttentionBlock(self.LSTM_dim, self.attn_dim, self.attn_dropout)
-        # self.attention = AttentionBlockWithoutQuery(self.LSTM_dim, self.attn_dim)
-        self.attention = AttentionBlockWithHeads(self.LSTM_dim, self.attn_dim, self.n_heads, self.head_dim, self.attn_dropout)
-        # self.attention = AttentionBlockWithConv(self.seq_length, self.LSTM_dim, self.attn_dim, self.conv_size)
-        # self.attention = AttentionBlockWithConvAndSequenceSeparation(self.seq_length, self.LSTM_dim, self.attn_dim, self.conv_size)
-
-        self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
-        self.drop_fc = nn.Dropout(self.dropout_prob)
-        self.fc2 = nn.Linear(self.dim_fc, 1)
-
-
-    def forward(self, seqs, lens):
-        # [256, 142, 4] or [256, 140, 4]
-        # lens = torch.zeros_like(lens)
-        start, end = seqs[:, 0], seqs[:, 1]
-        start, end = start.view(-1, self.seq_length, 4), end.view(-1, self.seq_length, 4)
-        embedding = F.relu(self.embedding(start))
-        # currently treat the 140-input as dimension, but shouldn't
-        # just want a dense mapping from sparse 4-d to dense 4-d
-        output1, (h_n, c_n) = self.lstm1(embedding)
-        # output = [256, 140, 2*50]  // 256, 4, 50???
-
-        embedding2 = F.relu(self.embedding(end))
-        output2, (h_n, c_n) = self.lstm2(embedding2)
-
-        feats = torch.cat((output1, output2), dim=1)
-        feats = self.bn(feats.view(-1, self.LSTM_dim, self.seq_length*2)).view(-1, self.seq_length*2, self.LSTM_dim)
-        # (batch, attn_dimension)
-        attn_seq, ws = self.attention(feats)
-        class_feats = torch.cat((attn_seq, lens), dim=1)
-        y = self.drop_fc(F.relu(self.fc1(class_feats)))
-        y = torch.sigmoid(self.fc2(y))
-        return y
-
 class AttentionBlockWithHeads(BaseModel):
     def __init__(self, in_dim, out_dim, n_heads, head_dim, dropout):
         super().__init__()
-
-        # variant 0:
-        # issue with this: similar to 1.2, but would need extra parameter
-        # it is the most flexible one though
         self.n_heads = n_heads
-        self.keys = clones(torch.nn.Linear(in_dim, head_dim, bias=False), n_heads)
-        self.values = clones(torch.nn.Linear(in_dim, head_dim, bias=False), n_heads)
-        self.queries = clones(torch.nn.Linear(1, head_dim, bias=False), n_heads)
-        self.head_unifier = torch.nn.Linear(head_dim*n_heads, out_dim)
+        self.keys = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
+        self.values = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
+        self.queries = clones(torch.nn.Linear(1, head_dim), n_heads)
+        self.heads_unifier = torch.nn.Linear(head_dim*n_heads, out_dim)
         self.drop = torch.nn.Dropout(dropout)
-
-        # variant 1.1:
-        # issue with this: not very flexible
-        # self.head_unifier = torch.nn.Linear(out_dim*n_heads, out_dim)
-        # variant 1.2:
-        # issue with this is not very flexible
-        # assert out_dim % n_heads == 0
-        # self.keys = clones(torch.nn.Linear(in_dim, out_dim/n_heads), n_heads)
-        # self.values = clones(torch.nn.Linear(in_dim, out_dim/n_heads), n_heads)
-        # self.queries = clones(torch.nn.Linear(1, out_dim/n_heads, bias=False), n_heads)
-        # self.head_unifier = torch.nn.Linear(out_dim/n_heads*n_heads, out_dim)
 
     def forward(self, input_seq):
         batch_size = input_seq.shape[0]
-        outputs, attn_ws = [], []
 
+        outputs, attn_ws = [], []
         for i in range(self.n_heads):
             values = self.values[i](input_seq)
             keys = self.keys[i](input_seq)
             # since same query for each element in batch
-            queries = self.queries[i].weight.repeat(batch_size, 1, 1) # attn_weights[0, 5] * values[0, 5] = weighted_vals[0, 5]
+            queries = self.queries[i].weight.repeat(batch_size, 1, 1)
             unnorm_weights = torch.bmm(keys, queries)
             attn_w = torch.softmax(unnorm_weights, dim=1)
             drop_attn_w = self.drop(attn_w)
@@ -901,20 +802,42 @@ class AttentionBlockWithHeads(BaseModel):
 
         zs = torch.cat(outputs, dim=1)
         attn_ws = torch.cat(attn_ws, dim=1)
-        output = self.head_unifier(zs)
-        return output, attn_ws
+        z = self.heads_unifier(zs)
+        return z, attn_ws
 
-def clones(module, N):
-    """Produce N identical layers."""
-    return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
+def clones(module, n):
+    """Produce n identical layers. (Taken from the annotated transformer) """
+    return nn.ModuleList([copy.deepcopy(module) for _ in range(n)])
 
+
+class AttentionBlock(BaseModel):
+    def __init__(self, in_dim, out_dim, dropout):
+        super().__init__()
+        self.key = torch.nn.Linear(in_dim, out_dim)
+        self.value = torch.nn.Linear(in_dim, out_dim)
+        # I just have one query independent of sequence length
+        self.drop = nn.Dropout(dropout)
+        self.query = torch.nn.Linear(1, out_dim) # perhaps other way to express this
+
+    def forward(self, input_seq):
+        batch_size = input_seq.shape[0]
+        values = self.value(input_seq)
+        keys = self.key(input_seq)
+        # since same query for each element in batch
+        queries = self.query.weight.repeat(batch_size, 1, 1)
+        unnorm_weights = torch.bmm(keys, queries)
+        attn_weights = torch.softmax(unnorm_weights, dim=1)
+        attn_weights_drop = self.drop(attn_weights)
+
+        weighted_vals = values * attn_weights_drop
+        output = torch.sum(weighted_vals, dim=1)
+        return output, attn_weights
 
 class AttentionBlockWithoutQuery(BaseModel):
     def __init__(self, in_dim, out_dim):
         super().__init__()
         self.key = torch.nn.Linear(in_dim, 1)
         self.value = torch.nn.Linear(in_dim, out_dim)
-        # I just have one query independent of sequence length
 
     def forward(self, input_seq):
         values = self.value(input_seq)
@@ -925,16 +848,16 @@ class AttentionBlockWithoutQuery(BaseModel):
         output = torch.sum(weighted_vals, dim=1)
         return output, attn_weights
 
-class AttentionBlockWithConv(BaseModel):
+
+class AttentionBlockWithConvWithHeads(BaseModel):
     def __init__(self, seq_len, in_dim, out_dim, kernel_size):
         super().__init__()
         self.seq_len = seq_len
         self.out_dim = out_dim
-
         self.key = torch.nn.Linear(in_dim, out_dim)
         self.value = torch.nn.Linear(in_dim, out_dim)
         # I just have one query independent of sequence length
-        self.query = torch.nn.Linear(1, out_dim, bias=False)
+        self.query = torch.nn.Linear(1, out_dim)
         self.drop = torch.nn.Dropout(0.5)
         self.drop_conv = torch.nn.Dropout2d(0.5)
         self.bn_values = torch.nn.BatchNorm1d(out_dim)
@@ -945,29 +868,84 @@ class AttentionBlockWithConv(BaseModel):
         batch_size = input_seq.shape[0]
 
         values = self.drop(self.value(input_seq))
+        values = self.bn_values(values.view(-1, self.out_dim, self.seq_len*2))
+        # apply conv to start sequence
         values_start = values[:, :self.seq_len]
-        values_start = self.bn_values(values_start.view(-1, self.out_dim, self.seq_len))
         values_conv_start = self.conv(values_start)
         values_conv_start = values_conv_start.view(-1, self.seq_len, self.out_dim)
-
+        # apply conv to end sequence
         values_end = values[:, self.seq_len:]
-        values_end = self.bn_values(values_end.view(-1, self.out_dim, self.seq_len))
         values_conv_end = self.conv(values_end)
         values_conv_end = values_conv_end.view(-1, self.seq_len, self.out_dim)
+        # combine both start and end sequence again
         values_conv = torch.cat((values_conv_start, values_conv_end), dim=1)
         values_conv = self.drop_conv(values_conv)
 
-
         keys = self.drop(self.key(input_seq))
+        keys = self.bn_keys(keys.view(-1, self.out_dim, 2*self.seq_len))
+        # apply conv to start sequence
         keys_start = keys[:, :self.seq_len]
-        keys_start = self.bn_keys(keys_start.view(-1, self.out_dim, self.seq_len))
         keys_conv_start = self.conv(keys_start)
         keys_conv_start = keys_conv_start.view(-1, self.seq_len, self.out_dim)
+        # apply conv to end sequence
         keys_end = keys[:, self.seq_len:]
-
-        keys_end = self.bn_keys(keys_end.view(-1, self.out_dim, self.seq_len))
         keys_conv_end = self.conv(keys_end)
         keys_conv_end = keys_conv_end.view(-1, self.seq_len, self.out_dim)
+        # combine both start and end sequence again
+        keys_conv = torch.cat((keys_conv_start, keys_conv_end), dim=1)
+        keys_conv = self.drop_conv(keys_conv)
+
+        # since same query for each element in batch
+        queries = self.query.weight.repeat(batch_size, 1, 1)
+        unnorm_weights = torch.bmm(keys_conv, queries)
+        attn_weights = torch.softmax(unnorm_weights, dim=1)
+        weighted_vals = values_conv * attn_weights
+        output = torch.sum(weighted_vals, dim=1)
+        return output, attn_weights
+
+class AttentionBlockWithConv(BaseModel):
+    def __init__(self, seq_len, in_dim, out_dim, kernel_size):
+        super().__init__()
+        self.seq_len = seq_len
+        self.out_dim = out_dim
+        self.key = torch.nn.Linear(in_dim, out_dim)
+        self.value = torch.nn.Linear(in_dim, out_dim)
+        # I just have one query independent of sequence length
+        self.query = torch.nn.Linear(1, out_dim)
+        self.drop = torch.nn.Dropout(0.5)
+        self.drop_conv = torch.nn.Dropout2d(0.5)
+        self.bn_values = torch.nn.BatchNorm1d(out_dim)
+        self.bn_keys = torch.nn.BatchNorm1d(out_dim)
+        self.conv = torch.nn.Conv1d(out_dim, out_dim, kernel_size, padding=kernel_size//2)
+
+    def forward(self, input_seq):
+        batch_size = input_seq.shape[0]
+
+        values = self.drop(self.value(input_seq))
+        values = self.bn_values(values.view(-1, self.out_dim, self.seq_len*2))
+        # apply conv to start sequence
+        values_start = values[:, :self.seq_len]
+        values_conv_start = self.conv(values_start)
+        values_conv_start = values_conv_start.view(-1, self.seq_len, self.out_dim)
+        # apply conv to end sequence
+        values_end = values[:, self.seq_len:]
+        values_conv_end = self.conv(values_end)
+        values_conv_end = values_conv_end.view(-1, self.seq_len, self.out_dim)
+        # combine both start and end sequence again
+        values_conv = torch.cat((values_conv_start, values_conv_end), dim=1)
+        values_conv = self.drop_conv(values_conv)
+
+        keys = self.drop(self.key(input_seq))
+        keys = self.bn_keys(keys.view(-1, self.out_dim, 2*self.seq_len))
+        # apply conv to start sequence
+        keys_start = keys[:, :self.seq_len]
+        keys_conv_start = self.conv(keys_start)
+        keys_conv_start = keys_conv_start.view(-1, self.seq_len, self.out_dim)
+        # apply conv to end sequence
+        keys_end = keys[:, self.seq_len:]
+        keys_conv_end = self.conv(keys_end)
+        keys_conv_end = keys_conv_end.view(-1, self.seq_len, self.out_dim)
+        # combine both start and end sequence again
         keys_conv = torch.cat((keys_conv_start, keys_conv_end), dim=1)
         keys_conv = self.drop_conv(keys_conv)
 

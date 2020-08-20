@@ -2,7 +2,7 @@
     "name": "GridSearch_AttnBiLSTMWithHeads",
 
     "log_directory": "results/FineTuning_AttnBiLSTM",
-    "log_file": "three",
+    "log_file": "three_but_no_bn_no_dropout",
     "n_gpu": 1,
     "model_parameters": {
       "LSTM_dim": [50],
@@ -10,7 +10,7 @@
       "n_heads": [4],
       "head_dim": [50],
       "fc_dim": [128],
-        "attn_dropout": [0]
+      "attn_dropout": [0.4]
     },
     "arch": {
         "type": "AttnBiLSTM",

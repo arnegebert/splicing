@@ -13,7 +13,9 @@
     },
     "arch": {
         "type": "AttnBiLSTM",
-        "args": {}
+        "args": {
+            "attn_mode": "single_head"
+        }
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",
