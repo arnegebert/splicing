@@ -27,7 +27,7 @@ def main(config):
     test_all, test_low, test_high = [], [], []
     for i in range(folds):
         # setup data_loader instances
-        config['data_loader']['args']['cross_validation_split'] = i
+        config['data_loader']['args']['cross_validation_seed'] = i
         data_loader = config.init_obj('data_loader', module_loader)
         valid_data_loader = data_loader.split_validation()
 

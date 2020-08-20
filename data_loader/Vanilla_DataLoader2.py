@@ -11,14 +11,13 @@ class Vanilla_DataLoader(BaseDataLoader):
     PSI data loading demo using BaseDataLoader
     """
 
-    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.1, num_workers=1, training=True,
+    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.1, num_workers=1,
                  classification=True, classification_treshold=0.99, cross_validation_seed=0, embedded=False):
         self.data_dir = data_dir
         start = time.time()
         print(f'starting loading of data')
-        self.samples = []
         self.class_threshold = classification_treshold
-        self.cross_validation_split = cross_validation_seed
+        self.cross_validation_seed = cross_validation_seed
         self.embedded = embedded
         self.classification = classification
         if data_dir:
@@ -29,12 +28,22 @@ class Vanilla_DataLoader(BaseDataLoader):
         else:
             raise Exception('No data directories given!')
 
-        folds = 1/validation_split
-        if not folds.is_integer(): print(f'Warning: rounded down to {folds} cross-validation folds')
-        self.dataset = self.cross_validation(x_cons_data, lx_cas_data, hx_cas_data, folds=folds)
+        # todo; make not dependent on self.embedded
+        if self.classification and not self.embedded:
+            x_cons_data[:, 280, 3] = (x_cons_data[:, 280, 3] >= self.class_threshold).astype(np.float32)
+            hx_cas_data[:, 280, 3] = (hx_cas_data[:, 280, 3] >= self.class_threshold).astype(np.float32)
+            lx_cas_data[:, 280, 3] = (lx_cas_data[:, 280, 3] >= self.class_threshold).astype(np.float32)
+
+        # todo: make class know about cross-validation (do this later though and ideally only the derived class knows)
+        # but maybe baseloader can know about it too since it would be kinda silly otherwise and I do need the functionality i nbtoh
+        self.current_cv_seed = cross_validation_seed
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))
-        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
+        super().__init__((x_cons_data, hx_cas_data, lx_cas_data),
+                         batch_size, shuffle, validation_split, num_workers, cross_validation_seed)
+
+    def get_train_test_and_val(self):
+        pass
 
     def cross_validation(self, cons, low, high, folds=10):
         # todo; make not dependent on self.embedded
@@ -48,8 +57,8 @@ class Vanilla_DataLoader(BaseDataLoader):
         low_fold_len = int(low.shape[0] / folds)
 
         # 1 fold for validation & early stopping
-        fold_val = 0
-        fold_test = 1
+        fold_val = self.cross_validation_seed
+        fold_test = fold_val + 1
 
         cons_to_alternative_ratio = int(cons_fold_len/(high_fold_len + low_fold_len))
         # avoid it being rounded down to 0
