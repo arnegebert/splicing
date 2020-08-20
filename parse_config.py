@@ -27,9 +27,30 @@ class ConfigParser:
 
         exper_name = self.config['name']
         # try reading out run_id from config
-        try: run_id = self.config['run_id']
-        except KeyError: pass
-        if not run_id:  # use timestamp as default run-id
+        try:
+            run_id = self.config['run_id']
+            self.explicit_run_id_set = run_id != '' and run_id is not None
+        except KeyError:
+            self.explicit_run_id_set = False
+
+        # if run_id was explicitly set initially files and folders for additional logging
+        if self.explicit_run_id_set:
+            runid = config['run_id']
+            os.makedirs(f'saved/{runid}', exist_ok=True)
+            fname_all = f'saved/{runid}/results_all.tsv'
+            if not os.path.exists(fname_all) or os.path.getsize(fname_all) == 0:
+                with open(fname_all, 'w') as f:
+                    metrics = [metric for metric in config["trainer"]["logged_metrics"]]
+                    metrics = '\t'.join([f'{metric}' for metric in metrics])
+                    f.write(f'name\ttime (min)\t{metrics}\n')
+            fname_concise = f'saved/{runid}/results_concise.tsv'
+            if not os.path.exists(fname_concise) or os.path.getsize(fname_concise) == 0:
+                with open(fname_concise, 'w') as f:
+                    cols = ['name', 'test_all (mean)', 'test_all (std)', 'test_low (mean)', 'test_low (std)',
+                            'test_high (mean)', 'test_high (std)']
+                    cols = '\t'.join(cols)
+                    f.write(f'{cols}\n')
+        else:  # use timestamp as default run-id
             run_id = datetime.now().strftime(r'%m%d_%H%M%S')
 
         self._save_dir = save_dir / 'models' / exper_name / run_id
@@ -40,6 +61,8 @@ class ConfigParser:
         print('FIX EXIST OK IN PARSE CONFIG'*100)
         self.save_dir.mkdir(parents=True, exist_ok=exist_ok)
         self.log_dir.mkdir(parents=True, exist_ok=exist_ok)
+
+
 
         # save updated config file to the checkpoint dir
         write_json(self.config, self.save_dir / 'config.json')
@@ -124,6 +147,9 @@ class ConfigParser:
     def __getitem__(self, name):
         """Access items like ordinary dict."""
         return self.config[name]
+
+    def __contains__(self, name):
+        return name in self.config
 
     def get_logger(self, name, verbosity=2):
         msg_verbosity = 'verbosity option {} is invalid. Valid options are {}.'.format(verbosity, self.log_levels.keys())

@@ -1,1 +1,2 @@
 time (min)	LSTM_dim	attn_dim	n_heads	head_dim	fc_dim	attn_dropout	train	val	test_all	test_low	test_high
+30	50	100	4	50	128	0	0.8195695009392614	0.7720853983696936	0.7682924142067524	0.8261396962433297	0.7190816112844013
