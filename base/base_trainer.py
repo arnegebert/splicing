@@ -83,10 +83,6 @@ class BaseTrainer:
             # update metrics for which best values are tracked separately
             # assumption: metric should be maximized
             self.logged_metrics = {metric:max(value, log[metric]) for (metric, value) in self.logged_metrics.items()}
-            # for metric, value in enumerate(self.logged_metrics.items()):
-            #     try:
-            #         self.logged_metrics[metric] = max(log[metric], value)
-            #     except KeyError: self.logger.warning(f'Metrics {metric} not found.')
 
             # evaluate model performance according to configured metric, save best checkpoint as model_best
             best = False

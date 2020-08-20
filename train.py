@@ -101,4 +101,5 @@ if __name__ == '__main__':
     config = ConfigParser.from_args(args, options)
     main(config)
     end = time.time()
+    print(f'put auc try block back'*100)
     print(f'Training took {(end-start)/60:.0f} min')

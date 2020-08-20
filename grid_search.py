@@ -40,7 +40,7 @@ def main(config):
         iters = 1 if not config["cross_validation"] else 9
         for i in range(iters):
             startt = time.time()
-            config['data_loader']['args']['cross_validation_split'] = i
+            config['data_loader']['args']['cross_validation_seed'] = i
             # Set model config to appropriate hyperparameters
             config["arch"]["args"].update(hyperparameters)
 

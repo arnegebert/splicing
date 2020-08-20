@@ -23,7 +23,7 @@ class BaseDataLoader(DataLoader):
         self.init_kwargs = {
             'batch_size': batch_size,
             'shuffle': shuffle,
-            'collate_fn': collate_fn,
+            # 'collate_fn': collate_fn,
             'num_workers': num_workers,
             'drop_last': drop_last
         }

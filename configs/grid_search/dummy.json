@@ -1,15 +1,16 @@
 {
-    "name": "FineTuning_AttnBiLSTM",
+    "name": "GridSearch_AttnBiLSTMWithHeads",
 
-    "log_directory": "results/FineTuning_AttnBiLSTM/onehead",
-    "log_file": "onehead",
+    "log_directory": "results/FineTuning_AttnBiLSTM",
+    "log_file": "three",
     "n_gpu": 1,
-
     "model_parameters": {
-        "LSTM_dim": [50],
-        "attn_dim": [100],
-        "fc_dim": [128],
-        "attn_dropout": [0.2]
+      "LSTM_dim": [50],
+      "attn_dim": [100],
+      "n_heads": [4],
+      "head_dim": [50],
+      "fc_dim": [128],
+      "attn_dropout": [0.5]
     },
     "arch": {
         "type": "AttnBiLSTM",
@@ -59,7 +60,7 @@
 
         "monitor": "max val_auc",
         "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc"],
-"early_stop": 15,
+        "early_stop": 15,
 
         "tensorboard": false
     },

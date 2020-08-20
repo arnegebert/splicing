@@ -13,7 +13,7 @@ def plot_and_save_roc(save_dir, *args):
     plt.cla()
     plt.style.use('seaborn')
     colors = ['orange', 'green', 'blue']
-    for ((pred, target, label), color) in zip(args, colors):
+    for (((pred, target), label), color) in zip(args, colors):
         fpr, tpr, _ = roc_curve(target, pred)
         auc_val = auc(fpr, tpr)
         plt.plot(fpr, tpr, linestyle='--', color=color, label=f'{label} PSI events (AUC={auc_val:0.2f})')

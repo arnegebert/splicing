@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+from scipy import stats
 from utils import one_hot_decode_seq_vanilla
 
 sample = 2
@@ -10,6 +10,7 @@ data = np.load(f'attn_ws/val_all_data.npy')[:, :, 0]
 attn_ws = np.load(f'attn_ws/attn_ws_50.npy')[:, :, 0]
 data = one_hot_decode_seq_vanilla(data[sample][:-1])
 mean, std = np.mean(attn_ws, axis=0), np.std(attn_ws, axis=0)
+stderr = stats.sem(attn_ws, axis=0)
 # if False:
 #     attn_ws = attn_ws[sample, :]
 # else:
@@ -33,7 +34,7 @@ if True:
     plt.rcParams['xtick.bottom'] = True
     plt.rcParams['ytick.left'] = True
 
-    ax.errorbar(x=range(0, 280), y=mean, yerr = std)
+    ax.errorbar(x=range(0, 280), y=mean, yerr = stderr)
     # ax.errorbar(x=range(0, 280), y=mean)
     ax.set_ylim(bottom=0, top=None)
 
