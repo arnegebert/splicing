@@ -47,7 +47,7 @@
         "args": {
             "attention": true
         },
-        "epochs": 1,
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 251,
@@ -60,5 +60,5 @@
         "tensorboard": false
     },
     "comment": "",
-    "cross_validation": true
+    "cross_validation": false
 }

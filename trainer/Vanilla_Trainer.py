@@ -13,6 +13,7 @@ class Vanilla_Trainer(BaseTrainer):
     def __init__(self, embedded=False, attention=False):
         self.embedded = embedded
         self.attention = attention
+        # could potentially add cross-validation support here
 
     def set_param(self, model, criterion, metric_ftns, optimizer, config, data_loader,
                  valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False):

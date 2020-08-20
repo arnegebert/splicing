@@ -11,7 +11,7 @@ class Vanilla_DataLoader(BaseDataLoader):
     PSI data loading demo using BaseDataLoader
     """
 
-    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
+    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.1, num_workers=1, training=True,
                  classification=True, classification_treshold=0.99, cross_validation_split=0, embedded=False):
         self.data_dir = data_dir
         start = time.time()
@@ -20,7 +20,7 @@ class Vanilla_DataLoader(BaseDataLoader):
         self.class_threshold = classification_treshold
         self.cross_validation_split = cross_validation_split
         self.embedded = embedded
-
+        self.classification = classification
         if data_dir:
             prefix = "embedded_" if embedded else ""
             x_cons_data = np.load(f'{data_dir}/{prefix}cons.npy')
@@ -29,15 +29,16 @@ class Vanilla_DataLoader(BaseDataLoader):
         else:
             raise Exception('No data directories given!')
 
-        self.dataset = self.cross_validation(x_cons_data, lx_cas_data, hx_cas_data)
+        folds = 1/validation_split
+        if not folds.is_integer(): print(f'Warning: rounded down to {folds} cross-validation folds')
+        self.dataset = self.cross_validation(x_cons_data, lx_cas_data, hx_cas_data, folds=folds)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))
-        # samples = prepare_data()
-        # self.dataset = TensorDataset(*samples)
-        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, dsc_cv=True)
+        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
 
     def cross_validation(self, cons, low, high, folds=10):
-        if not self.embedded:
+        # todo; make not dependent on self.embedded
+        if self.classification and not self.embedded:
             cons[:, 280, 3] = (cons[:, 280, 3] >= self.class_threshold).astype(np.float32)
             high[:, 280, 3] = (high[:, 280, 3] >= self.class_threshold).astype(np.float32)
             low[:, 280, 3] = (low[:, 280, 3] >= self.class_threshold).astype(np.float32)

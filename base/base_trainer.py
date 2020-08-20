@@ -2,7 +2,7 @@ import torch
 from abc import abstractmethod
 from numpy import inf
 from logger import TensorboardWriter
-
+import time
 
 class BaseTrainer:
     """
@@ -67,6 +67,7 @@ class BaseTrainer:
         Full training logic
         """
         not_improved_count = 0
+        startt = time.time()
         for epoch in range(self.start_epoch, self.epochs + 1):
             result = self._train_epoch(epoch)
 
@@ -118,6 +119,15 @@ class BaseTrainer:
 
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
+        endt = time.time()
+
+        if self.config.explicit_run_id_set: # if special run_id given, save results in central place
+            runid = self.config['run_id']
+            fname = f'saved/{runid}/results_all.tsv'
+            with open(fname, 'a') as f:
+                metric_vals = [val for (key, val) in self.logged_metrics.items()]
+                metric_vals = '\t'.join([f'{val}' for val in metric_vals])
+                f.write(f'{self.config["name"]}\t{(endt-startt)/60:.0f}\t{metric_vals}\n')
 
     def _prepare_device(self, n_gpu_use):
         """

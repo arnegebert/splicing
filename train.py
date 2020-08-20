@@ -22,10 +22,10 @@ def main(config):
 
     logger = config.get_logger('train')
 
+    trainer = config.init_obj('trainer', module_trainer)
     folds = 9 if config['cross_validation'] else 1
     test_all, test_low, test_high = [], [], []
     for i in range(folds):
-        startt = time.time()
         # setup data_loader instances
         config['data_loader']['args']['cross_validation_split'] = i
         data_loader = config.init_obj('data_loader', module_loader)
@@ -45,8 +45,6 @@ def main(config):
 
         lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
-        trainer = config.init_obj('trainer', module_trainer)
-
         trainer.set_param(model, criterion, metrics, optimizer,
                           config=config,
                           data_loader=data_loader,
@@ -55,8 +53,6 @@ def main(config):
 
         trainer.train()
 
-        endt = time.time()
-
         # Some custom logging code follows
         # todo: put this into base trainer
         test_all.append(trainer.logged_metrics["test_auc"])
@@ -64,14 +60,6 @@ def main(config):
             test_low.append(trainer.logged_metrics["test_low_auc"])
             test_high.append(trainer.logged_metrics["test_high_auc"])
         except KeyError: pass
-
-        if config.explicit_run_id_set: # if special run_id given, save results in central place
-            runid = config['run_id']
-            fname = f'saved/{runid}/results_all.tsv'
-            with open(fname, 'a') as f:
-                metric_vals = [val for (key, val) in trainer.logged_metrics.items()]
-                metric_vals = '\t'.join([f'{val}' for val in metric_vals])
-                f.write(f'{config["name"]}\t{(endt-startt)/60:.0f}\t{metric_vals}\n')
 
     test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
     logger.info(f'Average test_all: {np.mean(test_all):.3f} +- {np.std(test_all):.3f}')
