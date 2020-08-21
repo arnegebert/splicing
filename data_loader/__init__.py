@@ -1,8 +1,5 @@
 from .GTEx_EmbeddedDataLoader import *
 
-from .NaivePSIDataLoader import *
-from .MNISTDataLoader import *
-
 from .Comparison_DataLoader import *
 from .Comparison_EmbeddedDataLoader import *
 

@@ -1,6 +1,3 @@
-from .MNISTTrainer import *
-from .NaivePSITrainer import *
-
 from .GTEx_D2V_Trainer import *
 
 from .Comparison_Trainer import *
