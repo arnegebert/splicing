@@ -8,9 +8,9 @@
         "args": {}
     },
     "data_loader": {
-        "type": "GTEx_EmbeddedDataLoader",
+        "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/distributed/brain_cortex_embedded_recon_junc_class.npy",
+            "data_dir": "data/dsc_reconstruction_junction",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -38,9 +38,10 @@
         }
     },
     "trainer": {
-        "type": "GTEx_D2V_Trainer",
-        "args": {"embedded": true},
-        --> make sure that newest test set changes are integrated (or not, since it likely doesn't matter)
+        "type": "Vanilla_Trainer",
+        "args": {
+            "embedded": true
+        },
         "epochs": 500,
 
         "save_dir": "saved/",

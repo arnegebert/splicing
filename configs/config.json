@@ -1,5 +1,5 @@
 {
-    "name": "iPSC_D2V_MLP",
+    "name": "ReconJunc_D2V_MLP",
 
     "n_gpu": 1,
 
@@ -8,20 +8,20 @@
         "args": {}
     },
     "data_loader": {
-        "type": "Comparison_DataLoader",
+        "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "",
+            "data_dir": "data/dsc_reconstruction_junction",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1,
+            "num_workers": 0,
             "embedded": true
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -38,10 +38,8 @@
         }
     },
     "trainer": {
-        "type": "Comparison_Trainer",
-        "args": {
-            "embedded": true
-        },
+        "type": "Vanilla_Trainer",
+        "args": {"embedded": true},
         "epochs": 500,
 
         "save_dir": "saved/",
@@ -54,5 +52,6 @@
 
         "tensorboard": false
     },
+    "comment": "",
     "cross_validation": false
 }

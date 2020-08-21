@@ -84,7 +84,7 @@ class BaseDataLoader(DataLoader):
         fold_test = fold_val + 1
 
         cons_to_alternative_ratio = int(cons_fold_len / (high_fold_len + low_fold_len))
-        # avoid it being rounded down to 0
+        # avoid ratio being rounded down to 0
         cons_to_alternative_ratio = max(1, cons_to_alternative_ratio)
         print(f'cons_to_alternative_ratio: {cons_to_alternative_ratio}')
         total = cons_fold_len + (high_fold_len + low_fold_len) * cons_to_alternative_ratio
@@ -117,10 +117,10 @@ class BaseDataLoader(DataLoader):
         test_all = np.concatenate((val_high, low[low_fold_len * fold_test:low_fold_len * (fold_test + 1)]), axis=0)
 
         print(f'Size training dataset: {len(train)}')
-        print(f'Proportions (before balancing):')
+        print(f'Proportions (after balancing):')
         print(f'cons: {cons_fold_len/total:.3f}%')
-        print(f'low: {low_fold_len/total:.3f}%')
-        print(f'high: {high_fold_len/total:.3f}%')
+        print(f'low: {low_fold_len*cons_to_alternative_ratio/total:.3f}%')
+        print(f'high: {high_fold_len*cons_to_alternative_ratio/total:.3f}%')
 
         train_dataset = VanillaDataset(train)
         val_all_dataset, val_low_dataset, val_high_dataset = VanillaDataset(val_all), VanillaDataset(val_low), \
