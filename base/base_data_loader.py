@@ -1,13 +1,12 @@
 import torch
 from torch.utils.data import DataLoader, Dataset
-from torch.utils.data.dataloader import default_collate
 import numpy as np
 
 class BaseDataLoader(DataLoader):
     """
     Base class for all data loaders
     """
-    def __init__(self, data, batch_size, shuffle, validation_split, num_workers, collate_fn=default_collate,
+    def __init__(self, data, batch_size, shuffle, validation_split, num_workers,
                  extra_test_datasets=None, drop_last=False,
                  data_split=True, cross_validation_seed=0):
         assert data_split, "Handling when data is not split into cons/low/high data currently not implemented"
@@ -24,7 +23,6 @@ class BaseDataLoader(DataLoader):
         self.init_kwargs = {
             'batch_size': batch_size,
             'shuffle': shuffle,
-            # 'collate_fn': collate_fn,
             'num_workers': num_workers,
             'drop_last': drop_last
         }
@@ -42,7 +40,6 @@ class BaseDataLoader(DataLoader):
                    # DataLoader(dataset=self.test_high,  **self.init_kwargs)
         else:
             # three test sets which are standard in CV
-            # raise Exception('Not yet updated to test set ages')
             regular_test_and_val_sets = [DataLoader(dataset=self.test_all,  **self.init_kwargs),
                    DataLoader(dataset=self.test_low, **self.init_kwargs),
                    DataLoader(dataset=self.test_high,  **self.init_kwargs),
@@ -54,6 +51,11 @@ class BaseDataLoader(DataLoader):
                 extra_test_sets.append(DataLoader(dataset=extra_test_set,  **self.init_kwargs))
             return regular_test_and_val_sets, extra_test_sets
 
+    def apply_classification_threshold(self, *arrays, embedded=False, threshold=0.99):
+        for array in arrays:
+            if embedded: array[:, 280, 3] = (array[:, 280, 3] >= threshold).astype(np.float32)
+            else: array[:, 2, 3] = (array[:, 2, 3] >= threshold).astype(np.float32)
+
     def get_train_test_and_val_sets(self, cons, low, high, folds=10):
         cons_fold_len = int(cons.shape[0] / folds)
         high_fold_len = int(high.shape[0] / folds)
@@ -61,6 +63,7 @@ class BaseDataLoader(DataLoader):
 
         # 1 fold for validation & early stopping
         fold_val = self.cross_validation_seed
+        # 1 fold for testing
         fold_test = fold_val + 1
 
         cons_to_alternative_ratio = int(cons_fold_len / (high_fold_len + low_fold_len))

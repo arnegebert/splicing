@@ -43,7 +43,7 @@ parser.add_argument("-b", "--boundary", choices=["S", "V"], default="S", help="B
                     "\tS -- Strict (Default)\n"
                     "\tV -- Variable\n")
 parser.add_argument("-t", "--threshold", default=10, type=int,
-                    help="Variability treshold. In case of strict boundaries this argument is ignored" +
+                    help="Variability threshold. In case of strict boundaries this argument is ignored" +
                     "(Default: 10nt).")
 parser.add_argument("-p", "--pool-genes", action="store_true",
                     help="pool together overlapping genes.")

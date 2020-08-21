@@ -12,7 +12,7 @@ class Vanilla_4_DataLoader(BaseDataLoader):
     PSI data loading demo using BaseDataLoader
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
-                 classification=True, classification_treshold=0.95, cross_validation_split=0):
+                 classification=True, classification_threshold=0.95, cross_validation_split=0):
         self.data_dir = data_dir
         start = time.time()
         print(f'starting loading of data')
@@ -26,9 +26,9 @@ class Vanilla_4_DataLoader(BaseDataLoader):
             raise Exception('No data directory given')
 
         if classification:
-            x_cons_data[:, 560, 3] = (x_cons_data[:, 560, 3] >= classification_treshold).astype(np.float32)
-            hx_cas_data[:, 560, 3] = (hx_cas_data[:, 560, 3] >= classification_treshold).astype(np.float32)
-            lx_cas_data[:, 560, 3] = (lx_cas_data[:, 560, 3] >= classification_treshold).astype(np.float32)
+            x_cons_data[:, 560, 3] = (x_cons_data[:, 560, 3] >= classification_threshold).astype(np.float32)
+            hx_cas_data[:, 560, 3] = (hx_cas_data[:, 560, 3] >= classification_threshold).astype(np.float32)
+            lx_cas_data[:, 560, 3] = (lx_cas_data[:, 560, 3] >= classification_threshold).astype(np.float32)
 
         a = int(x_cons_data.shape[0] / 10)
         b = int(hx_cas_data.shape[0] / 10)

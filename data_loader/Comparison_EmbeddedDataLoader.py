@@ -17,10 +17,10 @@ class Comparison_EmbeddedDataLoader(BaseDataLoader):
     3. Train on lib1, test on lib from other individual
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
-                 classification=True, classification_treshold=0.95, cross_validation_split=0):
+                 classification=True, classification_threshold=0.95, cross_validation_split=0):
         self.data_dir = data_dir
         self.classification = classification
-        self.class_threshold = classification_treshold
+        self.class_threshold = classification_threshold
         self.cross_validation_split = cross_validation_split
         start = time.time()
         print(f'starting loading of data')

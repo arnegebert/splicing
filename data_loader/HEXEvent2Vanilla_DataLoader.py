@@ -11,7 +11,7 @@ class HEXEvent2Vanilla_DataLoader(BaseDataLoader):
     Bit different than the standard I use for data loading (so can't directly replace with Vanilla_DataLoader)
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True,
-                 cross_validation_split=0, classification_treshold=0.99):
+                 cross_validation_split=0, classification_threshold=0.99):
         self.data_dir = data_dir
         start = time.time()
         print(f'starting loading of data')
@@ -22,9 +22,9 @@ class HEXEvent2Vanilla_DataLoader(BaseDataLoader):
         lx_cas_data = np.load('data/hexevent/low.npy')
 
         x_cons_data[:,-1,4] = 1
-        x_cons_data = convert_hexevent_to_vanilla_format(x_cons_data, classification_treshold)
-        hx_cas_data = convert_hexevent_to_vanilla_format(hx_cas_data, classification_treshold)
-        lx_cas_data = convert_hexevent_to_vanilla_format(lx_cas_data, classification_treshold)
+        x_cons_data = convert_hexevent_to_vanilla_format(x_cons_data, classification_threshold)
+        hx_cas_data = convert_hexevent_to_vanilla_format(hx_cas_data, classification_threshold)
+        lx_cas_data = convert_hexevent_to_vanilla_format(lx_cas_data, classification_threshold)
 
         a = int(x_cons_data.shape[0] / 10)
         b = int(hx_cas_data.shape[0] / 10)
@@ -85,9 +85,9 @@ class HEXEvent2Vanilla_DataLoader(BaseDataLoader):
 # Constant values taken in reference from
 # https://github.com/louadi/DSC/blob/master/training%20notebooks/cons_vs_es.ipynb
 # Don't blame me ¯\_(ツ)_/¯
-def convert_hexevent_to_vanilla_format(array, treshold):
+def convert_hexevent_to_vanilla_format(array, threshold):
     lifehack = 500000
-    label = array[:lifehack, -1, 4] > treshold
+    label = array[:lifehack, -1, 4] > threshold
     start_seq, end_seq = array[:lifehack, :140, :4], array[:lifehack, 141:281, :4]
     start_and_end = np.concatenate((start_seq, end_seq), axis=1)
     lens = array[:lifehack, -1, 0:3]

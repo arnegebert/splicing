@@ -51,7 +51,7 @@ print(f'{len(filtered_sample_names)} samples after getting those with {tissue} d
 # have to work with that very large python text file as a result
 sample_idxs = []
 data = {}
-treshold_tpm = 10
+threshold_tpm = 10
 with open(path_srcs) as f:
     for i, line in enumerate(f):
         if i % 1000 == 0: # ~ 357500 junctions
@@ -75,7 +75,7 @@ with open(path_srcs) as f:
                 version_idx = gene.index('.')
                 gene = gene[:version_idx]
             tpm = float(line[sample_idxs[164]])
-            if tpm >= treshold_tpm:
+            if tpm >= threshold_tpm:
                 data[gene] = tpm
 # data = junctions -> sample reads
 
