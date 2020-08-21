@@ -40,7 +40,7 @@
     "trainer": {
         "type": "Vanilla_Trainer",
         "args": {},
-        "epochs": 150,
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 251,

@@ -41,7 +41,7 @@
         "type": "GTEx_D2V_Trainer",
         "args": {"embedded": true},
         --> make sure that newest test set changes are integrated (or not, since it likely doesn't matter)
-        "epochs": 100,
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 101,
