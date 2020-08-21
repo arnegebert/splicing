@@ -1,3 +1,3 @@
-from .Comparison_Trainer import *
+from .ComparisonTrainer import *
 
 from .VanillaTrainer import *

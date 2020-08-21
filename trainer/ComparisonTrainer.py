@@ -8,7 +8,7 @@ from utils import inf_loop, MetricTracker, save_pred_and_target
 from visualizations.roc_curves import plot_and_save_roc
 
 
-class Comparison_Trainer(BaseTrainer):
+class ComparisonTrainer(BaseTrainer):
     """
     Trainer class
     """

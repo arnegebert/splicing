@@ -38,7 +38,7 @@
         }
     },
     "trainer": {
-        "type": "Comparison_Trainer",
+        "type": "ComparisonTrainer",
         "args": {
             "embedded": true
         },
