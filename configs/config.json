@@ -1,5 +1,5 @@
 {
-    "name": "GTEx_Junc_D2V_MLP",
+    "name": "iPSC_D2V_MLP",
 
     "n_gpu": 1,
 
@@ -8,13 +8,13 @@
         "args": {}
     },
     "data_loader": {
-        "type": "Vanilla_DataLoader",
+        "type": "Comparison_DataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/junc/cerebellum",
+            "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0,
+            "num_workers": 1,
             "embedded": true
         }
     },
@@ -38,11 +38,11 @@
         }
     },
     "trainer": {
-        "type": "Vanilla_Trainer",
+        "type": "Comparison_Trainer",
         "args": {
             "embedded": true
         },
-        "epochs": 2,
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 101,
@@ -54,6 +54,5 @@
 
         "tensorboard": false
     },
-    "comment": "",
-    "cross_validation": true
+    "cross_validation": false
 }

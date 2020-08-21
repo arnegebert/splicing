@@ -26,21 +26,22 @@ class Comparison_DataLoader(BaseDataLoader):
         if data_dir:
             raise Exception('reeeeeeeeeeeeeeeeeeeee')
         else:
-            cons = np.load('data/iPSC/exon/cons.npy')
-            low = np.load('data/iPSC/exon/low_bezi1.npy')
-            high = np.load('data/iPSC/exon/high_bezi1.npy')
+            prefix = "embedded_" if embedded else ""
+            cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
+            low = np.load(f'data/iPSC/exon/{prefix}low_bezi1.npy')
+            high = np.load(f'data/iPSC/exon/{prefix}high_bezi1.npy')
 
-            diff_lib_cons = np.load('data/iPSC/exon/cons.npy')
-            diff_lib_low = np.load('data/iPSC/exon/low_bezi2.npy')
-            diff_lib_high = np.load('data/iPSC/exon/high_bezi2.npy')
+            diff_lib_cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
+            diff_lib_low = np.load(f'data/iPSC/exon/{prefix}low_bezi2.npy')
+            diff_lib_high = np.load(f'data/iPSC/exon/{prefix}high_bezi2.npy')
 
-            diff_indv_cons = np.load('data/iPSC/exon/cons.npy')
-            diff_indv_low = np.load('data/iPSC/exon/low_lexy2.npy')
-            diff_indv_high = np.load('data/iPSC/exon/high_lexy2.npy')
+            diff_indv_cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
+            diff_indv_low = np.load(f'data/iPSC/exon/{prefix}low_lexy2.npy')
+            diff_indv_high = np.load(f'data/iPSC/exon/{prefix}high_lexy2.npy')
 
-            diff_tissue_cons = np.load('data/hipsci_majiq/exon/cons.npy')
-            diff_tissue_low = np.load('data/hipsci_majiq/exon/low.npy')
-            diff_tissue_high = np.load('data/hipsci_majiq/exon/high.npy')
+            diff_tissue_cons = np.load(f'data/hipsci_majiq/exon/{prefix}cons.npy')
+            diff_tissue_low = np.load(f'data/hipsci_majiq/exon/{prefix}low.npy')
+            diff_tissue_high = np.load(f'data/hipsci_majiq/exon/{prefix}high.npy')
 
         if self.classification:
             cons, low, high = self.apply_classification_threshold(cons, low, high,

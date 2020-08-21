@@ -109,7 +109,7 @@ class BaseTrainer:
                                      "Training stops.".format(self.early_stop))
                     self.logger.info(f"Best model performance: {self.mnt_best:.3f} {self.mnt_metric}")
                     for metric, value in self.logged_metrics.items():
-                        self.logger.info(f"Best value of metric '{metric}':{value:.3f}")
+                        self.logger.info(f"Best value of metric '{metric}': {value:.3f}")
                     self._save_checkpoint(epoch, save_best=True)
                     break
 

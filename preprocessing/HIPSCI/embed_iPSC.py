@@ -8,7 +8,7 @@ from utils import one_hot_decode_seq_vanilla
 startt = time.time()
 data_path = '../../data'
 data_dir = 'iPSC/exon'
-sample_name = 'lexy2'
+sample_name = 'bezi1' # bezi1, bezi2, lexy2
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
 
 def batch_split_into_3_mers(batch):

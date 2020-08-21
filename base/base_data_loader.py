@@ -90,7 +90,7 @@ class BaseDataLoader(DataLoader):
         total = cons_fold_len + (high_fold_len + low_fold_len) * cons_to_alternative_ratio
         cons_perc = cons_fold_len / total
         print(f'Percentage of consecutive data: {cons_perc}')
-        if cons_perc > 0.65 or cons_perc < 0.35:
+        if cons_perc > 0.66 or cons_perc < 0.34:
             raise Exception(f'Unbalanced dataset')
 
         # 9 folds for training
@@ -117,10 +117,10 @@ class BaseDataLoader(DataLoader):
         test_all = np.concatenate((val_high, low[low_fold_len * fold_test:low_fold_len * (fold_test + 1)]), axis=0)
 
         print(f'Size training dataset: {len(train)}')
-        print(f'Size mixed test dataset: {len(test_all)}')
-        print(f'Size low inclusion test dataset: {len(test_low)}')
-        print(f'Size high inclusion test dataset: {len(test_high)}')
-        print(f'Size mixed validation dataset: {len(val_all)}')
+        print(f'Proportions (before balancing):')
+        print(f'cons: {cons_fold_len/total:.3f}%')
+        print(f'low: {low_fold_len/total:.3f}%')
+        print(f'high: {high_fold_len/total:.3f}%')
 
         train_dataset = VanillaDataset(train)
         val_all_dataset, val_low_dataset, val_high_dataset = VanillaDataset(val_all), VanillaDataset(val_low), \

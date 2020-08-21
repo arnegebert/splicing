@@ -12,12 +12,12 @@ class Comparison_Trainer(BaseTrainer):
     """
     Trainer class
     """
-    def __init__(self):
-        pass
+    def __init__(self, embedded=False, attention=False):
+        self.embedded = embedded
+        self.attention = attention
 
     def set_param(self, model, criterion, metric_ftns, optimizer, config, data_loader,
-                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, embedded=False,
-                  attention=False):
+                 valid_data_loader=None, lr_scheduler=None, len_epoch=None):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
@@ -32,8 +32,6 @@ class Comparison_Trainer(BaseTrainer):
         (self.test_all, self.test_low, self.test_high, self.val_all), self.extra_test_set_loaders = valid_data_loader
         self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size))
-        self.embedded = embedded
-        self.attention = attention
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.val_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
