@@ -31,7 +31,6 @@ class BaseDataLoader(DataLoader):
 
     def get_valid_and_test_loaders(self):
         if not self.extra_test:
-            # return three dataloaders here based on my validation datasets
             return DataLoader(dataset=self.test_all,  **self.init_kwargs),\
                    DataLoader(dataset=self.test_low, **self.init_kwargs),\
                    DataLoader(dataset=self.test_high,  **self.init_kwargs),\
@@ -74,6 +73,11 @@ class BaseDataLoader(DataLoader):
         high_fold_len = int(high.shape[0] / folds)
         low_fold_len = int(low.shape[0] / folds)
 
+        # shuffling to avoid any biases from data generation
+        np.random.seed(0)
+        np.random.shuffle(cons)
+        np.random.shuffle(low)
+        np.random.shuffle(high)
         # 1 fold for validation & early stopping
         fold_val = self.cross_validation_seed
         # 1 fold for testing
@@ -99,9 +103,6 @@ class BaseDataLoader(DataLoader):
 
             train = np.concatenate((train, low[:low_fold_len * fold_val]), axis=0)
             train = np.concatenate((train, low[low_fold_len * (fold_test + 1):]), axis=0)
-
-        np.random.seed(0)
-        np.random.shuffle(train)
 
         val_high = np.concatenate((high[high_fold_len * fold_val:high_fold_len * (fold_val + 1)],
                                    cons[cons_fold_len * fold_val:cons_fold_len * (fold_val + 1)]), axis=0)

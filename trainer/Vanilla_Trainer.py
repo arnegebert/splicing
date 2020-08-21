@@ -36,7 +36,7 @@ class Vanilla_Trainer(BaseTrainer):
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.val_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.test_all_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.test_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.test_low_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.test_high_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
 
@@ -174,7 +174,6 @@ class Vanilla_Trainer(BaseTrainer):
         # del attn_ws_b
         predictions, targets = torch.cat(predictions, dim=0).cpu().numpy(), torch.cat(targets, dim=0).cpu().numpy()
         return predictions, targets
-        # return np.concatenate(predictions, axis=0), np.concatenate(targets, axis=0)
 
     def convert_to_model_input_format(self, data):
         if self.embedded:

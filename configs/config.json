@@ -1,28 +1,28 @@
 {
-    "name": "GTEx_Junc_D2V_MLP",
+    "name": "HIPSCI_MAJIQ_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "MLP2",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
         "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/exon/brain",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 0,
-            "embedded": true,
-            "classification_threshold": 0.95
+            "classification": true,
+            "classification_threshold": 0.99
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -40,13 +40,11 @@
     },
     "trainer": {
         "type": "Vanilla_Trainer",
-        "args": {
-            "embedded": true
-        },
-        "epochs": 2,
+        "args": {},
+        "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "max val_auc",
