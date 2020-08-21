@@ -1,5 +1,5 @@
 {
-    "name": "GTEx_Junc_BiLSTM",
+    "name": "GTEx_Exon_BiLSTM",
 
     "n_gpu": 1,
 

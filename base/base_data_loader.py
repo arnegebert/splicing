@@ -90,7 +90,7 @@ class BaseDataLoader(DataLoader):
         total = cons_fold_len + (high_fold_len + low_fold_len) * cons_to_alternative_ratio
         cons_perc = cons_fold_len / total
         print(f'Percentage of consecutive data: {cons_perc}')
-        if cons_perc > 0.6 or cons_perc < 0.4:
+        if cons_perc > 0.65 or cons_perc < 0.35:
             raise Exception(f'Unbalanced dataset')
 
         # 9 folds for training

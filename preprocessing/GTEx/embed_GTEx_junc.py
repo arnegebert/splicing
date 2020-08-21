@@ -6,7 +6,7 @@ import numpy as np
 from utils import one_hot_decode_seq_vanilla
 
 startt = time.time()
-tissue = 'cerebellum'
+tissue = 'brain'
 assert tissue in ['brain', 'heart', "cerebellum"]
 data_path = '../../data'
 data_dir = f'gtex_processed/junc/{tissue}'

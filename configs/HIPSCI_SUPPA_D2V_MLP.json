@@ -41,7 +41,8 @@
         "type": "Vanilla_Trainer",
         "args": {
             "embedded": true
-        },        "epochs": 200,
+        },
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 101,

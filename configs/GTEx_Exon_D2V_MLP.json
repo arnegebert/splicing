@@ -1,5 +1,5 @@
 {
-    "name": "GTEx_Junc_D2V_MLP",
+    "name": "GTEx_Exon_D2V_MLP",
 
     "n_gpu": 1,
 
@@ -42,7 +42,7 @@
         "args": {
             "embedded": true
         },
-        "epochs": 100,
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 101,
