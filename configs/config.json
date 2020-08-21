@@ -1,20 +1,22 @@
 {
-    "name": "iPSC_DSC",
+    "name": "GTEx_Junc_D2V_MLP",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "DSC",
+        "type": "MLP2",
         "args": {}
     },
     "data_loader": {
-        "type": "Comparison_DataLoader",
+        "type": "Vanilla_DataLoader",
         "args":{
-            "data_dir": "",
+            "data_dir": "data/gtex_processed/exon/brain",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1
+            "num_workers": 0,
+            "embedded": true,
+            "classification_threshold": 0.95
         }
     },
     "optimizer": {
@@ -37,9 +39,11 @@
         }
     },
     "trainer": {
-        "type": "Comparison_Trainer",
-        "args": {},
-        "epochs": 200,
+        "type": "Vanilla_Trainer",
+        "args": {
+            "embedded": true
+        },
+        "epochs": 2,
 
         "save_dir": "saved/",
         "save_period": 101,
@@ -47,9 +51,10 @@
 
         "monitor": "max val_auc",
         "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc"],
-"early_stop": 15,
+        "early_stop": 15,
 
         "tensorboard": false
     },
-    "cross_validation": false
+    "comment": "",
+    "cross_validation": true
 }

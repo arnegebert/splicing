@@ -8,8 +8,6 @@ startt = time.time()
 data_path = '../../data'
 data_dir = 'dsc_reconstruction_junction'
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
-classification_task = True
-constitutive_level = 0.99
 
 load_from_cons = 'cons'
 load_from_low = 'low'
@@ -34,7 +32,6 @@ def run(data_dir, load_from_cons, load_from_low, load_from_high, save_to_cons, s
     def decode_reshape_and_embed(batch):
         seq_len = len(batch[0])-1
         batch_vector = []
-        batch[:, seq_len, 3] = (batch[:, seq_len, 3] >= constitutive_level)
 
         for i, line in enumerate(batch):
             if i % 500 == 0: print(f'Processing line {i}')

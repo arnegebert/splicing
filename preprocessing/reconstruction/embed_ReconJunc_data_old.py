@@ -46,8 +46,7 @@ elif tissue == 'cerebellum':
 # std_len = 21350.371079742523
 
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
-classification_task = True
-constitutive_level = 0.95
+constitutive_level = 0.99
 
 def batch_split_into_3_mers(batch):
     to_return = []
@@ -77,14 +76,13 @@ with open(f'{data_path}/{src}') as f:
         s, e = j.split('_')[1:3]
         s, e = int(s), int(e)
         psi = float(psi[:-1])
-        is_constitutive = float(psi >= constitutive_level)
 
         if psi <= 0.2: low += 1
         if 0.2 < psi <= 0.75: medium += 1
         if psi > 0.75 and psi < constitutive_level: high += 1
         if psi > constitutive_level: cons += 1
 
-        label = is_constitutive if classification_task else psi
+        label = psi
 
         l1 = (e - s - intron_mean) / intron_std
         start, end = split_into_3_mers(start_seq), split_into_3_mers(end_seq)

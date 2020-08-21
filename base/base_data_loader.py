@@ -44,17 +44,30 @@ class BaseDataLoader(DataLoader):
                    DataLoader(dataset=self.test_low, **self.init_kwargs),
                    DataLoader(dataset=self.test_high,  **self.init_kwargs),
                          DataLoader(dataset=self.val_all,  **self.init_kwargs)]
-            # 6 other test sets which I have added
+            # 9 other test sets which I have added
             if len(self.extra_test) != 9: raise Exception('Unexpected number of extra test sets')
             extra_test_sets = []
             for extra_test_set in self.extra_test:
                 extra_test_sets.append(DataLoader(dataset=extra_test_set,  **self.init_kwargs))
             return regular_test_and_val_sets, extra_test_sets
 
-    def apply_classification_threshold(self, *arrays, embedded=False, threshold=0.99):
-        for array in arrays:
-            if embedded: array[:, 280, 3] = (array[:, 280, 3] >= threshold).astype(np.float32)
-            else: array[:, 2, 3] = (array[:, 2, 3] >= threshold).astype(np.float32)
+    def apply_classification_threshold(self, cons, low, high, embedded=False, threshold=0.99):
+        if not embedded:
+            cons[:, 280, 3] = (cons[:, 280, 3] >= threshold).astype(np.float32)
+            low[:, 280, 3] = (low[:, 280, 3] >= threshold).astype(np.float32)
+            high[:, 280, 3] = (high[:, 280, 3] >= threshold).astype(np.float32)
+            high_cons, high_non_cons = high[high[:, 280, 3] == 1], high[high[:, 280, 3] == 0]
+        else:
+            cons[:, 2, 3] = (cons[:, 2, 3] >= threshold).astype(np.float32)
+            low[:, 2, 3] = (low[:, 2, 3] >= threshold).astype(np.float32)
+            high[:, 2, 3] = (high[:, 2, 3] >= threshold).astype(np.float32)
+            high_cons, high_non_cons = high[high[:, 2, 3] == 1], high[high[:, 2, 3] == 0]
+        # data is initially split low/high/cons PSI, but after classification some high PSI
+        # might be classified as constitutive -> adjust split
+        cons = np.concatenate((cons, high_cons), axis=0)
+        high = high_non_cons
+        return cons, low, high
+
 
     def get_train_test_and_val_sets(self, cons, low, high, folds=10):
         cons_fold_len = int(cons.shape[0] / folds)
@@ -79,6 +92,7 @@ class BaseDataLoader(DataLoader):
         # 9 folds for training
         train = cons[:cons_fold_len * fold_val]
         train = np.concatenate((train, cons[cons_fold_len * (fold_test + 1):]), axis=0)
+        # rebalancing of dataset
         for _ in range(cons_to_alternative_ratio):
             train = np.concatenate((train, high[:high_fold_len * fold_val]), axis=0)
             train = np.concatenate((train, high[high_fold_len * (fold_test + 1):]), axis=0)
@@ -114,6 +128,7 @@ class BaseDataLoader(DataLoader):
                                                                 VanillaDataset(test_high)
         return train_dataset, test_all_dataset, test_low_dataset, test_high_dataset, \
                val_all_dataset  # , val_low_dataset, val_high_dataset
+
 
 class VanillaDataset(Dataset):
     """ Simple Implementation of Dataset class. """
