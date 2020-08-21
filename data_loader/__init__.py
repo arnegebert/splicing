@@ -1,3 +1,3 @@
-from .Comparison_DataLoader import *
+from .ComparisonDataLoader import *
 
 from .VanillaDataLoader import *

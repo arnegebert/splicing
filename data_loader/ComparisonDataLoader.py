@@ -5,7 +5,7 @@ import numpy as np
 from base import BaseDataLoader
 
 
-class Comparison_DataLoader(BaseDataLoader):
+class ComparisonDataLoader(BaseDataLoader):
     """
     Implements all three use cases for HIPSCI NotNeuron:
     1. Train on lib1, test on lib1

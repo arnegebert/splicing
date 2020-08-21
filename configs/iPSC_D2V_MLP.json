@@ -8,7 +8,7 @@
         "args": {}
     },
     "data_loader": {
-        "type": "Comparison_DataLoader",
+        "type": "ComparisonDataLoader",
         "args":{
             "data_dir": "",
             "batch_size": 256,
