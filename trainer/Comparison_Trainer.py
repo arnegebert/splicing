@@ -28,14 +28,9 @@ class Comparison_Trainer(BaseTrainer):
             # iteration-based training
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
-        # self.valid_data_loader = valid_data_loader
-        # self.test_all, self.test_low, self.test_high, self.test_all_diff_lib, self.test_low_diff_lib, \
-        # self.test_high_diff_lib, self.test_all_diff_indv, self.test_low_diff_indv, self.test_high_diff_indv, \
-        # self.test_all_diff_tissue, self.test_low_diff_tissue, self.test_high_diff_tissue = valid_data_loader
 
         (self.test_all, self.test_low, self.test_high, self.val_all), self.extra_test_set_loaders = valid_data_loader
         self.lr_scheduler = lr_scheduler
-        # self.lr_scheduler = None
         self.log_step = int(np.sqrt(data_loader.batch_size))
         self.embedded = embedded
         self.attention = attention
@@ -53,23 +48,6 @@ class Comparison_Trainer(BaseTrainer):
             MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer) for _ in self.extra_test_set_names
         ]
 
-
-        # self.test_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        # self.test_low_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        # self.test_high_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        #
-        # self.test_all_metrics_diff_lib = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        # self.test_low_metrics_diff_lib = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        # self.test_high_metrics_diff_lib = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        #
-        # self.test_all_metrics_diff_indv = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        # self.test_low_metrics_diff_indv = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        # self.test_high_metrics_diff_indv = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        #
-        # self.test_all_metrics_diff_tissue = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        # self.test_low_metrics_diff_tissue = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        # self.test_high_metrics_diff_tissue = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-
     def _train_epoch(self, epoch):
         """
         Training logic for an epoch
@@ -86,10 +64,10 @@ class Comparison_Trainer(BaseTrainer):
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
-            output = self.model(seqs, lens)
+            pred = self.model(seqs, lens)
             if self.attention:
-                output, attn_ws = output
-            loss = self.criterion(output, target)
+                pred, attn_ws = pred
+            loss = self.criterion(pred, target)
             loss.backward()
             self.optimizer.step()
 
@@ -98,7 +76,7 @@ class Comparison_Trainer(BaseTrainer):
             self.train_metrics.update('loss', loss.item())
             for met in self.metric_ftns:
                 try:
-                    auc_val = met(output, target)
+                    auc_val = met(pred, target)
                     self.train_metrics.update(met.__name__, auc_val)
                 except ValueError:
                     print('AUC bitching around for train metrics')
@@ -114,30 +92,14 @@ class Comparison_Trainer(BaseTrainer):
                 break
         log = self.train_metrics.result()
 
-        # test_log_all, test_log_low, test_log_high, test_log_all_diff_lib, test_log_low_diff_lib, test_log_high_diff_lib, \
-        #     test_log_all_diff_indv, test_log_low_diff_indv, test_log_high_diff_indv, \
-        #     test_log_all_diff_tissue, test_log_low_diff_tissue, test_log_high_diff_tissue = self._valid_epoch(epoch)
-        test_log_all, test_log_low, test_log_high, val_log_all, extra_test_set_logs = self._valid_epoch(epoch)
-        # (test_log_all, test_log_low, test_log_high, val_log_all), extra_test_set_logs = all_logs[:4], all_logs[4:]
+        test_log_all, test_log_low, test_log_high, val_log, extra_test_set_logs = self._valid_epoch(epoch)
         log.update(**{'test_' + k: v for k, v in test_log_all.items()})
         log.update(**{'test_low_' + k: v for k, v in test_log_low.items()})
         log.update(**{'test_high_' + k: v for k, v in test_log_high.items()})
-        log.update(**{'val_' + k: v for k, v in test_log_high.items()})
+        log.update(**{'val_' + k: v for k, v in val_log.items()})
 
         for (name, test_log) in zip(self.extra_test_set_names, extra_test_set_logs):
             log.update(**{f'{name}_' + k: v for k, v in test_log.items()})
-
-        # log.update(**{'test_diff_lib_' + k: v for k, v in test_log_all_diff_lib.items()})
-        # log.update(**{'test_low_diff_lib_' + k: v for k, v in test_log_low_diff_lib.items()})
-        # log.update(**{'test_high_diff_lib_' + k: v for k, v in test_log_high_diff_lib.items()})
-        #
-        # log.update(**{'test_diff_indv_' + k: v for k, v in test_log_all_diff_indv.items()})
-        # log.update(**{'test_low_diff_indv_' + k: v for k, v in test_log_low_diff_indv.items()})
-        # log.update(**{'test_high_diff_indv_' + k: v for k, v in test_log_high_diff_indv.items()})
-        #
-        # log.update(**{'test_diff_tissue_' + k: v for k, v in test_log_all_diff_tissue.items()})
-        # log.update(**{'test_low_diff_tissue_' + k: v for k, v in test_log_low_diff_tissue.items()})
-        # log.update(**{'test_high_diff_tissue_' + k: v for k, v in test_log_high_diff_tissue.items()})
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
@@ -155,6 +117,7 @@ class Comparison_Trainer(BaseTrainer):
         self.test_low_metrics.reset()
         self.test_high_metrics.reset()
         self.val_metrics.reset()
+        for metric in self.extra_test_set_metrics: metric.reset()
         with torch.no_grad():
             pred_target_all = self._single_val_epoch(self.test_all, epoch, self.test_all_metrics)
             pred_target_low = self._single_val_epoch(self.test_low, epoch, self.test_low_metrics)
@@ -167,29 +130,12 @@ class Comparison_Trainer(BaseTrainer):
             for loader, metric in zip(self.extra_test_set_loaders, self.extra_test_set_metrics):
                 self._single_val_epoch(loader, epoch, metric)
 
-            # self._single_val_epoch(self.test_all_diff_lib, epoch, self.test_all_metrics_diff_lib)
-            # self._single_val_epoch(self.test_low_diff_lib, epoch, self.test_low_metrics_diff_lib)
-            # self._single_val_epoch(self.test_high_diff_lib, epoch, self.test_high_metrics_diff_lib)
-            #
-            # self._single_val_epoch(self.test_all_diff_indv, epoch, self.test_all_metrics_diff_indv)
-            # self._single_val_epoch(self.test_low_diff_indv, epoch, self.test_low_metrics_diff_indv)
-            # self._single_val_epoch(self.test_high_diff_indv, epoch, self.test_high_metrics_diff_indv)
-            #
-            # self._single_val_epoch(self.test_all_diff_tissue, epoch, self.test_all_metrics_diff_tissue)
-            # self._single_val_epoch(self.test_low_diff_tissue, epoch, self.test_low_metrics_diff_tissue)
-            # self._single_val_epoch(self.test_high_diff_tissue, epoch, self.test_high_metrics_diff_tissue)
-
         extra_test_set_results = [metric.result() for metric in self.extra_test_set_metrics]
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
         return self.test_all_metrics.result(), self.test_low_metrics.result(), self.test_high_metrics.result(), \
         self.val_metrics.result(), extra_test_set_results
-
-   #      return self.test_all_metrics.result(), self.test_low_metrics.result(), self.test_high_metrics.result(),\
-   #  self.test_all_metrics_diff_lib.result(), self.test_low_metrics_diff_lib.result(), self.test_high_metrics_diff_lib.result(), \
-   # self.test_all_metrics_diff_indv.result(), self.test_low_metrics_diff_indv.result(), self.test_high_metrics_diff_indv.result(), \
-   # self.test_all_metrics_diff_tissue.result(), self.test_low_metrics_diff_tissue.result(), self.test_high_metrics_diff_tissue.result()
 
     def _single_val_epoch(self, val_data, epoch, metrics):
         predictions, targets = [], []
@@ -198,18 +144,18 @@ class Comparison_Trainer(BaseTrainer):
 
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
 
-            output = self.model(seqs, lens)
+            pred = self.model(seqs, lens)
             if self.attention:
-                output, attn_ws = output
-            loss = self.criterion(output, target)
+                pred, attn_ws = pred
+            loss = self.criterion(pred, target)
 
             self.writer.set_step((epoch - 1) * len(val_data) + batch_idx, 'valid')
             if 'loss' in metrics: metrics.update('loss', loss.item())
-            predictions.append(output.data)
+            predictions.append(pred.data)
             targets.append(target.data)
             for met in self.metric_ftns:
                 try:
-                    auc_val = met(output, target)
+                    auc_val = met(pred, target)
                     metrics.update(met.__name__, auc_val)
                 except ValueError:
                     print('AUC bitching around')

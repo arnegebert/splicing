@@ -54,11 +54,11 @@ class Vanilla_Trainer(BaseTrainer):
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
-            output = self.model(seqs, lens)
+            pred = self.model(seqs, lens)
             if self.attention:
-                output, attn_ws = output
+                pred, attn_ws = pred
 
-            loss = self.criterion(output, target)
+            loss = self.criterion(pred, target)
             loss.backward()
             self.optimizer.step()
 
@@ -66,16 +66,12 @@ class Vanilla_Trainer(BaseTrainer):
             self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update('loss', loss.item())
             for met in self.metric_ftns:
-                #
-                auc_val = met(output, target)
-                self.train_metrics.update(met.__name__, auc_val)
-
-                # try:
-                #     auc_val = met(output, target)
-                #     self.train_metrics.update(met.__name__, auc_val)
-                # except ValueError:
-                #     print('AUC bitching around for train metrics')
-                #     continue
+                try:
+                    auc_val = met(pred, target)
+                    self.train_metrics.update(met.__name__, auc_val)
+                except ValueError:
+                    print('AUC bitching around for train metrics')
+                    continue
 
             if batch_idx % self.log_step == 0:
                 self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(
@@ -150,23 +146,23 @@ class Vanilla_Trainer(BaseTrainer):
             seqs, lens, target = self.convert_to_model_input_format(data)
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
 
-            prediction = self.model(seqs, lens)
+            pred = self.model(seqs, lens)
             if self.attention:
-                prediction, attn_ws = prediction
+                pred, attn_ws = pred
             #     attn_ws = attn_ws.data.cpu().numpy()
             #     attn_ws_b.append(attn_ws)
                 # databs = data.data.cpu().numpy()
                 # datab.append(databs)
 
-            loss = self.criterion(prediction, target)
+            loss = self.criterion(pred, target)
 
             self.writer.set_step((epoch - 1) * len(val_data) + batch_idx, 'valid')
             if 'loss' in metrics: metrics.update('loss', loss.item())
-            predictions.append(prediction.data)
+            predictions.append(pred.data)
             targets.append(target.data)
             for met in self.metric_ftns:
                 try:
-                    auc_val = met(prediction, target)
+                    auc_val = met(pred, target)
                     metrics.update(met.__name__, auc_val)
                 except ValueError:
                     print('AUC bitching around')

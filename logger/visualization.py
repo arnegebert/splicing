@@ -47,6 +47,8 @@ class TensorboardWriter():
             self.add_scalar('steps_per_sec', 1 / duration.total_seconds())
             self.timer = datetime.now()
 
+
+
     def __getattr__(self, name):
         """
         If visualization is configured to use:

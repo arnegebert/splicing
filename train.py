@@ -29,7 +29,7 @@ def main(config):
         # setup data_loader instances
         config['data_loader']['args']['cross_validation_seed'] = i
         data_loader = config.init_obj('data_loader', module_loader)
-        valid_data_loader = data_loader.split_validation()
+        valid_data_loader = data_loader.get_valid_and_test_loaders()
 
         # build model architecture, then print to console
         model = config.init_obj('arch', module_arch)
@@ -101,5 +101,4 @@ if __name__ == '__main__':
     config = ConfigParser.from_args(args, options)
     main(config)
     end = time.time()
-    print(f'put auc try block back'*100)
     print(f'Training took {(end-start)/60:.0f} min')

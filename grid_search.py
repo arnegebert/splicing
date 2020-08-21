@@ -45,7 +45,7 @@ def main(config):
             config["arch"]["args"].update(hyperparameters)
 
             data_loader = config.init_obj('data_loader', module_loader)
-            valid_data_loader = data_loader.split_validation()
+            valid_data_loader = data_loader.get_valid_and_test_loaders()
 
             # build model architecture, then print to console
             model = config.init_obj('arch', module_arch)

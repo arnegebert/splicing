@@ -111,7 +111,10 @@ ENV/
 # input data, saved log, checkpoints
 data/
 input/
-saved/
+saved/DSC_original
+saved/log
+saved/models
+saved/test
 datasets/
 
 # editor, os cache directory

@@ -31,7 +31,7 @@ class BaseDataLoader(DataLoader):
 
         super().__init__(dataset=self.train, **self.init_kwargs)
 
-    def split_validation(self):
+    def get_valid_and_test_loaders(self):
         if not self.extra_test:
             # return three dataloaders here based on my validation datasets
             return DataLoader(dataset=self.test_all,  **self.init_kwargs),\

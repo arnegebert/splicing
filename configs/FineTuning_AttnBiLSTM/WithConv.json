@@ -7,7 +7,7 @@
     "arch": {
         "type": "AttnBiLSTM",
         "args": {
-          "lstm_dim": 50,
+          "LSTM_dim": 50,
           "attn_dim": 100,
           "attn_mode": "conv",
           "conv_size": 3

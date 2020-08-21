@@ -1,5 +1,5 @@
 {
-    "name": "HIPSCI_MAJIQ_SingleHead",
+    "name": "SingleHead",
 
     "n_gpu": 1,
     "run_id": "",
@@ -7,7 +7,7 @@
     "arch": {
         "type": "AttnBiLSTM",
         "args": {
-          "lstm_dim": 50,
+          "LSTM_dim": 50,
           "attn_dim": 100,
           "attn_mode": "single_head"
         }

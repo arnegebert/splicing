@@ -73,8 +73,8 @@ class Comparison_DataLoader(BaseDataLoader):
             low[:, 280, 3] = (low[:, 280, 3] >= self.class_threshold).astype(np.float32)
             high[:, 280, 3] = (high[:, 280, 3] >= self.class_threshold).astype(np.float32)
 
-    # # overriding split_validation for extra functionality
-    # def split_validation(self):
+    # # overriding get_valid_and_test_loaders for extra functionality
+    # def get_valid_and_test_loaders(self):
     #     pass
 
 

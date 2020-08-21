@@ -9,7 +9,6 @@
         "args": {
           "LSTM_dim": 50,
           "attn_dim": 100,
-          "attn_dropout": 0.2,
           "attn_mode": "no_query"
         }
     },
