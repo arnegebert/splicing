@@ -580,7 +580,6 @@ class BiLSTM2(BaseModel):
 
         embedding = F.relu(self.embedding(start))
         output, (h_n, c_n) = self.lstm1(embedding)
-        # todo -- might need to add lstm layers for grid search here
         x = c_n.view(-1, self.LSTM_dim*self.lstm_layer)
 
         embedding2 = F.relu(self.embedding(end))
@@ -634,7 +633,6 @@ class BiLSTM3(BaseModel):
         # currently treat the 140-input as dimension, but shouldn't
         # just want a dense mapping from sparse 4-d to dense 4-d
         output, (h_n, c_n) = self.lstm1(embedding.view(-1, 140, 4))
-        # todo -- might need to add lstm layers for grid search here
         # output = [256, 140, 2*50]  // 256, 4, 50???
         x = h_n.view(-1, self.LSTM_dim*self.lstm_layer)
         # want: a 50-dimensional output for the complete sequence (140x4)
@@ -689,7 +687,6 @@ class BiLSTM4(BaseModel):
         # currently treat the 140-input as dimension, but shouldn't
         # just want a dense mapping from sparse 4-d to dense 4-d
         output, (h_n, c_n) = self.lstm1(embedding)
-        # todo -- might need to add lstm layers for grid search here
         # output = [256, 140, 2*50]  // 256, 4, 50???
         x = h_n.view(-1, self.LSTM_dim*self.lstm_layer)
         # want: a 50-dimensional output for the complete sequence (140x4)

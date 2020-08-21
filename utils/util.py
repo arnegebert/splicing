@@ -15,9 +15,9 @@ def overlap(start, end, start2, end2):
 
 def save_pred_and_target(log_dir, pred_target_all, pred_target_low, pred_target_high):
     # pred_target_all = (pred_all, target_all)
-    pred_target_all = np.concatenate((np.array(pred_target_all[0]).flatten(), np.array(pred_target_all[1])))
-    pred_target_low = np.concatenate((np.array(pred_target_low[0]).flatten(), np.array(pred_target_low[1])))
-    pred_target_high = np.concatenate((np.array(pred_target_high[0]).flatten(), np.array(pred_target_high[1])))
+    pred_target_all = np.concatenate((pred_target_all[0].flatten(), pred_target_all[1]))
+    pred_target_low = np.concatenate((pred_target_low[0].flatten(), pred_target_low[1]))
+    pred_target_high = np.concatenate((pred_target_high[0].flatten(), pred_target_high[1]))
     np.save(f'{log_dir}/pred_and_target_all.npy', pred_target_all)
     np.save(f'{log_dir}/pred_and_target_low.npy', pred_target_low)
     np.save(f'{log_dir}/pred_and_target_high.npy', pred_target_high)

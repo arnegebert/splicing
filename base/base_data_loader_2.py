@@ -8,13 +8,14 @@ class BaseDataLoader(DataLoader):
     Base class for all data loaders
     """
     def __init__(self, data, batch_size, shuffle, validation_split, num_workers, collate_fn=default_collate,
-                 extra_val_datasets=None, drop_last=False,
+                 extra_test_datasets=None, drop_last=False,
                  data_split=True, cross_validation_seed=0):
         assert data_split, "Handling when data is not split into cons/low/high data currently not implemented"
         self.validation_split = validation_split
         self.cross_validation_seed = cross_validation_seed
-        self.extra_val = extra_val_datasets
-        cons, low, high = data
+        self.extra_test = extra_test_datasets
+        if data_split:
+            cons, low, high = data
         folds = 1/validation_split
         if not folds.is_integer(): print(f'Warning: rounded down to {folds} cross-validation folds')
         self.train, self.test_all, self.test_low, self.test_high, \
@@ -31,7 +32,7 @@ class BaseDataLoader(DataLoader):
         super().__init__(dataset=self.train, **self.init_kwargs)
 
     def split_validation(self):
-        if not self.extra_val:
+        if not self.extra_test:
             # return three dataloaders here based on my validation datasets
             return DataLoader(dataset=self.test_all,  **self.init_kwargs),\
                    DataLoader(dataset=self.test_low, **self.init_kwargs),\
@@ -40,17 +41,18 @@ class BaseDataLoader(DataLoader):
                    # DataLoader(dataset=self.test_low, **self.init_kwargs),\
                    # DataLoader(dataset=self.test_high,  **self.init_kwargs)
         else:
-            # three validation sets which are standard in CV
-            # todo: fix
-            raise Exception('Not yet updated to test set ages')
-            val_sets = [DataLoader(dataset=self.val_all,  **self.init_kwargs),
-                   DataLoader(dataset=self.val_low, **self.init_kwargs),
-                   DataLoader(dataset=self.val_high,  **self.init_kwargs)]
-            # 6 other validation sets which I have added
-            if len(self.extra_val) != 9: raise Exception('Unexpected number of extra validation sets')
-            for extra_val_set in self.extra_val:
-                val_sets.append(DataLoader(dataset=extra_val_set,  **self.init_kwargs))
-            return val_sets
+            # three test sets which are standard in CV
+            # raise Exception('Not yet updated to test set ages')
+            regular_test_and_val_sets = [DataLoader(dataset=self.test_all,  **self.init_kwargs),
+                   DataLoader(dataset=self.test_low, **self.init_kwargs),
+                   DataLoader(dataset=self.test_high,  **self.init_kwargs),
+                         DataLoader(dataset=self.val_all,  **self.init_kwargs)]
+            # 6 other test sets which I have added
+            if len(self.extra_test) != 9: raise Exception('Unexpected number of extra test sets')
+            extra_test_sets = []
+            for extra_test_set in self.extra_test:
+                extra_test_sets.append(DataLoader(dataset=extra_test_set,  **self.init_kwargs))
+            return regular_test_and_val_sets, extra_test_sets
 
     def get_train_test_and_val_sets(self, cons, low, high, folds=10):
         cons_fold_len = int(cons.shape[0] / folds)
@@ -97,9 +99,10 @@ class BaseDataLoader(DataLoader):
         test_all = np.concatenate((val_high, low[low_fold_len * fold_test:low_fold_len * (fold_test + 1)]), axis=0)
 
         print(f'Size training dataset: {len(train)}')
+        print(f'Size mixed test dataset: {len(test_all)}')
+        print(f'Size low inclusion test dataset: {len(test_low)}')
+        print(f'Size high inclusion test dataset: {len(test_high)}')
         print(f'Size mixed validation dataset: {len(val_all)}')
-        print(f'Size low inclusion validation dataset: {len(val_low)}')
-        print(f'Size high inclusion validation dataset: {len(val_high)}')
 
         train_dataset = VanillaDataset(train)
         val_all_dataset, val_low_dataset, val_high_dataset = VanillaDataset(val_all), VanillaDataset(val_low), \

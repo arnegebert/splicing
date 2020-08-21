@@ -75,7 +75,7 @@ class LayerNorm(nn.Module):
     def forward(self, x):
         mean = x.mean(-1, keepdim=True)
         std = x.std(-1, keepdim=True)
-        # todo not sure what you need a_2 and b_2 for; seems like they act as neutral elements
+        # not sure what you need a_2 and b_2 for; seems like they act as neutral elements
         # (multiplying by 1, adding 0)
         return self.a_2 * (x - mean) / (std + self.eps) + self.b_2
 

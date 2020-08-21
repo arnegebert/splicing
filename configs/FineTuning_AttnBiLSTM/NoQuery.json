@@ -47,7 +47,7 @@
         "args": {
             "attention": true
         },
-        "epochs": 1,
+        "epochs": 500,
 
         "save_dir": "saved/",
         "save_period": 251,
@@ -55,9 +55,9 @@
 
         "monitor": "max val_auc",
         "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc"],
-"early_stop": 15,
+        "early_stop": 15,
 
-        "tensorboard": false
+        "tensorboard": true
     },
     "comment": "",
     "cross_validation": true

@@ -1,8 +1,11 @@
 import numpy as np
 import torch
+from sklearn.metrics import precision_recall_curve, confusion_matrix
 
 from base import BaseTrainer
-from utils import inf_loop, MetricTracker
+from model.metric import auc_single
+from utils import inf_loop, MetricTracker, save_pred_and_target
+from visualizations.roc_curves import plot_and_save_roc
 
 
 class Comparison_Trainer(BaseTrainer):
@@ -13,7 +16,8 @@ class Comparison_Trainer(BaseTrainer):
         pass
 
     def set_param(self, model, criterion, metric_ftns, optimizer, config, data_loader,
-                 valid_data_loader=None, lr_scheduler=None, len_epoch=None):
+                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, embedded=False,
+                  attention=False):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
@@ -25,35 +29,46 @@ class Comparison_Trainer(BaseTrainer):
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
         # self.valid_data_loader = valid_data_loader
-        self.val_all, self.val_low, self.val_high, self.val_all_diff_lib, self.val_low_diff_lib, \
-        self.val_high_diff_lib, self.val_all_diff_indv, self.val_low_diff_indv, self.val_high_diff_indv, \
-        self.val_all_diff_tissue, self.val_low_diff_tissue, self.val_high_diff_tissue = valid_data_loader
-        self.do_validation = self.val_all is not None
+        # self.test_all, self.test_low, self.test_high, self.test_all_diff_lib, self.test_low_diff_lib, \
+        # self.test_high_diff_lib, self.test_all_diff_indv, self.test_low_diff_indv, self.test_high_diff_indv, \
+        # self.test_all_diff_tissue, self.test_low_diff_tissue, self.test_high_diff_tissue = valid_data_loader
+
+        (self.test_all, self.test_low, self.test_high, self.val_all), self.extra_test_set_loaders = valid_data_loader
         self.lr_scheduler = lr_scheduler
         # self.lr_scheduler = None
         self.log_step = int(np.sqrt(data_loader.batch_size))
+        self.embedded = embedded
+        self.attention = attention
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.val_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.test_all_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.test_low_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.test_high_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
 
-        self.test_metrics = []
-        for i in range(len(valid_data_loader)):
-            self.test_metrics.append(MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer))
+        self.extra_test_set_names = ['diff_lib', 'diff_lib_low', 'diff_lib_high',
+                                     'diff_indv', 'diff_indv_low', 'diff_indv_high',
+                                     'diff_tissue', 'diff_tissue_low', 'diff_tissue_high']
+        self.extra_test_set_metrics = [
+            MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer) for _ in self.extra_test_set_names
+        ]
 
-        self.valid_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.valid_low_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.valid_high_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
 
-        self.val_all_metrics_diff_lib = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.val_low_metrics_diff_lib = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.val_high_metrics_diff_lib = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-
-        self.val_all_metrics_diff_indv = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.val_low_metrics_diff_indv = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.val_high_metrics_diff_indv = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-
-        self.val_all_metrics_diff_tissue = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.val_low_metrics_diff_tissue = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.val_high_metrics_diff_tissue = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.test_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.test_low_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.test_high_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        #
+        # self.test_all_metrics_diff_lib = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.test_low_metrics_diff_lib = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.test_high_metrics_diff_lib = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        #
+        # self.test_all_metrics_diff_indv = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.test_low_metrics_diff_indv = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.test_high_metrics_diff_indv = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        #
+        # self.test_all_metrics_diff_tissue = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.test_low_metrics_diff_tissue = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        # self.test_high_metrics_diff_tissue = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
 
     def _train_epoch(self, epoch):
         """
@@ -67,13 +82,13 @@ class Comparison_Trainer(BaseTrainer):
 
         for batch_idx, data in enumerate(self.data_loader):
             # start, end = data[:, :140, :4], data[:, 140:280]
-            seqs = data[:, :280].view(-1, 2, 140, 4)
-            lens, target = data[:, 280, :3], data[:, 280, 3]
-
+            seqs, lens, target = self.convert_to_model_input_format(data)
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
 
             output = self.model(seqs, lens)
+            if self.attention:
+                output, attn_ws = output
             loss = self.criterion(output, target)
             loss.backward()
             self.optimizer.step()
@@ -99,36 +114,30 @@ class Comparison_Trainer(BaseTrainer):
                 break
         log = self.train_metrics.result()
 
-        if self.do_validation:
-            val_log_all, val_log_low, val_log_high, val_log_all_diff_lib, val_log_low_diff_lib, val_log_high_diff_lib, \
-                val_log_all_diff_indv, val_log_low_diff_indv, val_log_high_diff_indv, \
-                val_log_all_diff_tissue, val_log_low_diff_tissue, val_log_high_diff_tissue = self._valid_epoch(epoch)
-            log.update(**{'val_' + k: v for k, v in val_log_all.items()})
-            val_log_low.pop('loss', None)
-            log.update(**{'val_low_' + k: v for k, v in val_log_low.items()})
-            val_log_high.pop('loss', None)
-            log.update(**{'val_high_' + k: v for k, v in val_log_high.items()})
+        # test_log_all, test_log_low, test_log_high, test_log_all_diff_lib, test_log_low_diff_lib, test_log_high_diff_lib, \
+        #     test_log_all_diff_indv, test_log_low_diff_indv, test_log_high_diff_indv, \
+        #     test_log_all_diff_tissue, test_log_low_diff_tissue, test_log_high_diff_tissue = self._valid_epoch(epoch)
+        test_log_all, test_log_low, test_log_high, val_log_all, extra_test_set_logs = self._valid_epoch(epoch)
+        # (test_log_all, test_log_low, test_log_high, val_log_all), extra_test_set_logs = all_logs[:4], all_logs[4:]
+        log.update(**{'test_' + k: v for k, v in test_log_all.items()})
+        log.update(**{'test_low_' + k: v for k, v in test_log_low.items()})
+        log.update(**{'test_high_' + k: v for k, v in test_log_high.items()})
+        log.update(**{'val_' + k: v for k, v in test_log_high.items()})
 
-            val_log_all_diff_lib.pop('loss', None)
-            log.update(**{'val_diff_lib_' + k: v for k, v in val_log_all_diff_lib.items()})
-            val_log_low_diff_lib.pop('loss', None)
-            log.update(**{'val_low_diff_lib_' + k: v for k, v in val_log_low_diff_lib.items()})
-            val_log_high_diff_lib.pop('loss', None)
-            log.update(**{'val_high_diff_lib_' + k: v for k, v in val_log_high_diff_lib.items()})
+        for (name, test_log) in zip(self.extra_test_set_names, extra_test_set_logs):
+            log.update(**{f'{name}_' + k: v for k, v in test_log.items()})
 
-            val_log_all_diff_indv.pop('loss', None)
-            log.update(**{'val_diff_indv_' + k: v for k, v in val_log_all_diff_indv.items()})
-            val_log_low_diff_indv.pop('loss', None)
-            log.update(**{'val_low_diff_indv_' + k: v for k, v in val_log_low_diff_indv.items()})
-            val_log_high_diff_indv.pop('loss', None)
-            log.update(**{'val_high_diff_indv_' + k: v for k, v in val_log_high_diff_indv.items()})
-
-            val_log_all_diff_tissue.pop('loss', None)
-            log.update(**{'val_diff_tissue_' + k: v for k, v in val_log_all_diff_tissue.items()})
-            val_log_low_diff_tissue.pop('loss', None)
-            log.update(**{'val_low_diff_tissue_' + k: v for k, v in val_log_low_diff_tissue.items()})
-            val_log_high_diff_tissue.pop('loss', None)
-            log.update(**{'val_high_diff_tissue_' + k: v for k, v in val_log_high_diff_tissue.items()})
+        # log.update(**{'test_diff_lib_' + k: v for k, v in test_log_all_diff_lib.items()})
+        # log.update(**{'test_low_diff_lib_' + k: v for k, v in test_log_low_diff_lib.items()})
+        # log.update(**{'test_high_diff_lib_' + k: v for k, v in test_log_high_diff_lib.items()})
+        #
+        # log.update(**{'test_diff_indv_' + k: v for k, v in test_log_all_diff_indv.items()})
+        # log.update(**{'test_low_diff_indv_' + k: v for k, v in test_log_low_diff_indv.items()})
+        # log.update(**{'test_high_diff_indv_' + k: v for k, v in test_log_high_diff_indv.items()})
+        #
+        # log.update(**{'test_diff_tissue_' + k: v for k, v in test_log_all_diff_tissue.items()})
+        # log.update(**{'test_low_diff_tissue_' + k: v for k, v in test_log_low_diff_tissue.items()})
+        # log.update(**{'test_high_diff_tissue_' + k: v for k, v in test_log_high_diff_tissue.items()})
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
@@ -142,46 +151,62 @@ class Comparison_Trainer(BaseTrainer):
         :return: A log that contains information about validation
         """
         self.model.eval()
-        self.valid_all_metrics.reset()
-        self.valid_low_metrics.reset()
-        self.valid_high_metrics.reset()
+        self.test_all_metrics.reset()
+        self.test_low_metrics.reset()
+        self.test_high_metrics.reset()
+        self.val_metrics.reset()
         with torch.no_grad():
-            self._single_val_epoch(self.val_all, epoch, self.valid_all_metrics)
-            self._single_val_epoch(self.val_low, epoch, self.valid_low_metrics)
-            self._single_val_epoch(self.val_high, epoch, self.valid_high_metrics)
+            pred_target_all = self._single_val_epoch(self.test_all, epoch, self.test_all_metrics)
+            pred_target_low = self._single_val_epoch(self.test_low, epoch, self.test_low_metrics)
+            pred_target_high = self._single_val_epoch(self.test_high, epoch, self.test_high_metrics)
+            self._single_val_epoch(self.val_all, epoch, self.val_metrics)
+            # todo: make this cleaner; assumes that mnt_best tracks auc
+            if auc_single(pred_target_all) >= self.mnt_best:
+                self.auc_f1_metric_evaluation_and_visualization(pred_target_all, pred_target_low, pred_target_high)
 
-            self._single_val_epoch(self.val_all_diff_lib, epoch, self.val_all_metrics_diff_lib)
-            self._single_val_epoch(self.val_low_diff_lib, epoch, self.val_low_metrics_diff_lib)
-            self._single_val_epoch(self.val_high_diff_lib, epoch, self.val_high_metrics_diff_lib)
+            for loader, metric in zip(self.extra_test_set_loaders, self.extra_test_set_metrics):
+                self._single_val_epoch(loader, epoch, metric)
 
-            self._single_val_epoch(self.val_all_diff_indv, epoch, self.val_all_metrics_diff_indv)
-            self._single_val_epoch(self.val_low_diff_indv, epoch, self.val_low_metrics_diff_indv)
-            self._single_val_epoch(self.val_high_diff_indv, epoch, self.val_high_metrics_diff_indv)
+            # self._single_val_epoch(self.test_all_diff_lib, epoch, self.test_all_metrics_diff_lib)
+            # self._single_val_epoch(self.test_low_diff_lib, epoch, self.test_low_metrics_diff_lib)
+            # self._single_val_epoch(self.test_high_diff_lib, epoch, self.test_high_metrics_diff_lib)
+            #
+            # self._single_val_epoch(self.test_all_diff_indv, epoch, self.test_all_metrics_diff_indv)
+            # self._single_val_epoch(self.test_low_diff_indv, epoch, self.test_low_metrics_diff_indv)
+            # self._single_val_epoch(self.test_high_diff_indv, epoch, self.test_high_metrics_diff_indv)
+            #
+            # self._single_val_epoch(self.test_all_diff_tissue, epoch, self.test_all_metrics_diff_tissue)
+            # self._single_val_epoch(self.test_low_diff_tissue, epoch, self.test_low_metrics_diff_tissue)
+            # self._single_val_epoch(self.test_high_diff_tissue, epoch, self.test_high_metrics_diff_tissue)
 
-            self._single_val_epoch(self.val_all_diff_tissue, epoch, self.val_all_metrics_diff_tissue)
-            self._single_val_epoch(self.val_low_diff_tissue, epoch, self.val_low_metrics_diff_tissue)
-            self._single_val_epoch(self.val_high_diff_tissue, epoch, self.val_high_metrics_diff_tissue)
-
+        extra_test_set_results = [metric.result() for metric in self.extra_test_set_metrics]
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
-        return self.valid_all_metrics.result(), self.valid_low_metrics.result(), self.valid_high_metrics.result(),\
-    self.val_all_metrics_diff_lib.result(), self.val_low_metrics_diff_lib.result(), self.val_high_metrics_diff_lib.result(), \
-   self.val_all_metrics_diff_indv.result(), self.val_low_metrics_diff_indv.result(), self.val_high_metrics_diff_indv.result(), \
-   self.val_all_metrics_diff_tissue.result(), self.val_low_metrics_diff_tissue.result(), self.val_high_metrics_diff_tissue.result()
+        return self.test_all_metrics.result(), self.test_low_metrics.result(), self.test_high_metrics.result(), \
+        self.val_metrics.result(), extra_test_set_results
+
+   #      return self.test_all_metrics.result(), self.test_low_metrics.result(), self.test_high_metrics.result(),\
+   #  self.test_all_metrics_diff_lib.result(), self.test_low_metrics_diff_lib.result(), self.test_high_metrics_diff_lib.result(), \
+   # self.test_all_metrics_diff_indv.result(), self.test_low_metrics_diff_indv.result(), self.test_high_metrics_diff_indv.result(), \
+   # self.test_all_metrics_diff_tissue.result(), self.test_low_metrics_diff_tissue.result(), self.test_high_metrics_diff_tissue.result()
 
     def _single_val_epoch(self, val_data, epoch, metrics):
+        predictions, targets = [], []
         for batch_idx, data in enumerate(val_data):
-            seqs = data[:, :280].view(-1, 2, 140, 4)
-            lens, target = data[:, 280, :3], data[:, 280, 3]
+            seqs, lens, target = self.convert_to_model_input_format(data)
 
             seqs, lens, target = seqs.to(self.device), lens.to(self.device), target.to(self.device)
 
             output = self.model(seqs, lens)
+            if self.attention:
+                output, attn_ws = output
             loss = self.criterion(output, target)
 
             self.writer.set_step((epoch - 1) * len(val_data) + batch_idx, 'valid')
-            metrics.update('loss', loss.item())
+            if 'loss' in metrics: metrics.update('loss', loss.item())
+            predictions.append(output.data)
+            targets.append(target.data)
             for met in self.metric_ftns:
                 try:
                     auc_val = met(output, target)
@@ -189,6 +214,33 @@ class Comparison_Trainer(BaseTrainer):
                 except ValueError:
                     print('AUC bitching around')
                     continue
+        predictions, targets = torch.cat(predictions, dim=0).cpu().numpy(), torch.cat(targets, dim=0).cpu().numpy()
+        return predictions, targets
+
+    def auc_f1_metric_evaluation_and_visualization(self, pred_target_all, pred_target_low, pred_target_high):
+        save_pred_and_target(self.log_dir, pred_target_all, pred_target_low, pred_target_high)
+        plot_and_save_roc(self.log_dir, (pred_target_low, 'low'), (pred_target_all, 'all'),
+                          (pred_target_high, 'high'))
+        pred_all, target_all = pred_target_all
+        # taken from https://machinelearningmastery.com/threshold-moving-for-imbalanced-classification/
+        precision, recall, thresholds = precision_recall_curve(target_all, pred_all)
+        # convert to f score
+        fscore = (2 * precision * recall) / (precision + recall)
+        # locate the index of the largest f score
+        ix = np.nanargmax(fscore)
+        tn, fp, fn, tp = confusion_matrix(target_all, pred_all >= thresholds[ix]).ravel()
+        self.logger.info(f'Best Threshold: {thresholds[ix]}, F-Score={fscore[ix]:.3f}')
+        self.logger.info(f'Corresponding precision: {precision[ix]:.3f}, recall: {recall[ix]:.3f}')
+        self.logger.info(f'TN: {tn}, FP: {fp}, FN: {fn}, TP: {tp}')
+
+    def convert_to_model_input_format(self, data):
+        if self.embedded:
+            seqs = data[:, :2].view(-1, 200)
+            lens, target = data[:, 2, :3], data[:, 2, 3]
+        else:
+            seqs = data[:, :280].view(-1, 2, 140, 4)
+            lens, target = data[:, -1, :3], data[:, -1, 3]
+        return seqs, lens, target
 
     def _progress(self, batch_idx):
         base = '[{}/{} ({:.0f}%)]'

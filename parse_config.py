@@ -57,8 +57,8 @@ class ConfigParser:
         self._log_dir = save_dir / 'log' / exper_name / run_id
 
         # make directory for saving checkpoints and log.
-        exist_ok = True #run_id == ''
-        print('FIX EXIST OK IN PARSE CONFIG'*100)
+        exist_ok = run_id == '' #True
+        # print('FIX EXIST OK IN PARSE CONFIG'*100)
         self.save_dir.mkdir(parents=True, exist_ok=exist_ok)
         self.log_dir.mkdir(parents=True, exist_ok=exist_ok)
 

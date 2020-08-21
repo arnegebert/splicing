@@ -39,9 +39,9 @@ def auc(output, target):
 
 def auc_single(output_and_target):
     output, target = output_and_target
-    # return auc(output, target)
-    output, target = np.array(output).flatten(), np.array(target)
     return metrics.roc_auc_score(target, output)
+    # output, target = np.array(output).flatten(), np.array(target)
+    # return metrics.roc_auc_score(target, output)
 
 # same as auc
 def auc2(output, target):
