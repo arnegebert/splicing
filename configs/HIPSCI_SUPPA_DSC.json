@@ -8,7 +8,7 @@
         "args": {}
     },
     "data_loader": {
-        "type": "Vanilla_DataLoader",
+        "type": "VanillaDataLoader",
         "args":{
             "data_dir": "data/hipsci_suppa",
             "batch_size": 256,
@@ -39,7 +39,7 @@
         }
     },
     "trainer": {
-        "type": "Vanilla_Trainer",
+        "type": "VanillaTrainer",
         "args": {},
         "epochs": 500,
 

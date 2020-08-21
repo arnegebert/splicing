@@ -9,7 +9,7 @@
         "args": {}
     },
     "data_loader": {
-        "type": "HEXEvent2Vanilla_DataLoader",
+        "type": "HEXEvent2VanillaDataLoader",
         "args":{
             "data_dir": "",
             "batch_size": 256,
@@ -38,7 +38,7 @@
         }
     },
     "trainer": {
-        "type": "Vanilla_Trainer",
+        "type": "VanillaTrainer",
         "args": {},
         "epochs": 500,
 

@@ -3,7 +3,7 @@ import time
 import numpy as np
 from base import BaseDataLoader
 
-class Vanilla_DataLoader(BaseDataLoader):
+class VanillaDataLoader(BaseDataLoader):
     """
     DataLoader for loading data in the standard "Vanilla" format
     """
