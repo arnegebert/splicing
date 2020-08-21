@@ -2,7 +2,7 @@
     "name": "HEXEvent_DSC",
 
     "n_gpu": 1,
-    "run_id": "_final",
+    "run_id": "",
 
     "arch": {
         "type": "DSC",
