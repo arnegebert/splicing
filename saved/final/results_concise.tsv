@@ -1,3 +1,4 @@
 name	test_all (mean)	test_all (std)	test_low (mean)	test_low (std)	test_high (mean)	test_high (std)
+HEXEvent_DSC	0.873	0.006	0.890	0.008	0.856	0.010
 SingleHead (5e-4)	0.801	0.021	0.850	0.025	0.710	0.016
 SingleHead (1e-3)	0.832	0.025	0.885	0.029	0.737	0.028
