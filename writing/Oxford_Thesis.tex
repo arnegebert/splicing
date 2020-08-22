@@ -23,11 +23,11 @@
 % The most common choices should be below.  You can also do other things, like replacing "a4paper" with "letterpaper", etc.
 
 % This one will format for two-sided binding (ie left and right pages have mirror margins; blank pages inserted where needed):
-\documentclass[a4paper,twoside]{ociamthesis}
+% \documentclass[a4paper,twoside]{ociamthesis}
 % This one will format for one-sided binding (ie left margin > right margin; no extra blank pages):
 %\documentclass[a4paper]{ociamthesis}
 % This one will format for PDF output (ie equal margins, no extra blank pages):
-%\documentclass[a4paper,nobind]{ociamthesis} 
+\documentclass[a4paper,nobind]{ociamthesis} 
 
 
 
@@ -36,7 +36,7 @@
 % generating a PDF to send to the printer!
 
 % This adds a "DRAFT" footer to every normal page.  (The first page of each chapter is not a "normal" page.)
-\fancyfoot[C]{\emph{DRAFT Printed on \today}}  
+\fancyfoot[C]{\emph{Version from \today}}  
 
 % This highlights (in blue) corrections marked with (for words) \mccorrect{blah} or (for whole
 % paragraphs) \begin{mccorrection} . . . \end{mccorrection}.  This can be useful for sending a PDF of
@@ -53,7 +53,6 @@
 
 % The science-type option: numerical in-text citation with references in order of appearance.
 \usepackage[style=numeric-comp, sorting=none, backend=biber, doi=false, isbn=false]{biblatex}
-\usepackage{graphicx}
 \newcommand*{\bibtitle}{References}
 
 % The humanities-type option: author-year in-text citation with an alphabetical works cited.
@@ -94,6 +93,7 @@
 
 %%%%% YOUR OWN PERSONAL MACROS
 % This is a good place to dump your own LaTeX macros as they come up.
+\usepackage{graphicx}
 
 % To make text superscripts shortcuts
 	\renewcommand{\th}{\textsuperscript{th}} % ex: I won 4\th place
