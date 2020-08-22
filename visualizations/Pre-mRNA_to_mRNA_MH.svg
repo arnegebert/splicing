@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 15.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="svg2" xmlns:svg="http://www.w3.org/2000/svg"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="458.667px"
+	 height="267.333px" viewBox="5.167 -25.333 458.667 267.333" enable-background="new 5.167 -25.333 458.667 267.333"
+	 xml:space="preserve">
+<rect id="rect3246" x="206.728" y="226" fill="#FF6666" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"/>
+<rect id="rect3248" x="409.728" y="226" fill="#99FFFF" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"/>
+<rect id="rect3244" x="9.728" y="226" fill="#666666" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"/>
+<text transform="matrix(1 0 0 1 27.3245 235.8252)" font-family="'ArialMT'" font-size="12">untranslated region (UTR)</text>
+<text transform="matrix(1 0 0 1 224.3245 235.8252)" font-family="'ArialMT'" font-size="12">coding sequence (CDS)</text>
+<text transform="matrix(1 0 0 1 427.3245 235.8252)" font-family="'ArialMT'" font-size="12">intron</text>
+<g>
+	<g id="g3254" transform="translate(4.5704913,1.5000034)">
+		
+			<rect id="rect2260" x="11.829" y="1" fill="#666666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"/>
+		
+			<rect id="rect3232" x="31.829" y="1" fill="#FF6666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="34" height="20"/>
+	</g>
+	
+		<rect id="rect3236" x="137.399" y="2.5" fill="#FF6666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="59" height="20"/>
+	<g id="g3274" transform="translate(4.5704913,1.5000034)">
+		
+			<rect id="rect3242" x="426.828" y="1" fill="#666666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"/>
+		
+			<rect id="rect3240" x="383.828" y="1" fill="#FF6666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="43" height="20"/>
+	</g>
+	
+		<rect id="rect3234" x="70.399" y="2.5" fill="#99FFFF" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="67" height="20"/>
+	
+		<rect id="rect3238" x="196.399" y="2.5" fill="#99FFFF" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="192" height="20"/>
+	<text transform="matrix(1 0 0 1 30.5847 47.2715)" font-family="'ArialMT'" font-size="12">exon</text>
+	<text transform="matrix(1 0 0 1 277.4084 47.2715)" font-family="'ArialMT'" font-size="12">intron</text>
+	<text transform="matrix(1 0 0 1 154.0847 47.2715)" font-family="'ArialMT'" font-size="12">exon</text>
+	<text transform="matrix(1 0 0 1 88.908 47.2715)" font-family="'ArialMT'" font-size="12">intron</text>
+	<text transform="matrix(1 0 0 1 407.0842 47.2715)" font-family="'ArialMT'" font-size="12">exon</text>
+	<path id="text3327" d="M16.524,29.189v0.625c0,1.634,0.236,2.727,0.719,3.281s1.425,0.844,2.875,0.844h20.094
+		c0.984,0,1.657,0.152,2.031,0.5s0.562,0.981,0.562,1.906v0.625h1.406v-0.625c0-0.925,0.188-1.559,0.562-1.906s1.078-0.5,2.062-0.5
+		h20.062c1.45,0,2.424-0.29,2.906-0.844s0.719-1.647,0.719-3.281v-0.625h-1.406v0.688c0,0.918-0.152,1.502-0.438,1.781
+		s-0.881,0.438-1.812,0.438H46.712c-1.03,0-1.784,0.139-2.25,0.438s-0.773,0.81-0.938,1.531c-0.164-0.722-0.472-1.233-0.938-1.531
+		s-1.22-0.438-2.25-0.438H20.18c-0.932,0-1.559-0.159-1.844-0.438s-0.406-0.863-0.406-1.781v-0.688H16.524z"/>
+	<path id="path3334" d="M388.508,29.188v0.625c0,1.634,0.236,2.727,0.719,3.281s1.457,0.844,2.906,0.844h24.469
+		c0.984,0,1.658,0.152,2.031,0.5c0.375,0.348,0.562,1.012,0.562,1.938v0.594h1.406v-0.594c0-0.925,0.189-1.59,0.562-1.938
+		c0.375-0.348,1.078-0.5,2.062-0.5h24.469c1.451,0,2.393-0.29,2.875-0.844s0.719-1.647,0.719-3.281v-0.625h-1.406v0.688
+		c0,0.918-0.121,1.502-0.406,1.781s-0.912,0.438-1.844,0.438h-24.531c-1.029,0-1.783,0.139-2.25,0.438
+		c-0.465,0.298-0.773,0.81-0.938,1.531c-0.164-0.722-0.471-1.233-0.938-1.531c-0.465-0.298-1.219-0.438-2.25-0.438h-24.562
+		c-0.932,0-1.527-0.159-1.812-0.438s-0.438-0.863-0.438-1.781v-0.688H388.508z"/>
+</g>
+<text transform="matrix(1 0 0 1 199.5872 -10)" font-family="'Arial-BoldItalicMT'" font-size="14">pre-mRNA</text>
+<text transform="matrix(1 0 0 1 187.4832 133)" font-family="'Arial-BoldItalicMT'" font-size="14">mature mRNA</text>
+<g>
+	<g id="g3254_1_" transform="translate(4.5704913,1.5000034)">
+		
+			<rect id="rect2260_1_" x="135.51" y="146.5" fill="#666666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"/>
+		
+			<rect id="rect3232_1_" x="155.51" y="146.5" fill="#FF6666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="34" height="20"/>
+	</g>
+	
+		<rect id="rect3236_1_" x="194.081" y="148" fill="#FF6666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="59" height="20"/>
+	<g id="g3274_1_" transform="translate(4.5704913,1.5000034)">
+		
+			<rect id="rect3242_1_" x="291.51" y="146.5" fill="#666666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"/>
+		
+			<rect id="rect3240_1_" x="248.51" y="146.5" fill="#FF6666" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="43" height="20"/>
+	</g>
+	<text transform="matrix(1 0 0 1 144.2664 195.082)" font-family="'ArialMT'" font-size="12">complete protein-coding sequence</text>
+	<path id="text3327_1_" d="M161.135,175v0.625c0,1.634,0.591,2.727,1.798,3.281c1.208,0.555,3.565,0.844,7.194,0.844h50.279
+		c2.463,0,4.146,0.152,5.083,0.5c0.936,0.348,1.408,0.98,1.408,1.906v0.625h3.519v-0.625c0-0.926,0.472-1.559,1.408-1.906
+		c0.936-0.348,2.697-0.5,5.161-0.5h50.2c3.629,0,6.066-0.289,7.273-0.844s1.799-1.647,1.799-3.281V175h-3.52v0.688
+		c0,0.918-0.381,1.502-1.094,1.781c-0.715,0.279-2.205,0.438-4.535,0.438h-50.437c-2.577,0-4.464,0.139-5.629,0.438
+		c-1.166,0.299-1.936,0.81-2.346,1.531c-0.41-0.722-1.181-1.232-2.346-1.531s-3.051-0.438-5.629-0.438h-50.436
+		c-2.331,0-3.9-0.158-4.614-0.438c-0.713-0.279-1.017-0.863-1.017-1.781V175H161.135z"/>
+</g>
+<g>
+	<g>
+		<g>
+			<polygon fill="#202020" points="232.313,52.334 232.313,90.736 220.745,90.736 233.899,113.521 247.053,90.736 235.486,90.736 
+				235.486,52.334 			"/>
+		</g>
+	</g>
+</g>
+</svg>
