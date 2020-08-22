@@ -1,0 +1,6 @@
+name	test_all (mean)	test_all (std)	test_low (mean)	test_low (std)	test_high (mean)	test_high (std)
+GTEx_Exon_DSC	0.679	0.000	0.699	0.000	0.607	0.000
+GTEx_Junc_DSC	0.681	0.000	0.697	0.000	0.626	0.000
+HIPSCI_MAJIQ_DSC	0.821	0.000	0.851	0.000	0.708	0.000
+HIPSCI_SUPPA_DSC	0.612	0.000	0.613	0.000	0.672	0.000
+iPSC_DSC	0.814	0.000	0.849	0.000	0.716	0.000
