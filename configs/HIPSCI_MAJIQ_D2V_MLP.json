@@ -54,5 +54,5 @@
 
         "tensorboard": false
     },
-    "cross_validation": true
+    "cross_validation": false
 }

@@ -5,7 +5,7 @@
     "run_id": "",
 
     "arch": {
-        "type": "BiLSTM2",
+        "type": "BiLSTM",
         "args": {
             "three_len_feats": true
         }

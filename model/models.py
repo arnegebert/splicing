@@ -371,26 +371,6 @@ class GTEx_DSC(BaseModel):
         y = torch.sigmoid(self.fc2(y))
         return y
 
-class DSCKiller(BaseModel):
-
-    def __init__(self):
-        super().__init__()
-        self.lin = nn.Linear(3, 1)
-
-    def forward(self, seqs, lens):
-        y = torch.sigmoid(self.lin(lens))
-        return y
-
-class DSCKillerKiller(BaseModel):
-
-    def __init__(self):
-        super().__init__()
-        self.lin = nn.Linear(1, 1, bias=True)
-
-    def forward(self, seqs, lens):
-        y = torch.sigmoid(self.lin(lens[:, 1].view(-1, 1)))
-        return y
-
 
 # v bad, 140k parameters, AUC barely getting above 0.5
 class BiLSTM1(BaseModel):
@@ -471,7 +451,6 @@ class BiLSTM2(BaseModel):
 
 
         self.embedding = nn.Linear(self.in_dim, self.embedding_dim, bias=True)
-        # self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
 
         self.lstm1 = nn.LSTM(input_size=self.embedding_dim, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
                              bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
@@ -564,8 +543,9 @@ class BiLSTM3(BaseModel):
 # 1 layers = seems best, as high as 85.8, fastest to train
 # 2 layers = slow to train, stop at 85 after 63 epochs
 # 3 layers = stopped after 20 epochs took like 20 min and it was still only at 82
-class BiLSTM4(BaseModel):
-    def __init__(self, three_len_feats):
+# 19141 parameters
+class BiLSTM(BaseModel):
+    def __init__(self, three_len_feats=True):
         super().__init__()
         self.three_feats = three_len_feats
         self.LSTM_dim = 50
@@ -575,9 +555,8 @@ class BiLSTM4(BaseModel):
         self.lstm_layer = 1
         self.lstm_dropout = 0.2
         self.in_fc = 2 * self.LSTM_dim * self.lstm_layer + (3 if self.three_feats else 1)
-
+        # mapping from sparse 4-d to dense 4-d
         self.embedding = nn.Linear(4, 4, bias=True)
-        # self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
 
         self.lstm1 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2, num_layers=self.lstm_layer,
                              bidirectional=True, batch_first=True, dropout=self.lstm_dropout)
@@ -588,18 +567,13 @@ class BiLSTM4(BaseModel):
         self.fc2 = nn.Linear(self.dim_fc, 1)
 
     def forward(self, seqs, lens):
-        # [256, 142, 4] or [256, 140, 4]
-        # lens = torch.zeros_like(lens)
+        # [256, 140, 4] input
         start, end = seqs[:, 0], seqs[:, 1]
-        start, end = start.view(-1, self.seq_length, 4), end.view(-1, self.seq_length, 4)
         embedding = F.relu(self.embedding(start))
-        # currently treat the 140-input as dimension, but shouldn't
-        # just want a dense mapping from sparse 4-d to dense 4-d
         output, (h_n, c_n) = self.lstm1(embedding)
-        # output = [256, 140, 2*50]  // 256, 4, 50???
+        # output: [256, 140, 2*50], c_n/h_n: [2, 256, 25]
+        # take only the last output as input for classification
         x = h_n.view(-1, self.LSTM_dim*self.lstm_layer)
-        # want: a 50-dimensional output for the complete sequence (140x4)
-        # currently have: a 50-dimensional output for each element in the sequence
 
         embedding2 = F.relu(self.embedding(end))
         output, (h_n, c_n) = self.lstm2(embedding2)
