@@ -27,7 +27,7 @@
 % This one will format for one-sided binding (ie left margin > right margin; no extra blank pages):
 %\documentclass[a4paper]{ociamthesis}
 % This one will format for PDF output (ie equal margins, no extra blank pages):
-\documentclass[a4paper,nobind]{ociamthesis} 
+\documentclass[a4paper,nobind,12pt]{ociamthesis} 
 
 
 
@@ -79,12 +79,12 @@
 
 % Master's candidates who require the alternate title page (with candidate number and word count)
 % must also un-comment and complete the following three lines:
-%\masterssubmissiontrue
-%\candidateno{933516}
+%\masterssubmission true
+\candidateno{1044935}
 %\wordcount{28,815}
 
 % Uncomment the following line if your degree also includes exams (eg most masters):
-%\renewcommand{\submittedtext}{Submitted in partial completion of the}
+\renewcommand{\submittedtext}{Submitted in partial completion of the}
 % Your full degree name.  (But remember that DPhils aren't "in" anything.  They're just DPhils.)
 \degree{MSc in Computer Science}
 % Term and year of submission, or date if your board requires (eg most masters)
@@ -103,6 +103,16 @@
 
 %%%%% THE ACTUAL DOCUMENT STARTS HERE
 \begin{document}
+
+
+
+%\begin{figure}
+%	\centering\includegraphics[width=0.7\textwidth]{figures/sample/Gray498.png} 
+%	\caption[Four-chamber illustration of the human heart.]{Four-chamber illustration of the human heart.  Clockwise from upper-left: right atrium, left atrium, left ventricle, right ventricle.}
+%	\label{fig:fourchamber}
+%\end{figure}
+
+
 
 
 
@@ -184,7 +194,7 @@
 % Uncomment to generate a list of tables:
 %\listoftables
 %	\mtcaddchapter
-fuvr
+
 %%%%% LIST OF ABBREVIATIONS
 % This example includes a list of abbreviations.  Look at text/abbreviations.tex to see how that file is
 % formatted.  The template can handle any kind of list though, so this might be a good place for a

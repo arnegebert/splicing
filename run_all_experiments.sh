@@ -1,5 +1,5 @@
 #!/bin/bash
-RUNID='overnight'
+RUNID='final'
 #
 #for configname in configs/*.json; do
 for configname in $(find configs/ -name '*.json' ! -wholename 'configs/config.json'); do
