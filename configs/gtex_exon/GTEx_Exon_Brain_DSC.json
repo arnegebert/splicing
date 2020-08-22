@@ -1,16 +1,16 @@
 {
-    "name": "GTEx_Junc_BiLSTM",
+    "name": "GTEx_Exon_Brain_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "BiLSTM",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
         "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/junc/brain",
+            "data_dir": "data/gtex_processed/exon/brain",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
