@@ -4,7 +4,7 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "GTEx_DSC",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {

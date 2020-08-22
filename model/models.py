@@ -15,28 +15,28 @@ class DSC(BaseModel):
         self.fc_in = 15*8*2 + 3
         self.conv1_start = nn.Conv1d(4, 32, kernel_size=7)
         torch.nn.init.xavier_uniform_(self.conv1_start.weight)
-        self.conv1_drop_start = nn.Dropout2d(0.2)
+        self.conv1_drop_start = nn.Dropout(0.2)
 
         self.conv2_start = nn.Conv1d(32, 8, kernel_size=4)
         torch.nn.init.xavier_uniform_(self.conv2_start.weight)
-        self.conv2_drop_start = nn.Dropout2d(0.2)
+        self.conv2_drop_start = nn.Dropout(0.2)
 
         self.conv3_start = nn.Conv1d(8, 8, kernel_size=3)
         torch.nn.init.xavier_uniform_(self.conv3_start.weight)
-        self.conv3_drop_start = nn.Dropout2d(0.2)
+        self.conv3_drop_start = nn.Dropout(0.2)
 
         # end conv blocks here...
         self.conv1_end = nn.Conv1d(4, 32, kernel_size=7)
         torch.nn.init.xavier_uniform_(self.conv1_end.weight)
-        self.conv1_drop_end = nn.Dropout2d(0.2)
+        self.conv1_drop_end = nn.Dropout(0.2)
 
         self.conv2_end = nn.Conv1d(32, 8, kernel_size=4)
         torch.nn.init.xavier_uniform_(self.conv2_end.weight)
-        self.conv2_drop_end = nn.Dropout2d(0.2)
+        self.conv2_drop_end = nn.Dropout(0.2)
 
         self.conv3_end = nn.Conv1d(8, 8, kernel_size=3)
         torch.nn.init.xavier_uniform_(self.conv3_end.weight)
-        self.conv3_drop_end = nn.Dropout2d(0.2)
+        self.conv3_drop_end = nn.Dropout(0.2)
 
         self.fc1 = nn.Linear(self.fc_in, 64)
         self.drop_fc = nn.Dropout(0.5)
@@ -89,54 +89,54 @@ class DSC_4_SEQ(BaseModel):
         # sequence before start
         self.conv1_bef_start = nn.Conv1d(4, 32, kernel_size=7)
         torch.nn.init.xavier_uniform_(self.conv1_bef_start.weight)
-        self.conv1_drop_bef_start = nn.Dropout2d(0.2)
+        self.conv1_drop_bef_start = nn.Dropout(0.2)
 
         self.conv2_bef_start = nn.Conv1d(32, 8, kernel_size=4)
         torch.nn.init.xavier_uniform_(self.conv2_bef_start.weight)
-        self.conv2_drop_bef_start = nn.Dropout2d(0.2)
+        self.conv2_drop_bef_start = nn.Dropout(0.2)
 
         self.conv3_bef_start = nn.Conv1d(8, 8, kernel_size=3)
         torch.nn.init.xavier_uniform_(self.conv3_bef_start.weight)
-        self.conv3_drop_bef_start = nn.Dropout2d(0.2)
+        self.conv3_drop_bef_start = nn.Dropout(0.2)
 
         # start sequence
         self.conv1_start = nn.Conv1d(4, 32, kernel_size=7)
         torch.nn.init.xavier_uniform_(self.conv1_start.weight)
-        self.conv1_drop_start = nn.Dropout2d(0.2)
+        self.conv1_drop_start = nn.Dropout(0.2)
 
         self.conv2_start = nn.Conv1d(32, 8, kernel_size=4)
         torch.nn.init.xavier_uniform_(self.conv2_start.weight)
-        self.conv2_drop_start = nn.Dropout2d(0.2)
+        self.conv2_drop_start = nn.Dropout(0.2)
 
         self.conv3_start = nn.Conv1d(8, 8, kernel_size=3)
         torch.nn.init.xavier_uniform_(self.conv3_start.weight)
-        self.conv3_drop_start = nn.Dropout2d(0.2)
+        self.conv3_drop_start = nn.Dropout(0.2)
 
         # end conv blocks here...
         self.conv1_end = nn.Conv1d(4, 32, kernel_size=7)
         torch.nn.init.xavier_uniform_(self.conv1_end.weight)
-        self.conv1_drop_end = nn.Dropout2d(0.2)
+        self.conv1_drop_end = nn.Dropout(0.2)
 
         self.conv2_end = nn.Conv1d(32, 8, kernel_size=4)
         torch.nn.init.xavier_uniform_(self.conv2_end.weight)
-        self.conv2_drop_end = nn.Dropout2d(0.2)
+        self.conv2_drop_end = nn.Dropout(0.2)
 
         self.conv3_end = nn.Conv1d(8, 8, kernel_size=3)
         torch.nn.init.xavier_uniform_(self.conv3_end.weight)
-        self.conv3_drop_end = nn.Dropout2d(0.2)
+        self.conv3_drop_end = nn.Dropout(0.2)
 
         # end conv blocks here...
         self.conv1_after_end = nn.Conv1d(4, 32, kernel_size=7)
         torch.nn.init.xavier_uniform_(self.conv1_after_end.weight)
-        self.conv1_drop_after_end = nn.Dropout2d(0.2)
+        self.conv1_drop_after_end = nn.Dropout(0.2)
 
         self.conv2_after_end = nn.Conv1d(32, 8, kernel_size=4)
         torch.nn.init.xavier_uniform_(self.conv2_after_end.weight)
-        self.conv2_drop_after_end = nn.Dropout2d(0.2)
+        self.conv2_drop_after_end = nn.Dropout(0.2)
 
         self.conv3_after_end = nn.Conv1d(8, 8, kernel_size=3)
         torch.nn.init.xavier_uniform_(self.conv3_after_end.weight)
-        self.conv3_drop_after_end = nn.Dropout2d(0.2)
+        self.conv3_drop_after_end = nn.Dropout(0.2)
 
         self.fc1 = nn.Linear(self.fc_in, 64)
         self.drop_fc = nn.Dropout(0.5)
@@ -470,123 +470,6 @@ class AttentionBlockWithConv(BaseModel):
         output = torch.sum(weighted_vals, dim=1)
         return output, attn_weights
 
-# ok, but 113 k parameters and doesn't amaze
-class BiLSTM2_4_SEQ(BaseModel):
-    def __init__(self, three_len_feats):
-        super().__init__()
-        self.three_feats = three_len_feats
-        if self.three_feats:
-            self.in_dim = 140
-            self.in_fc = 4 * 50 + 3
-        else:
-            self.in_dim = 140
-            self.in_fc = 4 * 50 + 1
-        self.embedding = nn.Linear(self.in_dim, self.in_dim, bias=True)
-        # self.embedding2 = nn.Linear(self.in_dim, self.in_dim, bias=True)
-
-        self.lstm0 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.lstm1 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.lstm2 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.lstm3 = nn.LSTM(input_size=self.in_dim, hidden_size=50//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.fc1 = nn.Linear(self.in_fc, 64)
-        self.drop_fc = nn.Dropout(0.5)
-        self.fc2 = nn.Linear(64, 1)
-
-    def forward(self, seqs, lens):
-        # [128, 142, 4] or [128, 140, 4]
-        # lens = torch.zeros_like(lens)
-        before_start, start, end, after_end = seqs[:, 0], seqs[:, 1], seqs[:, 2], seqs[:, 3]
-        start, end = start.view(-1, 4, self.in_dim), end.view(-1, 4, self.in_dim)
-        before_start, after_end = before_start.view(-1, 4, self.in_dim), after_end.view(-1, 4, self.in_dim)
-
-        embedding0 = F.relu(self.embedding(before_start))
-        output, (h_n, c_n) = self.lstm0(embedding0)
-        x = c_n.view(-1, 50)
-
-        embedding = F.relu(self.embedding(start))
-        output, (h_n, c_n) = self.lstm1(embedding)
-        xx = c_n.view(-1, 50)
-
-        embedding2 = F.relu(self.embedding(end))
-        output, (h_n, c_n) = self.lstm2(embedding2)
-        xxx = c_n.view(-1, 50)
-
-        embedding3 = F.relu(self.embedding(after_end))
-        output, (h_n, c_n) = self.lstm3(embedding3)
-        xxxx = c_n.view(-1, 50)
-
-        feats = torch.cat((x, xx, xxx, xxxx), dim=1)
-        if self.three_feats:
-            feats = torch.cat((feats, lens.view(-1, 3)), dim=1)
-        else:
-            feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
-        feats = feats.view(-1, self.in_fc)
-        y = self.drop_fc(F.relu(self.fc1(feats)))
-        y = torch.sigmoid(self.fc2(y))
-        return y
-
-# ok, but 113 k parameters and doesn't amaze
-class BiLSTM3_4_SEQ(BaseModel):
-    def __init__(self, three_len_feats):
-        super().__init__()
-        self.three_feats = three_len_feats
-        if self.three_feats:
-            self.in_dim = 140
-            self.in_fc = 4 * 24 + 3
-        else:
-            self.in_dim = 140
-            self.in_fc = 4 * 24 + 1
-        self.embedding_dim = 35
-        self.embedding = nn.Linear(self.in_dim, self.embedding_dim, bias=True)
-
-        self.lstm0 = nn.LSTM(input_size=self.embedding_dim, hidden_size=24//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.lstm1 = nn.LSTM(input_size=self.embedding_dim, hidden_size=24//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.lstm2 = nn.LSTM(input_size=self.embedding_dim, hidden_size=24//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.lstm3 = nn.LSTM(input_size=self.embedding_dim, hidden_size=24//2, num_layers=1, bidirectional=True,
-                            batch_first=True, dropout=0.2)
-        self.fc1 = nn.Linear(self.in_fc, 16)
-        self.drop_fc = nn.Dropout(0.5)
-        self.fc2 = nn.Linear(16, 1)
-
-    def forward(self, seqs, lens):
-        # [128, 142, 4] or [128, 140, 4]
-        # lens = torch.zeros_like(lens)
-        before_start, start, end, after_end = seqs[:, 0], seqs[:, 1], seqs[:, 2], seqs[:, 3]
-        start, end = start.view(-1, 4, self.in_dim), end.view(-1, 4, self.in_dim)
-        before_start, after_end = before_start.view(-1, 4, self.in_dim), after_end.view(-1, 4, self.in_dim)
-
-        embedding0 = F.relu(self.embedding(before_start))
-        output, (h_n, c_n) = self.lstm0(embedding0)
-        x = c_n.view(-1, 24)
-
-        embedding = F.relu(self.embedding(start))
-        output, (h_n, c_n) = self.lstm1(embedding)
-        xx = c_n.view(-1, 24)
-
-        embedding2 = F.relu(self.embedding(end))
-        output, (h_n, c_n) = self.lstm2(embedding2)
-        xxx = c_n.view(-1, 24)
-
-        embedding3 = F.relu(self.embedding(after_end))
-        output, (h_n, c_n) = self.lstm3(embedding3)
-        xxxx = c_n.view(-1, 24)
-
-        feats = torch.cat((x, xx, xxx, xxxx), dim=1)
-        if self.three_feats:
-            feats = torch.cat((feats, lens.view(-1, 3)), dim=1)
-        else:
-            feats = torch.cat((feats, lens.view(-1, 1)), dim=1)
-        feats = feats.view(-1, self.in_fc)
-        y = self.drop_fc(F.relu(self.fc1(feats)))
-        y = torch.sigmoid(self.fc2(y))
-        return y
 
 # overfitting AS FUCK
 class MLP(BaseModel):
