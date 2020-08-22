@@ -7,9 +7,9 @@
     "arch": {
         "type": "AttnBiLSTM",
         "args": {
-          "LSTM_dim": 50,
-          "attn_dim": 100,
-          "attn_mode": "single_head"
+            "LSTM_dim": 50,
+            "attn_dim": 100,
+            "attn_mode": "single_head"
         }
     },
     "data_loader": {
@@ -25,7 +25,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0.0,
             "amsgrad": true
         }
