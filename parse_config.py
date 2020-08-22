@@ -108,6 +108,8 @@ class ConfigParser:
         modification = {opt.target : getattr(args, _get_opt_name(opt.flags)) for opt in options}
 
         # configuration from me (and not sure if smart)
+        if args.cross_validation:
+            config['cross_validation'] = args.cross_validation
         if args.run_id:
             config['run_id'] = args.run_id
 

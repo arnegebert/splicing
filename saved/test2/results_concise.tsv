@@ -1,0 +1,2 @@
+name	test_all (mean)	test_all (std)	test_low (mean)	test_low (std)	test_high (mean)	test_high (std)
+SingleHead	0.784	0.020	0.831	0.032	0.694	0.015
