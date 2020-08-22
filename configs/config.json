@@ -1,29 +1,27 @@
 {
-    "name": "iPSC_D2V_MLP",
+    "name": "HEXEvent_DSC",
 
     "n_gpu": 1,
+    "run_id": "",
 
     "arch": {
-        "type": "MLP2",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
-        "type": "ComparisonDataLoader",
+        "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "",
+            "data_dir": "data/hexevent",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1,
-            "embedded": true
+            "num_workers": 0
         }
     },
     "optimizer": {
-        "type": "Adam",
+        "type": "RMSprop",
         "args":{
-            "lr": 5e-4,
-            "weight_decay": 0,
-            "amsgrad": true
+            "lr": 5e-4
         }
     },
     "loss": "binary_cross_entropy",
@@ -33,27 +31,25 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 10000,
+            "step_size": 200,
             "gamma": 0.1
         }
     },
     "trainer": {
-        "type": "ComparisonTrainer",
-        "args": {
-            "embedded": true
-        },
+        "type": "VanillaTrainer",
+        "args": {},
         "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
         "monitor": "max val_auc",
-        "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc", "diff_lib_auc",
-        "diff_indv_auc", "diff_tissue_auc"],
+        "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc"],
         "early_stop": 15,
 
         "tensorboard": false
     },
+    "comment": "",
     "cross_validation": false
 }

@@ -12,16 +12,18 @@
         "type": "VanillaDataLoader",
         "args":{
             "data_dir": "data/hexevent",
-            "batch_size": 256,
+            "batch_size": 100,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 0
         }
     },
     "optimizer": {
-        "type": "RMSprop",
+        "type": "Adam",
         "args":{
-            "lr": 5e-4
+            "lr": 5e-4,
+            "weight_decay": 0.0,
+            "amsgrad": true
         }
     },
     "loss": "binary_cross_entropy",
