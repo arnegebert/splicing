@@ -1,30 +1,29 @@
 {
-    "name": "HEXEvent_BiLSTM",
+    "name": "HIPSCI_MAJIQ_DSC",
 
     "n_gpu": 1,
-    "run_id": "",
 
     "arch": {
-        "type": "BiLSTM",
-        "args": {
-            "three_len_feats": true
-        }
+        "type": "GTEx_DSC",
+        "args": {}
     },
     "data_loader": {
         "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "data/hexevent",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0
+            "num_workers": 0,
+            "classification": true,
+            "classification_threshold": 0.99
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
-            "weight_decay": 0.0,
+            "lr": 1e-3,
+            "weight_decay": 0,
             "amsgrad": true
         }
     },
@@ -35,7 +34,7 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 200,
+            "step_size": 10000,
             "gamma": 0.1
         }
     },
@@ -50,7 +49,7 @@
 
         "monitor": "max val_auc",
         "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc"],
-"early_stop": 25,
+        "early_stop": 15,
 
         "tensorboard": false
     },
