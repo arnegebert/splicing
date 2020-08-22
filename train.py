@@ -56,10 +56,8 @@ def main(config):
         # Some custom logging code follows
         # todo: put this into base trainer
         test_all.append(trainer.logged_metrics["test_auc"])
-        try: # this in try statement because some of my models don't have test low / high metrics
-            test_low.append(trainer.logged_metrics["test_low_auc"])
-            test_high.append(trainer.logged_metrics["test_high_auc"])
-        except KeyError: pass
+        test_low.append(trainer.logged_metrics["test_low_auc"])
+        test_high.append(trainer.logged_metrics["test_high_auc"])
 
     test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
     logger.info(f'Average test_all: {np.mean(test_all):.3f} +- {np.std(test_all):.3f}')
