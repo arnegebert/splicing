@@ -204,9 +204,16 @@ Number of high PSI exons: 11819
 some analysis of the numbers, e.g. junction datasets way larger
 probably won't include reconexon/junction dataset
 
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{data/visualizations/dataset_histograms_seaborn.png} 
+	\caption[test.]{
+		...
+	}
+	\label{fig:datahistograms}
+\end{figure}
 
-Figure [] shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that the distribution of PSI values is bi-model with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.
-The biggest contributor to this is that due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. Another factor is that they only estimate PSI based on one biological sample in contrast to the other datasets. HipSci SUPPA especially has an extremely low number of non-rarely or frequently included exons which is likely an artefact of its coarse, transcription-level estimation method.
+Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that the distribution of PSI values is bi-model with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
+The biggest contributor to this is that due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. Another factor is that they only estimate PSI based on one biological sample in contrast to the other datasets. HipSci SUPPA especially has an extremely low number of non-rarely or frequently included exons which is likely an artefact of its coarse, transcription-level estimation method.\\
 The relatively low number of non-constitutive exon samples in the HEXEvent dataset is likely influenced by the ESTs coming from a mix of biological samples from different tissues. Among many tissues, there are likely few tissues that contain some exons
 should also hold for constitutive exons; so rarely exons constitutive, so more with middle psi values
 SCEPTICAL -- unlikely to include
@@ -214,15 +221,15 @@ todo:
 collecting average l2 lengths of datasets
 gtex: 24.81448218801441 +- 93.86430163002234
 realization: don't I just collect cassette exons? :o what about vanilla constitutive exons?
-Models:
-The models are all essentially split into two components.
+\section{Models} \label{sec:models}
+The models are fundamentally all split into two components. \\
 The first component extracts the most relevant features of the two input sequences of nucleotides. The feature extraction for the sequence around the exon start and the exon end is done independently. Depending on the exact model, the feature extraction is based either on CNNs, BiLSTMs or MLP. The extracted features of this layer are concatenated along with the length features and fed as input to the second component.
 The second component uses the extracted features and length features to perform binary classification. This component is implemented as a shallow MLP for all models. It consists of one or two fully connected layers followed by dropout and activation layers. A sigmoid activation function is used after the last layer to obtain an output from [0, 1].
-CNN -DSC
-CNNs are useful when the input data contains spatially invariant patterns. Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.
-CNNs are also extremely promising for the application to nucleotide sequences:
-1) We can expect to find motifs in the input sequence. Motifs are often represented as position weight matrixes (PWMs). The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs.
-2) These motifs may be found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence.
+\subsection{DSC: CNN-based} \label{subsec:dsc}
+CNNs are useful when the input data contains spatially invariant patterns. Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
+CNNs are also extremely promising for the application to nucleotide sequences: \\
+1) We can expect to find motifs in the input sequence. Motifs are often represented as position weight matrixes (PWMs). The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs.\\
+2) These motifs may be found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence. \\
 Keeping this motivation in mind, the first model extracts features from the two input sequences using CNN-based blocks. A CNN feature extraction block with the same architecture but independently learned weights is used for each input sequence. This is to accommodate the model learning to extract different features from the exon start and exon end sequence. The extracted features are used by a shallow MLP to obtain the final classification. This model is the same as the DSC model from [DSC paper].
 Concretely, a CNN block consists of three convolutional layers. The first convolutional layer has a window size of 7 units and 32 filters, the second has a window size of 4 units and 8 filters and the third has a window size of 3 units and 8 filters. Each convolutional layer is followed by a dropout layer with dropout probability 0.2 to reduce overfitting [cite dropout], a ReLU activation layer and a max-pooling layer with stride and window size 2 to extract the most salient features. The hyperparameters for this model were chosen with grid search by [DSC]. As we are dealing with inherently 1-dimensional textual data instead of inherently 2-dimensional image data, 1D convolution layers are used.
 https://stats.stackexchange.com/questions/288261/why-is-max-pooling-necessary-in-convolutional-neural-networks
@@ -234,33 +241,36 @@ Like text, genomic data is fundamentally a sequence of characters.
 This makes it possible to apply techniques known from Natural Language Processing (NLP) to genomic data. This is an especially promising area of cross-pollination because of the large strides NLP has been able to make in recent years using deep learning.
 Some of the most important milestones in NLP have been efficient embeddings via word2vec, applying RNNs to text as in seq2seq and extremely powerful and deep Transformers.
 In this work, we will test the application of doc2vec (a derivative of word2vec) and seq2seq models to the task of alternative splicing classification. The current state-of-the-art transformer models, albeit very potent, usually require huge datasets in the order of millions of samples which aren't available for this task. While scaling them down might be an interesting avenue of research even heavily scaled-down models might still be over parametrized for the task as it has frequently been shown that very shallow networks (with less than 5 layers) perform best on genomic data. Additionally, our input sequences are very long; generally 140 tokens long. Initial tests showed that this also leads to memory problems when training on only one GPU, as the memory requirements of Transformers grows quadratically with respect to the length of the input sequence, further complicating their application. Due to these considerations, we chose to forego the evaluation of Transformer-based models in this study.
-D2V + MLP
-If I want to expand this section:
-Asgari, E., & Mofrad, M. R. (2015). Continuous distributed representation of biological sequences for deep proteomics and genomics. PloS one, 10(11), e0141287.
-Contains very good explanations / phrasings
+\subsection{D2V: MLP-based} \label{subsec:d2v}
+%TODO: If I want to expand this section:
+%Asgari, E., & Mofrad, M. R. (2015). Continuous distributed representation of biological sequences for deep proteomics and genomics. PloS one, 10(11), e0141287.
+%Contains very good explanations / phrasings
+\subsubsection{Introduction to word embeddings}
 Word2Vec is a neural network-based model from Natural Language Processing (NLP) which provides a continuously distributed (vector) representation for each word within a sentence. [] The main idea of Word2Vec is that the meaning of a word is characterized by its context and therefore semantically related words will be similarly represented. The classic example is that
-Mikolov, T., Corrado, G., Chen, K., & Dean, J. (2013). Efficient Estimation of Word Representations in Vector Space. Proceedings of the International Conference on Learning Representations (ICLR 2013)
-Mikolov, T., Chen, K., Corrado, G., & Dean, J. (2013). Distributed Representations of Words and Phrases and their Compositionality. In Advances in Neural Information Processing Systems.
+%TODO: Mikolov, T., Corrado, G., Chen, K., & Dean, J. (2013). Efficient Estimation of Word Representations in Vector Space. Proceedings of the International Conference on Learning Representations (ICLR 2013)
+%Mikolov, T., Chen, K., Corrado, G., & Dean, J. (2013). Distributed Representations of Words and Phrases and their Compositionality. In Advances in Neural Information Processing Systems.
 Distributed representation has proved one of the most successful approaches in machine learning [6–10]. The main idea in this approach is encoding and storing information about an item within a system through establishing its interactions with other members. [biobvec]
 King - Man + Woman ~= Queen
 vector arrow over words would be great
 when adding the Word2Vec representations of the respective words.
 Doc2Vec is an extension of Word2Vec which can handle variable length texts (such as paragraphs and complete documents). It returns a fixed-length representation independent of input size.
-Le, Q. V., & Mikolov, T. (2014). Distributed Representations of Sentences and Documents. International Conference on Machine Learning - ICML 2014, 32, 1188–1196. Retrieved from http://arxiv.org/abs/1405.4053
-Kiros, R., Zhu, Y., Salakhutdinov, R., Zemel, R. S., Torralba, A., Urtasun, R., & Fidler, S. (2015). Skip-Thought Vectors. In Proceedings of NIPS 2015. Retrieved from http://arxiv.org/abs/1506.06726
+%TODO Le, Q. V., & Mikolov, T. (2014). Distributed Representations of Sentences and Documents. International Conference on Machine Learning - ICML 2014, 32, 1188–1196. Retrieved from http://arxiv.org/abs/1405.4053
+%Kiros, R., Zhu, Y., Salakhutdinov, R., Zemel, R. S., Torralba, A., Urtasun, R., & Fidler, S. (2015). Skip-Thought Vectors. In Proceedings of NIPS 2015. Retrieved from http://arxiv.org/abs/1506.06726
+\subsubsection{Training}
 To train word2vec or doc2vec a large corpus of unlabelled data is needed. As we are training on genomic data, the largest corpus is the complete genome itself. The complete human reference genome GRCh38 was obtained from UCSC. [http://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/]
 During training on text data, the corpus is split into documents which are ideally semantically meaningful (like paragraphs). Due to memory limitations and due to corresponding to the average gene size [https://bionumbers.hms.harvard.edu/bionumber.aspx?id=105336&ver=6], we split the genome into sequences of 28,000 nucleotide sequences. However, tests with sequences of length 10,000 showed that this boundary length does not seem to affect model performance in a meaningful way.
-k-mers:
+\subsubsection{Using k-mers}\label{subsubsec:kmers}
 Naively applying word2vec or doc2vec to genomic data would mean treating each nucleotide as a token. Drawing the parallel to natural language, this would mean wanting to embed each character in a word. However, a single character or nucleotide (which on top comes from an alphabet of only four characters) does likely not contain enough information by itself. Therefore, it is desirable to embed a k-mer.
 One major difference between text and genomic data is the single-token complexity: a word contains far more information than a single nucleotide.
 Multiple studies have explored this issue and found 3-mers to perform the best. [add quotes from IEEE, IEEE itself] We follow their recommendation in this work and split each sequence of nucleotides into overlapping 3-mers. Overlapping means that in the case of the sequence 'AACGAT' the resulting overlapping 3-mer sequence is 'AAC', 'ACG', 'CGA' and 'GAT'. Therefore, the 28,000 nucleotides long pre-training sequences are split into overlapping 3-mer sequences (sentences) of length 27,998.
-How pre-training the word embeddings works:
+\subsubsection{Pre-training of word embeddings}
 The pre-training for word2vec uses a shallow neural network with an input, hidden and output layer. If the continuous bag-of-words technique (CBOW) is used, all words in a window except the current word are given as input and the target output is the current word. Typical window size is 5. [WHAT DOES THE HIDDEN LAYER LOOK LIKE? -- could honestly skip this]
 If the skip-gram technique is used, only the current word is given as input and the task is to predict the surrounding words in the window. Doc2Vec works similarly. In the CBOW equivalent called distributed memory (DM), a document identifier (usually just an integer enumerating all documents) is given as additional input. In the skip-gram equivalent distributed bag of words (DBOW), the current word is replaced by the document identifier and the task is to predict all words in the window. All four different training methods are visualized in Figure [figure 3 from distributed].
 There is no clear choice for when which training method should be used for Word2Vec or Doc2Vec as the training methods tend to perform similarly. However, DM (and also CBOW) preserve the order of words and as the order of words (3-mers) is likely significant, we chose DM as pre-training method.
 Pre-processing the human genome like above and using the DM training method, we trained the Doc2Vec model to output a 100-dimensional embedding for each document.
-Discussion of t-SNE embeddings:
+\subsubsection{Analyzing the obtained embeddings}
 We visualize the embeddings for all 64 possible 3-mers using Stochastic Neighbor Embedding (t-SNE) [36] in Figure [t-SNE embeddings; both w/ nts and w/ amino acids].
+%TODO tSNE citation
 Doc2Vec is trained to map words (3-mers) which occur in a similar context to similar representations. We observe that this often translates to mapping the same amino acids to similar representations. There are some instances when different amino acids are mapped together like the quartet Ala, Thr, Pro and Ser in the top-left corner. Displaying the 3-mers associated with the amino acids, that this likely occurs because these different amino acids share two out of three nucleotides at the same positions. We take this visualization as an indication that Doc2Vec was able to learn biologically useful embeddings for the overlapping 3-mers.
 [maybe] Making use of these pre-trained embeddings, each 140 nucleotide input sequence is split into overlapping 3-mers and mapped to a 100-dimensional vector. Like in the other models, a shallow MLP using these sequence features in conjunction with length features for classification.
 Inference:
@@ -272,72 +282,74 @@ doc2vec will map words (3-mers) which are used in similar contexts to similar re
 wil: codon usage bias; not all encodings of a codon will be used with the same frequency
 the bias of codon usage at exon boundaries
 Laurence Hurst paper looks at biases in the first and last 30 nucleotides within an exon
-BiLSTM
+\subsection{BiLSTM + Attn} \label{subsec:bilstm}
 Seq2seq:
 Sequence-to-sequence (Seq2seq) Sutskever et al. in 2014, below] is a general deep learning-based framework for mapping one sequence to another. The first part of the framework is an encoder which processes the input symbol-by-symbol and produces a vector representation for each input symbol. The second part is a decoder which predicts the output sequence based on the representation by the decoder. In the first timestep, the decoder uses the last output of the encoder and in all other timesteps, it uses its output from the previous time step as input. The encoder and decoder are typically RNN-based networks such as LSTMs [schmidhuber] or GRUs [quote GRU]. Encoder and decoder are jointly trained to maximize the probability of correct output. This framework has been particularly successful in machine translation (MT): for instance, Google announced in 2016 that it started using them for their MT. Figure ![ visualizes the working of an encoder-decoder model.
 Sutskever, I., Vinyals, O., & Le, Q. V. (2014). Sequence to sequence learning with neural networks. In Advances in Neural Information Processing Systems.
 https://smerity.com/articles/2016/google_nmt_arch.html
 https://ruder.io/a-review-of-the-recent-history-of-nlp/index.html#2013wordembeddings
-Attention:
+\subsubsection{Are you paying attention?}
 In the original Seq2seq framework, only the last state of the encoder is passed to the decoder. This means that the encoder needs to encode all of the information observed in the input sequence into its last state. While theoretically possible, [ICLR] hypothesized that this informational bottleneck hampered performance in practice. They proposed removing this bottleneck via introducing attention. Attention is a mechanism whereby the decoder can look at all the representation generated by the encoder at once and can 'choose' to focus on the most important ones. Introducing attention lead to large performance gains across Seq2seq-based models and quickly became standard practice. The attention mechanism also adds interpretability to the model because it indicates which parts of the input sequence are most crucial for the model's prediction. Figure [] visualizes what parts of an input sequence a model is paying attention during an MT task. Attention is one of the most important innovations in deep learning research in recent years. For instance, the current state-of-the-art Transformer models [bert, aiayn] forego recurrent networks completely and solely use attention within the encoder and decoder components.
 However, as justified earlier, we won't focus on these models due to issues of scaling and the sufficiency of shallow networks for genomic prediction tasks.
-Bahdanau, D., Cho, K., & Bengio, Y. (2015). Neural Machine Translation by Jointly Learning to Align and Translate. In ICLR 2015.
+%TODO Bahdanau, D., Cho, K., & Bengio, Y. (2015). Neural Machine Translation by Jointly Learning to Align and Translate. In ICLR 2015.
 could also use graphics from this
-another attention reference: https://arxiv.org/pdf/1508.04025.pdf
-https://3.bp.blogspot.com/-3Pbj_dvt0Vo/V-qe-Nl6P5I/AAAAAAAABQc/z0_6WtVWtvARtMk0i9_AtLeyyGyV6AI4wCLcB/s1600/nmt-model-fast.gif
-alternative: https://machinetalk.org/2019/03/29/neural-machine-translation-with-attention-mechanism/
+%another attention reference: https://arxiv.org/pdf/1508.04025.pdf
+%https://3.bp.blogspot.com/-3Pbj_dvt0Vo/V-qe-Nl6P5I/AAAAAAAABQc/z0_6WtVWtvARtMk0i9_AtLeyyGyV6AI4wCLcB/s1600/nmt-model-fast.gif
+%alternative: https://machinetalk.org/2019/03/29/neural-machine-translation-with-attention-mechanism/
 Attention is a very general mechanism not limited to the Seq2seq framework and different forms of it (such as additive [bengio original] or multiplicative attention [transformer]) are used in practice. It can theoretically be useful for any task where a model needs to make a decision based on certain parts of an input.
-[transformer here and why I don't use it]
-[More applications of attention]
-It has been applied to constituency parsing (Vinyals et al., 2015)
-, reading comprehension (Hermann et al., 2015)
-, and one-shot learning (Vinyals et al., 2016)
-, among many others. The input does not even need to be a sequence but can consist of other representations as in the case of image captioning (Xu et al., 2015)
-, which can be seen in Figure 12 below
+%[transformer here and why I don't use it]
+%[More applications of attention]
+%It has been applied to constituency parsing (Vinyals et al., 2015)
+%, reading comprehension (Hermann et al., 2015)
+%, and one-shot learning (Vinyals et al., 2016)
+%, among many others. The input does not even need to be a sequence but can consist of other representations as in the case of image captioning (Xu et al., 2015)
+%, which can be seen in Figure 12 below
+\subsubsection{Integrating attention}
 Taking inspiration from the successful application and improved interpretability of the Seq2seq framework with attention in other domains, we also want to apply it to constitutive exon classification. We now describe the modifications we made to be able to use this set up in our context. In particular, we describe the attention mechanism in more detail as necessary for our second modification.
-Modification 1: MLP instead of a recurrent decoder
+\subsubsection{Modification 1: MLP instead of a recurrent decoder}
 As the name implies, models based on the Seq2seq framework take a sequence as input and give a sequence as output. This is achieved via using a recurrent decoder which outputs symbols until it outputs an <EOS> (end-of-sentence) token (in the case for MT, similar for other domains). However, in our case, the output will always be a single scalar: the classification of the exon as constitutive or alternatively spliced. Thus, we don't require a recurrent decoder and instead use a shallow MLP for classification of the encoder features.
-Modification 2: Attention with a learned query vector
+\subsubsection{Modification 2: Attention with a learned query vector}
 The most common form of attention (multiplicative or dot-product attention), makes uses of conceptual queries and key-value pairs. A given query is compared to all keys by computing a similarity score between the query and each key via the dot-product. The similarity scores are normalized through the use of a softmax layer. The normalized similarity scores are also commonly called the attention weights; keys similar to the query are weighted more. The output of the attention layer for a given query and input sequence is then the weighted vector sum obtained by multiplying each value by the attention weight of its respective key.
 Putting the above intuition into formulas, the (dot-product self-) attention mechanism can be described using the following equations:
 $$Q, K, V = IW^Q, IW^K, IW^V$$
-The query, key and value matrices Q, K and V are computed by multiplying the input with query, key and value parameter matrices W^Q, W^K and W^V.
+The query, key and value matrices Q, K and V are computed by multiplying the input with query, key and value parameter matrices $W^Q$, $W^K$ and $W^V$.
 where $$W^Q,W^K, W^V \in \mathbb{R}^{in \times out}$$,
 and $$Q,K, V \in \mathbb{R}^{l \times out}$$. in corresponds to the number of features of each element in the input sequence to the attention layer, out corresponds to the number of features in the output of the attention layer. l corresponds to the number of elements in the input sequence to the attention layer.
 Attention can be then computed as:
 $$Z = attention(I) = softmax(QK^T)V$$
 where $$Z \in \mathbb{R}^{l \times out}$$. The input I is a concatenation (along the first dimension) of the representations given by the two BiLSTMs.
 This makes use of the fact that $$Q\cdotp K = QK^T$$ where $$\cdotp$$ denotes the dot product.
-This form of attention is also visualized in Figure !](https://jalammar.github.io/images/t/self-attention-matrix-calculation.png) and ![
-from https://jalammar.github.io/illustrated-transformer/
-todo: remove this division by square-root -- maybe ask Kuba how to photoshop this away
+%This form of attention is also visualized in Figure !](https://jalammar.github.io/images/t/self-attention-matrix-calculation.png) and ![
+%from https://jalammar.github.io/illustrated-transformer/
+%todo: remove this division by square-root -- maybe ask Kuba how to photoshop this away
 As shown, multiplicative self-attention computes a separate query for each input token. It is called self-attention because it allows a sequence to pay attention to 'itself'. (Unmasked) self-attention is mainly used in the encoder part of Transformer architectures to improve the representation for each word.
 However, our objective in using attention is not to improve the representation for each symbol in a sequence (this is the task of the BiLSTM), but to select the most important features from an input sequence. The conceptual query for our task is also always the same independent of input: is this exon constitutively spliced or not?
-thought: this also naturally happens in seq2seq models when they use attention -- how is what I am doing differently?
+%thought: this also naturally happens in seq2seq models when they use attention -- how is what I am doing differently?
 Thus, we adapt the attention mechanism so that we learn a single, input-independent query $${Q}^* \in \mathcal{R}^{1 \times out}$$. The output of the attention layer is now computed as:
 decided against explaining innovation as two-points with (1) one query and (2) independent of input because I felt unsure of (2)
 $$Z^* = {attention}^*(I) = softmax({Q}^*K^T)V$$
 where $$Z^* \in \mathbb{R}^{1 \times out}$$. Note that the query matrix $${Q}^*$$ is directly learned in the attention block and not multiplied with the input, giving rise to its input independence. The output Z is now a weighted sum of the nucleotide representation in the input sequences which the model deemed most crucial to pay attention to.
-Putting it all together:
+\subsubsection{Putting it all together:}
 Like a Seq2Seq model, an RNN-based Encoder is used to capture a representation of the input sequence. We select the most important representations of the input using the modified attention mechanism we introduced. Instead of a recursive decoder, we use a shallow MLP for classification based on the selected features.
-One detail not mentioned yet is that the input to the BiLSTM blocks is a dense 4-dimensional embedding of the one-hot encoded sequences. This embedding is the same for each sequence and jointly learned during training. This extra embedding layer is included as previous works have shown that otherwise, the model might suffer from limited generalization performance caused by the sparsity of the one-hot encoded representation. [https://arxiv.org/pdf/1512.05135.pdf]
-Alternative:
+One detail not mentioned yet is that the input to the BiLSTM blocks is a dense 4-dimensional embedding of the one-hot encoded sequences. This embedding is the same for each sequence and jointly learned during training. This extra embedding layer is included as previous works have shown that otherwise, the model might suffer from limited generalization performance caused by the sparsity of the one-hot encoded representation. 
+%todo: [https://arxiv.org/pdf/1512.05135.pdf]
+\subsection{Alternative implementations of attention}
 In the following, we introduce multiple extensions which were attempted which didn't lead to improved results. For most of these, initial results clearly showed that the results weren't improved by using them. As such, we didn't test these extensions more extensively than initial experiments because we felt the initial results were already instructive enough and no further investigation was warranted. Thus, the analysis of the results won't be as extensive as for the extensions which worked.
-No query:
+\subsubsection{No query}
 As the query matrix $${Q}^*$$ is already the same independent of the exact input sequence, it could be possible to drop it and compute the attention weights sorely based on the key matrix K.
 This is possible by learning a key weight matrix $$W^{K^*} \in \mathcal{R}^{in \times 1}$$ and computing attention as:
 $$K^* = IW^{K^*}$$
 $$Z^{} = {attention}^{}(I) = softmax(K^*)V$$
 where $$K^* \in \mathbb{R}^{l \times 1}$$ and $$Z^{**} \in \mathbb{R}^{1 \times out}$$
 However, in initial experiments, the attention** mechanism performed significantly worse than the attention* mechanism. The extra representational capacity by having a query matrix seems to be important for performance.
-Multiple attention heads:
+\subsubsection{Multiple attention heads}
 Having one set of query, key and value matrices limits the model to one representational subspace (one way of 'interpreting' the input). It might be useful for the model to have multiple representational subspaces. This is usually achieved via $$h$$ different sets of query, key and weight matrices $$W^Q_1, W^Q_1, W^Q_1, \dots W^Q_{h}, W^Q_{h},W^Q_{h}$$ producing multiple outputs $$Z_0, \dots, Z_{n\_h}$$.
 The final output matrix $$Z_{final} \in \mathcal{R}^{l \times out}$$ is then computed as:
 $$Z_{final} = concat(Z_1, \dots, Z_{h}) W^O$$
 where the concatenation occurs along the second dimension and $$W^O \in \mathcal{R}^{out * h \times out\_new}$$
-thought: might change this up a little, would require a bit more implementation effort than previously thought (eg. initial attention dimension should be divided by 3) or requires the assumption that out == out_new (I think I will choose this one, but not certain)
-Convolution in attention heads:
-As was previously discussed in the motivation for splitting the input sequence into overlapping 3-mers in [], the information contained in a single nucleotide is very low. This motivated [ghent bio transformer paper] to apply an additional 1D convolution to the query, key and value matrices Q, K and V. This extension can be understood as an alternative to splitting the input into k-mers and provided better results than splitting the input into k-mers when using a Transformer network for a genome annotation task in [].
+thought: might change this up a little, would require a bit more implementation effort than previously thought (eg. initial attention dimension should be divided by 3) or requires the assumption that out == $out_new$ (I think I will choose this one, but not certain)
+\subsubsection{Convolution in attention heads}
+As was previously discussed in the motivation for splitting the input sequence into overlapping 3-mers in \ref{subsubsec:kmers}, the information contained in a single nucleotide is very low. This motivated [ghent bio transformer paper] to apply an additional 1D convolution to the query, key and value matrices Q, K and V. This extension can be understood as an alternative to splitting the input into k-mers and provided better results than splitting the input into k-mers when using a Transformer network for a genome annotation task in [].
 Keeping in mind the modification of directly learning the query matrix, this leads to:
 $$K_{conv}, V_{conv} = conv(K), conv(V)$$
 $$Z^* = {attention}_{conv}^*(I) = softmax({Q}^*K_{conv}^T)V_{conv}$$
@@ -354,70 +366,48 @@ Reasons for why this extension did not work might be related to the use of a rec
 (2) In [], the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
 they: 3000 nucleotides, convolution filter of 7
 A small implementational detail regarding the attention blocks: the query, key and value parameter matrices are implemented via a linear layer with the appropriate dimensions. These also learn bias weights which are added to the output by default. While in theory the bias weights should be turned off to implement exactly the shown formulas, in practice other attention mechanism implementations leave these turned on [annotated transformer] and so we follow suit. Thus, to be precise, the query, key and value computation should be:
-old motivation:
-The architecture of this model can be motivated in two ways:
-1) Similar to DSC, we use two blocks for feature extraction. However, incorporating the knowledge that our input data is a sequence, we use an RNN for this feature extraction. In particular, under the assumption that bidirectional context is important for this task, we use bidirectional LSTM (BiLSTM). Like DSC, a shallow MLP uses the obtained features of both blocks for classification.
-2)
-The final model is very similar to the current state-of-the-art splicing code for predicting the inclusion rate of a cassette exon [distributed], as introduced in [related works].
-maybe: (could make my motivation seem shallow)
-This is a standard LSTM architecture and a similar architecture have been successfully applied to the related task of finding new splice junctions. [https://arxiv.org/pdf/1512.05135.pdf, https://www.sciencedirect.com/science/article/pii/S0010482519304135]
-simple feature extraction + classification model as eg in [https://www.researchgate.net/figure/An-example-of-bidirectional-LSTM-tagger-architecture_fig1_330276457 ] -- 5 citations
+%   old motivation:
+%The architecture of this model can be motivated in two ways:
+%1) Similar to DSC, we use two blocks for feature extraction. However, incorporating the knowledge that our input data is a sequence, we use an RNN for this feature extraction. In particular, under the assumption that bidirectional context is important for this task, we use bidirectional LSTM (BiLSTM). Like DSC, a shallow MLP uses the obtained features of both blocks for classification.
+%2)
+%The final model is very similar to the current state-of-the-art splicing code for predicting the inclusion rate of a cassette exon [distributed], as introduced in [related works].
+%maybe: (could make my motivation seem shallow)
+%This is a standard LSTM architecture and a similar architecture have been successfully applied to the related task of finding new splice junctions. [https://arxiv.org/pdf/1512.05135.pdf, https://www.sciencedirect.com/science/article/pii/S0010482519304135]
+%simple feature extraction + classification model as eg in [https://www.researchgate.net/figure/An-example-of-bidirectional-LSTM-tagger-architecture_fig1_330276457 ] -- 5 citations
+
 For this model, the hyperparameter space was a lot larger and model performance was very sensitive to the hyperparameter choice. The most crucial hyperparameters were the number of encoder dimensions and the number of dimensions of the attention layer. Hyperparameters were optimized via grid search on the HipSci MAJIQ dataset.
 putting model parameters into the text instead of a table:
 Concretely, each LSTM block consists of a BiLSTM with one (?) layer which outputs 50 features.
 The shallow MLP used for classification uses a single layer with 128 (?) neurons and is followed by a dropout layer with dropout probability of 0.5.
 mention respective model sizes here
-bilstm 93261, dsc 20.001, d2v 3281 [post-poned until I have settled on them]
+bilstm 93261, dsc 20.001, d2v 3281 [postponed until I have settled on them]
 could also put them in table and compare later
-4 seqs:
-DSC: 39681
-d2v: 13201
-bilstm 166461
-Training and implementation details:
-Implementation:
-All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) [cite]. The Doc2Vec model was implemented using the gensim library (version 3.8.3). [cite] The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section [...]. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 12 different dataset variants and 4 different models are used, the codebase contains only 2 different data loader and trainer classes.
-PyTorch citation:
-@incollection{NEURIPS2019_9015,
-title = {PyTorch: An Imperative Style, High-Performance Deep Learning Library},
-author = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and Desmaison, Alban and Kopf, Andreas and Yang, Edward and DeVito, Zachary and Raison, Martin and Tejani, Alykhan and Chilamkurthy, Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and Chintala, Soumith},
-booktitle = {Advances in Neural Information Processing Systems 32},
-editor = {H. Wallach and H. Larochelle and A. Beygelzimer and F. d\textquotesingle Alch\'{e}-Buc and E. Fox and R. Garnett},
-pages = {8024--8035},
-year = {2019},
-publisher = {Curran Associates, Inc.},
-url = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf}
-}
-gensim citation: 
-@inproceedings{rehurek_lrec,
- title = {{Software Framework for Topic Modelling with Large Corpora}},
- author = {Radim {\v R}eh{\r u}{\v r}ek and Petr Sojka},
- booktitle = {{Proceedings of the LREC 2010 Workshop on New
- Challenges for NLP Frameworks}},
- pages = {45--50},
- year = 2010,
- month = May,
- day = 22,
- publisher = {ELRA},
- address = {Valletta, Malta},
- note={\url{http://is.muni.cz/publication/884893/en}},
- language={English}
-}
-The structure of the repository was based on the PyTorch Deep Learning Project template available at [https://github.com/victoresque/pytorch-template]. This template provides access to abstract classes for data loaders, trainers and the models themselves. These abstract classes already contain a lot of the implementation-independent code to log results and train and save models. These abstract classes can then be extended with implementation-specific code as e.g. exact data formats. Using this structure avoids the duplication of a lot of boilerplate code.
+
+\section{Training and implementation details}
+\subsection{Implementation}
+
+All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 12 different dataset variants and 4 different models are used, the codebase contains only 2 different data loader and trainer classes.\\
+
+
+The structure of the repository was based on the PyTorch Deep Learning Project template available at \url{github.com/victoresque/pytorch-template}. This template provides access to abstract classes for data loaders, trainers and the models themselves. These abstract classes already contain a lot of the implementation-independent code to log results and train and save models. These abstract classes can then be extended with implementation-specific code as e.g. exact data formats. Using this structure avoids the duplication of a lot of boilerplate code.\\
 To run an experiment, the experimental settings are defined in separate JSON files. This allows for easy and unambiguous reproduction of results. All experiments for whom results in this study are shown are available as JSON files that define the exact parameters used.
-The code repository itself contains multiple README which go into more details towards the structuring and using of the code and also define naming conventions.
+The code repository itself contains multiple README which go into more details towards the structuring and using of the code and also define naming conventions.\\
+
 total code base contained roughly ... lines of code. the majority of these were in preprocessing section [maybe exclude this]
-Training:
+\subsection{Training}
 The training was done using one NVIDIA GeForce GTX 1080 Ti GPU. This proved to be sufficient as initial exploratory experiments showed no advantage of using deep networks and the resulting networks used are all relatively shallow. The pre-training of the Doc2Vec model on the human genome took 3 hours. We randomly split each dataset into 10 folds; in a given run, 8 folds were used for training, 1 fold for validation and 1 fold for testing. Each model was trained with different folds 9 times.
 The training time for training a single model once varied between 1 minute and 25 minutes (see [table with training times]). The models were trained with early stopping on the validation fold until they stopped improving for 15 epochs. This typically occurred after 70 - 150 training epochs.
 Where we established in a base experiment that the variance for a given model was low between runs (lower than ~1%), we only trained the model in follow-up experiments once for practical reasons.
-Loss:
+\subsubsection{Loss}
 All models were trained to minimize the binary cross-entropy loss:
-L = - (y log(\hat{y}) + (1 - y) log (1 - \hat{y}))
-where the ground truth y \in {0, 1} and the prediction of the model \hat{y} \in [0, 1]. The binary cross-entropy is the standard loss for training deep learning-based (binary) classifiers.
-Metrics:
-As in previous work [dsc], we evaluate all models using the Area under ROC curve (AUC). The AUC provides an aggregate measure of performance across all possible decision thresholds.
+$$\mathbb{L} = - (y log(\hat{y}) + (1 - y) log (1 - \hat{y}))$$
+where the ground truth $y \in \{0, 1\}$ and the prediction of the model $\hat{y} \in [0, 1]$. The binary cross-entropy is the standard loss for training deep learning-based (binary) classifiers.
+\subsubsection{Metrics}
+As in previous work \cite{dsc}, we evaluate all models using the Area under ROC curve (AUC). The AUC provides an aggregate measure of performance across all possible decision thresholds.
 However, some of our datasets were unbalanced. This may lead to a degenerating behaviour where a model only predicts the majority class. Additionally, only looking at the AUC does not give a good sense of the .... specificity.. recall?
-This is not captured by the AUC.
+This is not captured by the AUC. \\
 Thus, we also evaluated the F1 of our models when working with an unbalanced dataset as in the case of the HipSci-based dataset processed with MAJIQ.
-The output of our models is a single, continuous scalar \hat{y} \in [0, 1]. As the AUC itself is an aggregate measure across all decision thresholds, we don't need to set it to a certain value that translates the continuous prediction into a discrete positive or negative class prediction. To compute the F1 score, we do. Naively, this threshold may be set to 0.5; that is, all outputs above 0.5 will be interpreted as a prediction of the positive class and all other outputs as a prediction of the negative class. However, this threshold may not be optimal to maximize the F1 score, especially when working with unbalanced datasets. We choose the threshold which maximizes the F1 score on the test set.
-Exact hyperparameters used for training the models are given in table [..].
+The output of our models is a single, continuous scalar $\hat{y} \in [0, 1]$. As the AUC itself is an aggregate measure across all decision thresholds, we don't need to set it to a certain value that translates the continuous prediction into a discrete positive or negative class prediction. To compute the F1 score, we do. Naively, this threshold may be set to 0.5; that is, all outputs above 0.5 will be interpreted as a prediction of the positive class and all other outputs as a prediction of the negative class. However, this threshold may not be optimal to maximize the F1 score, especially when working with unbalanced datasets. We choose the threshold which maximizes the F1 score on the test set.
+
+
+Exact hyperparameters used for training the models are given in table [..]
