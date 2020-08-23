@@ -2,11 +2,20 @@
 
 \minitoc
 
-Gene expression is the process whereby a sequence of nucleotides is used to direct the synthesis of a functional gene product (protein, functional RNA). Gene expression is fundamental to all life. It occurs in two steps: during transcription, the DNA is transcribed into messenger RNA (mRNA) and during translation, the mRNA is decoded into proteins.
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/pre-mrna2mrna.png} 
+	\caption[test]
+	{The process of splicing visualized. Introns are removed from the pre-mRNA to obtain the mature mRNA. Apart from coding regions, the exons may also consist of non-coding untranslated regions who are also believed to influence gene expression. %[https://commons.wikimedia.org/wiki/File:Pre-mRNA_to_mRNA_MH.svg]
+		
+	}
+	\label{fig:pre-mrna2mrna}
+\end{figure}
+
+Gene expression is fundamental to all life. It is the process whereby a sequence of nucleotides is used to direct the synthesis of a functional gene product (protein, functional RNA). Gene expression occurs in two steps: during transcription, the DNA is transcribed into messenger RNA (mRNA) and during translation, the mRNA is decoded into proteins.\\
 In more detail, during transcription, an initially transcribed precursor mRNA (pre-RNA) is translated into a mature RNA by a process called splicing. Splicing is based on DNA being made up of exons (predominantly coding regions), and, typically longer, introns (non-coding regions).
-Only exons are contained in the mature mRNA. Introns are still contained in the initially transcribed precursor mRNA (pre-mRNA). However, they are spliced out by the spliceosome to form the mature mRNA. The spliceosome is a complex molecular machine consisting of as many as 150 proteins. [Current perspectives] This is visualized in ![](https://upload.wikimedia.org/wikipedia/commons/9/9f/Pre-mRNA_to_mRNA_MH.svg)
-https://commons.wikimedia.org/wiki/File:Pre-mRNA_to_mRNA_MH.svg
-explain the predominantly part based on the UTR
+Only exons are contained in the mature mRNA. Introns are still contained in the initially transcribed precursor mRNA (pre-mRNA). However, they are spliced out by the spliceosome to form the mature mRNA. The spliceosome is a complex molecular machine consisting of as many as 150 proteins. [Current perspectives] This is visualized in \ref{fig:pre-mrna2mrna}.
+
+%explain the predominantly part based on the UTR
 Exons which are always included in the mRNA are called constitutive exons. However, 95\% of human genes with multiple exons are alternatively spliced, that is, they may only sometimes be included or may be included with different splice sites. The most common types of alternative splicing in higher eukaryotes are \cite{commonsplicing1}\cite{commonsplicing2}:
 
 \begin{itemize}
@@ -15,19 +24,30 @@ Exons which are always included in the mRNA are called constitutive exons. Howev
 \item intron retention, that is, when an intron between exons is not spliced out. It accounts for roughly 5% of AS activity in higher eukaryotes.
 \end{itemize}
 
-Different forms of alternative splicing are visualized in Figure ![](https://lh3.googleusercontent.com/UBEP623KPjSWGRpyKcnpvmkgeGc5IpnTS_3YxtT-xNZ8NhYP2zwNKTh_hefpADiSf3yj7HIGqSSplxExPDUBgc7iEMxZPvgqmcYNxhh4fNlSXPnWubAN9Q4xAR8Ztgq5bKr7EunH) [https://hrjournal.net/article/view/2693]. More complex forms of alternative splicing, such as mutually exclusive exons, also exist, but they are currently believed to be more uncommon. Alternative splicing occurs in nearly all organisms that carry out pre-mRNA splicing as such as plants or animals and its frequency varies across organisms. [https://www.sciencedirect.com/science/article/pii/B9780123749840000437]
-Why does alternative splicing occur?
-Alternative splicing enables a single gene to encode multiple protein variants. This massively contributes to proteomic diversity. For instance, the roughly 20,000 humans genes are estimated to encoder over 100,000 different proteins. https://biologydictionary.net/alternative-splicing/
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/alternative_splicing_forms.png} 
+	\caption[test]
+	{Visualization of the most common forms of alternative splicing and the resulting different possible mature mRNAs.
+	[https://hrjournal.net/article/view/2693]
+}
+	\label{fig:altsplicingforms}
+\end{figure}
+
+Different forms of alternative splicing are visualized in Figure \ref{fig:altsplicingforms}. More complex forms of alternative splicing, such as mutually exclusive exons, also exist, but they are currently believed to be more uncommon. Alternative splicing occurs in nearly all organisms that carry out pre-mRNA splicing as such as plants or animals and its frequency varies across organisms. [https://www.sciencedirect.com/science/article/pii/B9780123749840000437]
+\subsubsection{Why does alternative splicing occur?}
+Alternative splicing enables a single gene to encode multiple protein variants. This massively contributes to proteomic diversity. For instance, the roughly 20,000 humans genes are estimated to encoder over 100,000 different proteins.\\ https://biologydictionary.net/alternative-splicing/
 Alternative splicing may also speed up the rate of evolutionary adaption. Due to alternative splicing, a gene may evolve to fulfil a different functionality without first needing to evolve a separate copy of the same gene. \cite{bretschneiderphdthesis}
-How is alternative splicing regulated?
-Alternative splicing was discovered 40 years ago \cite{discoveryofsplicing}, but the molecular mechanisms governing it are still poorly understood. It is known that the spliceosome recognizes exon-intron boundaries based on the 5' and 3' splice sites, the branch site located in roughly the middle of the exon, and the polypyrimidine tract located upstream of the 3' splice site. However, estimates suggest that these four factors only account for half of the information required to determine splicing behaviour. The rest is likely accounted for by intronic or exonic, cis-acting sequences of the pre-mRNA which bind to trans-acting factors. These cis-acting sequences are usually 4-18 nucleotide long and classified as exonic splicing enhancers or silencers. [current]
+\subsubsection{How is alternative splicing regulated?}
+Alternative splicing was discovered 40 years ago \cite{discoveryofsplicing}, but the molecular mechanisms governing it are still poorly understood. It is known that the spliceosome recognizes exon-intron boundaries based on the 5' and 3' splice sites, the branch site located in roughly the middle of the exon, and the polypyrimidine tract located upstream of the 3' splice site. However, estimates suggest that these four factors only account for half of the information required to determine splicing behaviour. The rest is likely accounted for by intronic or exonic, cis-acting sequences of the pre-mRNA which bind to trans-acting factors. These cis-acting sequences are usually 4-18 nucleotide long and classified as exonic splicing enhancers or silencers \ref{splicing_current_perspectives}.
 However, the dynamic interaction between cis-acting and trans-acting factors is highly complex, new factors are still being found and thus a lot more work needs to be done if we want to fully understand alternative splicing.
-interesting papers for this:
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4648177/
-https://onlinelibrary.wiley.com/doi/epdf/10.1002/bies.20692
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4360811/#:~:text=Constitutive%20splicing%20is%20the%20process,various%20forms%20of%20mature%20mRNA.
-What happens when splicing is misregulated?
+
+%interesting papers for this:
+%https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4648177/
+%https://onlinelibrary.wiley.com/doi/epdf/10.1002/bies.20692
+%https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4360811/#:~:text=Constitutive%20splicing%20is%20the%20process,various%20forms%20of%20mature%20mRNA.
+\subsubsection{What happens when splicing is misregulated?}
 Since alternative splicing is such a fundamental mechanism, its correct execution is crucial. Defects in splicing are typically caused by genomic sequence variations leading to misregulation of the splicing process. An estimated 9\%-30\% of Mendelian disorders may act through disruption of splicing \cite{comparison}
 Splice variants have also been shown to be biomarkers for multiple types of cancers \cite{cancer}. As a result, alternative splicing has also been suggested as a biomarker and potential target for drug discovery [https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4648177/]. \\
-==> why understanding alternative splicing is important
+
+\subsubsection{Importance of understanding splicing}
 Thus, there is great interest in better understanding the mechanisms underpinning alternative splicing. Due to rapid advances in RNA-sequencing technologies, it is now possible to sequence the genome of a patient within a day. However, the genomic variants (compared to a reference genome) observed in patients are often variants of unknown significance. \cite{bretschneiderphdthesis} That is, it is unknown whether these variants are pathogenic or benign. An improved understanding of alternative splicing may improve the classification of genomic variants and help with the diagnosis of patients, especially those with rare genomic diseases.
