@@ -1,3 +1,4 @@
 name	test_all (mean)	test_all (std)	test_low (mean)	test_low (std)	test_high (mean)	test_high (std)
 SingleHead	0.784	0.020	0.831	0.032	0.694	0.015
 iPSC_D2V_MLP	0.713	0.000	0.740	0.000	0.660	0.000
+MultiHeads	0.865	0.011	0.919	0.018	0.768	0.018
