@@ -1,5 +1,5 @@
 {
-    "name": "MultiHeads",
+    "name": "MultiHeadsNoQuery",
 
     "n_gpu": 1,
     "run_id": "",
@@ -12,7 +12,7 @@
             "n_heads": 4,
             "head_dim": 50,
             "fc_dim": 128,
-            "attn_mode": "heads",
+            "attn_mode": "heads_no_query",
             "attn_dropout": 0.4
         }
     },
