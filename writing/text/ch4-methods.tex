@@ -1,4 +1,8 @@
+\chapter{\label{ch:4-methods}Methods}
+
 %TODO: short name for attention model
+% TODO: fix attention formulas
+%TODO: citations not working
 
 This chapter introduces the primary data sources, describes how these were used to obtain the training datasets, and presents the used models. It also gives implementation details regarding processing steps, model implementation, and model training.
 In this work, we focus on the splicing prediction of cassette exons. Previous work indicates that advances in predicting one type of alternative splicing behaviour via Machine Learning methods also translates to advances in prediction for other types. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryotes. Thus, for reasons of practicality we choose cassette exons as the type of alternative splicing, we will focus on.
@@ -18,7 +22,7 @@ Processed data which can not be used to identify the donors is publicly availabl
 \subsection{HipSci} \label{subsec:hipsci}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{data/visualizations/ipscprocess.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ipscprocess.png} 
 	\caption[test.]{
 	(1) Cell culture of donor cells is grown. (2) Transduce the genes associated with reprogramming into the cells via viral vectors. (3) Isolate the cells expressing the transduced genes (in red) and culture them according to embryonic stem cell culture. (4) A small subset of the transfected cells become iPSC cells. Graphic and description adapted from \cite{ipscprocess}.
 }
@@ -43,13 +47,13 @@ Similarly, $\Psi_5$ is defined as the number of transcripts containing a particu
 High-throughput sequencing of cDNA fragments (RNA-seq; Lister et al., 2008) has become a popular tool to investigate RNA expression and post-transcriptional regulation. Sequencing of the transcriptome reveals tens of thousands of transcripts expressed simultaneously (Mortazavi et al., 2008). Despite providing a deep and genome-wide view on post-transcriptional processing, current technologies cannot reveal transcripts in full-length due to limitations in read length. %TODO: fix citations here [https://www.researchgate.net/publication/282645615_Alternative_Splicing_Signatures_in_RNA-seq_Data_Percent_Spliced_in_PSI/link/59e8404b458515c3630fe4e3/download]
 High-throughput sequencing methods are a potent tool to investigate RNA expression and post-transcriptional regulation. However, due to limited coverage, short read length, and experimental biases they are not able to provide a full view of post-transcriptional processing so far.
 However, due to limitations in read length, they are not able to provide a full view of post-transcriptional processing so far.
-[majiq + berlin, https://elifesciences.org/articles/11752#abstract]
+%[majiq + berlin, https://elifesciences.org/articles/11752#abstract]
 'Despite constant technological advancement, the combination of limited coverage depth, experimental biases, and reads spanning only a small fraction of the variable parts of transcripts has left accurate mapping of transcriptome variations an open challenge (Alamancos et al., 2014).'
 \subsubsection{Naive PSI estimation}\label{subsubsec:naivepsi}
 
-Let #IR be the number of reads giving evidence for a particular exon being included. Let #ER be the numbers of reads giving evidence for a particular exon being excluded. A PSI value of 100\% indicates a constitutive exon which is always included, a score below 100\% includes an alternatively spliced exon. Figure MISO graphic] or ![berlin graphic, should then mention that it shows the full pipeline from going from reads to PSI] shows examples of possible reads counted in pos and neg. PSI can then be estimated as:
-$$PSI = \frac{#IR}{(#IR+#ER)}$$
-The advantage of this estimate lies in its flexibility. It is very to implement and not very error-prone. It is independent of library size. It can easily be adapted to estimate the PSI of a junction by redefining #IR and #ER to count the inclusion and exclusion read for that junction.
+Let \#IR be the number of reads giving evidence for a particular exon being included. Let \#ER be the numbers of reads giving evidence for a particular exon being excluded. A PSI value of 100\% indicates a constitutive exon which is always included, a score below 100\% includes an alternatively spliced exon. Figure MISO graphic] or ![berlin graphic, should then mention that it shows the full pipeline from going from reads to PSI] shows examples of possible reads counted in pos and neg. PSI can then be estimated as:
+$$PSI = \frac{\#IR}{(\#IR+\#ER)}$$
+The advantage of this estimate lies in its flexibility. It is very to implement and not very error-prone. It is independent of library size. It can easily be adapted to estimate the PSI of a junction by redefining \#IR and \#ER to count the inclusion and exclusion read for that junction.
 'deceptively simple'?
 %TODO: [Using Naive PSI with GTEx data (or similar)]
 However, this estimate has various issues. [todo formatting -- itemize]
@@ -68,8 +72,8 @@ However, this estimate has various issues. [todo formatting -- itemize]
 %	this is the reason why I wanted access to raw RNA-seq reads
 	\item Related to 1), typically multiple samples or biological replicates of a given experiment are available. It is desirable that reads across multiple samples can be integrated to give a more well-adjusted estimate. How to best achieve this is not obvious. Read depths between multiple libraries may vary and this should be accounted for. [possible other issues here and then make this another itemization]
 	\item IR and ER must be normalized for exon length to obtain meaningful results. For a long exon, the majority of reads will be IR because they can be located over a much larger area than the ER who must overlap with the 0-length feature of the splicing junction. This can be accounted for by normalizing for the possible number of start positions for each read population:
-	$$#IR_norm = \frac{IR}{(exon length + read length -1)}$$
-	$$#ER_norm = \frac{ER}{(read length - 1)}$$
+	$$\#IR_norm = \frac{\#IR}{(exon length + read length -1)}$$
+	$$\#ER_norm = \frac{\#ER}{(read length - 1)}$$
 	Note that this assumes that reads are uniformly distributed across a transcript isoform. It is well-known that RNA-seq reads are biased .... [get paper from Liz/Wilfred]
 	
 	%	thought: this normalization doesn't obviously seem correct to me on second thought. an ER can be found at two junctions, so that would double the number of possible read starts
@@ -233,7 +237,7 @@ some analysis of the numbers, e.g. junction datasets way larger
 probably won't include reconexon/junction dataset
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{data/visualizations/dataset_histograms_seaborn.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/dataset_histograms_seaborn.png} 
 	\caption[test.]{
 		...
 	}
@@ -306,7 +310,7 @@ Doc2Vec is trained to map words (3-mers) which occur in a similar context to sim
 [maybe] Making use of these pre-trained embeddings, each 140 nucleotide input sequence is split into overlapping 3-mers and mapped to a 100-dimensional vector. Like in the other models, a shallow MLP using these sequence features in conjunction with length features for classification.
 Inference:
 During inference, the Doc2Vec model outputs 100-dimensional embeddings for each input sequence. These, along with the length features, are fed into the shallow MLP for classification. The shallow MLP consists of two layers with 16 and 8 neurons each respectively followed by a dropout layer with dropout probability of 0.2.
-![](https://lh5.googleusercontent.com/iapyd6dbrKCN6Y8HzSUDi7fNx5XlgKbCHvZj6Y6J6CRCF4_PTS527lgO9-R_NVPthwxGQrq1DNBEwXfVZqjyXtdf_UmVW8MgYv6zSOJsauefzy9X5HQJI9lF30QBk-a7uLc7DT0N)
+%TODO ![](https://lh5.googleusercontent.com/iapyd6dbrKCN6Y8HzSUDi7fNx5XlgKbCHvZj6Y6J6CRCF4_PTS527lgO9-R_NVPthwxGQrq1DNBEwXfVZqjyXtdf_UmVW8MgYv6zSOJsauefzy9X5HQJI9lF30QBk-a7uLc7DT0N)
 [discussion of the tsne embeddings here]
 research on what to write:
 doc2vec will map words (3-mers) which are used in similar contexts to similar representations
@@ -314,11 +318,11 @@ wil: codon usage bias; not all encodings of a codon will be used with the same f
 the bias of codon usage at exon boundaries
 Laurence Hurst paper looks at biases in the first and last 30 nucleotides within an exon
 \subsection{BiLSTM + Attn} \label{subsec:bilstm}
-Seq2seq:
+\subsubsection{Seq2Seq} \label{subsubsec:seq2seq}
 Sequence-to-sequence (Seq2seq) Sutskever et al. in 2014, below] is a general deep learning-based framework for mapping one sequence to another. The first part of the framework is an encoder which processes the input symbol-by-symbol and produces a vector representation for each input symbol. The second part is a decoder which predicts the output sequence based on the representation by the decoder. In the first timestep, the decoder uses the last output of the encoder and in all other timesteps, it uses its output from the previous time step as input. The encoder and decoder are typically RNN-based networks such as LSTMs [schmidhuber] or GRUs [quote GRU]. Encoder and decoder are jointly trained to maximize the probability of correct output. This framework has been particularly successful in machine translation (MT): for instance, Google announced in 2016 that it started using them for their MT. Figure ![ visualizes the working of an encoder-decoder model.
-Sutskever, I., Vinyals, O., & Le, Q. V. (2014). Sequence to sequence learning with neural networks. In Advances in Neural Information Processing Systems.
-https://smerity.com/articles/2016/google_nmt_arch.html
-https://ruder.io/a-review-of-the-recent-history-of-nlp/index.html#2013wordembeddings
+%TODO Sutskever, I., Vinyals, O., & Le, Q. V. (2014). Sequence to sequence learning with neural networks. In Advances in Neural Information Processing Systems.
+%https://smerity.com/articles/2016/google_nmt_arch.html
+%https://ruder.io/a-review-of-the-recent-history-of-nlp/index.html#2013wordembeddings
 \subsubsection{Are you paying attention?}
 In the original Seq2seq framework, only the last state of the encoder is passed to the decoder. This means that the encoder needs to encode all of the information observed in the input sequence into its last state. While theoretically possible, [ICLR] hypothesized that this informational bottleneck hampered performance in practice. They proposed removing this bottleneck via introducing attention. Attention is a mechanism whereby the decoder can look at all the representation generated by the encoder at once and can 'choose' to focus on the most important ones. Introducing attention lead to large performance gains across Seq2seq-based models and quickly became standard practice. The attention mechanism also adds interpretability to the model because it indicates which parts of the input sequence are most crucial for the model's prediction. Figure [] visualizes what parts of an input sequence a model is paying attention during an MT task. Attention is one of the most important innovations in deep learning research in recent years. For instance, the current state-of-the-art Transformer models [bert, aiayn] forego recurrent networks completely and solely use attention within the encoder and decoder components.
 However, as justified earlier, we won't focus on these models due to issues of scaling and the sufficiency of shallow networks for genomic prediction tasks.

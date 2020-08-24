@@ -56,5 +56,12 @@ if __name__ == '__main__':
     run_id = 'final'
     dirs = [f'../saved/DSC_original/{file_name}']
     for exp in experiments: dirs.append(f'../saved/log/{exp}/{run_id}/{file_name}')
+    load_and_plot_roc('hexevent_cross_model_roc_auc_comparison', dirs, labels)
 
-    load_and_plot_roc('baseline_five_models', dirs, labels)
+    # config for HipSci SUPPA
+    labels = ['DSC', 'D2V', 'BiLSTM + Attn']
+    experiments = ['HIPSCI_SUPPA_DSC', 'HIPSCI_SUPPA_D2V_MLP', 'HIPSCI_SUPPA_Attn']
+    file_name = 'pred_and_target_all.npy'
+    run_id = 'final'
+    dirs = [f'../saved/log/{exp}/{run_id}/{file_name}' for exp in experiments]
+    load_and_plot_roc('suppa_cross_model_roc_auc_comparison', dirs, labels)

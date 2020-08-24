@@ -1,0 +1,15 @@
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{| l | c | c | c| c} 
+		\hline
+		Model name & Only sequences & Sequences + lengths & Performance difference\\
+		\hline
+		DSC & 0.618 & 0.873 & 0.255\\
+		D2V & 0.614 & 0.896 & 0.282\\
+		BiLSTM + Attn & \textbf{0.636} & \textbf{0.904} & 0.268\\
+		\hline
+	\end{tabular}
+	\caption{Performance of the main models on the HEXEvent dataset with and without length features given as AUC.  
+	}
+	\label{table:results_hexevent}
+\end{table}

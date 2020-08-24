@@ -29,7 +29,7 @@
 % This one will format for PDF output (ie equal margins, no extra blank pages):
 \documentclass[a4paper,nobind,12pt]{ociamthesis} 
 
-
+%
 
 %%%%% SELECT YOUR DRAFT OPTIONS
 % Three options going on here; use in any combination.  But remember to turn the first two off before
@@ -96,7 +96,6 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{hyperref}
-
 
 
 % To make text superscripts shortcuts
@@ -240,6 +239,11 @@ The first kind of intellectual and artistic personality belongs to the hedgehogs
 
 {\renewcommand*\MakeUppercase[1]{#1}%
 \printbibliography[heading=bibintoc,title={\bibtitle}]}
+
+\printbibliography
+%\bibliographystyle{plain}
+%
+%\bibliography{references}
 
 
 \end{document}
