@@ -47,7 +47,7 @@ def load_highly_expressed_genes():
     with open(path_highly_expr_genes) as f:
         for l in f:
             gene_id, tpm = l.split(',')
-            highly_expressed_genes[gene_id] = tpm
+            highly_expressed_genes[gene_id] = float(tpm)
 
 load_highly_expressed_genes()
 
@@ -57,19 +57,8 @@ def contains_highly_expressed_gene(genes):
             return True, highly_expressed_genes[gene]
     return False, 0
 
-gencode_genes = {}
-# def load_gencode_genes():
-#     with open(f'../../data/gencode_genes.csv') as f:
-#         for line in f:
-#             line = line.replace('\n','').split('\t')
-#             if len(line) == 1: continue
-#             gene, chr, start, end, strand = line[0], int(line[1][3:]), int(line[2]), int(line[3]), line[4]
-#             if chr not in gencode_genes:
-#                 gencode_genes[chr] = []
-#             gencode_genes[chr].append((gene, start, end, strand))
-#         print('Finished reading gencode genes')
-
 def load_gencode_genes():
+    gencode_genes = {}
     with open(f'../../data/gencode_genes.csv') as f:
         for line in f:
             line = line.replace('\n','').split('\t')
@@ -77,13 +66,14 @@ def load_gencode_genes():
             gene, chr, start, end, strand = line[0], int(line[1][3:]), int(line[2]), int(line[3]), line[4]
             gencode_genes[gene] = strand
         print('Finished reading gencode genes')
+    return gencode_genes
 
-load_gencode_genes()
+gencode_genes = load_gencode_genes()
 
 def get_strand_based_on_gene(gene):
     if gene in gencode_genes:
         return gencode_genes[gene]
-    else: return None
+    else: return None # unnecessary, but more explicit
 
 not_highly_expressed = 0
 homeless_junctions = 0
@@ -121,33 +111,26 @@ with open(path_filtered_reads) as f:
             print(f'Reading line {i}')
         line = line.replace('\n','').split(',')
         junction = line[0].split('_')
-        try:
-            read_chrom = int(junction[0][3:])
-        except ValueError:
-            break
         start, end = int(junction[1]), int(junction[2])
         read_count = int(line[1])
+        gene = line[2]
+        try:
+            read_chrom = int(junction[0].replace('chr', ''))
+        except ValueError: # breaks for X, Y and M chromosomes
+            break
+
         # if chromosome changes, update loaded sequence until chromosome 22 reached
         if read_chrom > loaded_chrom:
             loaded_chrom += 1
             current_idx_overlap = 0
             chrom_seq = load_chrom_seq(loaded_chrom)
 
-        # extract sequence around start
-            # however, not extremly big priorities as it essentially just some data pollution
-        # q: does it work to just remove the first and last exon boundary found for each chromosome?
-            # a: no, because that doesn't solve the problems for genes
-
         """ Filtering """
         # a minimal length of 25nt for the exons and a length of 80nt for the neighboring introns are
         # required as exons/introns shorter than 25nt/80nt are usually caused by sequencing errors and
         # they represent less than 1% of the exon and intron length distributions
         # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6722613/
-        # genes, updated_idx = map_from_position_to_genes(loaded_chrom, start, end, current_idx_overlap)
-        # if not genes: homeless_junctions += 1
-        # current_idx_overlap = updated_idx
-        gene = line[2]
-        in_highly_expressed_gene = contains_highly_expressed_gene([gene])
+        in_highly_expressed_gene, tpm = contains_highly_expressed_gene([gene])
         if not in_highly_expressed_gene:
             not_highly_expressed += 1
             continue
@@ -156,26 +139,6 @@ with open(path_filtered_reads) as f:
             too_short_intron += 1
             continue
 
-        # make sure there are at least 'introns_bef_start' intron nts between exon junctions
-        # q: do i even want to do this? how do i do this?
-
-
-        # make sure that very first exon in chromosome doesn't contain N nt input
-        # make sure that very last exon in chromosome doesn't contain N nt input
-        if i == 0 or i == len(junction_reads_file)-1:
-            print('----------------------------------------------------------------------')
-            continue
-
-        # if start - introns_bef_start < prev_end:
-        #     continue
-
-        # remove first exon in gene
-
-        # gene_start = 0
-        # gene_end = 1e10
-        # remove last exon in gene
-        # if end + introns_after_end > gene_end:
-        #     continue
         # todo: probably want to make sure that i dont have junctions where distance between
         # them is smaller than flanking sequence i extract
 
@@ -196,6 +159,7 @@ with open(path_filtered_reads) as f:
 
         """ Estimation of the PSI value """
         # PSI = pos / (pos + neg)
+        tpm_count = read_count/tpm
         pos = read_count
         # neg == it overlaps with the junction in any way:
 
@@ -214,7 +178,15 @@ with open(path_filtered_reads) as f:
             junction2 = line2[0].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
             if end2 >= start:
-                neg += int(line2[1])
+                gene2 = line2[2]
+                in_highly_expressed_gene2, tpm2 = contains_highly_expressed_gene([gene2])
+                if not in_highly_expressed_gene2:
+                    not_highly_expressed += 1
+                    continue
+                read_count2 = int(line2[1])
+                tpm_count2 = read_count2/tpm2
+                neg += tpm_count2
+
 
         # check all junctions below until start2 > end
         for idx_below in range(i+1, i+10):
@@ -224,7 +196,14 @@ with open(path_filtered_reads) as f:
             junction2 = line2[0].split('_')
             start2, end2 = int(junction2[1]), int(junction2[2])
             if end >= start2:
-                neg += int(line2[1])
+                gene2 = line2[2]
+                in_highly_expressed_gene2, tpm2 = contains_highly_expressed_gene([gene2])
+                if not in_highly_expressed_gene2:
+                    not_highly_expressed += 1
+                    continue
+                read_count2 = int(line2[1])
+                tpm_count2 = read_count2/tpm2
+                neg += tpm_count2
 
         if pos + neg == 0: psi = 0
         else: psi = pos / (pos + neg)

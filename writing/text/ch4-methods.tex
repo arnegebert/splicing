@@ -58,6 +58,9 @@ However, this estimate has various issues. [todo formatting -- itemize]
 	The estimate of $PSI_E2$ is likely to be more accurate, but this information is not contained in the estimate. Concretely, these two samples would be treated as equally important by the network even though perhaps they shouldn't.
 	A further processing step to only count exons who experienced at least threshold number of reads only alleviates this problem. One would need to account for the expressiveness of each gene because 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the expressiveness of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM) and although TPM is the most common one, it is not obvious that it is the best choice in this scenario.
 	% https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
+	
+	%TODO: could add that even then reads across a gene aren't normally distributed
+	
 	Assuming that one obtains a read count normalized by the gene expressiveness for each exon, there is not a principled way to choose the cutoff threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and training samples.
 	\item Reads which align purely to the flanking constitutive exons are ignored. While these could have occurred in either isoform, they provide latent evidence for whether the cassette exon was included or not. In isoforms where it occurred, the total length of the isoform is longer which means the reads are distributed over a larger area. This leads to a comparatively reduced proportion of reads across the flanking exons when the exon was included and vice versa. The estimate neglects to take this information into account.
 %	This estimate ignores reads that align to the bodies of the flanking constitutive exons, which could have derived from either isoform. Nevertheless, these constitutive reads contain latent information about the splicing of the alternative exon, as higher expression of the exclusion isoform will generally increase the density of reads in the flanking exons relative to the alternative exon, and lower expression of the exclusion isoform will decrease this ratio of densities.
@@ -75,13 +78,22 @@ However, this estimate has various issues. [todo formatting -- itemize]
 	%	I think you can't really do normalization for junction counting
 \end{enumerate}
 
+
+
 %hopefully was able to demonstrate that this estimate is problematic and may easily be unreliable.
 Due to these issues relating to the uncertainty, to not making use of all of the available evidence and to integrating reads across multiple samples, this estimate is problematic.
-[address all three of these issues when saying that I do naive PSI estimation for GTEx; 1) TPM with threshold, 2) only take genes with high TPM, 3) only take reads from the sample with the maximum total reads]
-PSI estimation is especially interesting for quantifying the changes in splicing between multiple samples in different conditions.
+\subsubsection{How I implemented PSI estimation}
+%TODO write this section
 
-
+1) Only take reads from genes across a certain TPM into account (because random spurios reads from low TPM genes could have an outsized effect on the estimation). Say that you weight reads according to the respective TPM. Show TPM distribution and say what TPM threshold you use.\\
+2) Say how there is nothing you can do, due to only having access to the junction reads themselves. \\
+3) Unclear how to best do this and skipped for now. However, basing estimatin based on the sample with the maximum total amount of reads. \\
+4) Say that you estimate read length to be 150 and do this. \\
+ TODO: mention junction datasets
+% potentially even more details; eg how you use this heuristic of checking the 10 samples past the current one
+% todo add details such as exact name of individuals used and number of reads
 Several approaches have been developed which try to address these issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose the two fast methods SUPPA and MAJIQ. SUPPA and MAJIQ represent two different approaches to PSI estimation: SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph.
+
 
 %isoform-based vs count-based methods
 %	count-based methods = exon based and event-based methods

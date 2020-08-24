@@ -48,7 +48,7 @@ def load_highly_expressed_genes():
     with open(path_highly_expr_genes) as f:
         for l in f:
             gene_id, tpm = l.split(',')
-            highly_expressed_genes[gene_id] = tpm
+            highly_expressed_genes[gene_id] = float(tpm)
 
 load_highly_expressed_genes()
 
@@ -58,19 +58,8 @@ def contains_highly_expressed_gene(genes):
             return True, highly_expressed_genes[gene]
     return False, 0
 
-gencode_genes = {}
-# def load_gencode_genes():
-#     with open(f'../../data/gencode_genes.csv') as f:
-#         for line in f:
-#             line = line.replace('\n','').split('\t')
-#             if len(line) == 1: continue
-#             gene, chr, start, end, strand = line[0], int(line[1][3:]), int(line[2]), int(line[3]), line[4]
-#             if chr not in gencode_genes:
-#                 gencode_genes[chr] = []
-#             gencode_genes[chr].append((gene, start, end, strand))
-#         print('Finished reading gencode genes')
-
 def load_gencode_genes():
+    gencode_genes = {}
     with open(f'../../data/gencode_genes.csv') as f:
         for line in f:
             line = line.replace('\n','').split('\t')
@@ -78,8 +67,9 @@ def load_gencode_genes():
             gene, chr, start, end, strand = line[0], int(line[1][3:]), int(line[2]), int(line[3]), line[4]
             gencode_genes[gene] = strand
         print('Finished reading gencode genes')
+    return gencode_genes
 
-load_gencode_genes()
+gencode_genes = load_gencode_genes()
 
 def get_strand_based_on_gene(gene):
     if gene in gencode_genes:
@@ -108,6 +98,7 @@ l1scons, l2scons, l3scons = [], [], []
 l1scass, l2scass, l3scass = [], [], []
 psis = []
 cons_exons, high_exons, low_exons = [], [], []
+other_read_gene_not_highly_expressed = 0
 
 with open(path_filtered_reads) as f:
     reader = csv.reader(f, delimiter="\n")
@@ -140,9 +131,9 @@ with open(path_filtered_reads) as f:
         # required as exons/introns shorter than 25nt/80nt are usually caused by sequencing errors and
         # they represent less than 1% of the exon and intron length distributions
         # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6722613/
-        gene = line[2]
-        in_highly_expressed_gene, tpm = contains_highly_expressed_gene([gene])
-        if not in_highly_expressed_gene:
+        gene1 = line[2]
+        in_highly_expressed_gene1, tpm1 = contains_highly_expressed_gene([gene1])
+        if not in_highly_expressed_gene1:
             not_highly_expressed += 1
             continue
 
@@ -157,14 +148,14 @@ with open(path_filtered_reads) as f:
         for idx_below in range(i + 1, i + 10):
             if idx_below >= len(junction_reads_file): break
             line2 = junction_reads_file[idx_below][0]
-            junction2, count2, gene2 = line2.replace('\n','').split(',')
+            junction2, read_count2, gene2 = line2.replace('\n','').split(',')
             _, start2, end2 = junction2.split('_')
             start2, end2 = int(start2), int(end2)
             if start1 == start2: # if junction starts at same point, check 10 following junctions
                 for idx_below_below in range(idx_below + 1, idx_below + 10):
                     if idx_below_below >= len(junction_reads_file): break
                     line3 = junction_reads_file[idx_below_below][0]
-                    junction3, count3, gene3 = line3.replace('\n','').split(',')
+                    junction3, read_count3, gene3 = line3.replace('\n','').split(',')
                     _, start3, end3 = junction3.split('_')
                     start3, end3 = int(start3), int(end3)
                     if end2 == end3 and start3 > end1: # junc 2 end at same place and junc 3 is to the right of junc 1
@@ -176,7 +167,7 @@ with open(path_filtered_reads) as f:
                         window_around_end = chrom_seq[start3 - exons_bef_end - 2:start3 + introns_after_end - 2]
                         junction_seqs[line[0]] = [window_around_start, window_around_end]
 
-                        strand = get_strand_based_on_gene(gene)
+                        strand = get_strand_based_on_gene(gene1)
                         if not strand:
                             gene_not_in_gencode += 1
                             continue
@@ -188,12 +179,32 @@ with open(path_filtered_reads) as f:
                         # almost always GT, but also many gc
                         # print(chrom_seq[c-1:c+1])
 
-                        # read count from a -> b / c -> d
-                        count = int(line[1])
-                        tpm_count1 = tpm * count
-                        pos = int(count3) + int(tpm_count1)
-                        # read count from a -> d
-                        neg = int(count2)
+
+
+                        read_count1, read_count2, read_count3 = int(line[1]), int(read_count2), int(read_count3)
+
+
+                        if True:
+                            # only taking reads from highly expressed TPMs
+                            in_highly_expressed_gene2, tpm2 = contains_highly_expressed_gene([gene2])
+                            in_highly_expressed_gene3, tpm3 = contains_highly_expressed_gene([gene3])
+                            if not in_highly_expressed_gene2 or not in_highly_expressed_gene3:
+                                other_read_gene_not_highly_expressed += 1
+                                break
+                            # adjusting read counts for TPM
+                            tpm_count1 = read_count1 / tpm1
+                            tpm_count2 = read_count2 / tpm2
+                            tpm_count3 = read_count3 / tpm3
+
+                            # read count from a -> b / c -> d
+                            pos = tpm_count3 + tpm_count1
+                            # read count from a -> d
+                            neg = tpm_count2
+                        else:
+                            # read count from a -> b / c -> d
+                            pos = read_count3 + read_count1
+                            # read count from a -> d
+                            neg = read_count2
 
                         startw, endw = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
                         startw, endw = np.array(startw), np.array(endw)
@@ -245,6 +256,7 @@ print(f'Number of skipped homeless junctions: {homeless_junctions} ')
 print(f'Number of junctions skipped because not part of highly expressed gene {not_highly_expressed}')
 print(f'Number of junctions after filtering: {len(seqs_psis)}')
 print(f'Number of samples from genes not found in gencode: {gene_not_in_gencode}')
+print(f'Number of times where some read giving evidence didn\'t come from a highly expressed gene: {other_read_gene_not_highly_expressed}')
 
 
 l1scons, l2scons, l3scons = np.array(l1scons), np.array(l2scons), np.array(l3scons)
