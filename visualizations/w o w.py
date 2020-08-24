@@ -4,8 +4,8 @@ model_name = 'd2v'
 # d2v: 7.5 I like the best, 25 previous favorite
 # w2v: 12.5 I like the best, 10 also decent
 perplexity = 7.5
-embedding_model = gensim.models.Word2Vec.load(f'../../model/{model_name}-full-5epochs')
-save_to = f'tSNE-{model_name}_bases.png'
+embedding_model = gensim.models.Word2Vec.load(f'../model/{model_name}-full-5epochs')
+save_to = f'tSNE-{model_name}.png'
 print('x')
 
 from sklearn.manifold import TSNE                   # final reduction
@@ -124,11 +124,11 @@ def plot_with_matplotlib(x_vals, y_vals, labels):
         label_name = one_l_codon_to_three_l_codon(label_name)
         xy = (x_vals[i], y_vals[i])
         xytext = (x_vals[i]-3.5, y_vals[i]+2)
-        # plt.annotate(label_name, xy=(x_vals[i], y_vals[i]),xytext=xytext)
-        plt.annotate(labels[i], xy=(x_vals[i], y_vals[i]), xytext=xytext)
+        plt.annotate(label_name, xy=(x_vals[i], y_vals[i]),xytext=xytext)
+        # plt.annotate(labels[i], xy=(x_vals[i], y_vals[i]), xytext=xytext)
     plt.xlabel('x')
     plt.ylabel('y')
-    plt.savefig(save_to, bbox_inches='tight')
+    plt.savefig(save_to, bbox_inches='tight', dpi=300)
     plt.show()
 
 # try:
