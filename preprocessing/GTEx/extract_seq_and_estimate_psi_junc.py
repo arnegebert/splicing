@@ -42,20 +42,20 @@ exons_after_start = 70 # exons
 exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 
-highly_expressed_genes = set()
+highly_expressed_genes = dict()
 def load_highly_expressed_genes():
     with open(path_highly_expr_genes) as f:
         for l in f:
             gene_id, tpm = l.split(',')
-            highly_expressed_genes.add(gene_id)
+            highly_expressed_genes[gene_id] = tpm
 
 load_highly_expressed_genes()
 
 def contains_highly_expressed_gene(genes):
     for gene in genes:
         if gene in highly_expressed_genes:
-            return True
-    return False
+            return True, highly_expressed_genes[gene]
+    return False, 0
 
 gencode_genes = {}
 # def load_gencode_genes():

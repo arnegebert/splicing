@@ -9,7 +9,8 @@ from base import BaseModel
 # exact replication of the model from DSC
 class DSC(BaseModel):
 
-    def __init__(self):
+    def __init__(self, use_lens=True):
+        self.use_lens = use_lens
         super().__init__()
 
         self.fc_in = 15*8*2 + 3
@@ -43,8 +44,9 @@ class DSC(BaseModel):
         self.fc2 = nn.Linear(64, 1)
 
     def forward(self, seqs, lens):
+        if not self.use_lens: lens = torch.zeros_like(lens)
+
         # [128, 2, 140, 4]
-        # lens = torch.zeros_like(lens)
         start, end = seqs[:, 0], seqs[:, 1]
         # reshape because 1D convolutions expect [B, C, L] dimensions
         start, end = start.view(-1, 4, 140), end.view(-1, 4, 140)
@@ -224,7 +226,7 @@ class BiLSTM(BaseModel):
 
 class AttnBiLSTM(BaseModel):
     def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=100, conv_size=3, attn_dropout=0.2, n_heads=4, head_dim=50,
-                 seq_length=140, fc_dropout=0.5, attn_mode='heads'):
+                 seq_length=140, fc_dropout=0.5, attn_mode='heads', use_lens=True):
         super().__init__()
         assert conv_size % 2 == 1, "Only uneven convolution sizes allowed because uneven conv same padding support implemented"
         assert attn_mode in ['heads', 'no_query', 'single_head', 'conv', 'heads_no_query']
@@ -232,6 +234,7 @@ class AttnBiLSTM(BaseModel):
         self.attn_dropout = attn_dropout
         self.head_dim = head_dim
         self.n_heads = n_heads
+        self.use_lens = use_lens
 
         self.LSTM_dim = LSTM_dim
         self.seq_length = seq_length
@@ -260,7 +263,7 @@ class AttnBiLSTM(BaseModel):
         elif attn_mode == 'heads_no_query':
             self.attention = AttentionBlockWithoutQueryWithHeads(LSTM_dim, attn_dim, n_heads, head_dim, attn_dropout)
         elif attn_mode == 'conv':
-            self.attention = AttentionBlockWithoutQueryWithConv(seq_length, LSTM_dim, attn_dim, conv_size, attn_dropout)
+            self.attention = AttentionBlockWithConv(seq_length, LSTM_dim, attn_dim, conv_size, attn_dropout)
 
         self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
         self.drop_fc = nn.Dropout(self.dropout_prob)
@@ -268,6 +271,7 @@ class AttnBiLSTM(BaseModel):
 
 
     def forward(self, seqs, lens):
+        if not self.use_lens: lens = torch.zeros_like(lens)
         # [256, 142, 4] or [256, 140, 4]
         start, end = seqs[:, 0], seqs[:, 1]
         start, end = start.view(-1, self.seq_length, 4), end.view(-1, self.seq_length, 4)
@@ -403,7 +407,7 @@ class AttentionBlockWithConv(BaseModel):
         # I just have one query independent of sequence length
         self.query = torch.nn.Linear(1, out_dim)
         self.drop = torch.nn.Dropout(dropout)
-        self.drop_conv = torch.nn.Dropout2d(0.5)
+        self.drop_conv = torch.nn.Dropout2d(0)
         self.bn_values = torch.nn.BatchNorm1d(out_dim)
         self.bn_keys = torch.nn.BatchNorm1d(out_dim)
         self.conv = torch.nn.Conv1d(out_dim, out_dim, kernel_size, padding=kernel_size//2)
@@ -508,9 +512,9 @@ class MLP(BaseModel):
 # 64/16 d=0.5 just bad; d=0.2 overfits
 # lens as input are again a fucking game changer...
 class MLP2(BaseModel):
-    def __init__(self):
+    def __init__(self, use_lens=True):
         super().__init__()
-
+        self.use_lens = use_lens
         self.fc1 = nn.Linear(200+3, 32)
         self.fc2 = nn.Linear(32, 8)
         self.fc3 = nn.Linear(8, 1)
@@ -518,8 +522,7 @@ class MLP2(BaseModel):
         self.drop_fc2 = nn.Dropout(0.2)
 
     def forward(self, d2v_feats, lens):
-        # [B, 100] input
-
+        if not self.use_lens: lens = torch.zeros_like(lens)
         # [B, 200]
         feats = torch.cat((d2v_feats, lens), dim=1)
         x = F.relu(self.drop_fc1(self.fc1(feats)))

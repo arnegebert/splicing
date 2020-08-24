@@ -26,29 +26,32 @@ save_to = args.save_to
 
 # Brain - Cortex sample with id 164 corresonds to sample id 'GTEX-1F7RK-1826-SM-7RHI4'
 # that is, 1F7RK is the donor id
-G = 6
-H = 7
-with open(path_annotation) as f:
-    reader = csv.reader(f, delimiter="\t")
-    # contains list with rows of samples
-    d = list(reader)
 
-def samples_from_tissue(data, tissue):
+def load_annotation_file(path_annotation):
+    with open(path_annotation) as f:
+        reader = csv.reader(f, delimiter="\t")
+        # contains list with rows of samples
+        d = list(reader)
+    return d
+
+
+
+# todo: don't know whether I need to find all these samples in annotation file first or not
+# todo: probably enough if I only look for the desired sample and tissue type in annotation file
+# todo: probably will need to use annotation file though
+annotation_data = load_annotation_file(path_annotation)
+
+def get_samples_from_tissue(data, tissue):
     filtered_sample_names = []
     for row in data:
-
         if tissue in row:
-            filtered_sample_names.append(row[0])
+            sample_name = row[0]
+            filtered_sample_names.append(sample_name)
     return filtered_sample_names
 
-
-def samples_from_tissues(data, tissues):
-    filtered_sample_names = []
-    for tissue in tissues:
-        filtered_sample_names.append(samples_from_tissue(data, tissue))
-    return filtered_sample_names
-
-filtered_sample_names = samples_from_tissue(d, tissue)
+filtered_sample_names = get_samples_from_tissue(annotation_data, tissue)
+# This donor has tissue samples from all the tissues we want to examine
+# Was selected in a previous processing step
 desired_donor = '1HCVE'
 desired_donor_matches = [desired_donor in name for name in filtered_sample_names]
 idx_desired_sample = desired_donor_matches.index(True)
@@ -81,24 +84,18 @@ with open(path_srcs) as f:
         if i % 1000 == 0: # ~ 357500 junctions
             print(f'Reading line {i}')
         line = line.split('\t')
-        if i == 2:
-            for n in filtered_sample_names:
-                try:
-                    sample_idxs.append(line.index(n))
-                except ValueError:
-                    # print(f'{n} not in .gtc-file')
-                    pass
-            print(f'{len(sample_idxs)} samples after only using those in .gtc-file')
+        if i < 2: continue
+        elif i == 2:
+            for j, sample_id in enumerate(line):
+                if desired_donor in sample_id:
+                    desired_donor_idx = j
+                    break
         elif i > 2:
-            # data_line = []
-            # for idx in sample_idxs:
-            #     data_line.append(line[idx])
-            # data[line[0]] = '\t'.join(data_line)
             gene = line[1]
             dot_idx = gene.index('.')
             gene = gene[:dot_idx]
             junction = line[0]
-            reads = int(line[sample_idxs[idx_desired_sample]])
+            reads = int(line[desired_donor_idx])
             total_reads += reads
             data.append((gene, junction, reads))
 # data = junctions -> sample reads

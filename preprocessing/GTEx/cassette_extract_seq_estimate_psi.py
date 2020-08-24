@@ -43,20 +43,20 @@ exons_after_start = 70 # exons
 exons_bef_end = 70 # exons
 introns_after_end = 70 # introns
 
-highly_expressed_genes = set()
+highly_expressed_genes = dict()
 def load_highly_expressed_genes():
     with open(path_highly_expr_genes) as f:
         for l in f:
             gene_id, tpm = l.split(',')
-            highly_expressed_genes.add(gene_id)
+            highly_expressed_genes[gene_id] = tpm
 
 load_highly_expressed_genes()
 
 def contains_highly_expressed_gene(genes):
     for gene in genes:
         if gene in highly_expressed_genes:
-            return True
-    return False
+            return True, highly_expressed_genes[gene]
+    return False, 0
 
 gencode_genes = {}
 # def load_gencode_genes():
@@ -91,15 +91,6 @@ homeless_junctions = 0
 current_idx_overlap = 0
 too_short_exon = 0
 gene_not_in_gencode = 0
-
-def overlap(start, end, start2, end2):
-    return not (end2 < start or start2 > end)
-
-# want to load chromosome as one giant string
-def load_chrom_seq(chrom):
-    with open(f'{data_path}/chromosomes/chr{chrom}.fa') as f:
-        loaded_chrom_seq = f.read().replace('\n', '')
-        return loaded_chrom_seq.replace(f'<chr{chrom}','', 1)
 
 def overlap(start, end, start2, end2):
     return not (end2 < start or start2 > end)
@@ -150,7 +141,7 @@ with open(path_filtered_reads) as f:
         # they represent less than 1% of the exon and intron length distributions
         # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6722613/
         gene = line[2]
-        in_highly_expressed_gene = contains_highly_expressed_gene([gene])
+        in_highly_expressed_gene, tpm = contains_highly_expressed_gene([gene])
         if not in_highly_expressed_gene:
             not_highly_expressed += 1
             continue
@@ -198,7 +189,9 @@ with open(path_filtered_reads) as f:
                         # print(chrom_seq[c-1:c+1])
 
                         # read count from a -> b / c -> d
-                        pos = int(count3) + int(line[1])
+                        count = int(line[1])
+                        tpm_count1 = tpm * count
+                        pos = int(count3) + int(tpm_count1)
                         # read count from a -> d
                         neg = int(count2)
 
