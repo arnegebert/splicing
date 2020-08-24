@@ -13,7 +13,7 @@ def plot_and_save_roc(save_dir, *args):
     plt.plot([0, 1], [0, 1], 'k--', lw=2)
     plt.title('ROC curve')
     plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive rate')
+    plt.ylabel('True Positive Rate')
 
     plt.legend(loc='best')
     plt.savefig(f'{save_dir}/ROC.png', dpi=300, bbox_inches='tight')
@@ -21,20 +21,25 @@ def plot_and_save_roc(save_dir, *args):
 
 
 def load_and_plot_roc(name, dirs, labels):
-    colors = ['orange', 'green', 'blue', 'red']
-    assert len(dirs) <= 4
+    colors = ['orange', 'green', 'blue', 'red', 'gray']
+    plt.cla()
+    plt.style.use('seaborn')
+
+    assert len(dirs) == len(labels) <= len(colors)
     for (dir, label, color) in zip(dirs, labels, colors):
-        pred, target = np.load(dir)
+        pred_and_target = np.load(dir)
+        pred, target = pred_and_target[:len(pred_and_target)//2], pred_and_target[len(pred_and_target)//2:]
         fpr, tpr, _ = roc_curve(target, pred)
         auc_val = auc(fpr, tpr)
-        plt.plot(fpr, tpr, linestyle='--', color=color, label=f'{label} PSI events (AUC={auc_val:0.2f})')
+        plt.plot(fpr, tpr, linestyle='--', label=f'{label} (AUC={auc_val:0.2f})')
     plt.plot([0, 1], [0, 1], 'k--', lw=2)
     plt.title('ROC curve')
     plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive rate')
+    plt.ylabel('True Positive Rate')
 
     plt.legend(loc='best')
     plt.savefig(f'{name}.png', dpi=300, bbox_inches='tight')
+    plt.show()
 
 
 def plot_attention(attn_weights):
@@ -45,11 +50,11 @@ def plot_attention(attn_weights):
 
 if __name__ == '__main__':
     # config for HEXEvent
-    labels = ['DSC (baseline)', 'DSC (ours)', 'BiLSTM', 'D2V', 'BiLSTM + Attn']
-    experiments = ['HEXEvent_DSC', 'HEXEvent_BiLSTM', 'HEXEvent_D2V_MLP', 'HEXEvent_Attn']
+    labels = ['DSC (original)', 'DSC (ours)', 'D2V', 'BiLSTM + Attn']
+    experiments = ['HEXEvent_DSC', 'HEXEvent_D2V_MLP', 'HEXEvent_Attn']
     file_name = 'pred_and_target_all.npy'
     run_id = 'final'
-    dirs = [f'../saved/original/{file_name}']
+    dirs = [f'../saved/DSC_original/{file_name}']
     for exp in experiments: dirs.append(f'../saved/log/{exp}/{run_id}/{file_name}')
 
     load_and_plot_roc('baseline_five_models', dirs, labels)
