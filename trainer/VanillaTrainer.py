@@ -4,9 +4,7 @@ from sklearn.metrics import precision_recall_curve, confusion_matrix
 
 from base import BaseTrainer
 from model.metric import auc_single
-from utils import inf_loop, MetricTracker, save_pred_and_target
-from visualizations.roc_curves import plot_and_save_roc
-
+from utils import inf_loop, MetricTracker, save_pred_and_target, plot_and_save_roc
 
 class VanillaTrainer(BaseTrainer):
     """
@@ -69,8 +67,9 @@ class VanillaTrainer(BaseTrainer):
                 try:
                     auc_val = met(pred, target)
                     self.train_metrics.update(met.__name__, auc_val)
-                except ValueError:
-                    print('AUC bitching around for train metrics')
+                except ValueError as e:
+                    print(e)
+                    # print('AUC bitching around for train metrics')
                     continue
 
             if batch_idx % self.log_step == 0:
@@ -111,8 +110,11 @@ class VanillaTrainer(BaseTrainer):
                 pred_target_high = self._single_val_epoch(self.test_high, epoch, self.test_high_metrics)
                 pred_target_val = self._single_val_epoch(self.val_all, epoch, self.val_metrics)
                 # todo: make this cleaner; assumes that mnt_best tracks auc
-                if auc_single(pred_target_val) >= self.mnt_best:
-                    self.auc_f1_metric_evaluation_and_visualization(pred_target_all, pred_target_low, pred_target_high)
+                try:
+                    if auc_single(pred_target_val) >= self.mnt_best:
+                        self.auc_f1_metric_evaluation_and_visualization(pred_target_all, pred_target_low, pred_target_high)
+                except ValueError:
+                    pass
 
 
         # add histogram of model parameters to the tensorboard
@@ -164,8 +166,9 @@ class VanillaTrainer(BaseTrainer):
                 try:
                     auc_val = met(pred, target)
                     metrics.update(met.__name__, auc_val)
-                except ValueError:
-                    print('AUC bitching around')
+                except ValueError as e:
+                    print(e)
+                    # print('AUC bitching around')
                     continue
         # if self.attention and metrics == self.test_all_metrics:
         #     attn_ws_b = np.concatenate(attn_ws_b, axis=0)

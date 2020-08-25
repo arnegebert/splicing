@@ -7,7 +7,7 @@ from utils import one_hot_decode_seq_vanilla
 #todo could make this doable via command line arguments and export / document data processing process via a bash script
 startt = time.time()
 data_path = '../../data'
-data_dir = 'hipsci_majiq/exon'
+data_dir = 'hipsci_majiq/junc'
 embedding_model = gensim.models.Doc2Vec.load('../../model/d2v-full-5epochs')
 
 def batch_split_into_3_mers(batch):

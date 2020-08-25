@@ -9,9 +9,29 @@ from itertools import repeat
 from collections import OrderedDict
 import math
 
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+
 
 def overlap(start, end, start2, end2):
     return not (start > end2 or end < start2)
+
+def plot_and_save_roc(save_dir, *args):
+    plt.cla()
+    plt.style.use('seaborn')
+    colors = ['orange', 'green', 'blue']
+    for (((pred, target), label), color) in zip(args, colors):
+        fpr, tpr, _ = roc_curve(target, pred)
+        auc_val = auc(fpr, tpr)
+        plt.plot(fpr, tpr, linestyle='--', color=color, label=f'{label} PSI events (AUC={auc_val:0.2f})')
+    plt.plot([0, 1], [0, 1], 'k--', lw=2)
+    # plt.title('ROC curve')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+
+    plt.legend(loc='best')
+    plt.savefig(f'{save_dir}/ROC.png', dpi=300, bbox_inches='tight')
+    # plt.show()
 
 def save_pred_and_target(log_dir, pred_target_all, pred_target_low, pred_target_high):
     # pred_target_all = (pred_all, target_all)

@@ -155,7 +155,7 @@ Overall,
 	\caption{Left: ROC curve of the DSC model on heart tissue. Right: ROC curve of the Attn model on heart tissue. }
 	\label{fig:gtex_junc_rocs}
 \end{figure}
-
+TODO: motivation for using junction-centric datasets
 TODO: rerun these with cross-validation (will take ~30 hours of trainig time though)
 
 - performance across the board a lot better; seemingly an easier task\\
@@ -172,12 +172,13 @@ TODO: rerun these with cross-validation (will take ~30 hours of trainig time tho
 In \ref{subsubsec:naivepsi}, we mentioned issues when trying to estimate PSI naively. Although we tried to alleviate these as far as possible in pre-processing, we don't account for the information contained in non-junction reads and that from multiple samples. As a result, data quality is likely still an issue. Alleviating these issues, we next evaluate our models based on a primary data source which gives access to raw RNA-seq reads. This enables us to use methods from the literature which leverage information from non-junction reads and multiple samples.
 
 \section{HipSci-based datasets} \label{sec:hipsci} 
+
 \subsection{SUPPA with neuron tissue induced iPSCs} \label{subsec:hipsci_suppa}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/suppa_cross_model_roc_auc_comparison.png} 
 	\caption[bla.]{Comparison of the ROC curves of the three main models on the HipSci dataset derived by using SUPPA. }
-	\label{fig:suppa_auc}
+	\label{fig:suppa_auc_roc}
 \end{figure}
 
 Takeaways:
@@ -188,6 +189,17 @@ Takeaways:
 
 \subsection{MAJIQ with iPSCs differentiated to neurons (exons)} \label{sec:hipsci_neuron_majiq}
 
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/majiq_neuron_cross_model_roc_auc_comparison.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/majiq_ipsc_cross_model_roc_auc_comparison.png} 
+	\caption[bla.]{Comparison of the ROC curves of the three main models on the HipSci datasets derived by using MAJIQ. }
+	\label{fig:majiq_rocs}
+\end{figure}
+
+- cross-model roc curve for neurons
+- cross-model roc curve for iPSC
+
+- bar chart for comparison
 
 \subsection{MAJIQ with iPSCs differentiated to neurons (junctions)}
 haven't run experiments yet, not sure if results are interesting (but probably yes)\\
@@ -201,5 +213,6 @@ due to training times, probably don't want to run these with cross-validation as
 cross-tissue comparison here with very low variance across tissues;\\
 seems like learned features are tissue-invariant\\
 
+continuous psi prediction too
 
 interpretation of attention mechanism etc follows here; some pretty graphics to follow

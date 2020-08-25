@@ -4,8 +4,7 @@ from sklearn.metrics import precision_recall_curve, confusion_matrix
 
 from base import BaseTrainer
 from model.metric import auc_single
-from utils import inf_loop, MetricTracker, save_pred_and_target
-from visualizations.roc_curves import plot_and_save_roc
+from utils import inf_loop, MetricTracker, save_pred_and_target, plot_and_save_roc
 
 
 class ComparisonTrainer(BaseTrainer):

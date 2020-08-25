@@ -53,8 +53,8 @@
         "logged_metrics": ["r2", "test_r2", "test_low_r2", "test_high_r2", "val_r2"],
         "early_stop": 15,
 
-        "tensorboard": false
+        "tensorboard": true
     },
     "comment": "",
-    "cross_validation": false
+    "cross_validation": true
 }

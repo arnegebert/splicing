@@ -87,8 +87,8 @@ However, this estimate has various issues.
 %	this is the reason why I wanted access to raw RNA-seq reads
 	\item Related to 1), typically multiple samples or biological replicates of a given experiment are available. It is desirable that reads across multiple samples can be integrated to give a more well-adjusted estimate. How to best achieve this is not obvious. Read depths between multiple libraries may vary and this should be accounted for. [possible other issues here and then make this another itemization]
 	\item IR and ER must be normalized for exon length to obtain meaningful results. For a long exon, the majority of reads will be IR because they can be located over a much larger area than the ER who must overlap with the 0-length feature of the splicing junction. This can be accounted for by normalizing for the possible number of start positions for each read population:
-	$$\#IR_norm = \frac{\#IR}{(exon length + read length -1)}$$
-	$$\#ER_norm = \frac{\#ER}{(read length - 1)}$$
+	$$\#IR_{norm} = \frac{\#IR}{(exon length + read length -1)}$$
+	$$\#ER_{norm} = \frac{\#ER}{(read length - 1)}$$
 	%TODO: check out second graphic from berlin paper in more detail
 	Note that this assumes that reads are uniformly distributed across a transcript isoform. It is well-known that RNA-seq reads are biased .... [get paper from Liz/Wilfred]
 	
@@ -175,7 +175,7 @@ The naive way of estimating PSI was applied to the GTEx dataset as we had no acc
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/input_schematic.png} 
-	\caption[bla.]{The input to our models are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. }
+	\caption[bla.]{Schematic of model input \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. }
 	\label{fig:inputschematic}
 \end{figure}
 
