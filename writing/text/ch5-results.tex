@@ -1,4 +1,4 @@
-\chapter{\label{ch:5-results}Results}
+\chapter{\label{ch:ch5-results}Results}
 
 
 This section shows and discusses the results of our experiments based on the models and the datasets introduced in Chapter \ref{ch:4-methods}. It also describes the rationale behind deciding which experiments should be run.
@@ -15,7 +15,7 @@ Thus, we conclude that, albeit with minor caveats, the reimplementation was succ
 
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/hexevent_cross_model_roc_auc_comparison.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/hexevent_cross_model_roc_auc_comparison.png} 
 	\caption[bla.]{Comparison of the ROC curves of the three main models (as well as the original implementation) on the HEXEvent dataset. The values of the original implementation were obtained by rerunning the training on the publicly available implementation. }
 	\label{fig:hexevent_auc}
 \end{figure}
@@ -37,14 +37,14 @@ Reimplementation was done piece-wise, that is, first the sequence features were 
 	\centering
 	\begin{tabular}{| l | c | c | c| c} 
 		\hline
-		Model name & Only sequences & Sequences + lengths & Relative performance difference\\
+		Model name & Only sequences & Sequences + lengths & Relative performance improvement\\
 		\hline
 		DSC & 0.618 & 0.873 & 0.684\\
 		D2V & 0.614 & 0.896 & 0.737\\
 		BiLSTM + Attn & \textbf{0.636} & \textbf{0.904} & 0.663\\
 		\hline
 	\end{tabular}
-	\caption{Performance of the main models on the HEXEvent dataset with and without length features given as AUC. Note that the relative performance drop was computed with reference to the baseline AUC value of 0.5.
+	\caption{Performance of the main models on the HEXEvent dataset with and without length features given as AUC. The relative performance improvement (from adding the length features) was computed as $\frac{AUC_{lengths} - AUC{no_lengths}}{AUC_{lengths} - 0.5}$. Computing it this way accounts for the baseline AUC of random guessing being 0.5.
 	}
 	\label{table:results_hexevent}
 \end{table}
@@ -82,7 +82,7 @@ These findings have strong implications. It calls into questions the meaningfuln
 %TODO: move figures into directories and update figure links
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/dsc_funeral_barchart.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/dsc_funeral_barchart.png} 
 	\caption[bla.]{Stress testing the HEXEvent dataset used in \cite{dsc}. The graph shows the performance as well as the inverse of the respective model sizes used.}
 	\label{fig:dsc_funeral}
 \end{figure}
@@ -95,7 +95,7 @@ These findings have strong implications. It calls into questions the meaningfuln
 
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/gtex_exon_barcharts.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_exon_barcharts.png} 
 	\caption{Performance on the GTEx-based exon datasets for different tissues. The error bars give the standard deviation across all cross-validation runs. }
 	\label{fig:gtex_exon_barcharts}
 \end{figure}
@@ -144,7 +144,7 @@ Overall,
 \subsection{Junction-based datasets} \label{subsec:gtex_junc}
 
 \begin{figure}[h]
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/gtex_junc_barcharts.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_junc_barcharts.png} 
 	\caption{Performance on the GTEx-based junction datasets for different tissues. }
 	\label{fig:gtex_junc_barcharts}
 \end{figure}
@@ -169,37 +169,66 @@ TODO: rerun these with cross-validation (will take ~30 hours of trainig time tho
 
 
 
-In \ref{subsubsec:naivepsi}, we mentioned issues when trying to estimate PSI naively. Although we tried to alleviate these as far as possible in pre-processing, we don't account for the information contained in non-junction reads and that from multiple samples. As a result, data quality is likely still an issue. Alleviating these issues, we next evaluate our models based on a primary data source which gives access to raw RNA-seq reads. This enables us to use methods from the literature which leverage information from non-junction reads and multiple samples.
+In \ref{subsubsec:naivepsi}, we mentioned issues when trying to estimate PSI naively. Although we tried to alleviate these as far as possible in pre-processing, we don't account for the information contained in non-junction reads and that from multiple samples. As a result, data quality is likely still an issue distoring the results in this section. Alleviating these issues, we next evaluate our models based on a primary data source which gives access to raw RNA-seq reads. This enables us to use methods from the literature which leverage information from non-junction reads and multiple samples.
 
 \section{HipSci-based datasets} \label{sec:hipsci} 
 
 \subsection{SUPPA with neuron tissue induced iPSCs} \label{subsec:hipsci_suppa}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/suppa_cross_model_roc_auc_comparison.png} 
-	\caption[bla.]{Comparison of the ROC curves of the three main models on the HipSci dataset derived by using SUPPA. }
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/suppa_cross_model_roc_auc_comparison.png} 
+	\caption{Comparison of the ROC curves of the three main models on the HipSci dataset derived by using SUPPA. }
 	\label{fig:suppa_auc_roc}
 \end{figure}
 
-Takeaways:
+Figure \ref{fig:suppa_auc_roc} shows poor model performance across the board. The predictive power of our models on the SUPPA-based HipSci dataset is worse than on the GTEx dataset and roughly equal to performance the HEXEvent dataset without length features. This indicates that 
 \begin{enumerate}
-	\item All models perform similarly, BiLSTM + Attn tends to perform best
-	\item All models perform very poorly perhaps a dataset issue (due to HIPSCI SUPPA being coarse-grained)
+	\item either we arrive at a strong dataset here and that constitutive exon classification is more challenging than so far anticipated,
+	\item or this dataset suffers from data quality issues which make constitutive exon classification very challenging for the models.
 \end{enumerate}
+Among these two, 2. is more likely: in retrorespect, SUPPA was not the best choice for dataset processing. It operates at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Additionally, it does not make it possible to generate a list of non-cassette constitutive exons, therefore roughly halving the size of the training set and the number of samples the model can learn from. Its PSI estimation is very simplistic and doesn't account for multiple of the issues highlighted in \ref{subsec:psiestimation}. Thus, we now turn to data processing with MAJIQ in hopes of better results. 
+
+% TODO thought: what if AUC here is only worse because the model doesn't have easy to classify constitutive exons which boost the AUC? 
+
 
 \subsection{MAJIQ with iPSCs differentiated to neurons (exons)} \label{sec:hipsci_neuron_majiq}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/majiq_neuron_cross_model_roc_auc_comparison.png} 
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/majiq_ipsc_cross_model_roc_auc_comparison.png} 
-	\caption[bla.]{Comparison of the ROC curves of the three main models on the HipSci datasets derived by using MAJIQ. }
+	\centering\includegraphics[width=0.5\textwidth]{../visualizations/ch5-results/majiq_neuron_cross_model_roc_auc_comparison.png} 
+	\centering\includegraphics[width=0.5\textwidth]{../visualizations/ch5-results/majiq_ipsc_cross_model_roc_auc_comparison.png} 
+	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
 	\label{fig:majiq_rocs}
 \end{figure}
 
-- cross-model roc curve for neurons
-- cross-model roc curve for iPSC
+All models perform better than in previous datasets, but in contrast to previous datasets we also observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by BiLSTM + Attn. The dataset based on undifferentiated iPSC samples seems to be slightly easier for the models, with AUC values across the board increasing by roughly 2\%. At a closer look at the dataset distribution
 
-- bar chart for comparison
+% TODO: investigate whether this is just a result of dataset composition --> not at first look
+% neuron: 26394 / 8201 / 10151 = 44746
+% ipsc: 27371 / 9299 / 11819 = 48489
+% --> look at relative numbers, once you have analyzed across tissue-performance
+
+% TODO: change roc curves such that I give AUC values explicitly (better than alternative of redoing)
+
+% TODO: fix graphic inlcusion after folder changes, but possibly do some more folder changes too
+%todo thought: it would be interesting to reevaluate all models without constitutive exons to see whether they actually perform better than in suppa dataset
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{| l | c | c | c| c} 
+		\hline
+		Model name & Only sequences & Sequences + lengths & Relative performance improvement\\
+		\hline
+		DSC & 0.811 & 0.808 & -0.010\\
+		D2V & 0.665 & 0.715 & 0.233\\
+		BiLSTM + Attn & \textbf{0.853} & \textbf{0.865} & 0.033\\
+		\hline
+	\end{tabular}
+	\caption{Performance on the dataset based on processing with MAJIQ and iPSC cells differentiated to neurons with and without length features given as AUC. Note that the relative performance drop was computed with reference to the baseline AUC value of 0.5.
+	}
+	\label{table:results_hexevent}
+\end{table}
+
+%TODO: bar chart for comparison
 
 \subsection{MAJIQ with iPSCs differentiated to neurons (junctions)}
 haven't run experiments yet, not sure if results are interesting (but probably yes)\\
@@ -208,7 +237,14 @@ due to training times, probably don't want to run these with cross-validation as
 
 \subsection{MAJIQ with undifferentiated iPSCs} \label{subsec:hipsci_ipsc_majiq}
 
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/majiq_comparison_barcharts.png} 
+	\caption{Performance when training models on one HipSci dataset and testing on the same dataset as well as three others. Within the bars of one model, going further right means using a dataset which is less similar to the dataset the model was trained on (the left-most bar display performance when testing the model on the dataset it was trained on). 'lib' refers to a library or biological sample from the same individual, 'indv' refers to the indivual the sample was taken from, 'diff' abbreviates different. 'iPSC cell' refers to a dataset based on RNA-seq data from undifferentiated iPSC cells while 'neuron cell' refers to iPSC cells differentiated to neuron cells. }
+	\label{fig:majiq_comparison_barcharts}
+\end{figure}
 
+- Extremely surprising results; it is better to train a dataset on undifferentiated tissue than training it on differentiated tissue --> def check data processing for this again lol, make sure that I actually shuffle data. this is too weird to be true
+- 
 
 cross-tissue comparison here with very low variance across tissues;\\
 seems like learned features are tissue-invariant\\

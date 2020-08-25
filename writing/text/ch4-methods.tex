@@ -23,7 +23,7 @@ Processed data which can not be used to identify the donors is publicly availabl
 \subsection{HipSci} \label{subsec:hipsci}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ipscprocess.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/ipscprocess.png} 
 	\caption[test.]{
 	(1) Cell culture of donor cells is grown. (2) Transduce the genes associated with reprogramming into the cells via viral vectors. (3) Isolate the cells expressing the transduced genes (in red) and culture them according to embryonic stem cell culture. (4) A small subset of the transfected cells become iPSC cells. Graphic and description adapted from \cite{ipscprocess}.
 }
@@ -63,7 +63,7 @@ Figure \ref{fig:psiestimation} illustrates the process of estimating PSI based o
 The advantage of this estimate lies in its simplicity and flexibility. It is quick and easy to implement (hopefully bug-free). It is independent of library size. It can easily be adapted to estimate the PSI of a junction by redefining \#IR and \#ER to count the inclusion and exclusion read for that junction.
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/psi_estimation.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/psi_estimation.png} 
 	\caption[]{
 		Process of estimating PSI based off RNA-seq reads \cite{berlinpsi}. The reads are mapped to the transcript. Based on annotation files, the reads overlapping exon/intron junctions are classfied as including or excluding reads for a particular exon. Based on the observed IR and ER, the PSI for a given exon is estimated.
 		}
@@ -145,7 +145,7 @@ Vertices which have more than 3 incoming edges are denoted as local splicing var
 \end{figure}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/splice_graph.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/splice_graph.png} 
 	\caption{An example splice graph as displayed in VOILA \cite{majiq2}. Exons, represented by grey rectangles, are connected with another exon via an edge, if a junction between the exons (or a variant of them) is observed. The number above an edge displays the number of observed raw reads spanning a particular exon-exon junction.}
 	\label{fig:splice_graph}
 \end{figure}
@@ -162,7 +162,7 @@ The latest version of MAJIQ available as of July 2020 was used (MAJIQ v2.0).
 
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/voila_example.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/voila_example.png} 
 	\caption[Four-chamber illustration of the human heart.]{Example output of VOILA while filtering for LSV which only experience exon skipping and no other alternative splicing event. }
 	\label{fig:voilaexample}
 \end{figure}
@@ -174,7 +174,7 @@ The naive way of estimating PSI was applied to the GTEx dataset as we had no acc
 \subsection{Final sample processing} \label{subsec:finalsampleprocessing}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/input_schematic.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/input_schematic.png} 
 	\caption[bla.]{Schematic of model input \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. }
 	\label{fig:inputschematic}
 \end{figure}
@@ -280,7 +280,7 @@ further analysis postponed until I ran experiments again and decided for which d
 %probably won't include reconexon/junction dataset
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/dataset_histograms_seaborn.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/dataset_histograms_seaborn.png} 
 	\caption[test.]{
 		...
 	}
@@ -349,7 +349,7 @@ If the skip-gram technique is used, only the current word is given as input and 
 There is no clear choice for when which training method should be used for Word2Vec or Doc2Vec as the training methods tend to perform similarly. However, DM (and also CBOW) preserve the order of words and as the order of words (3-mers) is likely significant, we chose DM as pre-training method.
 Pre-processing the human genome like above and using the DM training method, we trained the Doc2Vec model to output a 100-dimensional embedding for each document.
 \begin{figure}
-	\includegraphics[width=0.7\textwidth]{../visualizations/d2v_training.png} 
+	\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/d2v_training.png} 
 	\caption{
 		% TODO
 	}
@@ -360,7 +360,7 @@ Pre-processing the human genome like above and using the DM training method, we 
 \subsubsection{Analyzing the obtained embeddings}
 %TODO: add w2v grtaphic from ieee
 \begin{figure}
-	\includegraphics[width=0.5\textwidth]{../visualizations/tSNE-d2v.png} 	\includegraphics[width=0.5\textwidth]{../visualizations/tSNE-d2v_bases.png} 
+	\includegraphics[width=0.5\textwidth]{../visualizations/ch4-methods/tSNE-d2v.png} 	\includegraphics[width=0.5\textwidth]{../visualizations/ch4-methods/tSNE-d2v_bases.png} 
 	\caption{
 		% TODO
 		 }
@@ -389,7 +389,7 @@ During inference, the Doc2Vec model outputs 100-dimensional embeddings for each 
 Sequence-to-sequence learning (Seq2seq) \cite{seq2seq} is a general deep learning-based framework for mapping one sequence to another. The first part of the framework is an encoder which processes the input symbol-by-symbol and produces a vector representation for each input symbol. The second part is a decoder which predicts the output sequence symbol-by-symbol based on the representation(s) computed by the decoder. In the first timestep, the decoder uses the last output of the encoder and in all other timesteps, it uses its own output from the previous time step as input. The encoder and decoder are typically RNN-based networks such as LSTMs \cite{lstm} or GRUs \cite{gru}. Encoder and decoder are jointly trained to maximize the probability of correct output. This framework has been particularly successful in machine translation (MT): for instance, Google announced in 2016 that it started using them for their MT \cite{googlemt2016}. Figure \ref{fig:encdec} visualizes the working of an encoder-decoder model.
 
 \begin{figure}
-	\centering\includegraphics[width=0.9\textwidth]{../visualizations/enc_dec.pdf} 
+	\centering\includegraphics[width=0.9\textwidth]{../visualizations/ch4-methods/enc_dec.pdf} 
 	\caption[bla.]{An encoder-decoder model \cite{ruderencdecgraphic} translates the English sentence 'He loved to eat' to the German sentence 'Er liebte zu essen'. The decoder takes the last hidden cell state of the encoder as initial input and generates the output token-by-token. The decoder takes its own previous output as prompt for the next output and stops generating output token when it generates a '.'-token. }
 	\label{fig:encdec}
 \end{figure}

@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 
 
+def compute_relative_performance_change_auc(value_bef, value_after):
+    return (value_after-value_bef)/(value_after-0.5)
+
 def overlap(start, end, start2, end2):
     return not (start > end2 or end < start2)
 
