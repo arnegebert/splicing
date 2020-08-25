@@ -91,10 +91,11 @@
 
 %%%%% YOUR OWN PERSONAL MACROS
 % This is a good place to dump your own LaTeX macros as they come up.
-\usepackage{graphicx}
-\usepackage{amsmath}
 \usepackage{hyperref}
+\parindent 0pt  % Paragraphs aren't indented 
+\setlength{\parskip}{\baselineskip} % Paragraphs have some free space after them
 
+\usepackage{parskip}[skip=10\baselineskip] % skips not large enough
 
 % To make text superscripts shortcuts
 	\renewcommand{\th}{\textsuperscript{th}} % ex: I won 4\th place
@@ -102,6 +103,7 @@
 	\renewcommand{\st}{\textsuperscript{st}}
 	\newcommand{\rd}{\textsuperscript{rd}}
 \DeclareUnicodeCharacter{0301}{*************************************}
+
 %%%%% THE ACTUAL DOCUMENT STARTS HERE
 \begin{document}
 

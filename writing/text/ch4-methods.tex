@@ -1,36 +1,38 @@
 \chapter{\label{ch:4-methods}Methods}
 
 %TODO: short name for attention model
-% TODO: fix attention formulas
 
 This chapter introduces the primary data sources, describes how these were used to obtain the training datasets, and presents the used models. It also gives implementation details regarding processing steps, model implementation, and model training.
 In this work, we focus on the splicing prediction of cassette exons. Previous work indicates that advances in predicting one type of alternative splicing behaviour via Machine Learning methods also translates to advances in prediction for other types. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryotes. Thus, for reasons of practicality we choose cassette exons as the type of alternative splicing, we will focus on.
 \section{Datasets}\label{sec:datasets}
 Three primary sources for genomic data were used in this study: the Human Exon splicing events (HEXEvent) database \cite{hexevent}, data from the Genotype-Tissue Expression (GTEx) project \cite{gtex} and data from the Human Induced Pluripotent Stem Cell Initiative (HipSci) \cite{hipsci}. Except for the HEXEvent database, none of these primary sources directly report the PSI values of exons or junctions. The processing done to estimate the PSI value-based from the primary sources is described in section [estimating PSI]. All of the data sources required further processing (e.g. extraction of corresponding nucleotide sequences) to obtain the final samples which are the input for the models. These further processing steps are described in section \ref{subsec:finalsampleprocessing}.
 
+
 \subsection{HEXEvent database} \label{subsec:hexevent}
 The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons) via an online user interface. It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information.
 It was chosen as a data source for direct comparability with the baseline paper \cite{dsc}.
 TODO critizie est data
 %TODO criticize EST data
+% https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1431573/
 these are sequence reads datasets based on which I will estimate the PSI values
 \subsection{GTEx} \label{subsec:gtex}
-The Genotype-Tissue Expression (GTEx) project provides the most comprehensive database for tissue-specific gene expression and regulation available to-date. It contains over 17000 samples from nearly 1000 human donors. Each sample was taken from up to 54 different tissue sites. The sequencing samples were obtained using mainly molecular assay-based techniques like Whole Genome Genotyping (WGS), Whole Exome Sequencing (WES) and RNA-Seq.\\
+The GTEx project provides the most comprehensive database for tissue-specific gene expression and regulation available to-date. It contains over 17000 samples from nearly 1000 human donors. Each sample was taken from up to 54 different tissue sites. The sequencing samples were obtained using mainly molecular assay-based techniques like Whole Genome Genotyping (WGS), Whole Exome Sequencing (WES) and RNA-Seq.\\
 Processed data which can not be used to identify the donors is publicly available on the GTEx portal. To access raw data (e.g. raw RNA-seq reads) and meta-information about the samples one is required to undergo a data access request. It is intended that data access is requested by PIs or leader of research groups for their whole lab. Approval of a data access request usually takes upwards of 3 months. The co-collaborators Prof. Wilfred Haerty and Prof. Elizabeth Tunbridge have access to the protected part of the GTEx data. However, the scope of projects for which they were granted access does not include this thesis and changing the scope would require undergoing the data access process again. For this reason, we only use the publicly available part of the GTEx data, in particular the files containing information about exon-exon junction reads.
 %using gtex:
 %'We strongly recommend the use of TPM (Transcripts Per Million), because is normalized for gene length first, and then for sequencing depth. This allows a direct comparison between samples' https://github.com/comprna/SUPPA/wiki/SUPPA2-tutorial
 %good site: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000424.v8.p2
 \subsection{HipSci} \label{subsec:hipsci}
-
+%TODO is my interpretation that iPSC cells are differentiated to neurons actually correct? -> perhaps ask in meeting
+% https://www.biorxiv.org/content/10.1101/095943v1 iPSC-derived sensory neurons
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/ipscprocess.png} 
 	\caption[test.]{
-	(1) Cell culture of donor cells is grown. (2) Transduce the genes associated with reprogramming into the cells via viral vectors. (3) Isolate the cells expressing the transduced genes (in red) and culture them according to embryonic stem cell culture. (4) A small subset of the transfected cells become iPSC cells. Graphic and description adapted from \cite{ipscprocess}.
+	(1) Cell culture of donor cells is grown. (2) Transduce the genes associated with reprogramming into the cells via viral vectors. (3) Isolate the cells expressing the transduced genes (in red) and culture them according to embryonic stem cell culture. (4) A small subset of the transfected cells become iPSC cells. Graphic and description adapted from \cite{img:ipscprocess}.
 }
 	\label{fig:ipscprocess}
 \end{figure}
 
-The Human Induced Pluripotent Stem Cell Initiative (HipSci) is a large, mostly freely-available repository of human induced pluripotent stem cell (iPSC) lines. iPSC cells are mature cells which have been reprogrammed to again become pluripotent (undetermined). Figure \ref{fig:ipscprocess} shows how iPSC cells are obtained. As iPSC cell lines are not directly obtained from human donors, but rather from building a cell culture based on some initial donor cells, the HipSci dataset does not suffer from the data privacy issues which prevented access to the raw RNA-seq reads as in the GTEx data.
+HipSci provides a large, mostly freely-available repository of human induced pluripotent stem cell (iPSC) lines. iPSC cells are mature cells which have been reprogrammed to again become pluripotent (undetermined). Figure \ref{fig:ipscprocess} shows how iPSC cells are obtained. As iPSC cell lines are not directly obtained from human donors, but rather from building a cell culture based on some initial donor cells, the HipSci dataset does not suffer from the data privacy issues which prevented access to the raw RNA-seq reads as in the GTEx data.
 
 
 Over 300 cell lines from over 300 donors along with their RNA-seq reads are publicly available from the HIPSCI portal. From these we selected two groups of roughly 20 biological replicates each:
@@ -48,7 +50,7 @@ Similarly, $\Psi_5$ is defined as the number of transcripts containing a particu
 
 
 %High-throughput sequencing of cDNA fragments (RNA-seq; Lister et al., 2008) has become a popular tool to investigate RNA expression and post-transcriptional regulation. Sequencing of the transcriptome reveals tens of thousands of transcripts expressed simultaneously (Mortazavi et al., 2008). Despite providing a deep and genome-wide view on post-transcriptional processing, current technologies cannot reveal transcripts in full-length due to limitations in read length.  [https://www.researchgate.net/publication/282645615_Alternative_Splicing_Signatures_in_RNA-seq_Data_Percent_Spliced_in_PSI/link/59e8404b458515c3630fe4e3/download]
-%TODO: add process graphics I made
+
 High-throughput sequencing methods are a potent tool to investigate RNA expression and post-transcriptional regulation. However, due to limited coverage, short read length, and experimental biases they are not able to provide a full view of post-transcriptional processing so far \cite{berlinpsi}.
 
 %However, due to limitations in read length, they are not able to provide a full view of post-transcriptional processing so far.
@@ -79,6 +81,7 @@ However, this estimate has various issues.
 	% https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
 	
 	%TODO: could add that even then reads across a gene aren't normally distributed
+	% see https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-290
 	
 	Assuming that one obtains a read count normalized by the gene expressiveness for each exon, there is not a principled way to choose the cutoff threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and training samples.
 	\item Reads which align purely to the flanking constitutive exons are ignored. While these could have occurred in either isoform, they provide latent evidence for whether the cassette exon was included or not. In isoforms where it occurred, the total length of the isoform is longer which means the reads are distributed over a larger area. This leads to a comparatively reduced proportion of reads across the flanking exons when the exon was included and vice versa. The estimate neglects to take this information into account.
@@ -124,9 +127,11 @@ Several approaches have been developed which try to address these issues in esti
 \subsubsection{SUPPA}\label{subsubsec:suppa}
 SUPPA2 \cite{suppa2} estimates the PSI value for each alternative splicing event based on transcript abundances. It operates in 2 steps for quantifying the PSI of an alternative splicing event:
 1) Given an input annotation file in GTF format, it generates the transcript isoforms which count as IR or ER for a given alternative splicing event.
-2) Given the information which transcript count as IR or ER from 1) and how frequently each transcript occurs, it estimates the PSI value via $PSI = TPM_{IR} / TPM_{IR} + TPM_{ER}$. SUPPA2 can integrate the TPM values from multiple samples.
+2) Given the information which transcript count as IR or ER from 1) and how frequently each transcript occurs, it estimates the PSI value via $PSI = \frac{TPM_{IR}}{TPM_{IR} + TPM_{ER}}$. SUPPA2 can integrate the TPM values from multiple samples.
 %because it is so naive is probably the reason why it performs so badly
 %!perhaps add steps 1/2/3 to this graphic?
+
+
 \textbf{Using SUPPA2:}
 SUPPA2 requires a GTF annotation file and a file quantifying the abundance of each transcript. A GENCODE version 34 annotation file obtained from Ensembl was used as an annotation file. Salmon was used for quantifying the relative abundance of each transcript in TPM. Salmon's [cite] quantification is based on the raw RNA-seq reads in FASTQ format, takes into account experimental attributes and correct for biases commonly observed in RNA-seq data. After extracting the TPM values provided by Salmon into the format required by SUPPA (a tsv-file with one column for the transcript id and one column for the TPM value), SUPPA2 estimates the PSI for each alternative splicing event.
 The latest version of SUPPA available as of July 2020 was used (SUPPA v2.3). 
@@ -134,7 +139,7 @@ The latest version of SUPPA available as of July 2020 was used (SUPPA v2.3).
 \subsubsection{MAJIQ}\label{subsubsec:majiq}
 Modeling Alternative Junction Inclusion Quantification (MAJIQ) builds up a splice graph \cite{majiq2} which contains exon as vertices and junctions as edges. An edge is added between two vertices if a transcript isoform is found in which they share a junction (that is if the exons are neighbours and everything between them has been spliced out).
 Constitutive exons are vertices with two incoming edges.
-Vertices which have more than 3 incoming edges are denoted as local splicing variations (LSV). Due to this problem formulation, MAJIQ can model more complex splicing variations than skipped exons, alternative 3' splice sites, and alternative 5' splice sites. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping.\\
+Vertices which have more than 3 incoming edges are denoted as local splicing variations (LSV). Due to this problem formulation, MAJIQ can model more complex splicing variations than skipped exons, alternative 3' splice sites, and alternative 5' splice sites. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping.
 
 
 
@@ -282,7 +287,7 @@ further analysis postponed until I ran experiments again and decided for which d
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/dataset_histograms_seaborn.png} 
 	\caption[test.]{
-		...
+		Histograms comparing the exon-centric versions of the four fundamentally different training datasets used. The shown GTEx dataset is based on samples from brain cortex tissue and  the shown HipSci datasets are based on samples from iPSC cells differentiated to neurons. 
 	}
 	\label{fig:datahistograms}
 \end{figure}
@@ -292,7 +297,7 @@ The biggest contributor to this is that due to their respective processing metho
 %The relatively low number of non-constitutive exon samples in the HEXEvent dataset is likely influenced by the ESTs coming from a mix of biological samples from different tissues. Among many tissues, there are likely few tissues that contain some exons
 %should also hold for constitutive exons; so rarely exons constitutive, so more with middle psi values
 %SCEPTICAL -- unlikely to include
-%todo:
+%todo:f
 %collecting average l2 lengths of datasets
 %gtex: 24.81448218801441 +- 93.86430163002234
 %realization: don't I just collect cassette exons? :o what about vanilla constitutive exons?
@@ -345,24 +350,34 @@ Multiple studies have explored this issue and found 3-mers to perform the best. 
  We follow their recommendation in this work and split each sequence of nucleotides into overlapping 3-mers. Overlapping means that in the case of the sequence 'AACGAT' the resulting overlapping 3-mer sequence is 'AAC', 'ACG', 'CGA' and 'GAT'. Therefore, the 28,000 nucleotides long pre-training sequences are split into overlapping 3-mer sequences (sentences) of length 27,998.
 \subsubsection{Pre-training of word embeddings}
 The pre-training for word2vec uses a shallow neural network with an input, hidden and output layer. If the continuous bag-of-words technique (CBOW) is used, all words in a window except the current word are given as input and the target output is the current word. Typical window size is 5. % TODO[WHAT DOES THE HIDDEN LAYER LOOK LIKE? -- could honestly skip this]
-If the skip-gram technique is used, only the current word is given as input and the task is to predict the surrounding words in the window. Doc2Vec works similarly. In the CBOW equivalent called distributed memory (DM), a document identifier (usually just an integer enumerating all documents) is given as additional input. In the skip-gram equivalent distributed bag of words (DBOW), the current word is replaced by the document identifier and the task is to predict all words in the window. All four different training methods are visualized in Figure [figure 3 from distributed].
-There is no clear choice for when which training method should be used for Word2Vec or Doc2Vec as the training methods tend to perform similarly. However, DM (and also CBOW) preserve the order of words and as the order of words (3-mers) is likely significant, we chose DM as pre-training method.
+If the skip-gram technique is used, only the current word is given as input and the task is to predict the surrounding words in the window. Doc2Vec works similarly. In the CBOW equivalent called distributed memory (DM), a document identifier (usually just an integer enumerating all documents) is given as additional input. In the skip-gram equivalent distributed bag of words (DBOW), the current word is replaced by the document identifier and the task is to predict all words in the window. All four different training methods are visualized in Figure \ref{fig:w2vd2vtrainingvariants}.\\
+There is no clear choice for when which training method should be used for Word2Vec or Doc2Vec as they tend to perform similarly. However, DM (and also CBOW) preserve the order of words and as the order of words (3-mers) is likely significant, we chose DM as pre-training method.
 Pre-processing the human genome like above and using the DM training method, we trained the Doc2Vec model to output a 100-dimensional embedding for each document.
 \begin{figure}
 	\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/d2v_training.png} 
 	\caption{
-		% TODO
+		Process by which the 100-dimensional embeddings are obtained \cite{d2vsplicing}: the input sequence is split into overlapping 3-mers which are then fed as input into the pre-trained d2v model. 
+		% TODO modify that only part (b) is visible
+		% TODO add sentence how 100-dimensional embedding is actually obtained
 	}
 	\label{fig:d2vtraining}
 \end{figure}
 
 
+\begin{figure}
+	\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/w2v_d2v_training_variants.png} 
+	\caption{
+		The four possible training algorithms for w2v and d2v models \cite{d2vsplicing}: (a) CBOW, and (b) skip-gram for w2v, and (c) DM and (d) DBOW for d2v. 
+	}
+	\label{fig:w2vd2vtrainingvariants}
+\end{figure}
+
 \subsubsection{Analyzing the obtained embeddings}
-%TODO: add w2v grtaphic from ieee
+
 \begin{figure}
 	\includegraphics[width=0.5\textwidth]{../visualizations/ch4-methods/tSNE-d2v.png} 	\includegraphics[width=0.5\textwidth]{../visualizations/ch4-methods/tSNE-d2v_bases.png} 
 	\caption{
-		% TODO
+		The 2-dimensional embeddings obtained by applying t-SNE to the 100-dimensional learned representations of all 64 possible 3-mers. Left shows the codons encoded by the 3-mers, right shows the actual 3-mers.
 		 }
 	\label{fig:tsne}
 \end{figure}
@@ -507,10 +522,9 @@ Concretely, each LSTM block consists of a BiLSTM with one (?) layer which output
 The shallow MLP used for classification uses a single layer with 128 (?) neurons and is followed by a dropout layer with dropout probability of 0.5.
 
 
-\section{Training and implementation details}
-\subsection{Implementation}
-% TODO: include figures from overleaf
-All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 12 different dataset variants and 4 different models are used, the codebase contains only 2 different data loader and trainer classes.\\
+\section{Training and implementation details} \label{sec:implementation_details}
+\subsection{Implementation} \label{subsec:implementation_details}
+All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 12 different dataset variants and 4 different models are used, the codebase contains only 2 different data loader and trainer classes.
 
 
 The structure of the repository was based on the PyTorch Deep Learning Project template available at \url{github.com/victoresque/pytorch-template}. This template provides access to abstract classes for data loaders, trainers and the models themselves. These abstract classes already contain a lot of the implementation-independent code to log results and train and save models. These abstract classes can then be extended with implementation-specific code as e.g. exact data formats. Using this structure avoids the duplication of a lot of boilerplate code.\\
@@ -519,15 +533,15 @@ The code repository itself contains multiple README which go into more details t
 
 TODO: total code base contained roughly ... lines of code. the majority of these were in preprocessing section [maybe exclude this]
 
-\subsection{Training}
+\subsection{Training} \label{subsec:training_details}
 The training was done using one NVIDIA GeForce GTX 1080 Ti GPU. This proved to be sufficient as initial exploratory experiments showed no advantage of using deep networks and the resulting networks used are all relatively shallow. The pre-training of the Doc2Vec model on the human genome took 3 hours. We randomly split each dataset into 10 folds; in a given run, 8 folds were used for training, 1 fold for validation and 1 fold for testing. Each model was trained with different folds 9 times.
-The training time for training a single model once varied between 1 minute and 25 minutes (see [table with training times]). The models were trained with early stopping on the validation fold until they stopped improving for 15 epochs. This typically occurred after 70 - 150 training epochs.
+The training time for training a single model once varied between 1 minute and 75 minutes (see [table with training times]). The models were trained with early stopping on the validation fold until they stopped improving for 15 epochs. This typically occurred after 70 - 150 training epochs.
 Where we established in a base experiment that the variance for a given model was low between runs (lower than ~1%), we only trained the model in follow-up experiments once for practical reasons.
-\subsubsection{Loss}
+\subsubsection{Loss}  \label{subsubsec:loss}
 All models were trained to minimize the binary cross-entropy loss:
-$$\mathbb{L} = - (y log(\hat{y}) + (1 - y) log (1 - \hat{y}))$$
+$$\mathbb{L} = - (y \log(\hat{y}) + (1 - y) \log (1 - \hat{y}))$$
 where the ground truth $y \in \{0, 1\}$ and the prediction of the model $\hat{y} \in [0, 1]$. The binary cross-entropy is the standard loss for training deep learning-based (binary) classifiers.
-\subsubsection{Metrics}
+\subsubsection{Metrics} \label{subsubsec:metrics}
 As in previous work \cite{dsc}, we evaluate all models using the Area under ROC curve (AUC). The AUC provides an aggregate measure of performance across all possible decision thresholds.
 However, some of our datasets were unbalanced. This may lead to a degenerating behaviour where a model only predicts the majority class. Additionally, only looking at the AUC does not give a good sense of the .... specificity.. recall?
 This is not captured by the AUC. \\
@@ -576,3 +590,6 @@ TODO: [mention respective model sizes here]
 bilstm + attn 66861, dsc 20.001, d2v 6801
 
 Exact hyperparameters used for training the models are given in table \ref{table:hyperparameters}.
+The DSC, D2V and BiLSTM + Attn models respectively contain 20,001, 6,801, and 66,861 trainable weights. In absolute terms, all of these model are still small compared to models known from Computer Vision and Natural Language Processing. The number of training weights is also reflected in the training times with the models respectively taking between 5 to 30 minutes, 1 to 5 minutes and 15 to 75 minutes to train once (depending on dataset). 
+
+ 

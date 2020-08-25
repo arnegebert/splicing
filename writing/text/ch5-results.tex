@@ -79,7 +79,6 @@ These findings have strong implications. It calls into questions the meaningfuln
 
 %We showed that the EST-based HEXEvent dataset is likely too flawed to serve as a basis for our methods. Thus, we try to construct an alternative dataset.
 
-%TODO: move figures into directories and update figure links
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/dsc_funeral_barchart.png} 
@@ -110,7 +109,7 @@ Results are given in Figure (....). Across all models, the performance is poor a
 The relative cross-model performance also stays the same between tissues: DSC tends to perform best, followed by Attn, followed by the D2V model. The variance of the Attn model between runs is comparatively very high; the Attn model is the best performing model, as measured by the maximum rather than mean AUC value, on the brain cortex tissue-based and cerebellum tissue-based datasets. This indicates that on this dataset the Attn model needed more regularization and dataset specific fine-tuning would've lead to it performing the best. 
 
 
-Figure \ref{fig:gtex_exon_roc} gives more insight into model the model performance. The performance on highly included, alternatively spliced exons (80\% <= PSI < 99\%) is significantly worse than on more rarely included, alternatively spliced exons (PSI < 80\%). From the definition of the AUC it follows that the AUC on the mixed dataset including exons with low and high PSI lies in-between these two extremes. In this case, only ~28\% of alternatively spliced exons belong to the exons with a high PSI and therefore the combined AUC is heavily weighted towards the AUC on the exons with low PSI. These observations align with similar observations made on the HEXEvent dataset \cite{dsc}.
+Figure \ref{fig:gtex_exon_roc} gives more insight into the model performance. The performance on highly included, alternatively spliced exons (80\% <= PSI < 99\%) is significantly worse than on more rarely included, alternatively spliced exons (PSI < 80\%). From the definition of the AUC it follows that the AUC on the mixed dataset including exons with low and high PSI lies in-between these two extremes. In this case, only ~28\% of alternatively spliced exons belong to the exons with a high PSI and therefore the combined AUC is heavily weighted towards the AUC on the exons with low PSI. These observations align with similar observations made on the HEXEvent dataset \cite{dsc}.
 
 ---- removing length feature would be interesting; doing it on brain as best performance and sort of lowest combined variance\\
 
@@ -200,7 +199,8 @@ Among these two, 2. is more likely: in retrorespect, SUPPA was not the best choi
 	\label{fig:majiq_rocs}
 \end{figure}
 
-All models perform better than in previous datasets, but in contrast to previous datasets we also observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by BiLSTM + Attn. The dataset based on undifferentiated iPSC samples seems to be slightly easier for the models, with AUC values across the board increasing by roughly 2\%. At a closer look at the dataset distribution
+All models perform better than in previous datasets, but in contrast to previous datasets we also observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by BiLSTM + Attn. The dataset based on undifferentiated iPSC samples seems to be slightly easier for the models, with AUC values across the board increasing by roughly 2\%. At a closer look at the dataset distribution....
+Applying the same test of evaluating the models with and without the length features, the results are very promising. 
 
 % TODO: investigate whether this is just a result of dataset composition --> not at first look
 % neuron: 26394 / 8201 / 10151 = 44746
@@ -209,7 +209,6 @@ All models perform better than in previous datasets, but in contrast to previous
 
 % TODO: change roc curves such that I give AUC values explicitly (better than alternative of redoing)
 
-% TODO: fix graphic inlcusion after folder changes, but possibly do some more folder changes too
 %todo thought: it would be interesting to reevaluate all models without constitutive exons to see whether they actually perform better than in suppa dataset
 
 \begin{table}[h!]
@@ -223,12 +222,12 @@ All models perform better than in previous datasets, but in contrast to previous
 		BiLSTM + Attn & \textbf{0.853} & \textbf{0.865} & 0.033\\
 		\hline
 	\end{tabular}
-	\caption{Performance on the dataset based on processing with MAJIQ and iPSC cells differentiated to neurons with and without length features given as AUC. Note that the relative performance drop was computed with reference to the baseline AUC value of 0.5.
+	\caption{Performance on the dataset based on processing with MAJIQ and iPSC cells differentiated to neurons with and without length features given. Note that the relative performance drop was computed with reference to the baseline AUC value of 0.5.
 	}
 	\label{table:results_hexevent}
 \end{table}
 
-%TODO: bar chart for comparison
+
 
 \subsection{MAJIQ with iPSCs differentiated to neurons (junctions)}
 haven't run experiments yet, not sure if results are interesting (but probably yes)\\
@@ -250,5 +249,7 @@ cross-tissue comparison here with very low variance across tissues;\\
 seems like learned features are tissue-invariant\\
 
 continuous psi prediction too
+
+
 
 interpretation of attention mechanism etc follows here; some pretty graphics to follow
