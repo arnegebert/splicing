@@ -72,31 +72,5 @@ def bar_charts():
     plt.savefig('dsc_funeral_barchart.png', dpi=300, bbox_inches='tight')
     plt.show()
 
-def load_and_plot_roc(name, dirs, labels):
-    colors = ['orange', 'green', 'blue', 'red']
-    assert len(dirs) <= 4
-    for (dir, label, color) in zip(dirs, labels, colors):
-        pred, target = np.load(dir)
-        fpr, tpr, _ = roc_curve(target, pred)
-        auc_val = auc(fpr, tpr)
-        plt.plot(fpr, tpr, linestyle='--', color=color, label=f'{label} PSI events (AUC={auc_val:0.2f})')
-    plt.plot([0, 1], [0, 1], 'k--', lw=2)
-    plt.title('ROC curve')
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive rate')
-
-    plt.legend(loc='best')
-    plt.savefig(f'{name}.png', dpi=300, bbox_inches='tight')
-
 if __name__ == '__main__':
     bar_charts()
-
-    # # config for HEXEvent
-    # labels = ['DSC (baseline)', 'DSC (ours)', 'BiLSTM', 'D2V', 'BiLSTM + Attn']
-    # experiments = ['HEXEvent_DSC', 'HEXEvent_BiLSTM', 'HEXEvent_D2V_MLP', 'HEXEvent_Attn']
-    # file_name = 'pred_and_target_all.npy'
-    # run_id = 'final'
-    # dirs = [f'../saved/original/{file_name}']
-    # for exp in experiments: dirs.append(f'../saved/log/{exp}/{run_id}/{file_name}')
-    #
-    # load_and_plot_roc('baseline_five_models', dirs, labels)

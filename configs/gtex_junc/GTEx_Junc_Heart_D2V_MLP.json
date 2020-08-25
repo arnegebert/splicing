@@ -1,27 +1,28 @@
 {
-    "name": "GTEx_Exon_Cerebellum_BiLSTM",
+    "name": "GTEx_Junc_Heart_D2V_MLP",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "BiLSTM",
+        "type": "MLP2",
         "args": {}
     },
     "data_loader": {
         "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/exon/cerebellum",
+            "data_dir": "data/gtex_processed/junc/heart",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0
+            "num_workers": 0,
+            "embedded": true
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-3,
-            "weight_decay": 0.0,
+            "lr": 5e-4,
+            "weight_decay": 0,
             "amsgrad": true
         }
     },
@@ -32,17 +33,19 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 200,
+            "step_size": 10000,
             "gamma": 0.1
         }
     },
     "trainer": {
         "type": "VanillaTrainer",
-        "args": {},
+        "args": {
+            "embedded": true
+        },
         "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 251,
+        "save_period": 101,
         "verbosity": 1,
 
         "monitor": "max val_auc",

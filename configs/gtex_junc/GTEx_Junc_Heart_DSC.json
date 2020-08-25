@@ -1,16 +1,16 @@
 {
-    "name": "GTEx_Exon_Cerebellum_BiLSTM",
+    "name": "GTEx_Junc_Heart_DSC",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "BiLSTM",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
         "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/exon/cerebellum",
+            "data_dir": "data/gtex_processed/junc/heart",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -20,7 +20,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-3,
+            "lr": 5e-4,
             "weight_decay": 0.0,
             "amsgrad": true
         }

@@ -101,7 +101,7 @@
 	\newcommand{\nd}{\textsuperscript{nd}}
 	\renewcommand{\st}{\textsuperscript{st}}
 	\newcommand{\rd}{\textsuperscript{rd}}
-
+\DeclareUnicodeCharacter{0301}{*************************************}
 %%%%% THE ACTUAL DOCUMENT STARTS HERE
 \begin{document}
 
@@ -145,9 +145,9 @@
 %%%%% ABSTRACT SEPARATE
 % This is used to create the separate, one-page abstract that you are required to hand into the Exam
 % Schools.  You can comment it out to generate a PDF for printing or whatnot.
-\begin{abstractseparate}
-	\input{text/abstract} % Create an abstract.tex file in the 'text' folder for your abstract.
-\end{abstractseparate}
+%\begin{abstractseparate}
+%	\input{text/abstract} % Create an abstract.tex file in the 'text' folder for your abstract.
+%\end{abstractseparate}
 
 
 % JEM: Pages are roman numbered from here, though page numbers are invisible until ToC.  This is in
@@ -165,14 +165,14 @@
 %\end{dedication}
 
 %%%%% ACKNOWLEDGEMENTS -- Nothing to do here except comment out if you don't want it.
-\begin{acknowledgements}
- 	\input{text/acknowledgements}
-\end{acknowledgements}
+%\begin{acknowledgements}
+% 	\input{text/acknowledgements}
+%\end{acknowledgements}
 
 %%%%% ABSTRACT -- Nothing to do here except comment out if you don't want it.
-\begin{abstract}
-	\input{text/abstract}
-\end{abstract}
+%\begin{abstract}
+%	\input{text/abstract}
+%\end{abstract}
 
 %%%%% MINI TABLES
 % This lays the groundwork for per-chapter, mini tables of contents.  Comment the following line
@@ -188,7 +188,7 @@
 % This is where the whole-document ToC appears:
 \tableofcontents
 
-\listoffigures
+%\listoffigures
 	\mtcaddchapter
 % \mtcaddchapter is needed when adding a non-chapter (but chapter-like) entity to avoid confusing minitoc
 
@@ -209,7 +209,7 @@
 %%%%% CHAPTERS
 % Add or remove any chapters you'd like here, by file name (excluding '.tex'):
 \flushbottom
-\include{text/afigure.tex}
+\include{text/afigure}
 \include{text/ch1-intro}
 \include{text/ch2-biobackground}
 \include{text/ch3-relatedwork}
@@ -227,6 +227,9 @@
 
 %%%%% REFERENCES
 
+
+
+
 % JEM: Quote for the top of references (just like a chapter quote if you're using them).  Comment to skip.
 \begin{savequote}[8cm]
 The first kind of intellectual and artistic personality belongs to the hedgehogs, the second to the foxes \dots
@@ -238,10 +241,6 @@ The first kind of intellectual and artistic personality belongs to the hedgehogs
 {\renewcommand*\MakeUppercase[1]{#1}%
 \printbibliography[heading=bibintoc,title={\bibtitle}]}
 
-\printbibliography
-%\bibliographystyle{plain}
-%
-%\bibliography{references}
 
 
 \end{document}

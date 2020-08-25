@@ -1,10 +1,11 @@
 {
-    "name": "GTEx_Junc_Brain_DSC",
+    "name": "GTEx_Junc_Brain_Attn",
 
     "n_gpu": 1,
+    "run_id": "",
 
     "arch": {
-        "type": "DSC",
+        "type": "AttnBiLSTM",
         "args": {}
     },
     "data_loader": {
@@ -20,7 +21,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 5e-4,
+            "lr": 1e-3,
             "weight_decay": 0.0,
             "amsgrad": true
         }
@@ -38,7 +39,9 @@
     },
     "trainer": {
         "type": "VanillaTrainer",
-        "args": {},
+        "args": {
+            "attention": true
+        },
         "epochs": 500,
 
         "save_dir": "saved/",
@@ -52,5 +55,5 @@
         "tensorboard": true
     },
     "comment": "",
-    "cross_validation": true
+    "cross_validation": false
 }

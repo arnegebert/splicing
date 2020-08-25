@@ -6,7 +6,9 @@
 This chapter introduces the primary data sources, describes how these were used to obtain the training datasets, and presents the used models. It also gives implementation details regarding processing steps, model implementation, and model training.
 In this work, we focus on the splicing prediction of cassette exons. Previous work indicates that advances in predicting one type of alternative splicing behaviour via Machine Learning methods also translates to advances in prediction for other types. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryotes. Thus, for reasons of practicality we choose cassette exons as the type of alternative splicing, we will focus on.
 \section{Datasets}\label{sec:datasets}
-Three primary sources for genomic data were used in this study: the Human Exon splicing events (HEXEvent) database \cite{hexevent}, data from the Genotype-Tissue Expression (GTEx) project \cite{gtex} and data from the Human Induced Pluripotent Stem Cell Initiative (HipSci) \cite{hipsci}. Except for the HEXEvent database, none of these primary sources directly report the PSI values of exons or junctions. The processing done to estimate the PSI value-based from the primary sources is described in section [estimating PSI]. All of the data sources required further processing (e.g. extraction of corresponding nucleotide sequences) to obtain the final samples which are the input for the models. These further processing steps are described in section [final sample processing]
+Three primary sources for genomic data were used in this study: the Human Exon splicing events (HEXEvent) database \cite{hexevent}, data from the Genotype-Tissue Expression (GTEx) project \cite{gtex} and data from the Human Induced Pluripotent Stem Cell Initiative (HipSci) \cite{hipsci}. Except for the HEXEvent database, none of these primary sources directly report the PSI values of exons or junctions. The processing done to estimate the PSI value-based from the primary sources is described in section [estimating PSI]. All of the data sources required further processing (e.g. extraction of corresponding nucleotide sequences) to obtain the final samples which are the input for the models. These further processing steps are described in section \ref{subsec:finalsampleprocessing}.
+
+\subsection{HEXEvent database} \label{subsec:hexevent}
 The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons) via an online user interface. It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information.
 It was chosen as a data source for direct comparability with the baseline paper \cite{dsc}.
 TODO critizie est data
@@ -46,6 +48,7 @@ Similarly, $\Psi_5$ is defined as the number of transcripts containing a particu
 
 
 %High-throughput sequencing of cDNA fragments (RNA-seq; Lister et al., 2008) has become a popular tool to investigate RNA expression and post-transcriptional regulation. Sequencing of the transcriptome reveals tens of thousands of transcripts expressed simultaneously (Mortazavi et al., 2008). Despite providing a deep and genome-wide view on post-transcriptional processing, current technologies cannot reveal transcripts in full-length due to limitations in read length.  [https://www.researchgate.net/publication/282645615_Alternative_Splicing_Signatures_in_RNA-seq_Data_Percent_Spliced_in_PSI/link/59e8404b458515c3630fe4e3/download]
+%TODO: add process graphics I made
 High-throughput sequencing methods are a potent tool to investigate RNA expression and post-transcriptional regulation. However, due to limited coverage, short read length, and experimental biases they are not able to provide a full view of post-transcriptional processing so far \cite{berlinpsi}.
 
 %However, due to limitations in read length, they are not able to provide a full view of post-transcriptional processing so far.
@@ -99,7 +102,7 @@ However, this estimate has various issues.
 
 %hopefully was able to demonstrate that this estimate is problematic and may easily be unreliable.
 Due to these issues relating to the uncertainty, to not making use of all of the available evidence and to integrating reads across multiple samples, this estimate is problematic.
-\subsubsection{How I implemented PSI estimation}
+\subsubsection{How I implemented PSI estimation} \label{subsubsec:implementedpsiestimation}
 %TODO write this section
 
 1) Only take reads from genes across a certain TPM into account (because random spurios reads from low TPM genes could have an outsized effect on the estimation). Say that you weight reads according to the respective TPM. Show TPM distribution and say what TPM threshold you use.\\
@@ -109,9 +112,13 @@ Due to these issues relating to the uncertainty, to not making use of all of the
  TODO: mention junction datasets
 % potentially even more details; eg how you use this heuristic of checking the 10 samples past the current one
 % todo add details such as exact name of individuals used and number of reads
-Several approaches have been developed which try to address these issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose the two fast methods SUPPA and MAJIQ. SUPPA and MAJIQ represent two different approaches to PSI estimation: SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph.
+Several approaches have been developed which try to address these issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose the two fast methods SUPPA and MAJIQ. SUPPA and MAJIQ represent two different approaches to PSI estimation: SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. Figure \ref{dataset_creation_process} shows the high-level steps taken when using MAJIQ and SUPPA to create datasets for training.
 
-
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{figures/d2v-Page-3.pdf} 
+	\caption{Data flow when using MAJIQ or SUPPA to create a training dataset. }
+	\label{fig:dataset_creation_process}
+\end{figure}
 %isoform-based vs count-based methods
 %	count-based methods = exon based and event-based methods
 \subsubsection{SUPPA}\label{subsubsec:suppa}
@@ -128,6 +135,14 @@ The latest version of SUPPA available as of July 2020 was used (SUPPA v2.3).
 Modeling Alternative Junction Inclusion Quantification (MAJIQ) builds up a splice graph \cite{majiq2} which contains exon as vertices and junctions as edges. An edge is added between two vertices if a transcript isoform is found in which they share a junction (that is if the exons are neighbours and everything between them has been spliced out).
 Constitutive exons are vertices with two incoming edges.
 Vertices which have more than 3 incoming edges are denoted as local splicing variations (LSV). Due to this problem formulation, MAJIQ can model more complex splicing variations than skipped exons, alternative 3' splice sites, and alternative 5' splice sites. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping.\\
+
+
+
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{figures/d2v-majiq.pdf} 
+	\caption{Data flow when using MAJIQ to create a training dataset. }
+	\label{fig:majiq_dataset_creation_process}
+\end{figure}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/splice_graph.png} 
@@ -295,6 +310,8 @@ Keeping this motivation in mind, the first model extracts features from the two 
 
 Concretely, a CNN block consists of three convolutional layers. The first convolutional layer has a window size of 7 units and 32 filters, the second has a window size of 4 units and 8 filters and the third has a window size of 3 units and 8 filters. Each convolutional layer is followed by a dropout layer with dropout probability 0.2 to reduce overfitting [cite dropout], a ReLU activation layer and a max-pooling layer with stride and window size 2 to extract the most salient features. The hyperparameters for this model were chosen with grid search by \cite{dsc}. As we are dealing with inherently 1-dimensional textual data instead of inherently 2-dimensional image data, 1D convolution layers are used.
 
+
+
 %https://stats.stackexchange.com/questions/288261/why-is-max-pooling-necessary-in-convolutional-neural-networks
 %no one knows why max-pooling works
 
@@ -424,27 +441,33 @@ $$Z^* = {attention}^*(I) = softmax({Q}^*K^T)V$$
 %decided against explaining innovation as two-points with (1) one query and (2) independent of input because I felt unsure of (2)
 
 where $Z^* \in \mathbb{R}^{1 \times out}$. Note that the query matrix ${Q}^*$ is directly learned in the attention block and not multiplied with the input, giving rise to its input independence. The output $Z$ is now a weighted sum of the nucleotide representation in the input sequences which the model deemed most crucial to pay attention to.
-\subsubsection{Putting it all together:}
+\subsubsection{Putting it all together:} 
 Like a Seq2Seq model, an RNN-based Encoder is used to capture a representation of the input sequence. We select the most important representations of the input using the modified attention mechanism we introduced. Instead of a recursive decoder, we use a shallow MLP for classification based on the selected features.
 One detail not mentioned yet is that the input to the BiLSTM blocks is a dense 4-dimensional embedding of the one-hot encoded sequences. This embedding is the same for each sequence and jointly learned during training. This extra embedding layer is included as previous works \cite{embeddingneeded} have shown that otherwise, the model might suffer from limited generalization performance caused by the sparsity of the one-hot encoded representation. 
 
-\subsection{Alternative implementations of attention}
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{figures/AttnBiLSTM.pdf} 
+	\caption{Architecture of the new attention-based model we introduce. }
+	\label{fig:attnbilstm}
+\end{figure}
+
+\subsection{Alternative implementations of attention} \label{subsec:alternative_attention}
 In the following, we introduce multiple extensions which were attempted which didn't lead to improved results. For most of these, initial results clearly showed that the results weren't improved by using them. As such, we didn't test these extensions more extensively than initial experiments because we felt the initial results were already instructive enough and no further investigation was warranted. Thus, the analysis of the results won't be as extensive as for the extensions which worked.
-\subsubsection{No query}
+\subsubsection{No query} \label{subsubsec:noquery}
 As the query matrix ${Q}^*$ is already the same independent of the exact input sequence, it could be possible to drop it and compute the attention weights sorely based on the key matrix K.
 This is possible by learning a key weight matrix $W^{K^*} \in \mathcal{R}^{in \times 1}$ and computing attention as:
 $$K^* = IW^{K^*}$$
 $$Z^{} = {attention}^{}(I) = softmax(K^*)V$$
 where $K^* \in \mathbb{R}^{l \times 1}$ and $Z^{**} \in \mathbb{R}^{1 \times out}$
 However, in initial experiments, the attention** mechanism performed significantly worse than the attention* mechanism. The extra representational capacity by having a query matrix seems to be important for performance.
-\subsubsection{Multiple attention heads}
+\subsubsection{Multiple attention heads} \label{subsubsec:heads}
 Having one set of query, key and value matrices limits the model to one representational subspace (one way of 'interpreting' the input). It might be useful for the model to have multiple representational subspaces. This is usually achieved via $$h$$ different sets of query, key and weight matrices $W^Q_1, W^Q_1, W^Q_1, \dots W^Q_{h}, W^Q_{h},W^Q_{h}$ producing multiple outputs $Z_0, \dots, Z_{n\_h}$.
 The final output matrix $Z_{final} \in \mathcal{R}^{l \times out}$ is then computed as:
 $$Z_{final} = concat(Z_1, \dots, Z_{h}) W^O$$
 where the concatenation occurs along the second dimension and $W^O \in \mathcal{R}^{out * h \times out\_new}$. $out_new$ represents the new output dimension of the attention layer, which is arrived at by combining the dimensions of the multiple attention heads.
 
 %thought: might change this up a little, would require a bit more implementation effort than previously thought (eg. initial attention dimension should be divided by 3) or requires the assumption that out == $out_new$ (I think I will choose this one, but not certain)
-\subsubsection{Convolution in attention heads}
+\subsubsection{Convolution in attention heads} \label{subsubsec:attention_conv}
 As was previously discussed in the motivation for splitting the input sequence into overlapping 3-mers in \ref{subsubsec:kmers}, the information contained in a single nucleotide is very low. This motivated \cite{ghentransformers} to apply an additional 1D convolution to the query, key and value matrices Q, K and V. This extension can be understood as an alternative to splitting the input into k-mers and provided better results than splitting the input into k-mers when using a Transformer network for a genome annotation task in \cite{ghentransformers}.
 Keeping in mind the modification of directly learning the query matrix, this leads to:
 $$K_{conv}, V_{conv} = conv(K), conv(V)$$

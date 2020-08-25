@@ -1,17 +1,16 @@
 {
-    "name": "GTEx_Junc_Cerebellum_Attn",
+    "name": "GTEx_Junc_Brain_DSC",
 
     "n_gpu": 1,
-    "run_id": "",
 
     "arch": {
-        "type": "AttnBiLSTM",
+        "type": "DSC",
         "args": {}
     },
     "data_loader": {
         "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/junc/cerebellum",
+            "data_dir": "data/gtex_processed/junc/brain",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -21,7 +20,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-3,
+            "lr": 5e-4,
             "weight_decay": 0.0,
             "amsgrad": true
         }
@@ -39,9 +38,7 @@
     },
     "trainer": {
         "type": "VanillaTrainer",
-        "args": {
-            "attention": true
-        },
+        "args": {},
         "epochs": 500,
 
         "save_dir": "saved/",
@@ -55,5 +52,5 @@
         "tensorboard": true
     },
     "comment": "",
-    "cross_validation": true
+    "cross_validation": false
 }

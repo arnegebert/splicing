@@ -31,6 +31,7 @@ def load_and_plot_roc(name, dirs, labels):
         pred, target = pred_and_target[:len(pred_and_target)//2], pred_and_target[len(pred_and_target)//2:]
         fpr, tpr, _ = roc_curve(target, pred)
         auc_val = auc(fpr, tpr)
+        print(f'{label}: {auc_val}')
         plt.plot(fpr, tpr, linestyle='--', label=f'{label} (AUC={auc_val:0.2f})')
     plt.plot([0, 1], [0, 1], 'k--', lw=2)
     plt.title('ROC curve')
