@@ -13,6 +13,12 @@ The HEXEvent database contains genome-wide exon data sets of human internal exon
 It was chosen as a data source for direct comparability with the baseline paper \cite{dsc}.
 TODO critizie est data
 %TODO criticize EST data
+
+EST underrepresent rare transcripts and often only account for 60\% of an organism's genes, yep 50-65\%
+- EST seqeuence;very short and highly error prone especially at the ends
+EST also permits low quality bases due to single pass sequencing, and some sequences are highly redundant in certain genes.
+- what sort of processing against bias does hexevent do?
+
 % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1431573/
 these are sequence reads datasets based on which I will estimate the PSI values
 \subsection{GTEx} \label{subsec:gtex}
@@ -306,6 +312,7 @@ The models are fundamentally all split into two components. \\
 The first component extracts the most relevant features of the two input sequences of nucleotides. The feature extraction for the sequence around the exon start and the exon end is done independently. Depending on the exact model, the feature extraction is based either on CNNs, BiLSTMs or MLP. The extracted features of this layer are concatenated along with the length features and fed as input to the second component.\\
 The second component uses the extracted features and length features to perform binary classification. This component is implemented as a shallow MLP for all models. It consists of one or two fully connected layers followed by dropout and activation layers. A sigmoid activation function is used after the last layer to obtain an output from [0, 1].
 \subsection{DSC: CNN-based} \label{subsec:dsc}
+% todo: add model graphic from DSC
 This model is the same as the Deep Splicing Code (DSC) model from \cite{dsc} and is based on CNNs.
 CNNs are useful when the input data contains spatially invariant patterns. Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
 CNNs are also extremely promising for the application to nucleotide sequences: \\
@@ -505,7 +512,7 @@ Reasons for why this extension did not work might be related to the use of a rec
 
 
 A small implementational detail regarding the attention blocks: the query, key and value parameter matrices are implemented via a linear layer with the appropriate dimensions. These also learn bias weights which are added to the output by default. While in theory the bias weights should be turned off to implement exactly the shown formulas, in practice other attention mechanism implementations leave these turned on \cite{annotatedtransformer} and so we follow suit. Thus, to be precise, the query, key and value computation should be:
-%TODO
+%TODO this formula of the attention mechanism
 %   old motivation:
 %The architecture of this model can be motivated in two ways:
 %1) Similar to DSC, we use two blocks for feature extraction. However, incorporating the knowledge that our input data is a sequence, we use an RNN for this feature extraction. In particular, under the assumption that bidirectional context is important for this task, we use bidirectional LSTM (BiLSTM). Like DSC, a shallow MLP uses the obtained features of both blocks for classification.
