@@ -40,7 +40,7 @@ Processed data which can not be used to identify the donors is publicly availabl
 %good site: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000424.v8.p2
 \subsection{HipSci} \label{subsec:hipsci}
 %TODO is my interpretation that iPSC cells are differentiated to neurons actually correct? -> perhaps ask in meeting
-% https://www.biorxiv.org/content/10.1101/095943v1 iPSC-derived sensory neurons
+% https://www.biorxiv.org/content/10.1101/095943v1 iPSC-derived sensory neurons; http://www.hipsci.org/lines/#/lines/HPSI0114i-eipl_1
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/ipscprocess.png} 
 	\caption[test.]{
@@ -83,7 +83,7 @@ The advantage of this estimate lies in its simplicity and flexibility. It is qui
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/psi_estimation.png} 
-	\caption[]{
+	\caption{
 		Process of estimating PSI based off RNA-seq reads \cite{berlinpsi}. The reads are mapped to the transcript. Based on annotation files, the reads overlapping exon/intron junctions are classfied as including or excluding reads for a particular exon. Based on the observed IR and ER, the PSI for a given exon is estimated.
 		}
 	\label{fig:psiestimation}
@@ -97,10 +97,10 @@ However, this estimate has various issues.
 	
 	One further processing step could be to only count exons who experienced at least a certain number of reads. However, assuming this solution is taken, there are additional two aspects worth discussing:
 %	However, Assuming that one obtains a read count normalized by the gene expressiveness, there are two further aspects worth discussing:
-	\begin{enumerate}
-		\item This threshold soluton only alleviates this problem because one needs to account for the expressiveness of each gene: 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the expressiveness of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM). Of these, TPM is usually the most common choice. 
-		\item There is not a principled way to choose the cutoff threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and training samples. In practice, the optimal way to choose the cutoff threshold will be unknown and vary from dataset to dataset.
-	\end{enumerate}
+%	\begin{enumerate}
+%		\item This threshold soluton only alleviates this problem because one needs to account for the expressiveness of each gene: 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the expressiveness of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM). Of these, TPM is usually the most common choice. 
+%		\item There is not a principled way to choose the cutoff threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and training samples. In practice, the optimal way to choose the cutoff threshold will be unknown and vary from dataset to dataset.
+%	\end{enumerate}
 	% https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
 
 
@@ -112,10 +112,10 @@ However, this estimate has various issues.
 %	this is the reason why I wanted access to raw RNA-seq reads
 	\item Related to 1), typically multiple samples or biological replicates of a given experiment are available. It is desirable that reads across multiple samples can be integrated to give a more well-adjusted estimate. How to best achieve this is not obvious. Read depths between multiple libraries may vary and this should be accounted for. [possible other issues here and then make this another itemization]
 	\item IR and ER must be normalized for exon length to obtain meaningful results. For a long exon, the majority of reads will be IR because they can be located over a much larger area than the ER who must overlap with the 0-length feature of the splicing junction. This can be accounted for by normalizing for the possible number of start positions for each read population:
-	$$\#IR_{norm} = \frac{\#IR}{exon\_length + read\_length -1}$$
-	$$\#ER_{norm} = \frac{\#ER}{read\_length - 1}$$
+%	$$\#IR_{norm} = \frac{\#IR}{exon\_length + read\_length -1}$$
+%	$$\#ER_{norm} = \frac{\#ER}{read\_length - 1}$$
 	%TODO: check out second graphic from berlin paper in more detail
-	Note that this assumes that reads are uniformly distributed across a transcript isoform. It is well-known that RNA-seq reads are biased .... [get paper from Liz/Wilfred]
+%	Note that this assumes that reads are uniformly distributed across a transcript isoform. It is well-known that RNA-seq reads are biased .... [get paper from Liz/Wilfred]
 	
 	%	thought: this normalization doesn't obviously seem correct to me on second thought. an ER can be found at two junctions, so that would double the number of possible read starts
 	%	IR can only start from position 0 to exon.length-read.length of the exon can't they?
@@ -133,8 +133,11 @@ However, this estimate has various issues.
 %hopefully was able to demonstrate that this estimate is problematic and may easily be unreliable.
 Due to these issues relating to the uncertainty, to not making use of all of the available evidence and to integrating reads across multiple samples, this estimate is problematic.
 
-Even if all of these issues are perfectly handled, the resulting estimate would still not be perfect. For instance, the 'solutions' for 1. and 4. implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript aren't equally distributed due to duplicate reads, stacking reads or GC-content bias.%TODO[ list of biases duplicate reads, stacking reads]. 
-
+Even if all of these issues are perfectly handled, the resulting estimate would still not be perfect. For instance, the 'solutions' for 1. and 4. implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript aren't equally distributed due to duplicate reads or GC-content bias.%TODO[ list of biases duplicate reads, stacking reads]. 
+% TODO: stashed for now; https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-290
+% https://www.the-scientist.com/news-opinion/technical-bias-widespread-in-rna-seq-datasets-66766#:~:text=Love%20adds%20that%20there%20are,length%2Drelated%20biases%20as%20well.
+% https://emea.support.illumina.com/bulletins/2017/04/considerations-for-rna-seq-read-length-and-coverage-.html#:~:text=Experiments%20looking%20for%20a%20more,for%20mRNA%2Fwhole%20transcriptome%20sequencing.
+%https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8
 These biases are not easily quantifiable and even already adjusted read estimates (e.g. for gene expressiveness) are still biased. \\
 In more general terms, the data on which the estimate is based is inherently very noisy and this will always lead to downstream effects independent of the preprocessing method used. The question is not whether the resulting estimate is still biased, but rather if the effect of systematic biases influencing it can be alleviated enough for the estimate to be useful. 
 %TODO i basicallly say here that unbiasing rna-seq data will never be possible - opinions from wil and liz? lol
@@ -148,18 +151,18 @@ However, it should be noted that HEXEvent uses the critized naive estimation met
 Therefore, care should be taken when drawing conclusions based on the PSI estimates of this dataset. 
 
 \subsubsection{Our PSI estimation implementation} \label{subsubsec:implementedpsiestimation}
-%TODO write this section
+%TODO think about multiple assignment issue
 To obtain a PSI estimate based on the publicly accessible exon-exon junction read counts of the GTEx project, we implement our own PSI estimation method. 
 
 GTEx gives access to data based on sample from different tissue. It also gives access to information about which sample types were taken from which donor (in an anonymized way). We use this information to find a donor from whom brain cortex tissue, cerebellum tissue and heart tissue samples were taken. For each sample we derive two datasets: one exon-centric dataset which only consists of cassette exons and one intron-centric dataset which consists of every junction found in the original data.
 We obtain six datasets in total.
 
 Fundamentally, our estimation relies on the formula $PSI = \frac{\#IR}{(\#IR+\#ER)}$. However, before computing PSI, we also apply the following filtering and normalization steps:
-\begin{itemize}
-	\item cassette exons which are shorter than 25 nt and introns which are shorter than 80 nt are excluded. Exon and intron of these lengths constitute less than 1\% of exons and introns in total and are usually caused by sequencing errors \cite{dsc}.
-	\item GTEx provides access to TPM values for each gene from a sample. Adressing point 1. from \ref{subsubsec:naivepsi}, we obtain the TPM-adjusted read counts via $\#IR^{TPM} = \frac{\#IR\}{TPM}$ and $\#ER^{TPM} = \frac{\#ER\}{TPM}$. To address spurious reads from lowly-transcribed genes having a disproportionate impact, we only count reads from genes whose TPM is larger than 10. This is by far the most stringent filtering method we apply, leading to about two-thirds of genes being filtered. This cut-off was chosen so aggressively as data quality is paramount. More details are given in Figure \ref{fig:tpm_distribution}.
-	\item Adressing point 4. about IRs naturally being more common than ER from \ref{subsubsec:naivepsi}, we estimate the read length of the RNA-seq reads to be 150 on average \cite{gtex_read_length} and apply the proposed normalization method: $\#IR^{TPM}_{norm} = \frac{\#IR^{TPM}}{(exon length + 149)}$ and $\#ER^{TPM}_{norm} = \frac{\#ER^{TPM}}{149}$.
-\end{itemize}
+%\begin{itemize}
+%	\item cassette exons which are shorter than 25 nt and introns which are shorter than 80 nt are excluded. Exon and intron of these lengths constitute less than 1\% of exons and introns in total and are usually caused by sequencing errors \cite{dsc}.
+%	\item GTEx provides access to TPM values for each gene from a sample. Adressing point 1. from \ref{subsubsec:naivepsi}, we obtain the TPM-adjusted read counts via $\#IR^{TPM} = \frac{\#IR\}{TPM}$ and $\#ER^{TPM} = \frac{\#ER\}{TPM}$. To address spurious reads from lowly-transcribed genes having a disproportionate impact, we only count reads from genes whose TPM is larger than 10. This is by far the most stringent filtering method we apply, leading to about two-thirds of genes being filtered. This cut-off was chosen so aggressively as data quality is paramount. More details are given in Figure %\ref{fig:tpm_distribution}.
+%	\item Adressing point 4. about IRs naturally being more common than ER from \ref{subsubsec:naivepsi}, we estimate the read length of the RNA-seq reads to be 150 on average \cite{gtex_read_length} and apply the proposed normalization method: $\#IR^{TPM}_{norm} = \frac{\#IR^{TPM}}{(exon length + 149)}$ and $\#ER^{TPM}_{norm} = \frac{\#ER^{TPM}}{149}$.
+%\end{itemize}
 
 Using the normalized \#IR and \#ER of all exons and junctions remaining after filtering, we then compute PSI: $PSI = \frac{\#IR^{TPM}_{norm}}{(\#IR^{TPM}_{norm}+\#ER^{TPM}_{norm})}$. 
 
@@ -168,12 +171,12 @@ This estimate also does not aggregate the information from multiple biological s
 
 After the PSI values have been obtained as described above, we apply the final sample processing steps as described in \ref{subsec:finalsampleprocessing}.
 
-\begin{figure}
-	\centering%\includegraphics[width=0.7\textwidth]{../visualizations/suppa_cross_model_roc_auc_comparison.png} 
-	\caption{%TODO tpm value histogram
-		Distribution of TPM values. The cut-off we chose is marked in red. Concretely, this lead to filtering ... out of ... genes. }
-	\label{fig:tpm_distribution}
-\end{figure}
+%\begin{figure}
+%	\centering%\includegraphics[width=0.7\textwidth]{../visualizations/suppa_cross_model_roc_auc_comparison.png} 
+%	\caption{%TODO tpm value histogram
+%		Distribution of TPM values. The cut-off we chose is marked in red. Concretely, this lead to filtering ... out of ... genes. }
+%	\label{fig:tpm_distribution}
+%\end{figure}
 %1) TPM: Only take reads from genes across a certain TPM into account (because random spurios reads from low TPM genes could have an outsized effect on the estimation). Say that you weight reads according to the respective TPM. Show TPM distribution and say what TPM threshold you use.\\
 %2) Latent information: Say how there is nothing you can do, due to only having access to the junction reads themselves. \\
 %3) Multiple samples: Unclear how to best do this and skipped for now. However, basing estimatin based on the sample with the maximum total amount of reads. \\
@@ -552,10 +555,10 @@ $$Z^{} = {attention}^{}(I) = softmax(K^*)V$$
 where $K^* \in \mathbb{R}^{l \times 1}$ and $Z^{**} \in \mathbb{R}^{1 \times out}$
 However, in initial experiments, the attention** mechanism performed significantly worse than the attention* mechanism. The extra representational capacity by having a query matrix seems to be important for performance.
 \subsubsection{Multiple attention heads} \label{subsubsec:heads}
-Having one set of query, key and value matrices limits the model to one representational subspace (one way of 'interpreting' the input). It might be useful for the model to have multiple representational subspaces. This is usually achieved via $$h$$ different sets of query, key and weight matrices $W^Q_1, W^Q_1, W^Q_1, \dots W^Q_{h}, W^Q_{h},W^Q_{h}$ producing multiple outputs $Z_0, \dots, Z_{n\_h}$.
+Having one set of query, key and value matrices limits the model to one representational subspace (one way of 'interpreting' the input). It might be useful for the model to have multiple representational subspaces. This is usually achieved via $h$ different sets of query, key and weight matrices $W^Q_1, W^Q_1, W^Q_1, \dots W^Q_{h}, W^Q_{h},W^Q_{h}$ producing multiple outputs $Z_0, \dots, Z_{n\_h}$.
 The final output matrix $Z_{final} \in \mathcal{R}^{l \times out}$ is then computed as:
 $$Z_{final} = concat(Z_1, \dots, Z_{h}) W^O$$
-where the concatenation occurs along the second dimension and $W^O \in \mathcal{R}^{out * h \times out\_new}$. $out_new$ represents the new output dimension of the attention layer, which is arrived at by combining the dimensions of the multiple attention heads.
+where the concatenation occurs along the second dimension and $W^O \in \mathcal{R}^{out * h \times out_{new}}$. $out_{new}$ represents the new output dimension of the attention layer, which is arrived at by combining the dimensions of the multiple attention heads.
 
 %thought: might change this up a little, would require a bit more implementation effort than previously thought (eg. initial attention dimension should be divided by 3) or requires the assumption that out == $out_new$ (I think I will choose this one, but not certain)
 \subsubsection{Convolution in attention heads} \label{subsubsec:attention_conv}
@@ -669,3 +672,4 @@ Exact hyperparameters used for training the models are given in table \ref{table
 The DSC, D2V and BiLSTM + Attn models respectively contain 20,001, 6,801, and 66,861 trainable weights. In absolute terms, all of these model are still small compared to models known from Computer Vision and Natural Language Processing. The number of training weights is also reflected in the training times with the models respectively taking between 5 to 30 minutes, 1 to 5 minutes and 15 to 75 minutes to train once (depending on dataset). 
 
  
+%TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation

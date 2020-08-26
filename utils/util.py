@@ -39,10 +39,6 @@ def letter_1_comes_before_letter_2_curried(letter1, letter2):
         return string.index(letter1) < string.index(letter2)
     return attack
 
-x = generate_permutations_iterative(['R', 'A', 'S', 'C', 'Bi'])
-print(x)
-x = list(filter(letter_1_comes_before_letter_2_curried('S', 'C'), x))
-print(x)
 def compute_relative_performance_change_auc(value_bef, value_after):
     return (value_after-value_bef)/(value_after-0.5)
 
@@ -145,3 +141,9 @@ class MetricTracker:
 
     def __contains__(self, item):
         return item in self.metrics
+
+if __name__ == '__main__':
+    names = generate_permutations_iterative(['A', 'D'])
+    # names = list(filter(letter_1_comes_before_letter_2_curried('S', 'C'), names))
+    for name in names:
+        print(name + 'SC')
