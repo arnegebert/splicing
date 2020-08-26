@@ -12,6 +12,21 @@ import math
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 
+def generate_permutations(letters):
+
+
+    def rec(all, curr, i):
+        if i == len(letters)-1:
+            all.append(list(curr))
+
+
+    return rec([], [], 0)
+
+def generate_oermutations_iterate(letters):
+    res = ['']
+    temp = []
+    for i in len(letters):
+        res = ['']
 
 def compute_relative_performance_change_auc(value_bef, value_after):
     return (value_after-value_bef)/(value_after-0.5)
