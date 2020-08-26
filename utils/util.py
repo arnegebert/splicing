@@ -22,12 +22,27 @@ def generate_permutations(letters):
 
     return rec([], [], 0)
 
-def generate_oermutations_iterate(letters):
+def generate_permutations_iterative(letters):
     res = ['']
-    temp = []
-    for i in len(letters):
-        res = ['']
+    for l in letters:
+        temp = []
+        for r in res:
+            for i in range(len(r)+1):
+                new = r[:i] + l + r[i:]
 
+                temp.append(new)
+        res = temp
+    return res
+
+def letter_1_comes_before_letter_2_curried(letter1, letter2):
+    def attack(string):
+        return string.index(letter1) < string.index(letter2)
+    return attack
+
+x = generate_permutations_iterative(['R', 'A', 'S', 'C', 'Bi'])
+print(x)
+x = list(filter(letter_1_comes_before_letter_2_curried('S', 'C'), x))
+print(x)
 def compute_relative_performance_change_auc(value_bef, value_after):
     return (value_after-value_bef)/(value_after-0.5)
 

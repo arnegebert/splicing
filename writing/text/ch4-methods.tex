@@ -21,20 +21,19 @@ Three primary sources for genomic data were used in this study: the Human Exon s
 
 
 \subsection{HEXEvent database} \label{subsec:hexevent}
-The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons) via an online user interface. It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information.
-It was chosen as a data source for direct comparability with the baseline paper \cite{dsc}.
-TODO critizie est data
-%TODO criticize EST data
+The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons) via an online user interface. It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information. ESTs are short cDNA sequences which have been used in older sequencing techniques (before the advent of modern high-throughput sequencing technologies). 
+However, EST are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error prone \cite{hitchhiker}. Additionally, ESTs underpresent less frequent transcripts and as a result often only capture 50 - 65\% of an organism's genes \cite{estunderrepresenttransripts}. Thus, great care has been taken to account for these systematic biases when working with EST data.
+%It was chosen as a data source for direct comparability with the baseline paper \cite{dsc}.
 
-EST underrepresent rare transcripts and often only account for 60\% of an organism's genes, yep 50-65\%
-- EST seqeuence;very short and highly error prone especially at the ends
-EST also permits low quality bases due to single pass sequencing, and some sequences are highly redundant in certain genes.
-- what sort of processing against bias does hexevent do?
+%EST underrepresent rare transcripts and often only account for 60\% of an organism's genes, yep 50-65\%
+%- EST seqeuence;very short and highly error prone especially at the ends
+%EST also permits low quality bases due to single pass sequencing, and some sequences are highly redundant in certain genes.
+%- what sort of processing against bias does hexevent do?
 
-% https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1431573/
+
 these are sequence reads datasets based on which I will estimate the PSI values
 \subsection{GTEx} \label{subsec:gtex}
-The GTEx project provides the most comprehensive database for tissue-specific gene expression and regulation available to-date. It contains over 17000 samples from nearly 1000 human donors. Each sample was taken from up to 54 different tissue sites. The sequencing samples were obtained using mainly molecular assay-based techniques like Whole Genome Genotyping (WGS), Whole Exome Sequencing (WES) and RNA-Seq.\\
+The GTEx project provides the most comprehensive database for tissue-specific gene expression and regulation available to-date. It contains over 17000 samples from nearly 1000 human donors. Each sample was taken from up to 54 different tissue sites. The sequencing samples were obtained using mainly molecular assay-based techniques like Whole Genome Genotyping (WGS), Whole Exome Sequencing (WES) and RNA-Seq. In particular, the tissue samples are also taken from rare tissue sites such as brain or heart as the donors are all recently deceased, but have donated their body to science. Thus, the GTEx project was only made possible through the kindness and generosity of donors making their body available for science. \\
 Processed data which can not be used to identify the donors is publicly available on the GTEx portal. To access raw data (e.g. raw RNA-seq reads) and meta-information about the samples one is required to undergo a data access request. It is intended that data access is requested by PIs or leader of research groups for their whole lab. Approval of a data access request usually takes upwards of 3 months. The co-collaborators Prof. Wilfred Haerty and Prof. Elizabeth Tunbridge have access to the protected part of the GTEx data. However, the scope of projects for which they were granted access does not include this thesis and changing the scope would require undergoing the data access process again. For this reason, we only use the publicly available part of the GTEx data, in particular the files containing information about exon-exon junction reads.
 %using gtex:
 %'We strongly recommend the use of TPM (Transcripts Per Million), because is normalized for gene length first, and then for sequencing depth. This allows a direct comparison between samples' https://github.com/comprna/SUPPA/wiki/SUPPA2-tutorial
@@ -93,23 +92,28 @@ The advantage of this estimate lies in its simplicity and flexibility. It is qui
 
 However, this estimate has various issues.
 \begin{enumerate}
-	\item It doesn't account for uncertainty in the estimate. A rarely expressed gene may only experience a few reads of a particular exon leading to a very uncertain estimate. For instance, if we observe 1 IR and 1 ER for exon E1: $PSI_E1 = \frac{1}{2} = 50\%$. Compare this to E2 where we observed 15 inclusion and 15 exclusion reads: $PSI_E2 = \frac{15}{30} = 50\%$.\\
-	The estimate of $PSI_E2$ is likely to be more accurate, but this information is not contained in the estimate. Concretely, these two samples would be treated as equally important by the network even though perhaps they shouldn't.
-	A further processing step to only count exons who experienced at least threshold number of reads only alleviates this problem. One would need to account for the expressiveness of each gene because 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the expressiveness of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM) and although TPM is the most common one, it is not obvious that it is the best choice in this scenario.
+	\item It doesn't account for uncertainty in the estimate. A rarely expressed gene may only experience a few reads of a particular exon leading to a very uncertain estimate. For instance, if we observe 1 IR and 1 ER for exon E1: $PSI_{E1} = \frac{1}{2} = 50\%$. Compare this to E2 where we observed 15 inclusion and 15 exclusion reads: $PSI_{E2} = \frac{15}{30} = 50\%$.\\
+	The estimate of $PSI_E2$ is likely to be more accurate, but this information is not contained in the estimate. Concretely, these two samples would be treated as equally important by the network even though they likely shouldn't.
+	
+	One further processing step could be to only count exons who experienced at least a certain number of reads. However, assuming this solution is taken, there are additional two aspects worth discussing:
+%	However, Assuming that one obtains a read count normalized by the gene expressiveness, there are two further aspects worth discussing:
+	\begin{enumerate}
+		\item This threshold soluton only alleviates this problem because one needs to account for the expressiveness of each gene: 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the expressiveness of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM). Of these, TPM is usually the most common choice. 
+		\item There is not a principled way to choose the cutoff threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and training samples. In practice, the optimal way to choose the cutoff threshold will be unknown and vary from dataset to dataset.
+	\end{enumerate}
 	% https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
+
+
 	
-	%TODO: could add that even then reads across a gene aren't normally distributed
-	% see https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-290
 	
-	Assuming that one obtains a read count normalized by the gene expressiveness for each exon, there is not a principled way to choose the cutoff threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and training samples.
 	\item Reads which align purely to the flanking constitutive exons are ignored. While these could have occurred in either isoform, they provide latent evidence for whether the cassette exon was included or not. In isoforms where it occurred, the total length of the isoform is longer which means the reads are distributed over a larger area. This leads to a comparatively reduced proportion of reads across the flanking exons when the exon was included and vice versa. The estimate neglects to take this information into account.
 %	This estimate ignores reads that align to the bodies of the flanking constitutive exons, which could have derived from either isoform. Nevertheless, these constitutive reads contain latent information about the splicing of the alternative exon, as higher expression of the exclusion isoform will generally increase the density of reads in the flanking exons relative to the alternative exon, and lower expression of the exclusion isoform will decrease this ratio of densities.
 %	[MISO]
 %	this is the reason why I wanted access to raw RNA-seq reads
 	\item Related to 1), typically multiple samples or biological replicates of a given experiment are available. It is desirable that reads across multiple samples can be integrated to give a more well-adjusted estimate. How to best achieve this is not obvious. Read depths between multiple libraries may vary and this should be accounted for. [possible other issues here and then make this another itemization]
 	\item IR and ER must be normalized for exon length to obtain meaningful results. For a long exon, the majority of reads will be IR because they can be located over a much larger area than the ER who must overlap with the 0-length feature of the splicing junction. This can be accounted for by normalizing for the possible number of start positions for each read population:
-	$$\#IR_{norm} = \frac{\#IR}{(exon length + read length -1)}$$
-	$$\#ER_{norm} = \frac{\#ER}{(read length - 1)}$$
+	$$\#IR_{norm} = \frac{\#IR}{exon\_length + read\_length -1}$$
+	$$\#ER_{norm} = \frac{\#ER}{read\_length - 1}$$
 	%TODO: check out second graphic from berlin paper in more detail
 	Note that this assumes that reads are uniformly distributed across a transcript isoform. It is well-known that RNA-seq reads are biased .... [get paper from Liz/Wilfred]
 	
@@ -117,24 +121,77 @@ However, this estimate has various issues.
 	%	IR can only start from position 0 to exon.length-read.length of the exon can't they?
 	%	won't do anything about this, but will want to use weaker claim
 	%	I think you can't really do normalization for junction counting
+
+%	The goal of these adjustments is not to arrive at perfect estimates, but rather to alleviate the influence of systematic biases as much as possible. 
+	
+	%TODO: could add that even then reads across a gene aren't evenly distributed
+	% see https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-290
 \end{enumerate}
 
 
 
 %hopefully was able to demonstrate that this estimate is problematic and may easily be unreliable.
 Due to these issues relating to the uncertainty, to not making use of all of the available evidence and to integrating reads across multiple samples, this estimate is problematic.
-\subsubsection{How I implemented PSI estimation} \label{subsubsec:implementedpsiestimation}
-%TODO write this section
 
-1) Only take reads from genes across a certain TPM into account (because random spurios reads from low TPM genes could have an outsized effect on the estimation). Say that you weight reads according to the respective TPM. Show TPM distribution and say what TPM threshold you use.\\
-2) Say how there is nothing you can do, due to only having access to the junction reads themselves. \\
-3) Unclear how to best do this and skipped for now. However, basing estimatin based on the sample with the maximum total amount of reads. \\
-4) Say that you estimate read length to be 150 and do this. \\
- TODO: mention junction datasets
+Even if all of these issues are perfectly handled, the resulting estimate would still not be perfect. For instance, the 'solutions' for 1. and 4. implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript aren't equally distributed due to duplicate reads, stacking reads or GC-content bias.%TODO[ list of biases duplicate reads, stacking reads]. 
+
+These biases are not easily quantifiable and even already adjusted read estimates (e.g. for gene expressiveness) are still biased. \\
+In more general terms, the data on which the estimate is based is inherently very noisy and this will always lead to downstream effects independent of the preprocessing method used. The question is not whether the resulting estimate is still biased, but rather if the effect of systematic biases influencing it can be alleviated enough for the estimate to be useful. 
+%TODO i basicallly say here that unbiasing rna-seq data will never be possible - opinions from wil and liz? lol
+\subsubsection{Dataset based on HEXEvent}
+% https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1431573/
+The HEXEvent database already provides PSI estimates based on EST counts for each exon and facilitates standard filtering steps (e.g. only select cassette exons). 
+The baseline paper \cite{dsc} takes HEXEvent as a starting point and generates three different datasets respectively only containing cassette exons, exons with an alternative 3' splice and exons with an alternative 5' splice site. Each of these datasets also contains constitutive exons. To account for the biases inherent in EST data, it applies multiple filtering steps such as requiring a minimum number of supporting ESTs and only using exons which display a single type of alternative splicing. They make the resulting datasets publicly available and we use the dataset containing cassette exons for direct comparability. 
+
+
+However, it should be noted that HEXEvent uses the critized naive estimation method for PSI, i.e., they estimate PSI as $PSI = \frac{\#IR}{(\#IR+\#ER)}$. They don't explicitly account for any of the four main critique points discussed above. The EST data available by UCSC is based on many different tissues which may lead to the derived alternative splicing behaviour being an average of the splicing behaviour of many tissues which never occurs in practice. %distort view, confuse nice words here
+Therefore, care should be taken when drawing conclusions based on the PSI estimates of this dataset. 
+
+\subsubsection{Our PSI estimation implementation} \label{subsubsec:implementedpsiestimation}
+%TODO write this section
+To obtain a PSI estimate based on the publicly accessible exon-exon junction read counts of the GTEx project, we implement our own PSI estimation method. 
+
+GTEx gives access to data based on sample from different tissue. It also gives access to information about which sample types were taken from which donor (in an anonymized way). We use this information to find a donor from whom brain cortex tissue, cerebellum tissue and heart tissue samples were taken. For each sample we derive two datasets: one exon-centric dataset which only consists of cassette exons and one intron-centric dataset which consists of every junction found in the original data.
+We obtain six datasets in total.
+
+Fundamentally, our estimation relies on the formula $PSI = \frac{\#IR}{(\#IR+\#ER)}$. However, before computing PSI, we also apply the following filtering and normalization steps:
+\begin{itemize}
+	\item cassette exons which are shorter than 25 nt and introns which are shorter than 80 nt are excluded. Exon and intron of these lengths constitute less than 1\% of exons and introns in total and are usually caused by sequencing errors \cite{dsc}.
+	\item GTEx provides access to TPM values for each gene from a sample. Adressing point 1. from \ref{subsubsec:naivepsi}, we obtain the TPM-adjusted read counts via $\#IR^{TPM} = \frac{\#IR\}{TPM}$ and $\#ER^{TPM} = \frac{\#ER\}{TPM}$. To address spurious reads from lowly-transcribed genes having a disproportionate impact, we only count reads from genes whose TPM is larger than 10. This is by far the most stringent filtering method we apply, leading to about two-thirds of genes being filtered. This cut-off was chosen so aggressively as data quality is paramount. More details are given in Figure \ref{fig:tpm_distribution}.
+	\item Adressing point 4. about IRs naturally being more common than ER from \ref{subsubsec:naivepsi}, we estimate the read length of the RNA-seq reads to be 150 on average \cite{gtex_read_length} and apply the proposed normalization method: $\#IR^{TPM}_{norm} = \frac{\#IR^{TPM}}{(exon length + 149)}$ and $\#ER^{TPM}_{norm} = \frac{\#ER^{TPM}}{149}$.
+\end{itemize}
+
+Using the normalized \#IR and \#ER of all exons and junctions remaining after filtering, we then compute PSI: $PSI = \frac{\#IR^{TPM}_{norm}}{(\#IR^{TPM}_{norm}+\#ER^{TPM}_{norm})}$. 
+
+This estimate fails to take into account the information contained in non-junction reads, as we simply don't have access to them.
+This estimate also does not aggregate the information from multiple biological samples, although we took care to choose the donor with tissue samples from brain cortex, cerebellum and heart, whose total read count was the highest. The initial dataset contained roughly 10 million total exon-exon junction read count for each tissue distributed over roughly 330,000 unique junctions. More statistics about this dataset, and the others, are given in Section \ref{subsec:datasetstatistics}. 
+
+After the PSI values have been obtained as described above, we apply the final sample processing steps as described in \ref{subsec:finalsampleprocessing}.
+
+\begin{figure}
+	\centering%\includegraphics[width=0.7\textwidth]{../visualizations/suppa_cross_model_roc_auc_comparison.png} 
+	\caption{%TODO tpm value histogram
+		Distribution of TPM values. The cut-off we chose is marked in red. Concretely, this lead to filtering ... out of ... genes. }
+	\label{fig:tpm_distribution}
+\end{figure}
+%1) TPM: Only take reads from genes across a certain TPM into account (because random spurios reads from low TPM genes could have an outsized effect on the estimation). Say that you weight reads according to the respective TPM. Show TPM distribution and say what TPM threshold you use.\\
+%2) Latent information: Say how there is nothing you can do, due to only having access to the junction reads themselves. \\
+%3) Multiple samples: Unclear how to best do this and skipped for now. However, basing estimatin based on the sample with the maximum total amount of reads. \\
+%4) Start pos normalization: Say that you estimate read length to be 150 and do this. \\
+% TODO: mention junction datasets
 % potentially even more details; eg how you use this heuristic of checking the 10 samples past the current one
 % todo add details such as exact name of individuals used and number of reads
 % bezi1, bezi2, lexy2 and sample number 1 with ERR number .... 
-Several approaches have been developed which try to address these issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose the two fast methods SUPPA and MAJIQ. SUPPA and MAJIQ represent two different approaches to PSI estimation: SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. Figure \ref{dataset_creation_process} shows the high-level steps taken when using MAJIQ and SUPPA to create datasets for training.
+
+
+
+
+\subsubsection{More sophisticated PSI estimation approaches}
+
+Several approaches have been developed which try to address the issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose the two fast methods SUPPA and MAJIQ. SUPPA and MAJIQ represent two different approaches to PSI estimation: SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. Figure \ref{dataset_creation_process} shows the high-level steps taken when using MAJIQ and SUPPA to create datasets for training.
+
+
+
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{figures/d2v-Page-3.pdf} 
@@ -226,7 +283,7 @@ Introns are on average one to two orders of magnitudes larger than exons and the
 %TODO [maybe but probably not: exon_mean, exon_std, intron_mean, intron_std = 145.42, 198.0, 5340., 17000.]
 Some of the datasets had a class imbalance issue between constitutive and alternatively spliced samples. For instance, the HexEvent dataset contains roughly times three as many constitutive as alternatively spliced samples. This leads to the issues with models getting stuck in local minima where they just predict the majority class. This was alleviated by including each alternatively spliced sample multiple times until the classes were balanced.
 A single sample input to the model contains two 140x4 one-hot encoded matrixes and three normalized length values. The associated ground truth with each sample is the scalar 1 if the respective exon or junction is constitutive, and 0 if not.
-\subsection{Dataset statistics} \cite{subsec:datasetstatistics}
+\subsection{Dataset statistics} \label{subsec:datasetstatistics}
 
 %TODO: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
 further analysis postponed until I ran experiments again and decided for which datasets I will show results 

@@ -126,6 +126,7 @@ with open(path_filtered_reads) as f:
             chrom_seq = load_chrom_seq(loaded_chrom)
 
         """ Filtering """
+        # publicly
         # a minimal length of 25nt for the exons and a length of 80nt for the neighboring introns are
         # required as exons/introns shorter than 25nt/80nt are usually caused by sequencing errors and
         # they represent less than 1% of the exon and intron length distributions
