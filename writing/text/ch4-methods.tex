@@ -1,6 +1,18 @@
 \chapter{\label{ch:4-methods}Methods}
 
-%TODO: short name for attention model
+%TODO: short name for attention model 
+Attentive recurrent splicing code
+ARSC
+Recurrent attentive splicing code
+RASC -- same as royal army service corps, favorite is this one
+For brevity, we baptise our architecture as RASC or recurrent attentive splicing code. 
+Multi-headed attentive Bi-Recurrent splicing code
+MABiRSC -- meh
+MARSC
+SCAR
+ASCR
+%TODO -> write functions that generates prermutations and go from there
+
 
 This chapter introduces the primary data sources, describes how these were used to obtain the training datasets, and presents the used models. It also gives implementation details regarding processing steps, model implementation, and model training.
 In this work, we focus on the splicing prediction of cassette exons. Previous work indicates that advances in predicting one type of alternative splicing behaviour via Machine Learning methods also translates to advances in prediction for other types. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryotes. Thus, for reasons of practicality we choose cassette exons as the type of alternative splicing, we will focus on.
@@ -115,6 +127,7 @@ Due to these issues relating to the uncertainty, to not making use of all of the
  TODO: mention junction datasets
 % potentially even more details; eg how you use this heuristic of checking the 10 samples past the current one
 % todo add details such as exact name of individuals used and number of reads
+% bezi1, bezi2, lexy2 and sample number 1 with ERR number .... 
 Several approaches have been developed which try to address these issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose the two fast methods SUPPA and MAJIQ. SUPPA and MAJIQ represent two different approaches to PSI estimation: SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. Figure \ref{dataset_creation_process} shows the high-level steps taken when using MAJIQ and SUPPA to create datasets for training.
 
 \begin{figure}
@@ -292,15 +305,14 @@ further analysis postponed until I ran experiments again and decided for which d
 	\label{fig:datahistograms}
 \end{figure}
 
-Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that the distribution of PSI values is bi-model with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
-The biggest contributor to this is that due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. Another factor is that they only estimate PSI based on one biological sample in contrast to the other datasets. HipSci SUPPA especially has an extremely low number of non-rarely or frequently included exons which is likely an artefact of its coarse, transcription-level estimation method.\\
+Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that in each dataset the distribution of PSI values is bi-modal with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
+Due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. 
+% liekly false for suppa Another factor is that they only estimate PSI based on one biological sample in contrast to the other datasets. 
+HipSci SUPPA especially has an extremely low number of non-rarely or frequently included exons which is likely an artefact of its coarse, transcription-level estimation method.\\
 %The relatively low number of non-constitutive exon samples in the HEXEvent dataset is likely influenced by the ESTs coming from a mix of biological samples from different tissues. Among many tissues, there are likely few tissues that contain some exons
 %should also hold for constitutive exons; so rarely exons constitutive, so more with middle psi values
 %SCEPTICAL -- unlikely to include
-%todo:f
-%collecting average l2 lengths of datasets
-%gtex: 24.81448218801441 +- 93.86430163002234
-%realization: don't I just collect cassette exons? :o what about vanilla constitutive exons?
+
 \section{Models} \label{sec:models}
 The models are fundamentally all split into two components. \\
 The first component extracts the most relevant features of the two input sequences of nucleotides. The feature extraction for the sequence around the exon start and the exon end is done independently. Depending on the exact model, the feature extraction is based either on CNNs, BiLSTMs or MLP. The extracted features of this layer are concatenated along with the length features and fed as input to the second component.\\
