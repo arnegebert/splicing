@@ -12,7 +12,8 @@ Generally all models perform extremely well with AUCs nearing 90\%. They also pe
 Assessing our reimplementation, we observe a small difference between the AUC value reported in \cite{dsc} (mean 0.899, standard deviation of 0.18) and the ones we observe (mean 0.873, standard deviation of 0.06). This is likely just a result of random statistical noise influenced by different random seeds between runs and differences between TensorFlow / Keras (their implementation) and PyTorch (our implementation). Notably, when reevaluating the publically available original implementation, in a single run we also obtain results (0.872 AUC) closer to the results of our reimplementation. 
 %There is a small (~2\%) difference in the AUC values in the AUC values for the DSC model reported in \cite{dsc} (89.9 AUC) and the ones we observe (87.1 AUC original). 
 Thus, we conclude that, albeit with minor caveats, the reimplementation was successful and that we are able to replicate the results of \cite{DSC}.
-
+%TODO say somewhere that validation and test error are always the same
+%TOOO also talk about training error
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/hexevent_cross_model_roc_auc_comparison.png} 
@@ -250,6 +251,6 @@ seems like learned features are tissue-invariant\\
 
 continuous psi prediction too
 
-
+interpretation of F1 score
 
 interpretation of attention mechanism etc follows here; some pretty graphics to follow

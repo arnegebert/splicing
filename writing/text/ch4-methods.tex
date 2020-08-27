@@ -1,6 +1,6 @@
 \chapter{\label{ch:4-methods}Methods}
 
-%TODO: short name for attention model  -- PRALINE current favorite
+%short name for attention model  -- PRALINE current favorite of the cheesy ones, but DRASC overall preferred
 %Attentive recurrent splicing code
 %ARSC
 %Recurrent attentive splicing code
@@ -14,14 +14,33 @@
 
 
 
-This chapter introduces the primary data sources, describes how these were used to obtain the training datasets, and presents the used models. It also gives implementation details regarding processing steps, model implementation, and model training.
-In this work, we focus on the splicing prediction of cassette exons. Previous work indicates that advances in predicting one type of alternative splicing behaviour via Machine Learning methods also translates to advances in prediction for other types. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryotes. Thus, for reasons of practicality we choose cassette exons as the type of alternative splicing, we will focus on.
+In this chapter, we give more details about the exact task we are trying to solve, introduce the primary data sources and describe how these were used to obtain the training datasets. Additionally, we motivate and explain the evaluated models and describe how these were implemented and trained.
+% We also give implementation details regarding processing steps, model implementation, and model training.
+
+\subsubsection{Why PSI?} \label{subsubsec:whypsi}
+
+- why not more ambitious? why not predict whole transcript directly? --> but this should be somewhere else, like in the task formulation section
+
+ok, older works use PSI -- but why do we use it?
+
+High-throughput sequencing methods are a popular and potent tool to investigate RNA expression and post-transcriptional regulation. However, due to limited coverage, short read length, and experimental biases they are not able to provide a full view of post-transcriptional processing so far \cite{berlinpsi}.
+-> this is why you introduce alternative splicing events; as reads are too short to identify splicing events
+
+
+\section{Task formulation} \label{sec:task_formulation}
+The output of our models will be the classification of a given exon or junction as constitutive or non-constitutive. To obtain the training label of an exon or junction as constitutive or non-constitutive, we need its respective PSI value. 
+Strictly speaking, all exons and junctions with a PSI of less than 100\% are non-constitutive. However, due to spurious reads, we classify all exons with a PSI $\leq 99\%$ as constitutive. 
+
+Previous work indicates that advances in predicting one type of alternative splicing behaviour (e.g. cassette exons) via Machine Learning methods also translates to advances in prediction for other types (e.g. exons with an alternative 3' splice site) \cite{dsc} \cite{buschhertel}. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryote and thus we choose cassette exons as the type of alternative splicing we will focus on.
+
 \section{Datasets}\label{sec:datasets}
-Three primary sources for genomic data were used in this study: the Human Exon splicing events (HEXEvent) database \cite{hexevent}, data from the Genotype-Tissue Expression (GTEx) project \cite{gtex} and data from the Human Induced Pluripotent Stem Cell Initiative (HipSci) \cite{hipsci}. Except for the HEXEvent database, none of these primary sources directly report the PSI values of exons or junctions. The processing done to estimate the PSI value-based from the primary sources is described in section \ref{subsec:psiestimation}. All of the data sources required further processing (e.g. extraction of corresponding nucleotide sequences) to obtain the final samples which are the input for the models. These further processing steps are described in section \ref{subsec:finalsampleprocessing}.
+Three primary sources for genomic data were used in this study: the Human Exon splicing events (HEXEvent) database \cite{hexevent}, data from the Genotype-Tissue Expression (GTEx) project \cite{gtex} and data from the Human Induced Pluripotent Stem Cell Initiative (HipSci) \cite{hipsci}. Except for the HEXEvent database, none of these primary sources directly report the PSI values of exons or junctions. However, we will use the PSI value as our prediction target and thus apply further processing steps to obtain PSI estimates \ref{subsec:psiestimation}. All of the data sources required further processing (e.g. extraction of corresponding nucleotide sequences) to obtain the final samples which are the input for the models. These further processing steps are described in section \ref{subsec:finalsampleprocessing}.
 
 
 \subsection{HEXEvent database} \label{subsec:hexevent}
-The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons) via an online user interface. It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information. ESTs are short cDNA sequences which have been used in older sequencing techniques (before the advent of modern high-throughput sequencing technologies). 
+The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons). It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information. ESTs are short cDNA sequences which have been used in older sequencing techniques (before the advent of modern high-throughput sequencing technologies). 
+
+%TODO perhaps extra section where I discuss the merit of each dataset because right now it doesn't fit
 However, EST are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error prone \cite{hitchhiker}. Additionally, ESTs underpresent less frequent transcripts and as a result often only capture 50 - 65\% of an organism's genes \cite{estunderrepresenttransripts}. Thus, great care has been taken to account for these systematic biases when working with EST data.
 %It was chosen as a data source for direct comparability with the baseline paper \cite{dsc}.
 
@@ -31,10 +50,11 @@ However, EST are based on only a single sequencing pass and especially bases at 
 %- what sort of processing against bias does hexevent do?
 
 
-these are sequence reads datasets based on which I will estimate the PSI values
+%these are sequence reads datasets based on which I will estimate the PSI values
 \subsection{GTEx} \label{subsec:gtex}
-The GTEx project provides the most comprehensive database for tissue-specific gene expression and regulation available to-date. It contains over 17000 samples from nearly 1000 human donors. Each sample was taken from up to 54 different tissue sites. The sequencing samples were obtained using mainly molecular assay-based techniques like Whole Genome Genotyping (WGS), Whole Exome Sequencing (WES) and RNA-Seq. In particular, the tissue samples are also taken from rare tissue sites such as brain or heart as the donors are all recently deceased, but have donated their body to science. Thus, the GTEx project was only made possible through the kindness and generosity of donors making their body available for science. \\
-Processed data which can not be used to identify the donors is publicly available on the GTEx portal. To access raw data (e.g. raw RNA-seq reads) and meta-information about the samples one is required to undergo a data access request. It is intended that data access is requested by PIs or leader of research groups for their whole lab. Approval of a data access request usually takes upwards of 3 months. The co-collaborators Prof. Wilfred Haerty and Prof. Elizabeth Tunbridge have access to the protected part of the GTEx data. However, the scope of projects for which they were granted access does not include this thesis and changing the scope would require undergoing the data access process again. For this reason, we only use the publicly available part of the GTEx data, in particular the files containing information about exon-exon junction reads.
+The GTEx project provides the most comprehensive database for tissue-specific gene expression and regulation available to-date; containing over 17000 samples from nearly 1000 human donors. The sequencing data was obtained using mainly molecular assay-based techniques like Whole Genome Genotyping (WGS), Whole Exome Sequencing (WES) and RNA-Seq. Samples were taken from up to 54 different tissue sites. In particular, the tissue samples are also taken from less commonly seen tissue sites such as brain or heart as the GTEx project sources its samples from recently-deceased donors who have donated their body to science. Thus, the GTEx project, and by extension the parts of this thesis relying on GTEx data, was only made possible through the kindness and generosity of donors making their body available for science.
+
+Processed data which can not be used to identify the donors is publicly available on the GTEx portal. To access raw data (e.g. raw RNA-seq reads) and meta-information about the samples one is required to undergo a data access request. It is intended that data access is requested by PIs or leader of research groups for their whole lab and approval of a data access request usually takes upwards of 3 months. The co-collaborators Prof. Wilfred Haerty and Prof. Elizabeth Tunbridge have access to the protected part of the GTEx data. However, the scope of projects for which they were granted access does not include this thesis and changing the scope would require undergoing the data access process again. For this reason, we can only use the publicly available part of the GTEx data in this study, in particular the files containing information about exon-exon junction reads.
 %using gtex:
 %'We strongly recommend the use of TPM (Transcripts Per Million), because is normalized for gene length first, and then for sequencing depth. This allows a direct comparison between samples' https://github.com/comprna/SUPPA/wiki/SUPPA2-tutorial
 %good site: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000424.v8.p2
@@ -44,18 +64,41 @@ Processed data which can not be used to identify the donors is publicly availabl
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/ipscprocess.png} 
 	\caption[test.]{
-	(1) Cell culture of donor cells is grown. (2) Transduce the genes associated with reprogramming into the cells via viral vectors. (3) Isolate the cells expressing the transduced genes (in red) and culture them according to embryonic stem cell culture. (4) A small subset of the transfected cells become iPSC cells. Graphic and description adapted from \cite{img:ipscprocess}.
+	The four high-level steps taken to obtain iPSC cells \cite{img:ipscprocess}:
+	(1) Grow a cell culture of donor cells, (2) transduce the genes associated with reprogramming into the cells via viral vectors, (3) isolate the cells expressing the transduced genes (in red) and culture them according to embryonic stem cell culture and, finally, (4) a small subset of the transfected cells become iPSC cells.
 }
 	\label{fig:ipscprocess}
 \end{figure}
 
-HipSci provides a large, mostly freely-available repository of human induced pluripotent stem cell (iPSC) lines. iPSC cells are mature cells which have been reprogrammed to again become pluripotent (undetermined). This process is visualized in Figure \ref{fig:ipscprocess}. As iPSC cell lines are not directly obtained from human donors, but rather from building a cell culture based on some initial donor cells, the HipSci dataset does not suffer from the data privacy issues which prevented access to the raw RNA-seq reads as in the GTEx data.
+HipSci provides a large repository of human induced pluripotent stem cell (iPSC) lines. iPSC cells are mature cells which have been reprogrammed to again become pluripotent (undetermined). This process is visualized in Figure \ref{fig:ipscprocess}. As iPSC cell lines are not directly obtained from human donors, but rather from building a cell culture based on some initial donor cells, accessing raw RNA-seq reads is not constrained by the same data privary regulations which prevented access to the raw RNA-seq reads from the GTEx project.
 
 
-Over 300 cell lines from over 300 donors along with their RNA-seq reads are publicly available from the HipSci portal. From these we selected two groups of roughly 20 biological replicates each:
-Neuron cell lines: One group of biological replicates were taken from undifferentiated iPSC cells from donors from which at least two cell lines are available. This allows testing how well the learned features of the model translate when applied to another library of the same tissue type from the same individual.
-iPSC cell lines: One group of 25 biological replicates were taken from iPSC cells differentiated to sensory neuron cells. This allows testing how well the learned features of the model translate when applied to another library of different tissue.
-For details regarding exactly which cell lines were taken, see \ref{app:hipsci_celllines}.
+Concretely, over 300 cell lines from over 300 donors along with sequencing information based on RNA-seq is publicly available from the HipSci portal. From these we selected two different groups of cell lines:
+\begin{itemize}
+
+	\item the first group contains 25 biological replicates (that is, samples from different cell lines developed under the same conditions) of sensory neuron cell lines. These cell lines were obtained by differentiating iPSC cells to sensory neuron cells.
+	\item the second group contains 20 biological replicates of iPSC cell lines which weren't differentiated to any other cell type. Here care was taken to choose donors from whom at least two different iPSC cell lines were developed.
+	
+%	iPSC cell lines: the second group of 20 biological replicates were taken from skin-tissue based iPSC cells which weren't differentiated to any other tissue. Here care was taken to choose donors from whom at least two different iPSC cell lines were developed. This allows us to test how well the learned features of the model generalize when applied to another library of the same tissue type from the same individual.
+\end{itemize}
+
+All used iPSC cells were originally obtained from skin cells. 
+
+Selecting the samples in this way, enables us to test cross-condition performance in three ways:
+\begin{itemize}
+	\item on the same cell type from the same donor, but from a different cell line. Here we expect the best generalization performance.
+	\item on the same cell type, but a different donor.
+	\item on a different cell type and from a different donor. Here we expect the worst generalization performance.
+\end{itemize}
+
+
+%From a biological perspective, it is interesting to see how splicing varies under different conditions. From a practical perspective, it is important to know how well the model generalizes when applied under different conditions. 
+%This was the motivation to take cell lines from two different cell types. 
+% For the analogue reason, the second group contained libraries of two different cell lines developed from the same donor of the same cell type. 
+%of samples of we chose the samples from the second group so that we would have different at least one pair of samples from the 
+%Cell-lines from two different tissue types were taken, toas this will allows us to test how well 
+
+The appendix contains detailed information about exactly which samples available from the HipSci portal were chosen \ref{app:hipsci_celllines}.
 %TODO: add details exactly which cell lines were used to the appendix
 
 %iPSC background probably here:
@@ -64,14 +107,14 @@ For details regarding exactly which cell lines were taken, see \ref{app:hipsci_c
 %process: take cell samples, then grow cell culture, make them pluripotent and use the pluripotent cells to differentiate into other ones
 \section{Data processing}\label{sec:dataprocessing}
 \subsection{Estimating PSI} \label{subsec:psiestimation}
-An often used quantitative measure is per cent spliced-in (PSI or $\Psi$).
-$\Psi$ is defined as the proportion of transcripts out of all transcripts that contain a given exon \cite{psi}. In other words, given a random transcript, it denotes the probability of a particular exon being included or excluded.
-Similarly, $\Psi_5$ is defined as the number of transcripts containing a particular alternative 3' splice site for a fixed 5' splice site. $\Psi_3$ is defined analogously as the number of transcripts containing a particular alternative 5' splice site for a fixed 3' splice site. $\Psi_5$ and $\Psi_3$ are particularly interesting to model the competition between different alternative splice sites.
+%An often used measure is to quantify alternative splicing is per cent spliced-in (PSI or $\Psi$).
+%$\Psi$ is defined as the proportion of transcripts out of all transcripts that contain a given exon \cite{psi}. In other words, given a random transcript, it denotes the probability of a particular exon being included or excluded.
+%Similarly, $\Psi_5$ is defined as the number of transcripts containing a particular alternative 3' splice site for a fixed 5' splice site. $\Psi_3$ is defined analogously as the number of transcripts containing a particular alternative 5' splice site for a fixed 3' splice site. $\Psi_5$ and $\Psi_3$ are particularly interesting to model the competition between different alternative splice sites.
 
 
 %High-throughput sequencing of cDNA fragments (RNA-seq; Lister et al., 2008) has become a popular tool to investigate RNA expression and post-transcriptional regulation. Sequencing of the transcriptome reveals tens of thousands of transcripts expressed simultaneously (Mortazavi et al., 2008). Despite providing a deep and genome-wide view on post-transcriptional processing, current technologies cannot reveal transcripts in full-length due to limitations in read length.  [https://www.researchgate.net/publication/282645615_Alternative_Splicing_Signatures_in_RNA-seq_Data_Percent_Spliced_in_PSI/link/59e8404b458515c3630fe4e3/download]
 
-High-throughput sequencing methods are a potent tool to investigate RNA expression and post-transcriptional regulation. However, due to limited coverage, short read length, and experimental biases they are not able to provide a full view of post-transcriptional processing so far \cite{berlinpsi}.
+
 
 %However, due to limitations in read length, they are not able to provide a full view of post-transcriptional processing so far.
 %[majiq + berlin, https://elifesciences.org/articles/11752#abstract]
@@ -93,7 +136,7 @@ The advantage of this estimate lies in its simplicity and flexibility. It is qui
 \end{figure}
 %'deceptively simple'?
 
-However, this estimate has various issues.
+However, this estimate also has various issues:
 \begin{enumerate}
 	\item It doesn't account for uncertainty in the estimate. A rarely expressed gene may only experience a few reads of a particular exon leading to a very uncertain estimate. For instance, if we observe 1 IR and 1 ER for exon E1: $PSI_{E1} = \frac{1}{2} = 50\%$. Compare this to E2 where we observed 15 inclusion and 15 exclusion reads: $PSI_{E2} = \frac{15}{30} = 50\%$.\\
 	The estimate of $PSI_E2$ is likely to be more accurate, but this information is not contained in the estimate. Concretely, these two samples would be treated as equally important by the network even though they likely shouldn't.
@@ -115,8 +158,8 @@ However, this estimate has various issues.
 %	this is the reason why I wanted access to raw RNA-seq reads
 	\item Related to 1), typically multiple samples or biological replicates of a given experiment are available. It is desirable that reads across multiple samples can be integrated to give a more well-adjusted estimate. How to best achieve this is not obvious. Read depths between multiple libraries may vary and this should be accounted for. [possible other issues here and then make this another itemization]
 	\item IR and ER must be normalized for exon length to obtain meaningful results. For a long exon, the majority of reads will be IR because they can be located over a much larger area than the ER who must overlap with the 0-length feature of the splicing junction. This can be accounted for by normalizing for the possible number of start positions for each read population:
-%	$$\#IR_{norm} = \frac{\#IR}{exon\_length + read\_length -1}$$
-%	$$\#ER_{norm} = \frac{\#ER}{read\_length - 1}$$
+	$$\#IR_{norm} = \frac{\#IR}{exon\_length + read\_length -1}$$
+	$$\#ER_{norm} = \frac{\#ER}{read\_length - 1}$$
 	%TODO: check out second graphic from berlin paper in more detail
 %	Note that this assumes that reads are uniformly distributed across a transcript isoform. It is well-known that RNA-seq reads are biased .... [get paper from Liz/Wilfred]
 	
@@ -127,21 +170,34 @@ However, this estimate has various issues.
 
 %	The goal of these adjustments is not to arrive at perfect estimates, but rather to alleviate the influence of systematic biases as much as possible. 
 	
-	%TODO: could add that even then reads across a gene aren't evenly distributed
+	%: could add that even then reads across a gene aren't evenly distributed
 	% see https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-290
+	
+	\item Reads may be misattributed. The motivation for analyzing splicing at a level of alternative splicing events is that full gene isoforms can not reliably be quantified given the currently available short RNA-seq read lengths. However, this issue may still occur at the splicing event level when two splicing variants of an exon share a junction. This is illustrated in Figure %TODO.
+	This misattribution of a read can only be corrected by considering circumstantial evidence, similar to 2.; for instance, read counts on the exon junction may give evidence regarding to which splicing event the read at the shared junction belongs.
 \end{enumerate}
 
-
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/visualizations-misattribution.pdf} 
+	\caption{The read across the exon-exon boundaries may be attributed to isoform 1 or isoform 2. Consequently, it may also be attributed to the first or second splicing variant of the middle exon.}
+	\label{fig:misattribution}
+\end{figure}
 
 %hopefully was able to demonstrate that this estimate is problematic and may easily be unreliable.
 Due to these issues relating to the uncertainty, to not making use of all of the available evidence and to integrating reads across multiple samples, this estimate is problematic.
 
-Even if all of these issues are perfectly handled, the resulting estimate would still not be perfect. For instance, the 'solutions' for 1. and 4. implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript aren't equally distributed due to duplicate reads or GC-content bias.%TODO[ list of biases duplicate reads, stacking reads]. 
-% TODO: stashed for now; https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-290
+\subsubsection{A word of caution} \label{subsubsec:caution}
+Even if all of these issues are perfectly handled, the resulting estimate would still not be perfect. For instance, the 'solutions' for 1. and 4. implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript aren't equally distributed due to biases relating to GC-content \cite{gccontentbias}, gene length and dinucleotide frequencies \cite{rnaseqbiascorrection}.
+% or transcript length bias. 
+ % there is also transcript length bias, see https://biologydirect.biomedcentral.com/articles/10.1186/1745-6150-4-14
+ % but this bias is more about biases between transcripts rather than within a given transcript
+ %[ list of biases duplicate reads, stacking reads]. 
+% : stashed for now; https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-290
 % https://www.the-scientist.com/news-opinion/technical-bias-widespread-in-rna-seq-datasets-66766#:~:text=Love%20adds%20that%20there%20are,length%2Drelated%20biases%20as%20well.
 % https://emea.support.illumina.com/bulletins/2017/04/considerations-for-rna-seq-read-length-and-coverage-.html#:~:text=Experiments%20looking%20for%20a%20more,for%20mRNA%2Fwhole%20transcriptome%20sequencing.
 %https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8
-These biases are not easily quantifiable and even already adjusted read estimates (e.g. for gene expressiveness) are still biased. \\
+These biases are not easily quantifiable and can never be perfectly corrected for.\\
+%and even already adjusted read estimates (e.g. for gene expressiveness) are still biased. \\
 In more general terms, the data on which the estimate is based is inherently very noisy and this will always lead to downstream effects independent of the preprocessing method used. The question is not whether the resulting estimate is still biased, but rather if the effect of systematic biases influencing it can be alleviated enough for the estimate to be useful. 
 %TODO i basicallly say here that unbiasing rna-seq data will never be possible - opinions from wil and liz? lol
 \subsubsection{Dataset based on HEXEvent}
@@ -149,8 +205,8 @@ In more general terms, the data on which the estimate is based is inherently ver
 The HEXEvent database already provides PSI estimates based on EST counts for each exon and facilitates standard filtering steps (e.g. only select cassette exons). 
 The baseline paper \cite{dsc} takes HEXEvent as a starting point and generates three different datasets respectively only containing cassette exons, exons with an alternative 3' splice and exons with an alternative 5' splice site. Each of these datasets also contains constitutive exons. To account for the biases inherent in EST data, it applies multiple filtering steps such as requiring a minimum number of supporting ESTs and only using exons which display a single type of alternative splicing. They make the resulting datasets publicly available and we use the dataset containing cassette exons for direct comparability. 
 
-
-However, it should be noted that HEXEvent uses the critized naive estimation method for PSI, i.e., they estimate PSI as $PSI = \frac{\#IR}{(\#IR+\#ER)}$. They don't explicitly account for any of the four main critique points discussed above. The EST data available by UCSC is based on many different tissues which may lead to the derived alternative splicing behaviour being an average of the splicing behaviour of many tissues which never occurs in practice. %distort view, confuse nice words here
+% TODO: color models
+However, it should be noted that HEXEvent uses the critized naive estimation method for PSI, i.e., they estimate PSI as $PSI = \frac{\#IR}{(\#IR+\#ER)}$. They don't explicitly account for any of the four main critique points discussed above. The EST data available by UCSC is based on many different tissues which may lead to the derived alternative splicing behaviour being an average of the splicing behaviour of many tissues which never occurs in any singular tissue. %distort view, confuse nice words here
 Therefore, care should be taken when drawing conclusions based on the PSI estimates of this dataset. 
 
 \subsubsection{Our PSI estimation implementation} \label{subsubsec:implementedpsiestimation}
@@ -170,9 +226,11 @@ Fundamentally, our estimation relies on the formula $PSI = \frac{\#IR}{(\#IR+\#E
 Using the normalized \#IR and \#ER of all exons and junctions remaining after filtering, we then compute PSI: $PSI = \frac{\#IR^{TPM}_{norm}}{(\#IR^{TPM}_{norm}+\#ER^{TPM}_{norm})}$. 
 
 This estimate fails to take into account the information contained in non-junction reads, as we simply don't have access to them.
-This estimate also does not aggregate the information from multiple biological samples, although we took care to choose the donor with tissue samples from brain cortex, cerebellum and heart, whose total read count was the highest. The initial dataset contained roughly 10 million total exon-exon junction read count for each tissue distributed over roughly 330,000 unique junctions. More statistics about this dataset, and the others, are given in Section \ref{subsec:datasetstatistics}. 
+This estimate also does not aggregate the information from multiple biological samples, although we took care to choose the donor with tissue samples from brain cortex, cerebellum and heart, whose total read count was the highest. 
+Reads may also be misattributed in our estimation as described in 5. of \ref{subsubsec:naivepsi}.
+%The initial dataset contained roughly 10 million total exon-exon junction read count for each tissue distributed over roughly 330,000 unique junctions. More statistics about this dataset, and the others, are given in Section \ref{subsec:datasetstatistics}. 
 
-After the PSI values have been obtained as described above, we apply the final sample processing steps as described in \ref{subsec:finalsampleprocessing}.
+%After the PSI values have been obtained as described above, we apply the final sample processing steps as described in \ref{subsec:finalsampleprocessing}.
 
 %\begin{figure}
 %	\centering%\includegraphics[width=0.7\textwidth]{../visualizations/suppa_cross_model_roc_auc_comparison.png} 

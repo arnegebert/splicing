@@ -229,7 +229,6 @@ class AttnBiLSTM(BaseModel):
                  seq_length=140, fc_dropout=0.5, attn_mode='heads', use_lens=True):
         super().__init__()
         assert conv_size % 2 == 1, "Only uneven convolution sizes allowed because uneven conv same padding support implemented"
-        assert attn_mode in ['heads', 'no_query', 'single_head', 'conv', 'heads_no_query']
         self.conv_size = conv_size
         self.attn_dropout = attn_dropout
         self.head_dim = head_dim
@@ -260,10 +259,20 @@ class AttnBiLSTM(BaseModel):
             self.attention = AttentionBlockWithoutQuery(LSTM_dim, attn_dim)
         elif attn_mode == 'heads':
             self.attention = AttentionBlockWithHeads(LSTM_dim, attn_dim, n_heads, head_dim, attn_dropout)
-        elif attn_mode == 'heads_no_query':
-            self.attention = AttentionBlockWithoutQueryWithHeads(LSTM_dim, attn_dim, n_heads, head_dim, attn_dropout)
         elif attn_mode == 'conv':
             self.attention = AttentionBlockWithConv(seq_length, LSTM_dim, attn_dim, conv_size, attn_dropout)
+        elif attn_mode == 'heads_no_query':
+            self.attention = AttentionBlockWithoutQueryWithHeads(LSTM_dim, attn_dim, n_heads, head_dim, attn_dropout)
+        elif attn_mode == 'heads_conv':
+            self.attention = AttentionBlockWithConvWithHeads(seq_length, LSTM_dim, attn_dim, n_heads, head_dim,
+                                                             conv_size, attn_dropout)
+        elif attn_mode == 'conv_no_query':
+            self.attention = AttentionBlockWithoutQueryWithConv(seq_length, LSTM_dim, attn_dim, conv_size, attn_dropout)
+        elif attn_mode == 'heads_conv_no_query':
+            self.attention = AttentionBlockWithoutQueryWithConvWithHeads(seq_length, LSTM_dim, attn_dim, n_heads,
+                                                                         head_dim, conv_size, attn_dropout)
+        else:
+            raise Exception(f'Unrecognized attn_mode argument "{attn_mode}"')
 
         self.fc1 = nn.Linear(self.in_fc, self.dim_fc)
         self.drop_fc = nn.Dropout(self.dropout_prob)
@@ -451,6 +460,73 @@ class AttentionBlockWithConv(BaseModel):
         output = torch.sum(weighted_vals, dim=1)
         return output, attn_weights
 
+
+class AttentionBlockWithConvWithHeads(BaseModel):
+    def __init__(self, seq_len, in_dim, out_dim, n_heads, head_dim, kernel_size, dropout):
+        super().__init__()
+        self.seq_len = seq_len
+        self.out_dim = out_dim
+        self.keys = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
+        self.values = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
+        # I just have one query independent of sequence length
+        self.queries = clones(torch.nn.Linear(1, head_dim), n_heads)
+        self.heads_unifier = torch.nn.Linear(head_dim*n_heads, out_dim)
+        self.n_heads = n_heads
+        self.head_dim = head_dim
+
+        self.drop = torch.nn.Dropout(dropout)
+        self.drop_conv = torch.nn.Dropout2d(0)
+        self.bn_values = torch.nn.BatchNorm1d(head_dim)
+        self.bn_keys = torch.nn.BatchNorm1d(head_dim)
+        self.conv = torch.nn.Conv1d(head_dim, head_dim, kernel_size, padding=kernel_size//2)
+
+    def forward(self, input_seq):
+        batch_size = input_seq.shape[0]
+
+        outputs, attn_ws = [], []
+        for i in range(self.n_heads):
+            values = self.drop(self.values[i](input_seq))
+            values = self.bn_values(values.view(batch_size, self.head_dim, 2*self.seq_len))
+            # apply conv to start sequence
+            values_start = values[:, :, :self.seq_len]
+            values_conv_start = self.conv(values_start)
+            values_conv_start = values_conv_start.view(batch_size, self.seq_len, self.head_dim)
+            # apply conv to end sequence
+            values_end = values[:, :, self.seq_len:]
+            values_conv_end = self.conv(values_end)
+            values_conv_end = values_conv_end.view(batch_size, self.seq_len, self.head_dim)
+            # combine both start and end sequence again
+            values_conv = torch.cat((values_conv_start, values_conv_end), dim=1)
+            values_conv = self.drop_conv(values_conv)
+
+            keys = self.drop(self.keys[i](input_seq))
+            keys = self.bn_keys(keys.view(batch_size, self.head_dim, 2*self.seq_len))
+            # apply conv to start sequence
+            keys_start = keys[:, :, :self.seq_len]
+            keys_conv_start = self.conv(keys_start)
+            keys_conv_start = keys_conv_start.view(batch_size, self.seq_len, self.head_dim)
+            # apply conv to end sequence
+            keys_end = keys[:, :, self.seq_len:]
+            keys_conv_end = self.conv(keys_end)
+            keys_conv_end = keys_conv_end.view(batch_size, self.seq_len, self.head_dim)
+            # combine both start and end sequence again
+            keys_conv = torch.cat((keys_conv_start, keys_conv_end), dim=1)
+            keys_conv = self.drop_conv(keys_conv)
+
+            # since same query for each element in batch
+            queries = self.queries[i].weight.repeat(batch_size, 1, 1)
+            unnorm_weights = torch.bmm(keys_conv, queries)
+            attn_w = torch.softmax(unnorm_weights, dim=1)
+            weighted_vals = values_conv * attn_w
+            output = torch.sum(weighted_vals, dim=1)
+            outputs.append(output)
+            attn_ws.append(attn_w)
+
+        zs = torch.cat(outputs, dim=1)
+        attn_ws = torch.cat(attn_ws, dim=1)
+        z = self.heads_unifier(zs)
+        return z, attn_ws
+
 class AttentionBlockWithoutQueryWithConv(BaseModel):
     def __init__(self, seq_len, in_dim, out_dim, kernel_size, dropout):
         super().__init__()
@@ -459,7 +535,7 @@ class AttentionBlockWithoutQueryWithConv(BaseModel):
         self.key = torch.nn.Linear(in_dim, 1)
         self.value = torch.nn.Linear(in_dim, out_dim)
         self.drop = torch.nn.Dropout(dropout)
-        self.drop_conv = torch.nn.Dropout2d(0.3)
+        self.drop_conv = torch.nn.Dropout2d(0)
         self.bn_values = torch.nn.BatchNorm1d(out_dim)
         self.conv = torch.nn.Conv1d(out_dim, out_dim, kernel_size, padding=kernel_size//2)
 
@@ -485,6 +561,53 @@ class AttentionBlockWithoutQueryWithConv(BaseModel):
         weighted_vals = values_conv * attn_weights
         output = torch.sum(weighted_vals, dim=1)
         return output, attn_weights
+
+class AttentionBlockWithoutQueryWithConvWithHeads(BaseModel):
+    def __init__(self, seq_len, in_dim, out_dim, n_heads, head_dim, kernel_size, dropout):
+        super().__init__()
+        self.seq_len = seq_len
+        self.out_dim = out_dim
+        self.keys = clones(torch.nn.Linear(in_dim, 1), n_heads)
+        self.values = clones(torch.nn.Linear(in_dim, head_dim), n_heads)
+        self.heads_unifier = torch.nn.Linear(head_dim * n_heads, out_dim)
+        self.n_heads = n_heads
+        self.head_dim = head_dim
+
+        self.drop = torch.nn.Dropout(dropout)
+        self.drop_conv = torch.nn.Dropout2d(0)
+        self.bn_values = torch.nn.BatchNorm1d(head_dim)
+        self.conv = torch.nn.Conv1d(head_dim, head_dim, kernel_size, padding=kernel_size//2)
+
+    def forward(self, input_seq):
+        outputs, attn_ws = [], []
+        for i in range(self.n_heads):
+            values = self.drop(self.values[i](input_seq))
+            values = self.bn_values(values.view(-1, self.head_dim, self.seq_len*2))
+            # apply conv to start sequence
+            values_start = values[:, :, :self.seq_len]
+            values_conv_start = self.conv(values_start)
+            values_conv_start = values_conv_start.view(-1, self.seq_len, self.head_dim)
+            # apply conv to end sequence
+            values_end = values[:, :, self.seq_len:]
+            values_conv_end = self.conv(values_end)
+            values_conv_end = values_conv_end.view(-1, self.seq_len, self.head_dim)
+            # combine both start and end sequence again
+            values_conv = torch.cat((values_conv_start, values_conv_end), dim=1)
+            values_conv = self.drop_conv(values_conv)
+
+            keys = self.drop(self.keys[i](input_seq))
+
+            unnorm_weights = keys
+            attn_w = torch.softmax(unnorm_weights, dim=1)
+            weighted_vals = values_conv * attn_w
+            output = torch.sum(weighted_vals, dim=1)
+            outputs.append(output)
+            attn_ws.append(attn_w)
+
+        zs = torch.cat(outputs, dim=1)
+        attn_ws = torch.cat(attn_ws, dim=1)
+        z = self.heads_unifier(zs)
+        return z, attn_ws
 
 # overfitting AS FUCK
 class MLP(BaseModel):
