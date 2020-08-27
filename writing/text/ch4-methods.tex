@@ -1,23 +1,23 @@
 \chapter{\label{ch:4-methods}Methods}
 
-%TODO: short name for attention model 
-Attentive recurrent splicing code
-ARSC
-Recurrent attentive splicing code
-RASC -- same as royal army service corps, favorite is this one
-For brevity, we baptise our architecture as RASC or recurrent attentive splicing code. 
-Multi-headed attentive Bi-Recurrent splicing code
-MABiRSC -- meh
-MARSC
-SCAR
-ASCR
-%TODO -> write functions that generates prermutations and go from there
+%TODO: short name for attention model  -- PRALINE current favorite
+%Attentive recurrent splicing code
+%ARSC
+%Recurrent attentive splicing code
+%RASC -- same as royal army service corps, favorite is this one
+%For brevity, we baptise our architecture as RASC or recurrent attentive splicing code. 
+%Multi-headed attentive Bi-Recurrent splicing code
+%MABiRSC -- meh
+%MARSC
+%SCAR
+%ASCR
+
 
 
 This chapter introduces the primary data sources, describes how these were used to obtain the training datasets, and presents the used models. It also gives implementation details regarding processing steps, model implementation, and model training.
 In this work, we focus on the splicing prediction of cassette exons. Previous work indicates that advances in predicting one type of alternative splicing behaviour via Machine Learning methods also translates to advances in prediction for other types. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryotes. Thus, for reasons of practicality we choose cassette exons as the type of alternative splicing, we will focus on.
 \section{Datasets}\label{sec:datasets}
-Three primary sources for genomic data were used in this study: the Human Exon splicing events (HEXEvent) database \cite{hexevent}, data from the Genotype-Tissue Expression (GTEx) project \cite{gtex} and data from the Human Induced Pluripotent Stem Cell Initiative (HipSci) \cite{hipsci}. Except for the HEXEvent database, none of these primary sources directly report the PSI values of exons or junctions. The processing done to estimate the PSI value-based from the primary sources is described in section [estimating PSI]. All of the data sources required further processing (e.g. extraction of corresponding nucleotide sequences) to obtain the final samples which are the input for the models. These further processing steps are described in section \ref{subsec:finalsampleprocessing}.
+Three primary sources for genomic data were used in this study: the Human Exon splicing events (HEXEvent) database \cite{hexevent}, data from the Genotype-Tissue Expression (GTEx) project \cite{gtex} and data from the Human Induced Pluripotent Stem Cell Initiative (HipSci) \cite{hipsci}. Except for the HEXEvent database, none of these primary sources directly report the PSI values of exons or junctions. The processing done to estimate the PSI value-based from the primary sources is described in section \ref{subsec:psiestimation}. All of the data sources required further processing (e.g. extraction of corresponding nucleotide sequences) to obtain the final samples which are the input for the models. These further processing steps are described in section \ref{subsec:finalsampleprocessing}.
 
 
 \subsection{HEXEvent database} \label{subsec:hexevent}
@@ -49,16 +49,19 @@ Processed data which can not be used to identify the donors is publicly availabl
 	\label{fig:ipscprocess}
 \end{figure}
 
-HipSci provides a large, mostly freely-available repository of human induced pluripotent stem cell (iPSC) lines. iPSC cells are mature cells which have been reprogrammed to again become pluripotent (undetermined). Figure \ref{fig:ipscprocess} shows how iPSC cells are obtained. As iPSC cell lines are not directly obtained from human donors, but rather from building a cell culture based on some initial donor cells, the HipSci dataset does not suffer from the data privacy issues which prevented access to the raw RNA-seq reads as in the GTEx data.
+HipSci provides a large, mostly freely-available repository of human induced pluripotent stem cell (iPSC) lines. iPSC cells are mature cells which have been reprogrammed to again become pluripotent (undetermined). This process is visualized in Figure \ref{fig:ipscprocess}. As iPSC cell lines are not directly obtained from human donors, but rather from building a cell culture based on some initial donor cells, the HipSci dataset does not suffer from the data privacy issues which prevented access to the raw RNA-seq reads as in the GTEx data.
 
 
-Over 300 cell lines from over 300 donors along with their RNA-seq reads are publicly available from the HIPSCI portal. From these we selected two groups of roughly 20 biological replicates each:
+Over 300 cell lines from over 300 donors along with their RNA-seq reads are publicly available from the HipSci portal. From these we selected two groups of roughly 20 biological replicates each:
 Neuron cell lines: One group of biological replicates were taken from undifferentiated iPSC cells from donors from which at least two cell lines are available. This allows testing how well the learned features of the model translate when applied to another library of the same tissue type from the same individual.
 iPSC cell lines: One group of 25 biological replicates were taken from iPSC cells differentiated to sensory neuron cells. This allows testing how well the learned features of the model translate when applied to another library of different tissue.
-iPSC background probably here:
-some section about iPSC cells as relevant later on -- might skip all of this:
-The Nobel Prize in Physiology or Medicine of 2012 was awarded to Shinya Yamanaka and Sir John Gurdon "for the discovery that mature cells can be reprogrammed to become pluripotent". Pluripotent cells are cells which can differentiate into other cell types.
-process: take cell samples, then grow cell culture, make them pluripotent and use the pluripotent cells to differentiate into other ones
+For details regarding exactly which cell lines were taken, see \ref{app:hipsci_celllines}.
+%TODO: add details exactly which cell lines were used to the appendix
+
+%iPSC background probably here:
+%some section about iPSC cells as relevant later on -- might skip all of this:
+%The Nobel Prize in Physiology or Medicine of 2012 was awarded to Shinya Yamanaka and Sir John Gurdon "for the discovery that mature cells can be reprogrammed to become pluripotent". Pluripotent cells are cells which can differentiate into other cell types.
+%process: take cell samples, then grow cell culture, make them pluripotent and use the pluripotent cells to differentiate into other ones
 \section{Data processing}\label{sec:dataprocessing}
 \subsection{Estimating PSI} \label{subsec:psiestimation}
 An often used quantitative measure is per cent spliced-in (PSI or $\Psi$).
@@ -191,8 +194,7 @@ After the PSI values have been obtained as described above, we apply the final s
 
 \subsubsection{More sophisticated PSI estimation approaches}
 
-Several approaches have been developed which try to address the issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose the two fast methods SUPPA and MAJIQ. SUPPA and MAJIQ represent two different approaches to PSI estimation: SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. Figure \ref{dataset_creation_process} shows the high-level steps taken when using MAJIQ and SUPPA to create datasets for training.
-
+Several approaches have been developed which try to address the issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose the two fast methods SUPPA and MAJIQ. SUPPA and MAJIQ represent two different approaches to PSI estimation: SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. Figure \ref{fig:dataset_creation_process} shows the high-level steps taken when using MAJIQ and SUPPA to create datasets for training.
 
 
 
@@ -252,8 +254,6 @@ The latest version of MAJIQ available as of July 2020 was used (MAJIQ v2.0).
 \end{figure}
 
 
-%TODO: look into hyperref etc
-
 The naive way of estimating PSI was applied to the GTEx dataset as we had no access to raw RNA-seq reads and couldn't apply SUPPA nor MAJIQ. SUPPA and MAJIQ were applied to the data from the HipSci repository.
 \subsection{Final sample processing} \label{subsec:finalsampleprocessing}
 
@@ -273,17 +273,17 @@ At this point, the datasets have been preprocessed that each sample at least con
 \end{itemize}
 
 Using the chromosome information and the start and end coordinates, a 140 nucleotide window around the start and end coordinates are extracted (see Figure \ref{fig:inputschematic}). Furthermore, if an exon or junction is taken from a negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed and each extracted nucleotides is converted to its reverse complement. This way the models don't have to learn different features for exons or junctions on the + and - strand.
-Samples from the chromosomes X, Y and M were excluded as these are known to show special splicing behaviour. \\
-%TODO: what exact formulation did will / liz use here?
+Samples from the chromosomes X, Y and M were excluded due to the fundamental functional differences between them and the autosomes. \\
 The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine 'A' was encoded as [1 0 0 0], cytosine 'C' as [0 1 0 0], guanine 'G' as [0 0 1 0] and thymine 'T' as [0 0 0 1]. Thus each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encodings.\\
 
-It is commonplace that repetitive sequences are soft-masked as lower case letters in the reference genome. As this has no bearing on alternative splicing, this information was ignored during one-hot encoded.\\
+It is commonplace that repetitive sequences are soft-masked as lower case letters in the reference genome. As this has no known bearing on alternative splicing, this information was ignored during one-hot encoding.\\
 
-% TODO: add motivation for why lens are used as features
+As in previous work \cite{dsc} \cite{flawed4}, we include the exon and intron lengths as input feature. This was motivated by the observation that exon and intron lengths are correlated with splicing behaviour \cite{lengthsref1} \cite{lengthsref2}. In particular, alternatively spliced exons tend to be flanked by longer introns. This may be due to long intronic sequences making it more challenging for the spliceosome to locate the exon or it plainly being more likely that novel exons originate within long introns \cite{bestlengthsref}. 
+
 %In addition to sequence information, the lengths of neighbouring introns or exons, as well as the length of the exon itself, are given as input to the models. Several studies have shown that exon and intron lengths can influence splice-site recognition. [15,34] In addition, previous studies have shown that including the length information dramatically model performance. [DSC] 
 
-Introns are on average one to two orders of magnitudes larger than exons and their relative standard deviation is three times as large as that of exons. To avoid giving features to the network whose magnitude might differ by several orders of magnitude, the intron and exon lengths features were respectively normalized through the mean length and standard deviations of internal exon and introns in the human genome \cite{exonintronlens}. For brevity, these lengths are often referred to as the length features.
-%TODO [maybe but probably not: exon_mean, exon_std, intron_mean, intron_std = 145.42, 198.0, 5340., 17000.]
+Introns are on average one to two orders of magnitudes larger than exons and their relative standard deviation is three times as large as that of exons. To avoid giving features to the network whose magnitude might differ by several orders of magnitude, the intron and exon lengths features were respectively normalized through the mean length and standard deviations of internal exon ($\mu=145, \sigma=198$) and introns ($\mu=5340, \sigma=17000$) in the human genome (see Appendix \ref{app:lengths}). For brevity, the normalized intron and exon lengths given to the network are often referred to as the length features.
+
 Some of the datasets had a class imbalance issue between constitutive and alternatively spliced samples. For instance, the HexEvent dataset contains roughly times three as many constitutive as alternatively spliced samples. This leads to the issues with models getting stuck in local minima where they just predict the majority class. This was alleviated by including each alternatively spliced sample multiple times until the classes were balanced.
 A single sample input to the model contains two 140x4 one-hot encoded matrixes and three normalized length values. The associated ground truth with each sample is the scalar 1 if the respective exon or junction is constitutive, and 0 if not.
 \subsection{Dataset statistics} \label{subsec:datasetstatistics}
@@ -384,7 +384,15 @@ The models are fundamentally all split into two components. \\
 The first component extracts the most relevant features of the two input sequences of nucleotides. The feature extraction for the sequence around the exon start and the exon end is done independently. Depending on the exact model, the feature extraction is based either on CNNs, BiLSTMs or MLP. The extracted features of this layer are concatenated along with the length features and fed as input to the second component.\\
 The second component uses the extracted features and length features to perform binary classification. This component is implemented as a shallow MLP for all models. It consists of one or two fully connected layers followed by dropout and activation layers. A sigmoid activation function is used after the last layer to obtain an output from [0, 1].
 \subsection{DSC: CNN-based} \label{subsec:dsc}
-% todo: add model graphic from DSC
+
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/dsc_architecture.png} 
+	\caption{
+		Architecture of DSC \cite{dsc}. The one-hot encoded sequences are fed into two convolutional blocks which generate features that are concatenated with the exon and intron lengths and used by a fully-connected layer to obtain the classification output.
+	}
+	\label{fig:dsc_architecture}
+\end{figure}
+
 This model is the same as the Deep Splicing Code (DSC) model from \cite{dsc} and is based on CNNs.
 CNNs are useful when the input data contains spatially invariant patterns. Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
 CNNs are also extremely promising for the application to nucleotide sequences: \\
@@ -433,10 +441,9 @@ If the skip-gram technique is used, only the current word is given as input and 
 There is no clear choice for when which training method should be used for Word2Vec or Doc2Vec as they tend to perform similarly. However, DM (and also CBOW) preserve the order of words and as the order of words (3-mers) is likely significant, we chose DM as pre-training method.
 Pre-processing the human genome like above and using the DM training method, we trained the Doc2Vec model to output a 100-dimensional embedding for each document.
 \begin{figure}
-	\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/d2v_training.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/d2v_training_cropped.png} 
 	\caption{
 		Process by which the 100-dimensional embeddings are obtained \cite{d2vsplicing}: the input sequence is split into overlapping 3-mers which are then fed as input into the pre-trained d2v model. 
-		% TODO modify that only part (b) is visible
 		% TODO add sentence how 100-dimensional embedding is actually obtained
 	}
 	\label{fig:d2vtraining}
@@ -444,7 +451,7 @@ Pre-processing the human genome like above and using the DM training method, we 
 
 
 \begin{figure}
-	\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/w2v_d2v_training_variants.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/w2v_d2v_training_variants.png} 
 	\caption{
 		The four possible training algorithms for w2v and d2v models \cite{d2vsplicing}: (a) CBOW, and (b) skip-gram for w2v, and (c) DM and (d) DBOW for d2v. 
 	}
@@ -540,7 +547,7 @@ Like a Seq2Seq model, an RNN-based Encoder is used to capture a representation o
 One detail not mentioned yet is that the input to the BiLSTM blocks is a dense 4-dimensional embedding of the one-hot encoded sequences. This embedding is the same for each sequence and jointly learned during training. This extra embedding layer is included as previous works \cite{embeddingneeded} have shown that otherwise, the model might suffer from limited generalization performance caused by the sparsity of the one-hot encoded representation. 
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{figures/AttnBiLSTM.pdf} 
+	\centering\includegraphics[width=1\textwidth]{figures/AttnBiLSTM.pdf} 
 	\caption{Architecture of the new attention-based model we introduce. }
 	\label{fig:attnbilstm}
 \end{figure}

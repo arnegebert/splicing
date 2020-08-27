@@ -61,7 +61,7 @@ There are multiple possible explanations for why this is:
 \end{enumerate}
 
 Overall, we conclude that the HEXEvent-based dataset is most likely fundamentally flawed and suffers from confounders.
-These findings have strong implications. It calls into questions the meaningfulness of \cite{dsc}'s results, showing the competitiveness of their model. These findings likely also warrant a critical investigation of any other conclusions drawn from papers based on the HEXEvent database. At the time of writing, the HEXEvent paper is cited 34 times. While most of these citations are just in passing, there are also multiple papers which use a HEXEvent-derived dataset for the training of Machine Learning models such as SVMs \cite{buschhertel}, Random Forests \cite{flawed1}, Decision Trees \cite{flawed2} or AdaBoost-based algorithms \cite{flawed3}. Due to these data quality issue, we try to construct an alternative dataset.
+These findings have strong implications. It calls into questions the meaningfulness of \cite{dsc}'s results, showing the competitiveness of their model. These findings likely also warrant a critical investigation of any other conclusions drawn from papers based on the HEXEvent database. At the time of writing, the HEXEvent paper is cited 34 times. While most of these citations are just in passing, there are also multiple papers which use a HEXEvent-derived dataset for the training of Machine Learning models such as SVMs \cite{buschhertel}, Random Forests \cite{flawed1} \cite{flawed4}, Decision Trees \cite{flawed2} or AdaBoost-based algorithms \cite{flawed3}. Due to these data quality issue, we try to construct an alternative dataset.
 
 
 % many of them, even correlational studies, say that this is a feature, rather than a bug
@@ -224,7 +224,7 @@ Applying the same test of evaluating the models with and without the length feat
 	\end{tabular}
 	\caption{Performance on the dataset based on processing with MAJIQ and iPSC cells differentiated to neurons with and without length features given. Note that the relative performance drop was computed with reference to the baseline AUC value of 0.5.
 	}
-	\label{table:results_hexevent}
+	\label{table:majiq_nolens}
 \end{table}
 
 
