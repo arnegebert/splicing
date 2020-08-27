@@ -35,8 +35,10 @@ def is_outlier(points, thresh=10):
     return modified_z_score > thresh
 
 tpms = []
-with open('../data/brain_cortex_tpm_one_sample.csv') as f:
-    for l in f:
+src = '../../data/gtex_processed/brain_cortex_junction_reads_one_sample.csv'
+with open(src) as f:
+    for i, l in enumerate(f):
+        if i == 4: continue
         # j, start_seq, end_seq, psi = l.split(',')
         gene, tpm = l.split(',')
         tpms.append(float(tpm[:-1]))
@@ -45,20 +47,27 @@ tpms = np.array(tpms)
 length = len(tpms)
 print(f'number of values: {length}')
 print(f'percent of zeroes: {np.sum(tpms == 0) / length}')
-# print(f'percent of psis <0.5: {np.sum(psis<0.5)/length}')
+print(f'percent of tpms <0.5: {np.sum(tpms<0.5)/length}')
+print(f'percent of tpms <5: {np.sum(tpms<5)/length}')
+print(f'percent of tpms <10: {np.sum(tpms<10)/length}')
+print(f'percent of tpms >=10: {np.sum(tpms>=10)/length}')
 # print(f'percent of psis =0.5: {np.sum(psis==0.5)/length}')
 # print(f'percent of psis >0.5: {np.sum(psis>0.5)/length}')
 # print(f'percent of psis =1: {np.sum(psis==1)/length}')
 print(f'mean: {np.mean(tpms)}')
 print(f'median: {np.median(tpms)}')
 
-filtered = tpms[tpms>=10]
-filtered = filtered[filtered<500]
+treshold1 = 0
+treshold2 = 200
+filtered = tpms[tpms>=treshold1]
+filtered = filtered[filtered<treshold2]
 # filtered = filtered[~is_outlier(filtered)]
-
+# https://stackoverflow.com/questions/25319799/plotting-a-histogram-in-pandas-with-very-heavy-tailed-data
+plt.style.use('seaborn')
 plt.hist(filtered)
 plt.xlabel('TPM value')
 plt.ylabel('number of data points')
 plt.show()
 
 print(f'median after filtering: {np.median(filtered)}')
+# looks shit so far -- how do I fix?

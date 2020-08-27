@@ -83,3 +83,41 @@ To get alternatively spliced exon I wanted download a list of their ids from voi
 filter_voila_tsv_from_voila_viewer --- use the list from voila to filter the voila tsv
 extract_seq_majiq_exon_cons.py --- use filtered voila tsv to extract seqs
 
+
+since texstudio sucks:
+ERR177-: 
+5544, 5551, 5552, 5554, 5594. 5595, 5596, 5598, 5600, 5601, 5631, 5634, 5637, 5638, 5640, 5641, 5643, 5644, 5684, 5685, 5686, 5687, 5688, 5689, 5693 25 biological replicates:
+ 
+ERR1775544 - 0 
+ERR1775551 - 1
+ERR1775552 - 2
+ERR1775553 - 3
+ERR1775554 - 4
+---
+ERR1775594 - 5
+ERR1775595 - 6
+ERR1775596 - 7
+ERR1775598 - 8
+ERR1775600 - 9
+ERR1775601 - 10
+--- 
+ERR1775631 - 11
+ERR1775634 - 12
+ERR1775637 - 13
+ERR1775638 - 14
+ERR1775640 - 15
+ERR1775641 - 16
+ERR1775643 - 17
+ERR1775644 - 18
+---
+ERR1775684 - 19
+ERR1775685 - 20
+ERR1775686 - 21
+ERR1775687 - 22
+ERR1775688 - 23
+ERR1775689 - 24
+ERR1775693 - 25
+
+20:
+ERR-:
+914342, 946968, 946976, 946983, 946984, 946990, 946992, 946994, 947011, 1203463, 1243454, 1274914, 1274917, 1724696, 1724699, 1743789, 2039345, 2039336, 2278244 2278245

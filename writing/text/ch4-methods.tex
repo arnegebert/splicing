@@ -41,7 +41,9 @@ Three primary sources for genomic data were used in this study: the Human Exon s
 The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons). It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information. ESTs are short cDNA sequences which have been used in older sequencing techniques (before the advent of modern high-throughput sequencing technologies). 
 
 %TODO perhaps extra section where I discuss the merit of each dataset because right now it doesn't fit
-However, EST are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error prone \cite{hitchhiker}. Additionally, ESTs underpresent less frequent transcripts and as a result often only capture 50 - 65\% of an organism's genes \cite{estunderrepresenttransripts}. Thus, great care has been taken to account for these systematic biases when working with EST data.
+Some issues with ESTs which therefore also affect HEXEvent are worth highlighting. EST are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error prone \cite{hitchhiker}. Additionally, ESTs underpresent less frequent transcripts and as a result often only capture 50 - 65\% of an organism's genes \cite{estunderrepresenttransripts}. Thus, these biases may also have an adverse effect on the HEXEvent database's data quality.
+
+%Thus, great care needs taken to account for these systematic biases when working with EST data.
 %It was chosen as a data source for direct comparability with the baseline paper \cite{dsc}.
 
 %EST underrepresent rare transcripts and often only account for 60\% of an organism's genes, yep 50-65\%
@@ -54,7 +56,8 @@ However, EST are based on only a single sequencing pass and especially bases at 
 \subsection{GTEx} \label{subsec:gtex}
 The GTEx project provides the most comprehensive database for tissue-specific gene expression and regulation available to-date; containing over 17000 samples from nearly 1000 human donors. The sequencing data was obtained using mainly molecular assay-based techniques like Whole Genome Genotyping (WGS), Whole Exome Sequencing (WES) and RNA-Seq. Samples were taken from up to 54 different tissue sites. In particular, the tissue samples are also taken from less commonly seen tissue sites such as brain or heart as the GTEx project sources its samples from recently-deceased donors who have donated their body to science. Thus, the GTEx project, and by extension the parts of this thesis relying on GTEx data, was only made possible through the kindness and generosity of donors making their body available for science.
 
-Processed data which can not be used to identify the donors is publicly available on the GTEx portal. To access raw data (e.g. raw RNA-seq reads) and meta-information about the samples one is required to undergo a data access request. It is intended that data access is requested by PIs or leader of research groups for their whole lab and approval of a data access request usually takes upwards of 3 months. The co-collaborators Prof. Wilfred Haerty and Prof. Elizabeth Tunbridge have access to the protected part of the GTEx data. However, the scope of projects for which they were granted access does not include this thesis and changing the scope would require undergoing the data access process again. For this reason, we can only use the publicly available part of the GTEx data in this study, in particular the files containing information about exon-exon junction reads.
+Processed data which can not be used to identify the donors is publicly available on the GTEx portal. To access raw data (e.g. raw RNA-seq reads) and meta-information about the samples one is required to undergo a data access request. It is intended that data access is requested by PIs or leader of research groups for their whole lab and approval of a data access request usually takes upwards of 3 months. The co-collaborators Prof. Wilfred Haerty and Prof. Elizabeth Tunbridge have access to the protected part of the GTEx data. However, the scope of projects for which they were granted access does not include this thesis and changing the scope would require undergoing the data access process again. For this reason, we can only use the publicly available part of the GTEx data in this study, in particular the files containing information about exon-exon junction reads. 
+
 %using gtex:
 %'We strongly recommend the use of TPM (Transcripts Per Million), because is normalized for gene length first, and then for sequencing depth. This allows a direct comparison between samples' https://github.com/comprna/SUPPA/wiki/SUPPA2-tutorial
 %good site: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000424.v8.p2
@@ -76,7 +79,7 @@ HipSci provides a large repository of human induced pluripotent stem cell (iPSC)
 Concretely, over 300 cell lines from over 300 donors along with sequencing information based on RNA-seq is publicly available from the HipSci portal. From these we selected two different groups of cell lines:
 \begin{itemize}
 
-	\item the first group contains 25 biological replicates (that is, samples from different cell lines developed under the same conditions) of sensory neuron cell lines. These cell lines were obtained by differentiating iPSC cells to sensory neuron cells.
+	\item the first group contains 25 biological replicates (that is, samples from different cell lines developed under the same conditions) of sensory neuron cell lines \cite{ipscneurons}. These cell lines were obtained by differentiating iPSC cells to sensory neuron cells.
 	\item the second group contains 20 biological replicates of iPSC cell lines which weren't differentiated to any other cell type. Here care was taken to choose donors from whom at least two different iPSC cell lines were developed.
 	
 %	iPSC cell lines: the second group of 20 biological replicates were taken from skin-tissue based iPSC cells which weren't differentiated to any other tissue. Here care was taken to choose donors from whom at least two different iPSC cell lines were developed. This allows us to test how well the learned features of the model generalize when applied to another library of the same tissue type from the same individual.
@@ -98,7 +101,7 @@ Selecting the samples in this way, enables us to test cross-condition performanc
 %of samples of we chose the samples from the second group so that we would have different at least one pair of samples from the 
 %Cell-lines from two different tissue types were taken, toas this will allows us to test how well 
 
-The appendix contains detailed information about exactly which samples available from the HipSci portal were chosen \ref{app:hipsci_celllines}.
+The appendix contains the ENA Accession Numbers of the chosen samples \ref{app:hipsci_celllines}.
 %TODO: add details exactly which cell lines were used to the appendix
 
 %iPSC background probably here:
@@ -173,7 +176,7 @@ However, this estimate also has various issues:
 	%: could add that even then reads across a gene aren't evenly distributed
 	% see https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-290
 	
-	\item Reads may be misattributed. The motivation for analyzing splicing at a level of alternative splicing events is that full gene isoforms can not reliably be quantified given the currently available short RNA-seq read lengths. However, this issue may still occur at the splicing event level when two splicing variants of an exon share a junction. This is illustrated in Figure %TODO.
+	\item Reads may be misattributed. The motivation for analyzing splicing at a level of alternative splicing events is that full gene isoforms can not reliably be quantified given the currently available short RNA-seq read lengths. However, this issue may still occur at the splicing event level when two splicing variants of an exon share a junction. This is illustrated in Figure \ref{fig:misattribution}.
 	This misattribution of a read can only be corrected by considering circumstantial evidence, similar to 2.; for instance, read counts on the exon junction may give evidence regarding to which splicing event the read at the shared junction belongs.
 \end{enumerate}
 
@@ -184,7 +187,7 @@ However, this estimate also has various issues:
 \end{figure}
 
 %hopefully was able to demonstrate that this estimate is problematic and may easily be unreliable.
-Due to these issues relating to the uncertainty, to not making use of all of the available evidence and to integrating reads across multiple samples, this estimate is problematic.
+Due to these issues relating to calibrating for uncertainty, to not making use of all of the available evidence, to integrating reads across multiple samples and misattributing reads, this estimate is problematic.
 
 \subsubsection{A word of caution} \label{subsubsec:caution}
 Even if all of these issues are perfectly handled, the resulting estimate would still not be perfect. For instance, the 'solutions' for 1. and 4. implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript aren't equally distributed due to biases relating to GC-content \cite{gccontentbias}, gene length and dinucleotide frequencies \cite{rnaseqbiascorrection}.
@@ -210,8 +213,7 @@ However, it should be noted that HEXEvent uses the critized naive estimation met
 Therefore, care should be taken when drawing conclusions based on the PSI estimates of this dataset. 
 
 \subsubsection{Our PSI estimation implementation} \label{subsubsec:implementedpsiestimation}
-%TODO think about multiple assignment issue
-To obtain a PSI estimate based on the publicly accessible exon-exon junction read counts of the GTEx project, we implement our own PSI estimation method. 
+To obtain a PSI estimate based on the publicly accessible exon-exon junction read counts of the GTEx project, we implement our own PSI estimation method. We are not able to use the published methods we introduce below, as they require access to the raw RNA-seq reads which we don't have access to due to data privacy regulations.
 
 GTEx gives access to data based on sample from different tissue. It also gives access to information about which sample types were taken from which donor (in an anonymized way). We use this information to find a donor from whom brain cortex tissue, cerebellum tissue and heart tissue samples were taken. For each sample we derive two datasets: one exon-centric dataset which only consists of cassette exons and one intron-centric dataset which consists of every junction found in the original data.
 We obtain six datasets in total.
@@ -231,7 +233,7 @@ Reads may also be misattributed in our estimation as described in 5. of \ref{sub
 %The initial dataset contained roughly 10 million total exon-exon junction read count for each tissue distributed over roughly 330,000 unique junctions. More statistics about this dataset, and the others, are given in Section \ref{subsec:datasetstatistics}. 
 
 %After the PSI values have been obtained as described above, we apply the final sample processing steps as described in \ref{subsec:finalsampleprocessing}.
-
+%TODO tpm value histogram
 %\begin{figure}
 %	\centering%\includegraphics[width=0.7\textwidth]{../visualizations/suppa_cross_model_roc_auc_comparison.png} 
 %	\caption{%TODO tpm value histogram
@@ -245,7 +247,7 @@ Reads may also be misattributed in our estimation as described in 5. of \ref{sub
 % TODO: mention junction datasets
 % potentially even more details; eg how you use this heuristic of checking the 10 samples past the current one
 % todo add details such as exact name of individuals used and number of reads
-% bezi1, bezi2, lexy2 and sample number 1 with ERR number .... 
+% TODO add this information in appendix bezi1, bezi2, lexy2 and sample number 1 with ERR number .... 
 
 
 
@@ -278,8 +280,9 @@ The latest version of SUPPA available as of July 2020 was used (SUPPA v2.3).
 \subsubsection{MAJIQ}\label{subsubsec:majiq}
 Modeling Alternative Junction Inclusion Quantification (MAJIQ) builds up a splice graph \cite{majiq2} which contains exon as vertices and junctions as edges. An edge is added between two vertices if a transcript isoform is found in which they share a junction (that is if the exons are neighbours and everything between them has been spliced out).
 Constitutive exons are vertices with two incoming edges.
-Vertices which have more than 3 incoming edges are denoted as local splicing variations (LSV). Due to this problem formulation, MAJIQ can model more complex splicing variations than skipped exons, alternative 3' splice sites, and alternative 5' splice sites. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping.
-
+Vertices which have more than 3 incoming edges are denoted as local splicing variations (LSV). Due to this problem formulation, MAJIQ can model more complex splicing variations than skipped exons, alternative 3' splice sites, and alternative 5' splice sites. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping. The only issue from \ref{subsubsec:naivepsi} MAJIQ doesn't account for is 2.: the integration of the information from non-junction reads. 
+% looked at mjiq paper; it only seems to look at juntons
+% hadnles eg point 5. by only looking at junctions until the very end and modelling eg cassette exons as two distinct LSVs --- ie each junction will have its own PSI
 
 
 \begin{figure}
@@ -294,8 +297,7 @@ Vertices which have more than 3 incoming edges are denoted as local splicing var
 	\label{fig:splice_graph}
 \end{figure}
 
-\textbf{Using MAJIQ:} MAJIQ requires sequence files in bam format (along with the index in bai format) and an annotation DB in gff3 format. The bam format is a format for aligned RNA-seq reads. 
-%todo [what does index file do?]
+\textbf{Using MAJIQ:} MAJIQ requires sequence files in bam format (along with their respective index files) and an annotation DB in gff3 format. The bam format is a format for aligned RNA-seq reads. 
 To this end, the raw reads from each sample were uploaded to the bioinformatics data processing platform Galaxy \cite{galaxy} from the European Nucleotide Archive (ENA). For each sample, the raw reads in FASTQ format were then mapped to the RNA using STAR \cite{star}. STAR produces the required bam and bai format files as output.
 
 The required gff3 file used is human GRCh38 release 13.
@@ -332,9 +334,9 @@ At this point, the datasets have been preprocessed that each sample at least con
 
 Using the chromosome information and the start and end coordinates, a 140 nucleotide window around the start and end coordinates are extracted (see Figure \ref{fig:inputschematic}). Furthermore, if an exon or junction is taken from a negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed and each extracted nucleotides is converted to its reverse complement. This way the models don't have to learn different features for exons or junctions on the + and - strand.
 Samples from the chromosomes X, Y and M were excluded due to the fundamental functional differences between them and the autosomes. \\
-The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine 'A' was encoded as [1 0 0 0], cytosine 'C' as [0 1 0 0], guanine 'G' as [0 0 1 0] and thymine 'T' as [0 0 0 1]. Thus each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encodings.\\
+The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine 'A' was encoded as [1 0 0 0], cytosine 'C' as [0 1 0 0], guanine 'G' as [0 0 1 0] and thymine 'T' as [0 0 0 1]. Thus each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encodings.
 
-It is commonplace that repetitive sequences are soft-masked as lower case letters in the reference genome. As this has no known bearing on alternative splicing, this information was ignored during one-hot encoding.\\
+It is commonplace that repetitive sequences are soft-masked as lower case letters in the reference genome. As this has no known bearing on alternative splicing, this information was ignored during one-hot encoding.
 
 As in previous work \cite{dsc} \cite{flawed4}, we include the exon and intron lengths as input feature. This was motivated by the observation that exon and intron lengths are correlated with splicing behaviour \cite{lengthsref1} \cite{lengthsref2}. In particular, alternatively spliced exons tend to be flanked by longer introns. This may be due to long intronic sequences making it more challenging for the spliceosome to locate the exon or it plainly being more likely that novel exons originate within long introns \cite{bestlengthsref}. 
 
@@ -342,11 +344,13 @@ As in previous work \cite{dsc} \cite{flawed4}, we include the exon and intron le
 
 Introns are on average one to two orders of magnitudes larger than exons and their relative standard deviation is three times as large as that of exons. To avoid giving features to the network whose magnitude might differ by several orders of magnitude, the intron and exon lengths features were respectively normalized through the mean length and standard deviations of internal exon ($\mu=145, \sigma=198$) and introns ($\mu=5340, \sigma=17000$) in the human genome (see Appendix \ref{app:lengths}). For brevity, the normalized intron and exon lengths given to the network are often referred to as the length features.
 
-Some of the datasets had a class imbalance issue between constitutive and alternatively spliced samples. For instance, the HexEvent dataset contains roughly times three as many constitutive as alternatively spliced samples. This leads to the issues with models getting stuck in local minima where they just predict the majority class. This was alleviated by including each alternatively spliced sample multiple times until the classes were balanced.
+In some of the datasets the number of constitutive and non-constitutive samples are not very evenly divided. For instance, the HexEvent dataset contains roughly times three as many constitutive as alternatively spliced samples. This leads to the issues with models getting stuck in local minima where they just predict the majority class. This was alleviated by including each alternatively spliced sample multiple times until the classes were balanced.
+
 A single sample input to the model contains two 140x4 one-hot encoded matrixes and three normalized length values. The associated ground truth with each sample is the scalar 1 if the respective exon or junction is constitutive, and 0 if not.
 \subsection{Dataset statistics} \label{subsec:datasetstatistics}
 
 %TODO: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
+% TODO add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads
 further analysis postponed until I ran experiments again and decided for which datasets I will show results 
 
 %hexevent:
@@ -421,6 +425,9 @@ further analysis postponed until I ran experiments again and decided for which d
 %some analysis of the numbers, e.g. junction datasets way larger
 %probably won't include reconexon/junction dataset
 
+%gtex number of reads:
+%The initial dataset contained roughly 10 million total exon-exon junction read count for each tissue distributed over roughly 330,000 unique junctions.
+
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/dataset_histograms_seaborn.png} 
 	\caption[test.]{
@@ -429,7 +436,7 @@ further analysis postponed until I ran experiments again and decided for which d
 	\label{fig:datahistograms}
 \end{figure}
 
-Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that in each dataset the distribution of PSI values is bi-modal with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
+Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that in each dataset the distribution of PSI values is bi-modal with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). This aligns well with previous observations that alternatively spliced junctions and exons tend to be very frequently or very rarely included \cite{buschhertel} \cite{bimodalpsivalues1} \cite{bimodalpsivalues2}. However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
 Due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. 
 % liekly false for suppa Another factor is that they only estimate PSI based on one biological sample in contrast to the other datasets. 
 HipSci SUPPA especially has an extremely low number of non-rarely or frequently included exons which is likely an artefact of its coarse, transcription-level estimation method.\\
@@ -544,6 +551,7 @@ During inference, the Doc2Vec model outputs 100-dimensional embeddings for each 
 
 
 \subsection{BiLSTM + Attn} \label{subsec:bilstm}
+% TODO: I AM DRASC
 \subsubsection{Seq2Seq} \label{subsubsec:seq2seq}
 Sequence-to-sequence learning (Seq2seq) \cite{seq2seq} is a general deep learning-based framework for mapping one sequence to another. The first part of the framework is an encoder which processes the input symbol-by-symbol and produces a vector representation for each input symbol. The second part is a decoder which predicts the output sequence symbol-by-symbol based on the representation(s) computed by the decoder. In the first timestep, the decoder uses the last output of the encoder and in all other timesteps, it uses its own output from the previous time step as input. The encoder and decoder are typically RNN-based networks such as LSTMs \cite{lstm} or GRUs \cite{gru}. Encoder and decoder are jointly trained to maximize the probability of correct output. This framework has been particularly successful in machine translation (MT): for instance, Google announced in 2016 that it started using them for their MT \cite{googlemt2016}. Figure \ref{fig:encdec} visualizes the working of an encoder-decoder model.
 
@@ -578,6 +586,7 @@ Taking inspiration from the successful application and improved interpretability
 \subsubsection{Modification 1: MLP instead of a recurrent decoder}
 As the name implies, models based on the Seq2seq framework take a sequence as input and give a sequence as output. This is achieved via using a recurrent decoder which outputs symbols until it outputs an <EOS> (end-of-sentence, e.g. a '.') token (in the case for MT, similar for other domains). However, in our case, the output will always be a single scalar: the classification of the exon as constitutive or alternatively spliced. Thus, we don't require a recurrent decoder and instead use a shallow MLP for classification of the encoder features.
 \subsubsection{Modification 2: Attention with a learned query vector}
+%todo fix this section (with graphics etc) when you have results of new attentio nexperiments
 The most common form of attention (multiplicative or dot-product attention), makes uses of conceptual queries and key-value pairs. A given query is compared to all keys by computing a similarity score between the query and each key via the dot-product. The similarity scores are normalized through the use of a softmax layer. The normalized similarity scores are also commonly called the attention weights; keys similar to the query are weighted more. The output of the attention layer for a given query and input sequence is then the weighted vector sum obtained by multiplying each value by the attention weight of its respective key.
 Putting the above intuition into formulas, the (dot-product self-) attention mechanism can be described using the following equations:
 $$Q, K, V = IW^Q, IW^K, IW^V$$
@@ -668,7 +677,7 @@ The shallow MLP used for classification uses a single layer with 128 (?) neurons
 
 \section{Training and implementation details} \label{sec:implementation_details}
 \subsection{Implementation} \label{subsec:implementation_details}
-All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 12 different dataset variants and 4 different models are used, the codebase contains only 2 different data loader and trainer classes.
+All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. It was chosen (over TensorFlow) as the main author already had more experience with PyTorch. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 12 different datasets and 3 different models are used, the codebase contains only 2 different data loader and trainer classes.
 
 
 The structure of the repository was based on the PyTorch Deep Learning Project template available at \url{github.com/victoresque/pytorch-template}. This template provides access to abstract classes for data loaders, trainers and the models themselves. These abstract classes already contain a lot of the implementation-independent code to log results and train and save models. These abstract classes can then be extended with implementation-specific code as e.g. exact data formats. Using this structure avoids the duplication of a lot of boilerplate code.\\

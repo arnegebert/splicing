@@ -137,11 +137,11 @@
 	doi = {10.1101/288845},
 	publisher = {Cold Spring Harbor Laboratory},
 	abstract = {To facilitate precision medicine and neuroscience research, we developed a machine-learning technique that scores the likelihood that a gene, when mutated, will cause a neurological phenotype. We analysed 1126 genes relating to 25 subtypes of Mendelian neurological disease defined by Genomics England (March 2017) together with 154 gene-specific features capturing genetic variation, gene structure and tissue-specific expression and co-expression. We randomly re-sampled genes with no known disease association to develop bootstrapped decision-tree models, which were integrated to generate a decision tree-based ensemble for each disease subtype. Genes generating larger numbers of distinct transcripts and with higher probability of having missense mutations in normal individuals were significantly more likely to cause neurological diseases. Using mouse-mutant phenotypic data we tested the accuracy of gene-phenotype predictions and found that for 88\% of all disease subtypes there was a significant enrichment of relevant phenotypic abnormalities when predicted genes were mutated in mice and in many cases mutations produced specific and matching phenotypes. Furthermore, using only newly identified genes included in the Genomics England November 2017 release, we assessed our gene-phenotype predictions and showed an 8.3 fold enrichment relative to chance for correct predictions. Thus, we demonstrate both the explanatory and predictive power of machine-learning-based models in neurological disease.},
-	URL = {https://www.biorxiv.org/content/early/2018/03/27/288845},
-	eprint = {https://www.biorxiv.org/content/early/2018/03/27/288845.full.pdf},
 	journal = {bioRxiv}
 }
 
+#	URL = {https://www.biorxiv.org/content/early/2018/03/27/288845},
+# eprint = {https://www.biorxiv.org/content/early/2018/03/27/288845.full.pdf},
 @INPROCEEDINGS{flawed3,
 	author={L. {Li} and Q. {Peng} and A. {Shakoor} and T. {Zhong} and S. {Sun} and X. {Wang}},
 	booktitle={2014 IEEE International Conference on Information and Automation (ICIA)}, 
@@ -208,10 +208,11 @@
 	publisher = {National Academy of Sciences},
 	abstract = {The exon/intron architecture of genes determines whether components of the spliceosome recognize splice sites across the intron or across the exon. Using in vitro splicing assays, we demonstrate that splice-site recognition across introns ceases when intron size is between 200 and 250 nucleotides. Beyond this threshold, splice sites are recognized across the exon. Splice-site recognition across the intron is significantly more efficient than splice-site recognition across the exon, resulting in enhanced inclusion of exons with weak splice sites. Thus, intron size can profoundly influence the likelihood that an exon is constitutively or alternatively spliced. An EST-based alternative-splicing database was used to determine whether the exon/intron architecture influences the probability of alternative splicing in the Drosophila and human genomes. Drosophila exons flanked by long introns display an up to 90-fold-higher probability of being alternatively spliced compared with exons flanked by two short introns, demonstrating that the exon/intron architecture in Drosophila is a major determinant in governing the frequency of alternative splicing. Exon skipping is also more likely to occur when exons are flanked by long introns in the human genome. Interestingly, experimental and computational analyses show that the length of the upstream intron is more influential in inducing alternative splicing than is the length of the downstream intron. We conclude that the size and location of the flanking introns control the mechanism of splice-site recognition and influence the frequency and the type of alternative splicing that a pre-mRNA transcript undergoes.},
 	issn = {0027-8424},
-	URL = {https://www.pnas.org/content/102/45/16176},
-	eprint = {https://www.pnas.org/content/102/45/16176.full.pdf},
 	journal = {Proceedings of the National Academy of Sciences}
 }
+
+#	URL = {https://www.pnas.org/content/102/45/16176},
+#eprint = {https://www.pnas.org/content/102/45/16176.full.pdf},
 
 @article{splicingcausescancer,
 	author = {Xu, Qiang and Lee, Christopher},
@@ -282,9 +283,10 @@
 	abstract = "{Expressed sequence tag (EST) sequencing projects are underway for numerous organisms, generating millions of short, single-pass nucleotide sequence reads, accumulating in EST databases. Extensive computational strategies have been developed to organize and analyse both small- and large-scale EST data for gene discovery, transcript and single nucleotide polymorphism analysis as well as functional annotation of putative gene products.We provide an overview of the significance of ESTs in the genomic era, their properties and the applications of ESTs. Methods adopted for each step of EST analysis by various research groups have been compared. Challenges that lie ahead in organizing and analysing the ever increasing EST data have also been identified.The most appropriate software tools for EST pre-processing, clustering and assembly, database matching and functional annotation have been compiled (available online from http://biolinfo.org/EST). We propose a road map for EST analysis to accelerate the effective analyses of EST data sets. An investigation of EST analysis platforms reveals that they all terminate prior to downstream functional annotation including gene ontologies, motif/pattern analysis and pathway mapping.}",
 	issn = {1467-5463},
 	doi = {10.1093/bib/bbl015},
-	url = {https://doi.org/10.1093/bib/bbl015},
-	eprint = {https://academic.oup.com/bib/article-pdf/8/1/6/735879/bbl015.pdf},
+
 }
+# 	url = {https://doi.org/10.1093/bib/bbl015},
+# eprint = {https://academic.oup.com/bib/article-pdf/8/1/6/735879/bbl015.pdf},
 
 @article{systematicbiasinest,
 	author = {Liu, Donglin and Graber, Joel},
@@ -784,6 +786,56 @@
 	number={},
 	pages={2818-2826},}
 
+
+@article{bimodalpsivalues1,
+	author = {Wu, Jie and Akerman, Martin and Sun, Shuying and McCombie, W. Richard and Krainer, Adrian R. and Zhang, Michael Q.},
+	title = "{SpliceTrap: a method to quantify alternative splicing under single cellular conditions}",
+	journal = {Bioinformatics},
+	volume = {27},
+	number = {21},
+	pages = {3010-3016},
+	year = {2011},
+	month = {09},
+	abstract = "{Motivation: Alternative splicing (AS) is a pre-mRNA maturation process leading to the expression of multiple mRNA variants from the same primary transcript. More than 90\\% of human genes are expressed via AS. Therefore, quantifying the inclusion level of every exon is crucial for generating accurate transcriptomic maps and studying the regulation of AS.Results: Here we introduce SpliceTrap, a method to quantify exon inclusion levels using paired-end RNA-seq data. Unlike other tools, which focus on full-length transcript isoforms, SpliceTrap approaches the expression-level estimation of each exon as an independent Bayesian inference problem. In addition, SpliceTrap can identify major classes of alternative splicing events under a single cellular condition, without requiring a background set of reads to estimate relative splicing changes. We tested SpliceTrap both by simulation and real data analysis, and compared it to state-of-the-art tools for transcript quantification. SpliceTrap demonstrated improved accuracy, robustness and reliability in quantifying exon-inclusion ratios.Conclusions: SpliceTrap is a useful tool to study alternative splicing regulation, especially for accurate quantification of local exon-inclusion ratios from RNA-seq data.Availability and Implementation: SpliceTrap can be implemented online through the CSH Galaxy server http://cancan.cshl.edu/splicetrap and is also available for download and installation at http://rulai.cshl.edu/splicetrap/.Contact:michael.zhang@utdallas.eduSupplementary Information:Supplementary data are available at Bioinformatics online.}",
+	issn = {1367-4803},
+	doi = {10.1093/bioinformatics/btr508},
+	url = {https://doi.org/10.1093/bioinformatics/btr508},
+	eprint = {https://academic.oup.com/bioinformatics/article-pdf/27/21/3010/16900127/btr508.pdf},
+}
+
+@article {ipscneurons,
+	author = {Schwartzentruber, Jeremy and Foskolou, Stefanie and Kilpinen, Helena and Rodrigues, Julia and Alasoo, Kaur and Knights, Andrew J and Patel, Minal and Goncalves, Angela and Ferreira, Rita and Benn, Caroline Louise and Wilbrey, Anna and Bictash, Magda and Impey, Emma and Cao, Lishuang and Lainez, Sergio and Loucif, Alexandre Julien and Whiting, Paul John and , and Gutteridge, Alex and Gaffney, Daniel J},
+	title = {Molecular and functional variation in iPSC-derived sensory neurons},
+	elocation-id = {095943},
+	year = {2017},
+	doi = {10.1101/095943},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {Induced pluripotent stem cells (iPSCs), and cells derived from them, have become key tools to model biological processes and disease mechanisms, particularly in cell types such as neurons that are difficult to access from living donors. Here, we present the first map of regulatory variants in an iPSC-derived cell type. To investigate genetic contributions to human sensory function, we performed 123 differentiations of iPSCs from 103 unique donors to a sensory neuronal fate, and measured gene expression, chromatin accessibility, and neuronal excitability. Compared with primary dorsal root ganglion, where sensory nerves collect near the spinal cord, gene expression was more variable across iPSC-derived neuronal cultures, particularly in genes related to differentiation and nervous system development. Single cell RNA-sequencing revealed that although the majority of cells are neuronal and express the expected marker genes, a substantial fraction have a fibroblast-like expression profile. By applying an allele-specific method we identify 3,778 quantitative trait loci influencing gene expression, 6,318 for chromatin accessibility, and 2,097 for RNA splicing at FDR 10\%. A number of these overlap with common disease associations, and suggest candidate causal variants and target genes. These include known causal variants at SNCA for Parkinson{\textquoteright}s disease and TNFRSF1A for multiple sclerosis, as well as new candidates for migraine, Parkinson{\textquoteright}s disease, and schizophrenia.},
+	URL = {https://www.biorxiv.org/content/early/2017/01/06/095943},
+	eprint = {https://www.biorxiv.org/content/early/2017/01/06/095943.full.pdf},
+	journal = {bioRxiv}
+}
+
+@article{bimodalpsivalues2,
+	author = {Shen, Shihao and Park, Juw Won and Huang, Jian and Dittmar, Kimberly A. and Lu, Zhi-xiang and Zhou, Qing and Carstens, Russ P. and Xing, Yi},
+	title = "{MATS: a Bayesian framework for flexible detection of differential alternative splicing from RNA-Seq data}",
+	journal = {Nucleic Acids Research},
+	volume = {40},
+	number = {8},
+	pages = {e61-e61},
+	year = {2012},
+	month = {01},
+	abstract = "{ Ultra-deep RNA sequencing has become a powerful approach for genome-wide analysis of pre-mRNA alternative splicing. We develop MATS (multivariate analysis of transcript splicing), a Bayesian statistical framework for flexible hypothesis testing of differential alternative splicing patterns on RNA-Seq data. MATS uses a multivariate uniform prior to model the between-sample correlation in exon splicing patterns, and a Markov chain Monte Carlo (MCMC) method coupled with a simulation-based adaptive sampling procedure to calculate the P -value and false discovery rate (FDR) of differential alternative splicing. Importantly, the MATS approach is applicable to almost any type of null hypotheses of interest, providing the flexibility to identify differential alternative splicing events that match a given user-defined pattern. We evaluated the performance of MATS using simulated and real RNA-Seq data sets. In the RNA-Seq analysis of alternative splicing events regulated by the epithelial-specific splicing factor ESRP1, we obtained a high RT–PCR validation rate of 86\\% for differential exon skipping events with a MATS FDR of \\&lt;10\\%. Additionally, over the full list of RT–PCR tested exons, the MATS FDR estimates matched well with the experimental validation rate. Our results demonstrate that MATS is an effective and flexible approach for detecting differential alternative splicing from RNA-Seq data. }",
+	issn = {0305-1048},
+	doi = {10.1093/nar/gkr1291},
+	url = {https://doi.org/10.1093/nar/gkr1291},
+	eprint = {https://academic.oup.com/nar/article-pdf/40/8/e61/25334363/gkr1291.pdf},
+}
+
+
+
+
+
 # ---------------------------------------------------------------------------------------------------
 Citations from initial project essay:
 
@@ -861,10 +913,11 @@ Citations from initial project essay:
 	publisher = {National Academy of Sciences},
 	abstract = {An mRNA fraction coding for hexon polypeptide, the major virion structural protein, was purified by gel electrophoresis from extracts of adenovirus 2-infected cells late in the lytic cycle. The mRNA sequences in this fraction were mapped between 51.7 and 61.3 units on the genome by visualizing RNA.DNA hybrids in the electron microscope. When hybrids of hexon mRNA and single-stranded restriction endonuclease cleavage fragments of viral DNA were visualized in the electron microscope, branched forms were observed in which 160 nucleotides of RNA from the 5' terminus were not hydrogen bonded to the single-stranded DNA. DNA sequences complementary to the RNA sequences in each 5' tail were found by electron microscopy to be located at 17, 20, and 27 units on the same strand as that coding for the body of the hexon mRNA. Thus, four segments of viral RNA may be joined together during the synthesis of mature hexon mRNA. A model is presented for adenovirus late mRNA synthesis that involves multiple splicing during maturation of a larger precursor nuclear RNA.},
 	issn = {0027-8424},
-	URL = {https://www.pnas.org/content/74/8/3171},
-	eprint = {https://www.pnas.org/content/74/8/3171.full.pdf},
+
 	journal = {Proceedings of the National Academy of Sciences}
 }
+#	URL = {https://www.pnas.org/content/74/8/3171},
+# eprint = {https://www.pnas.org/content/74/8/3171.full.pdf},
 
 % 30661751 
 @Article{cell,
