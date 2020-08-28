@@ -62,8 +62,6 @@ Processed data which can not be used to identify the donors is publicly availabl
 %'We strongly recommend the use of TPM (Transcripts Per Million), because is normalized for gene length first, and then for sequencing depth. This allows a direct comparison between samples' https://github.com/comprna/SUPPA/wiki/SUPPA2-tutorial
 %good site: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000424.v8.p2
 \subsection{HipSci} \label{subsec:hipsci}
-%TODO is my interpretation that iPSC cells are differentiated to neurons actually correct? -> perhaps ask in meeting
-% https://www.biorxiv.org/content/10.1101/095943v1 iPSC-derived sensory neurons; http://www.hipsci.org/lines/#/lines/HPSI0114i-eipl_1
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/ipscprocess.png} 
 	\caption[test.]{
@@ -102,7 +100,7 @@ Selecting the samples in this way, enables us to test cross-condition performanc
 %Cell-lines from two different tissue types were taken, toas this will allows us to test how well 
 
 The appendix contains the ENA Accession Numbers of the chosen samples \ref{app:hipsci_celllines}.
-%TODO: add details exactly which cell lines were used to the appendix
+
 
 %iPSC background probably here:
 %some section about iPSC cells as relevant later on -- might skip all of this:
@@ -140,30 +138,32 @@ The advantage of this estimate lies in its simplicity and flexibility. It is qui
 %'deceptively simple'?
 
 However, this estimate also has various issues:
-\begin{enumerate}
+\begin{enumerate}[label=(\alph*)]
 	\item It doesn't account for uncertainty in the estimate. A rarely expressed gene may only experience a few reads of a particular exon leading to a very uncertain estimate. For instance, if we observe 1 IR and 1 ER for exon E1: $PSI_{E1} = \frac{1}{2} = 50\%$. Compare this to E2 where we observed 15 inclusion and 15 exclusion reads: $PSI_{E2} = \frac{15}{30} = 50\%$.\\
-	The estimate of $PSI_E2$ is likely to be more accurate, but this information is not contained in the estimate. Concretely, these two samples would be treated as equally important by the network even though they likely shouldn't.
+	The estimate of $PSI_{E2}$ is likely to be more accurate, but this information is not contained in the estimate. Concretely, these two samples would be treated as equally important by the network even though they likely shouldn't.
 	
-	One further processing step could be to only count exons who experienced at least a certain number of reads. However, assuming this solution is taken, there are additional two aspects worth discussing:
+	To account for this, it is possible to only count exons who experienced at least a certain number of reads. However, raw read counts are very unreliable when not accounting for gene expressiveness: 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the expressiveness of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM). Of these, TPM is usually the most common choice. Therefore, a better solution is likely to only count reads from genes whose TPM is above a certain threshold. \\
+	Note that there is not a principled way to choose this threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and data quantity. In practice, the 'optimal' cutoff threshold will be unknown and vary from dataset to dataset.
+	% TODO reformulate once again to say just take TPM values bitch no cut-off
+%	However, assuming this solution is taken, there are additional two aspects worth discussing:
 %	However, Assuming that one obtains a read count normalized by the gene expressiveness, there are two further aspects worth discussing:
 %	\begin{enumerate}
-%		\item This threshold soluton only alleviates this problem because one needs to account for the expressiveness of each gene: 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the expressiveness of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM). Of these, TPM is usually the most common choice. 
+%		\item 
 %		\item There is not a principled way to choose the cutoff threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and training samples. In practice, the optimal way to choose the cutoff threshold will be unknown and vary from dataset to dataset.
 %	\end{enumerate}
 	% https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
 
-
-	
 	
 	\item Reads which align purely to the flanking constitutive exons are ignored. While these could have occurred in either isoform, they provide latent evidence for whether the cassette exon was included or not. In isoforms where it occurred, the total length of the isoform is longer which means the reads are distributed over a larger area. This leads to a comparatively reduced proportion of reads across the flanking exons when the exon was included and vice versa. The estimate neglects to take this information into account.
 %	This estimate ignores reads that align to the bodies of the flanking constitutive exons, which could have derived from either isoform. Nevertheless, these constitutive reads contain latent information about the splicing of the alternative exon, as higher expression of the exclusion isoform will generally increase the density of reads in the flanking exons relative to the alternative exon, and lower expression of the exclusion isoform will decrease this ratio of densities.
 %	[MISO]
 %	this is the reason why I wanted access to raw RNA-seq reads
-	\item Related to 1), typically multiple samples or biological replicates of a given experiment are available. It is desirable that reads across multiple samples can be integrated to give a more well-adjusted estimate. How to best achieve this is not obvious. Read depths between multiple libraries may vary and this should be accounted for. [possible other issues here and then make this another itemization]
-	\item IR and ER must be normalized for exon length to obtain meaningful results. For a long exon, the majority of reads will be IR because they can be located over a much larger area than the ER who must overlap with the 0-length feature of the splicing junction. This can be accounted for by normalizing for the possible number of start positions for each read population:
+	\item Related to (a), typically multiple samples or biological replicates of a given experiment are available. It is desirable that reads across multiple samples can be integrated to give a more well-adjusted estimate. How to best achieve this is not obvious. Read depths between multiple libraries may vary and this should be accounted for. 
+	%[possible other issues here and then make this another itemization]
+	\item IRs and ERs must be normalized for exon length to obtain meaningful results. For a long exon, the majority of reads will be IRs because they can be located over a much larger area than the ERs who must overlap with the 0-length feature of the splicing junction (see Figure \ref{fig:readlengthnorm}). This can be accounted for by normalizing for the possible number of start positions of each read population \cite{berlinpsi}:
 	$$\#IR_{norm} = \frac{\#IR}{exon\_length + read\_length -1}$$
 	$$\#ER_{norm} = \frac{\#ER}{read\_length - 1}$$
-	%TODO: check out second graphic from berlin paper in more detail
+	% included berlin graphic as favor action over inaction and well I don't think (I hope) I have an excessive amount of graphics yet
 %	Note that this assumes that reads are uniformly distributed across a transcript isoform. It is well-known that RNA-seq reads are biased .... [get paper from Liz/Wilfred]
 	
 	%	thought: this normalization doesn't obviously seem correct to me on second thought. an ER can be found at two junctions, so that would double the number of possible read starts
@@ -177,22 +177,30 @@ However, this estimate also has various issues:
 	% see https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-290
 	
 	\item Reads may be misattributed. The motivation for analyzing splicing at a level of alternative splicing events is that full gene isoforms can not reliably be quantified given the currently available short RNA-seq read lengths. However, this issue may still occur at the splicing event level when two splicing variants of an exon share a junction. This is illustrated in Figure \ref{fig:misattribution}.
-	This misattribution of a read can only be corrected by considering circumstantial evidence, similar to 2.; for instance, read counts on the exon junction may give evidence regarding to which splicing event the read at the shared junction belongs.
+	This misattribution of a read can only be corrected by considering circumstantial evidence, similar to (b); for instance, read counts on the exon junction may give evidence regarding to which splicing event the read at the shared junction belongs.
 \end{enumerate}
+
+
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/read_length_normalization.jpg} 
+	\caption{
+		This graphic showcases the need for read length normalization when estimating PSI \cite{berlinpsi}. An IR (left) can be located anywhere over the exon and around the junction. An ER (right) can only be located where it crosses the exon-exon junction. Thus, any PSI estimation which does not account for this will be biased towards estimating higher PSI values than accurate. 
+}
+	\label{fig:readlengthnorm}
+\end{figure}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/visualizations-misattribution.pdf} 
-	\caption{The read across the exon-exon boundaries may be attributed to isoform 1 or isoform 2. Consequently, it may also be attributed to the first or second splicing variant of the middle exon.}
+	\caption{The read across the exon-exon junction may be attributed to isoform 1 or isoform 2. Consequently, it may also be attributed to the first or second splicing variant of the middle exon.}
 	\label{fig:misattribution}
 \end{figure}
 
-
-
 %hopefully was able to demonstrate that this estimate is problematic and may easily be unreliable.
-Due to these issues relating to calibrating for uncertainty, to not making use of all of the available evidence, to integrating reads across multiple samples and misattributing reads, this estimate is problematic.
+%Due to these issues relating to calibrating for uncertainty, to not making use of all of the available evidence, to integrating reads across multiple samples and misattributing reads, is estimate is problematic.
+Any estimate of PSI that doesn't account for all, or at least the majority of these issues, will likely be very unreliable. 
 
 \subsubsection{A word of caution} \label{subsubsec:caution}
-Even if all of these issues are perfectly handled, the resulting estimate would still not be perfect. For instance, the 'solutions' for 1. and 4. implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript aren't equally distributed due to biases relating to GC-content \cite{gccontentbias}, gene length and dinucleotide frequencies \cite{rnaseqbiascorrection}.
+However, even if all of these issues are perfectly handled, the resulting PSI estimate would still not be perfect. For instance, the 'solutions' for (a) and (d) implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript aren't equally distributed due to biases relating to GC-content \cite{gccontentbias}, gene length and dinucleotide frequencies \cite{rnaseqbiascorrection}.
 % or transcript length bias. 
  % there is also transcript length bias, see https://biologydirect.biomedcentral.com/articles/10.1186/1745-6150-4-14
  % but this bias is more about biases between transcripts rather than within a given transcript
@@ -201,41 +209,44 @@ Even if all of these issues are perfectly handled, the resulting estimate would 
 % https://www.the-scientist.com/news-opinion/technical-bias-widespread-in-rna-seq-datasets-66766#:~:text=Love%20adds%20that%20there%20are,length%2Drelated%20biases%20as%20well.
 % https://emea.support.illumina.com/bulletins/2017/04/considerations-for-rna-seq-read-length-and-coverage-.html#:~:text=Experiments%20looking%20for%20a%20more,for%20mRNA%2Fwhole%20transcriptome%20sequencing.
 %https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8
-These biases are not easily quantifiable and can never be perfectly corrected for.\\
+These biases are not easily quantifiable and can never be perfectly corrected for. Thus, the PSI estimate will always be affected by these biases. \\
 %and even already adjusted read estimates (e.g. for gene expressiveness) are still biased. \\
-In more general terms, the data on which the estimate is based is inherently very noisy and this will always lead to downstream effects independent of the preprocessing method used. The question is not whether the resulting estimate is still biased, but rather if the effect of systematic biases influencing it can be alleviated enough for the estimate to be useful. 
-%TODO i basicallly say here that unbiasing rna-seq data will never be possible - opinions from wil and liz? lol
+In more general terms, the data on which the estimate is based on is biased in multiple complex, dynamically interacting ways and this will always lead to downstream effects independent of the preprocessing method used. The question is not whether the resulting estimate is still biased, but rather if the effect of systematic biases influencing it can be alleviated enough for the estimate to be useful. In this study, we answer this question in an empirical way by testing datasets resulting from four different PSI estimation methods. We now introduce the exact datasets we use and which PSI estimatin method was used to obtain them. 
+%i basicallly say here that unbiasing rna-seq data will never be possible - opinions from wil and liz? lol
 \subsubsection{Dataset based on HEXEvent}
 % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1431573/
 The HEXEvent database already provides PSI estimates based on EST counts for each exon and facilitates standard filtering steps (e.g. only select cassette exons). 
 The baseline paper \cite{dsc} takes HEXEvent as a starting point and generates three different datasets respectively only containing cassette exons, exons with an alternative 3' splice and exons with an alternative 5' splice site. Each of these datasets also contains constitutive exons. To account for the biases inherent in EST data, it applies multiple filtering steps such as requiring a minimum number of supporting ESTs and only using exons which display a single type of alternative splicing. They make the resulting datasets publicly available and we use the dataset containing cassette exons for direct comparability. 
 
 % TODO: color models
-However, it should be noted that HEXEvent uses the critized naive estimation method for PSI, i.e., they estimate PSI as $PSI = \frac{\#IR}{(\#IR+\#ER)}$. They don't explicitly account for any of the four main critique points discussed above. The EST data available by UCSC is based on many different tissues which may lead to the derived alternative splicing behaviour being an average of the splicing behaviour of many tissues which never occurs in any singular tissue. %distort view, confuse nice words here
+However, it should be noted that HEXEvent uses the critized naive estimation method for PSI, i.e., they estimate PSI as $PSI = \frac{\#IR}{(\#IR+\#ER)}$. Except for requiring a minimum number of supporting ESTs, none of the five main critique points above are explicitly accounted for by \cite{dsc}. The EST data available by UCSC is based on many different tissues which may lead to the derived alternative splicing behaviour being an average of the splicing behaviour of many tissues which never occurs in any singular tissue. %distort view, confuse nice words here
 Therefore, care should be taken when drawing conclusions based on the PSI estimates of this dataset. 
 
 \subsubsection{Our PSI estimation implementation} \label{subsubsec:implementedpsiestimation}
-To obtain a PSI estimate based on the publicly accessible exon-exon junction read counts of the GTEx project, we implement our own PSI estimation method. We are not able to use the published methods we introduce below, as they require access to the raw RNA-seq reads which we don't have access to due to data privacy regulations.
+To obtain a PSI estimate based on the publicly accessible exon-exon junction read counts of the GTEx project, we implement our own PSI estimation method. We are not able to use the PSI estimation methods from the literature we introduce below, as they require access to the raw RNA-seq reads which we don't have access to due to data privacy regulations.
 
-GTEx gives access to data based on sample from different tissue. It also gives access to information about which sample types were taken from which donor (in an anonymized way). We use this information to find a donor from whom brain cortex tissue, cerebellum tissue and heart tissue samples were taken. For each sample we derive two datasets: one exon-centric dataset which only consists of cassette exons and one intron-centric dataset which consists of every junction found in the original data.
+GTEx publicly gives access to anonymized information about which sample types were taken from which donor. We use this information to find a donor from whom brain cortex tissue, cerebellum tissue and heart tissue samples were taken. For each tissue sample we derive two datasets: one exon-centric dataset in which we estimate PSI for cassette exons and one intron-centric dataset in which we estimate PSI for junctions. 
+% would give more details about how cassette exons / junctions are selected in the respective datasetes here
 We obtain six datasets in total.
 
-Fundamentally, our estimation relies on the formula $PSI = \frac{\#IR}{(\#IR+\#ER)}$. However, before computing PSI, we also apply the following filtering and normalization steps:
-%\begin{itemize}
-%	\item cassette exons which are shorter than 25 nt and introns which are shorter than 80 nt are excluded. Exon and intron of these lengths constitute less than 1\% of exons and introns in total and are usually caused by sequencing errors \cite{dsc}.
-%	\item GTEx provides access to TPM values for each gene from a sample. Adressing point 1. from \ref{subsubsec:naivepsi}, we obtain the TPM-adjusted read counts via $\#IR^{TPM} = \frac{\#IR\}{TPM}$ and $\#ER^{TPM} = \frac{\#ER\}{TPM}$. To address spurious reads from lowly-transcribed genes having a disproportionate impact, we only count reads from genes whose TPM is larger than 10. This is by far the most stringent filtering method we apply, leading to about two-thirds of genes being filtered. This cut-off was chosen so aggressively as data quality is paramount. More details are given in Figure %\ref{fig:tpm_distribution}.
-%	\item Adressing point 4. about IRs naturally being more common than ER from \ref{subsubsec:naivepsi}, we estimate the read length of the RNA-seq reads to be 150 on average \cite{gtex_read_length} and apply the proposed normalization method: $\#IR^{TPM}_{norm} = \frac{\#IR^{TPM}}{(exon length + 149)}$ and $\#ER^{TPM}_{norm} = \frac{\#ER^{TPM}}{149}$.
-%\end{itemize}
+Fundamentally, our PSI estimation relies on the formula $PSI = \frac{\#IR}{(\#IR+\#ER)}$. However, before computing PSI, we also apply the following filtering and normalization steps:
+\begin{itemize}
+	\item Cassette exons which are shorter than 25 nt and introns which are shorter than 80 nt are excluded. Exons and introns of these lengths constitute less than 1\% of exons and introns in total and are usually an artifact of sequencing errors \cite{dsc}.
+	\item GTEx provides access to TPM values for each gene from a sample. Adressing point (a) from \ref{subsubsec:naivepsi}, we obtain the TPM-adjusted read counts via $\#IR^{TPM} = \frac{\#IR}{TPM}$ and $\#ER^{TPM} = \frac{\#ER}{TPM}$. To address spurious reads from lowly-transcribed genes having a disproportionate impact, we only count reads from genes whose TPM is larger than 10. This filters around 84\% of genes which in turn filters around 56\% of the junctions. This is the most stringent filtering step we apply. 
+	
+%	This is by far the most stringent filtering method we apply, leading to about two-thirds of genes being filtered. This cut-off was chosen so aggressively as data quality is paramount. More details are given in Figure %\ref{fig:tpm_distribution}.
+	\item Adressing point (d) about IRs naturally being more common than ER, we estimate the read length of the RNA-seq reads to be 150 on average \cite{gtex_read_length} and apply the proposed normalization method: $\#IR^{TPM}_{norm} = \frac{\#IR^{TPM}}{(exon length + 149)}$ and $\#ER^{TPM}_{norm} = \frac{\#ER^{TPM}}{149}$.
+\end{itemize}
 
 Using the normalized \#IR and \#ER of all exons and junctions remaining after filtering, we then compute PSI: $PSI = \frac{\#IR^{TPM}_{norm}}{(\#IR^{TPM}_{norm}+\#ER^{TPM}_{norm})}$. 
 
-This estimate fails to take into account the information contained in non-junction reads, as we simply don't have access to them.
+Comparing our estimation method to the standards set out by \ref{subsubsec:naivepsi}, this estimate fails to take into account the information contained in non-junction reads, as we simply don't have access to them.
 This estimate also does not aggregate the information from multiple biological samples, although we took care to choose the donor with tissue samples from brain cortex, cerebellum and heart, whose total read count was the highest. 
-Reads may also be misattributed in our estimation as described in 5. of \ref{subsubsec:naivepsi}.
+Reads may also be misattributed in our cassette exon PSI estimation as described in (e). Note that misattribution is not an issue when estimating the PSI of junctions.
 %The initial dataset contained roughly 10 million total exon-exon junction read count for each tissue distributed over roughly 330,000 unique junctions. More statistics about this dataset, and the others, are given in Section \ref{subsec:datasetstatistics}. 
 
 %After the PSI values have been obtained as described above, we apply the final sample processing steps as described in \ref{subsec:finalsampleprocessing}.
-%TODO tpm value histogram
+% tpm value histogram
 %\begin{figure}
 %	\centering%\includegraphics[width=0.7\textwidth]{../visualizations/suppa_cross_model_roc_auc_comparison.png} 
 %	\caption{%TODO tpm value histogram
@@ -246,43 +257,52 @@ Reads may also be misattributed in our estimation as described in 5. of \ref{sub
 %2) Latent information: Say how there is nothing you can do, due to only having access to the junction reads themselves. \\
 %3) Multiple samples: Unclear how to best do this and skipped for now. However, basing estimatin based on the sample with the maximum total amount of reads. \\
 %4) Start pos normalization: Say that you estimate read length to be 150 and do this. \\
-% TODO: mention junction datasets
+%  mention junction datasets
 % potentially even more details; eg how you use this heuristic of checking the 10 samples past the current one
-% todo add details such as exact name of individuals used and number of reads
-% TODO add this information in appendix bezi1, bezi2, lexy2 and sample number 1 with ERR number .... 
+%  add details such as exact name of individuals used and 
 
 
 
 
 \subsubsection{More sophisticated PSI estimation approaches}
 
-Several approaches have been developed which try to address the issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose the two fast methods SUPPA and MAJIQ. SUPPA and MAJIQ represent two different approaches to PSI estimation: SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. Figure \ref{fig:dataset_creation_process} shows the high-level steps taken when using MAJIQ and SUPPA to create datasets for training.
+Several approaches have been developed which try to address the issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose two fast methods, representing different approaches to PSI estimation: SUPPA and MAJIQ. SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. %Figure \ref{fig:dataset_creation_process} shows the high-level steps taken when using SUPPA and MAJIQ to create datasets for training.
 
 
-
-\begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{figures/d2v-Page-3.pdf} 
-	\caption{Data flow when using MAJIQ or SUPPA to create a training dataset. }
-	\label{fig:dataset_creation_process}
-\end{figure}
+% inaccurate as I don't think SUPPA directly takes BAM / kinda unnessessary either way
+%\begin{figure}
+%	\centering\includegraphics[width=0.7\textwidth]{figures/d2v-Page-3.pdf} 
+%	\caption{Data flow when using MAJIQ or SUPPA to create a training dataset. }
+%	\label{fig:dataset_creation_process}
+%\end{figure}
 %isoform-based vs count-based methods
 %	count-based methods = exon based and event-based methods
 \subsubsection{SUPPA}\label{subsubsec:suppa}
-SUPPA2 \cite{suppa2} estimates the PSI value for each alternative splicing event based on transcript abundances. It operates in 2 steps for quantifying the PSI of an alternative splicing event:
+SUPPA \cite{suppa2} estimates the PSI value for each alternative splicing event based on transcript abundances. It operates in 2 steps for quantifying the PSI of an alternative splicing event:
 1) Given an input annotation file in GTF format, it generates the transcript isoforms which count as IR or ER for a given alternative splicing event.
-2) Given the information which transcript count as IR or ER from 1) and how frequently each transcript occurs, it estimates the PSI value via $PSI = \frac{TPM_{IR}}{TPM_{IR} + TPM_{ER}}$. SUPPA2 can integrate the TPM values from multiple samples.
+2) Given the information which transcript count as IR or ER from 1) and how frequently each transcript occurs, it estimates the PSI value via $PSI = \frac{TPM_{IR}}{TPM_{IR} + TPM_{ER}}$. $TPM_{IR}$ and $TPM_{ER}$ respectively refer to the total TPM of transcripts supporting a certain exon being included or excluded. SUPPA can integrate the TPM values from multiple samples.
 %because it is so naive is probably the reason why it performs so badly
 %!perhaps add steps 1/2/3 to this graphic?
 
 
-\textbf{Using SUPPA2:}
-SUPPA2 requires a GTF annotation file and a file quantifying the abundance of each transcript. A GENCODE version 34 annotation file obtained from Ensembl was used as an annotation file. Salmon was used for quantifying the relative abundance of each transcript in TPM. Salmon's [cite] quantification is based on the raw RNA-seq reads in FASTQ format, takes into account experimental attributes and correct for biases commonly observed in RNA-seq data. After extracting the TPM values provided by Salmon into the format required by SUPPA (a tsv-file with one column for the transcript id and one column for the TPM value), SUPPA2 estimates the PSI for each alternative splicing event.
-The latest version of SUPPA available as of July 2020 was used (SUPPA v2.3). 
+\textbf{Using SUPPA:}
+SUPPA requires a GTF annotation file and a file quantifying the abundance of each transcript. A GENCODE version 34 annotation file obtained from Ensembl was used as an annotation file. Salmon \cite{salmon} was used for quantifying the relative abundance of each transcript in TPM. Salmon's quantification is based on the raw RNA-seq reads in FASTQ format, takes into account experimental attributes and corrects for biases commonly observed in RNA-seq data. After extracting the TPM values provided by Salmon into the format required by SUPPA (a tsv-file with one column for the transcript id and one column for the TPM value), SUPPA estimates the PSI for each alternative splicing event.
 %[https://github.com/comprna/SUPPA/releases/tag/v2.3 if I feel like it]
+
+SUPPA operates on at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Of the discussed issues in \ref{subsubsec:naivepsi}, it accounts for 2 of them: 
+
+SUPPA's main competitive advantage for PSI estimation lies in its speed and low memory overhead compared to other methods \cite{suppa} (which it achieves through leveraging fast transcript quantification methods such as Salmon), not necessarily that it achieves the best accuracy. This becomes apparent when judging how well SUPPA addresses the issues we laid out in \ref{subsubsec:naivepsi}: of these adresses it only (c) - the integration of evidence from multiple samples. SUPPA only focuses on alternatively spliced exons and thus we are not able to derive a list of constitutive exons from SUPPA. Since SUPPA operates at the transcript level, it implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Therefore, it remains to be seen whether the estimation of SUPPA is accurate enough for our purposes.
+
+
+% this was taken from the results section
+%in retrorespect, SUPPA was not the best choice for dataset processing. It operates at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Additionally, it does not make it possible to generate a list of non-cassette constitutive exons, therefore roughly halving the size of the training set and the number of samples the model can learn from. Its PSI estimation is very simplistic and doesn't account for multiple of the issues highlighted in \ref{subsec:psiestimation}. 
+
+
+
 \subsubsection{MAJIQ}\label{subsubsec:majiq}
 Modeling Alternative Junction Inclusion Quantification (MAJIQ) builds up a splice graph \cite{majiq2} which contains exon as vertices and junctions as edges. An edge is added between two vertices if a transcript isoform is found in which they share a junction (that is if the exons are neighbours and everything between them has been spliced out).
 Constitutive exons are vertices with two incoming edges.
-Vertices which have more than 3 incoming edges are denoted as local splicing variations (LSV). Due to this problem formulation, MAJIQ can model more complex splicing variations than skipped exons, alternative 3' splice sites, and alternative 5' splice sites. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping. The only issue from \ref{subsubsec:naivepsi} MAJIQ doesn't account for is 2.: the integration of the information from non-junction reads. 
+Vertices which have more than 3 incoming edges are denoted as local splicing variations (LSV). This problem formulation allows MAJIQ to model more complex splicing events (rather than the ones from \ref{fig:altsplicingforms}), although we won't leverage this extra capability here. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\Delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping. The only issue from \ref{subsubsec:naivepsi} MAJIQ doesn't account for is (b): the integration of the information from non-junction reads. Thus, we expect MAJIQ's PSI estimates to be the most accurate of all methods we are testing.
 % looked at mjiq paper; it only seems to look at juntons
 % hadnles eg point 5. by only looking at junctions until the very end and modelling eg cassette exons as two distinct LSVs --- ie each junction will have its own PSI
 
@@ -299,14 +319,13 @@ Vertices which have more than 3 incoming edges are denoted as local splicing var
 	\label{fig:splice_graph}
 \end{figure}
 
-\textbf{Using MAJIQ:} MAJIQ requires sequence files in bam format (along with their respective index files) and an annotation DB in gff3 format. The bam format is a format for aligned RNA-seq reads. 
-To this end, the raw reads from each sample were uploaded to the bioinformatics data processing platform Galaxy \cite{galaxy} from the European Nucleotide Archive (ENA). For each sample, the raw reads in FASTQ format were then mapped to the RNA using STAR \cite{star}. STAR produces the required bam and bai format files as output.
+\textbf{Using MAJIQ:} MAJIQ requires sequence files in bam format (along with their respective index files) and an annotation DB (we used human GRCh38 release 13) in gff3 format. The bam format is a format for aligned RNA-seq reads. 
+To this end, the raw reads from each sample were uploaded to the bioinformatics data processing platform Galaxy \cite{galaxy} from the European Nucleotide Archive (ENA). For each sample, the raw reads in FASTQ format were then mapped to the reference genome GRCh38 using STAR \cite{star}. STAR produces the required bam and bai format files as output.
 
-The required gff3 file used is human GRCh38 release 13.
-MAJIQ use then proceeds in three stages. First MAJIQ Builder takes a configuration file, the gff3 annotation and the bam and bai files of all samples as input and builds up the splicing graph. At this stage, MAJIQ also identifies constitutive exons and optionally dumps them to a file. This option was used.
+MAJIQ use then proceeds in three stages. First MAJIQ Builder takes a configuration file, the gff3 annotation and the bam and bai files of all samples as input and builds up the splicing graph. At this stage, MAJIQ also identifies constitutive exons and optionally saves them to a file. This option was used.
 Secondly, MAJIQ PSI estimates the PSI of the LSV candidates obtained through MAJIQ Builder. MAJIQ PSI improves the accuracy of its PSI estimate by integrating evidence across multiple samples.
-Finally, the obtained LSVs can be visualized using VOILA. VOILA also allows filtering of LSV according to type. See Figure \ref{fig:voilaexample} for an example output of VOILA. For this study, only LSV which denoted exon skipping were used. The filtered LSV along with the constitutive exons obtained from MAJIQ Builder were then used for processing as described in Section \ref{subsec:finalsampleprocessing}.\\
-The latest version of MAJIQ available as of July 2020 was used (MAJIQ v2.0).
+Finally, the obtained LSVs can be visualized using VOILA. See Figure \ref{fig:voilaexample} for an example output of VOILA. VOILA also allows filtering of LSV according to type and we used this to obtain the estimated PSI values of all exon skipping LSVs. The filtered LSV along with the constitutive exons obtained from MAJIQ Builder were then used for processing as described in Section \ref{subsec:finalsampleprocessing}.\\
+%The latest version of MAJIQ available as of July 2020 was used (MAJIQ v2.0).
 
 
 \begin{figure}
@@ -316,7 +335,7 @@ The latest version of MAJIQ available as of July 2020 was used (MAJIQ v2.0).
 \end{figure}
 
 
-The naive way of estimating PSI was applied to the GTEx dataset as we had no access to raw RNA-seq reads and couldn't apply SUPPA nor MAJIQ. SUPPA and MAJIQ were applied to the data from the HipSci repository.
+Our implementation of PSI estimation was applied to the GTEx dataset. SUPPA and MAJIQ were applied to the data from the HipSci repository.
 \subsection{Final sample processing} \label{subsec:finalsampleprocessing}
 
 \begin{figure}
@@ -352,7 +371,7 @@ A single sample input to the model contains two 140x4 one-hot encoded matrixes a
 \subsection{Dataset statistics} \label{subsec:datasetstatistics}
 
 %TODO: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
-% TODO add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads
+% TODO add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
 further analysis postponed until I ran experiments again and decided for which datasets I will show results 
 
 %hexevent:
@@ -680,7 +699,7 @@ The shallow MLP used for classification uses a single layer with 128 (?) neurons
 
 \section{Training and implementation details} \label{sec:implementation_details}
 \subsection{Implementation} \label{subsec:implementation_details}
-All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. It was chosen (over TensorFlow) as the main author already had more experience with PyTorch. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 12 different datasets and 3 different models are used, the codebase contains only 2 different data loader and trainer classes.
+All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. It was chosen (over TensorFlow) as the main author already had more experience with PyTorch. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The latest versions of SUPPA (SUPPA v2.3) and MAJIQ (MAJIQ v2.0) available as of July 2020 were used. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 12 different datasets and 3 different models are used, the codebase contains only 2 different data loader and trainer classes.
 
 
 The structure of the repository was based on the PyTorch Deep Learning Project template available at \url{github.com/victoresque/pytorch-template}. This template provides access to abstract classes for data loaders, trainers and the models themselves. These abstract classes already contain a lot of the implementation-independent code to log results and train and save models. These abstract classes can then be extended with implementation-specific code as e.g. exact data formats. Using this structure avoids the duplication of a lot of boilerplate code.\\

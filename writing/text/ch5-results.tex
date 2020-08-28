@@ -45,7 +45,7 @@ Reimplementation was done piece-wise, that is, first the sequence features were 
 		BiLSTM + Attn & \textbf{0.636} & \textbf{0.904} & 0.663\\
 		\hline
 	\end{tabular}
-	\caption{Performance of the main models on the HEXEvent dataset with and without length features given as AUC. The relative performance improvement (from adding the length features) was computed as $\frac{AUC_{lengths} - AUC{no_lengths}}{AUC_{lengths} - 0.5}$. Computing it this way accounts for the baseline AUC of random guessing being 0.5.
+	\caption{Performance of the main models on the HEXEvent dataset with and without length features given as AUC. The relative performance improvement (from adding the length features) was computed as $\frac{AUC_{lengths} - AUC{no\_lengths}}{AUC_{lengths} - 0.5}$. Computing it this way accounts for the baseline AUC of random guessing being 0.5.
 	}
 	\label{table:results_hexevent}
 \end{table}
@@ -244,7 +244,10 @@ due to training times, probably don't want to run these with cross-validation as
 \end{figure}
 
 - Extremely surprising results; it is better to train a dataset on undifferentiated tissue than training it on differentiated tissue --> def check data processing for this again lol, make sure that I actually shuffle data. this is too weird to be true
-- 
+
+- constitutive exons are shared across all datasets
+- majiq builder builds up initial splice graph using all samples -- some confounding there for sure
+- for this sort of analysis, prediting differential splicing itself would be more apt
 
 cross-tissue comparison here with very low variance across tissues;\\
 seems like learned features are tissue-invariant\\
