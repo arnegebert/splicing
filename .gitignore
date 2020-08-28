@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+writing/bibentries
+
 majiq/bam_not_neuron
 
 salmon/quants
@@ -405,3 +407,4 @@ TSWLatexianTemp*
 
 # expex forward references with \gathertags
 *-tags.tex
+writing/referencescopy.bib
