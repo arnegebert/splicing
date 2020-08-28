@@ -144,7 +144,7 @@ However, this estimate also has various issues:
 	
 	To account for this, it is possible to only count exons who experienced at least a certain number of reads. However, raw read counts are very unreliable when not accounting for gene expressiveness: 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the expressiveness of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM). Of these, TPM is usually the most common choice. Therefore, a better solution is likely to only count reads from genes whose TPM is above a certain threshold. \\
 	Note that there is not a principled way to choose this threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and data quantity. In practice, the 'optimal' cutoff threshold will be unknown and vary from dataset to dataset.
-	% TODO reformulate once again to say just take TPM values bitch no cut-off
+	% reformulate once again to say just take TPM values bitch no cut-off
 %	However, assuming this solution is taken, there are additional two aspects worth discussing:
 %	However, Assuming that one obtains a read count normalized by the gene expressiveness, there are two further aspects worth discussing:
 %	\begin{enumerate}
@@ -218,7 +218,6 @@ In more general terms, the data on which the estimate is based on is biased in m
 The HEXEvent database already provides PSI estimates based on EST counts for each exon and facilitates standard filtering steps (e.g. only select cassette exons). 
 The baseline paper \cite{dsc} takes HEXEvent as a starting point and generates three different datasets respectively only containing cassette exons, exons with an alternative 3' splice and exons with an alternative 5' splice site. Each of these datasets also contains constitutive exons. To account for the biases inherent in EST data, it applies multiple filtering steps such as requiring a minimum number of supporting ESTs and only using exons which display a single type of alternative splicing. They make the resulting datasets publicly available and we use the dataset containing cassette exons for direct comparability. 
 
-% TODO: color models
 However, it should be noted that HEXEvent uses the critized naive estimation method for PSI, i.e., they estimate PSI as $PSI = \frac{\#IR}{(\#IR+\#ER)}$. Except for requiring a minimum number of supporting ESTs, none of the five main critique points above are explicitly accounted for by \cite{dsc}. The EST data available by UCSC is based on many different tissues which may lead to the derived alternative splicing behaviour being an average of the splicing behaviour of many tissues which never occurs in any singular tissue. %distort view, confuse nice words here
 Therefore, care should be taken when drawing conclusions based on the PSI estimates of this dataset. 
 
@@ -308,7 +307,7 @@ Vertices which have more than 3 incoming edges are denoted as local splicing var
 
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{figures/d2v-majiq.pdf} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/visualizations-majiq.pdf} 
 	\caption{Data flow when using MAJIQ to create a training dataset. }
 	\label{fig:majiq_dataset_creation_process}
 \end{figure}
@@ -337,7 +336,7 @@ Finally, the obtained LSVs can be visualized using VOILA. See Figure \ref{fig:vo
 
 Our implementation of PSI estimation was applied to the GTEx dataset. SUPPA and MAJIQ were applied to the data from the HipSci repository.
 \subsection{Final sample processing} \label{subsec:finalsampleprocessing}
-
+% todo here on my go through the methods section
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/input_schematic.png} 
 	\caption[bla.]{Schematic of model input \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. }
@@ -636,7 +635,7 @@ Like a Seq2Seq model, an RNN-based Encoder is used to capture a representation o
 One detail not mentioned yet is that the input to the BiLSTM blocks is a dense 4-dimensional embedding of the one-hot encoded sequences. This embedding is the same for each sequence and jointly learned during training. This extra embedding layer is included as previous works \cite{embeddingneeded} have shown that otherwise, the model might suffer from limited generalization performance caused by the sparsity of the one-hot encoded representation. 
 
 \begin{figure}
-	\centering\includegraphics[width=1\textwidth]{figures/AttnBiLSTM.pdf} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/visualizations-AttnBiLSTM.pdf} 
 	\caption{Architecture of the new attention-based model we introduce. }
 	\label{fig:attnbilstm}
 \end{figure}
