@@ -40,7 +40,7 @@ Three primary sources for genomic data were used in this study: the Human Exon s
 \subsection{HEXEvent database} \label{subsec:hexevent}
 The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons). It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information. ESTs are short cDNA sequences which have been used in older sequencing techniques (before the advent of modern high-throughput sequencing technologies). 
 
-%TODO perhaps extra section where I discuss the merit of each dataset because right now it doesn't fit
+%perhaps extra section where I discuss the merit of each dataset because right now it doesn't fit
 Some issues with ESTs which therefore also affect HEXEvent are worth highlighting. EST are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error prone \cite{hitchhiker}. Additionally, ESTs underpresent less frequent transcripts and as a result often only capture 50 - 65\% of an organism's genes \cite{estunderrepresenttransripts}. Thus, these biases may also have an adverse effect on the HEXEvent database's data quality.
 
 %Thus, great care needs taken to account for these systematic biases when working with EST data.
@@ -336,43 +336,48 @@ Finally, the obtained LSVs can be visualized using VOILA. See Figure \ref{fig:vo
 
 Our implementation of PSI estimation was applied to the GTEx dataset. SUPPA and MAJIQ were applied to the data from the HipSci repository.
 \subsection{Final sample processing} \label{subsec:finalsampleprocessing}
-% todo here on my go through the methods section
+
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/input_schematic.png} 
-	\caption[bla.]{Schematic of model input \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. }
+	\caption[bla.]{Schematic of model input for an exon-centric training sample \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. The input for intron-centric training samples is analogue.}
 	\label{fig:inputschematic}
 \end{figure}
 
-Using the output of the previous preprocessing steps, now either exon-centric or intron-centric samples are created. Exon-centric samples are created when the task of the network is to classify an exon as constitutive or not. Intron-centric samples are created when the task of the network is to classify whether a junction is constitutive or not.
-At this point, the datasets have been preprocessed that each sample at least contains the following:
-
+At this point, the datasets have been preprocessed such that we have the following information for each training sample that we want to create: 
 \begin{itemize}
 	\item chromosome and strand information of the to-be-classified exon or junction,
 	\item start and end coordinates of the exon or junction within a chromosome,
-	\item the lengths of neighbouring introns or exons.
+	\item the lengths of neighbouring introns or exons*\footnote{Due to data limitations, we don't know the length of neighbouring exons when creating intron-centric training samples from GTEx data. In this case, the length of neighbouring exons is set to a constant 0. }.
 \end{itemize}
 
-Using the chromosome information and the start and end coordinates, a 140 nucleotide window around the start and end coordinates are extracted (see Figure \ref{fig:inputschematic}). Furthermore, if an exon or junction is taken from a negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed and each extracted nucleotides is converted to its reverse complement. This way the models don't have to learn different features for exons or junctions on the + and - strand.
-Samples from the chromosomes X, Y and M were excluded due to the fundamental functional differences between them and the autosomes. \\
-The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine 'A' was encoded as [1 0 0 0], cytosine 'C' as [0 1 0 0], guanine 'G' as [0 0 1 0] and thymine 'T' as [0 0 0 1]. Thus each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encodings.
+Using this information, now either exon-centric or intron-centric training samples are created. Exon-centric training samples are created when the task of the network is to classify an exon as constitutive or not. Intron-centric training samples are created when the task of the network is to classify whether a junction is constitutive or not.
+
+
+Using the chromosome information and the start and end coordinates, two 140 nucleotide window around the start and end coordinates were extracted from the human reference genome GRCh38 (see Figure \ref{fig:inputschematic}). Furthermore, if an exon or junction is taken from a negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed and each extracted nucleotide is converted to its reverse complement. This mirrors biology as the spliceosome also observes the exon start and end sites as switched and reverse complemented between the + and - strand. Presumably, this means the models the models don't have to learn different features for exons or junctions on the + and - strand. \\
+Samples from the chromosomes X, Y and M were excluded due to the fundamental functional differences between them and the autosomes (e.g. there only exists one copy of the sex chromosomes).
+
+The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine 'A' is encoded as [1 0 0 0], cytosine 'C' as [0 1 0 0], guanine 'G' as [0 0 1 0] and thymine 'T' as [0 0 0 1]. Thus, each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encoded nucleotides.
 
 It is commonplace that repetitive sequences are soft-masked as lower case letters in the reference genome. As this has no known bearing on alternative splicing, this information was ignored during one-hot encoding.
 
-As in previous work \cite{dsc} \cite{flawed4}, we include the exon and intron lengths as input feature. This was motivated by the observation that exon and intron lengths are correlated with splicing behaviour \cite{lengthsref1} \cite{lengthsref2}. In particular, alternatively spliced exons tend to be flanked by longer introns. This may be due to long intronic sequences making it more challenging for the spliceosome to locate the exon or it plainly being more likely that novel exons originate within long introns \cite{bestlengthsref}. 
+As in previous work \cite{dsc} \cite{flawed4}, we include the lengths of flanking exons or intron and the length of the exon or intron itself as additional input features. For brevity, we often refer to these exon and intron lengths as the length features. The inclusion of the length features is motivated by the observation that exon and intron lengths are correlated with splicing behaviour \cite{lengthsref1} \cite{lengthsref2}. In particular, alternatively spliced exons tend to be flanked by longer introns. This may be due to long intronic sequences making it more challenging for the spliceosome to locate the exon or it plainly being more likely that novel exons originate within long introns \cite{bestlengthsref}. 
 
 %In addition to sequence information, the lengths of neighbouring introns or exons, as well as the length of the exon itself, are given as input to the models. Several studies have shown that exon and intron lengths can influence splice-site recognition. [15,34] In addition, previous studies have shown that including the length information dramatically model performance. [DSC] 
 
-Introns are on average one to two orders of magnitudes larger than exons and their relative standard deviation is three times as large as that of exons. To avoid giving features to the network whose magnitude might differ by several orders of magnitude, the intron and exon lengths features were respectively normalized through the mean length and standard deviations of internal exon ($\mu=145, \sigma=198$) and introns ($\mu=5340, \sigma=17000$) in the human genome. For brevity, the normalized intron and exon lengths given to the network are often referred to as the length features.
+Introns are on average one to two orders of magnitudes larger than exons and their relative standard deviation is three times as large as that of exons. To avoid giving features to the network whose magnitude might differ by several orders of magnitude, the intron and exon lengths features were respectively normalized by the mean length and standard deviations of internal exon ($\mu=145, \sigma=198$) and introns ($\mu=5340, \sigma=17000$) in the human genome \cite{exonintronlens} \cite{bionumbers}. 
 
-In some of the datasets the number of constitutive and non-constitutive samples are not very evenly divided. For instance, the HexEvent dataset contains roughly times three as many constitutive as alternatively spliced samples. This leads to the issues with models getting stuck in local minima where they just predict the majority class. This was alleviated by including each alternatively spliced sample multiple times until the classes were balanced.
+In some of the datasets there are significantly more constitutive, than non-constitutive training samples. For instance, the HexEvent dataset contains roughly three times as many constitutive as alternatively spliced samples. In these cases, we rebalanced the datasets by including each alternatively spliced sample multiple times until the class imbalance was less than two-to-one. 
 
-A single sample input to the model contains two 140x4 one-hot encoded matrixes and three normalized length values. The associated ground truth with each sample is the scalar 1 if the respective exon or junction is constitutive, and 0 if not.
+%This leads to the issues with models getting stuck in local minima where they just predict the majority class. This was alleviated by including each alternatively spliced sample multiple times until the classes were balanced.
+
+The end results is that a single training sample for the model contains two 140x4 one-hot encoded matrixes and three normalized length values. This is the model input. The associated ground truth with each sample is the scalar 1 if the respective exon or junction is constitutive, and 0 if not.
 \subsection{Dataset statistics} \label{subsec:datasetstatistics}
-
+% todo here on my go through the methods section
 %TODO: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
 % TODO add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
 further analysis postponed until I ran experiments again and decided for which datasets I will show results 
 
+i think i propose skipping majiq junction datasets
 %hexevent:
 %Total number of exons: 50918
 %Number of low PSI exons: 39128
@@ -466,27 +471,35 @@ HipSci SUPPA especially has an extremely low number of non-rarely or frequently 
 %SCEPTICAL -- unlikely to include
 
 \section{Models} \label{sec:models}
-The models are fundamentally all split into two components. \\
-The first component extracts the most relevant features of the two input sequences of nucleotides. The feature extraction for the sequence around the exon start and the exon end is done independently. Depending on the exact model, the feature extraction is based either on CNNs, BiLSTMs or MLP. The extracted features of this layer are concatenated along with the length features and fed as input to the second component.\\
-The second component uses the extracted features and length features to perform binary classification. This component is implemented as a shallow MLP for all models. It consists of one or two fully connected layers followed by dropout and activation layers. A sigmoid activation function is used after the last layer to obtain an output from [0, 1].
+All three models are fundamentally split into two components: 
+\begin{enumerate}
+	\item The first component extracts the most relevant features of the two input sequences of nucleotides. The feature extraction for the sequence around the exon start and the exon end is done independently. Depending on the exact model, the feature extraction is based either on CNNs, BiLSTMs or MLP. The extracted features of this layer are concatenated along with the length features and fed as input to the second component.
+	
+	\item The second component uses the extracted features and length features to perform binary classification. This component is implemented as a shallow MLP for all models. It consists of one or two fully connected layers followed by dropout and activation layers. A sigmoid activation function is used after the last layer to obtain an output from [0, 1].
+\end{enumerate}
+
 \subsection{DSC: CNN-based} \label{subsec:dsc}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/dsc_architecture.png} 
 	\caption{
-		Architecture of DSC \cite{dsc}. The one-hot encoded sequences are fed into two convolutional blocks which generate features that are concatenated with the exon and intron lengths and used by a fully-connected layer to obtain the classification output.
+		Architecture of DSC \cite{dsc}. The one-hot encoded sequences are fed into two convolutional blocks which generate features that are concatenated with the exon and intron lengths. The sequence and length features are then used by a fully-connected layer to obtain the classification output.
 	}
 	\label{fig:dsc_architecture}
 \end{figure}
 
 This model is the same as the Deep Splicing Code (DSC) model from \cite{dsc} and is based on CNNs.
-CNNs are useful when the input data contains spatially invariant patterns. Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
-CNNs are also extremely promising for the application to nucleotide sequences: \\
-1) We can expect to find motifs in the input sequence. Motifs are often represented as position weight matrixes (PWMs). The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs.\\
-2) These motifs may be found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence. \\
-Keeping this motivation in mind, the first model extracts features from the two input sequences using CNN-based blocks. A CNN feature extraction block with the same architecture but independently learned weights is used for each input sequence. This is to accommodate the model learning to extract different features from the exon start and exon end sequence. The extracted features are used by a shallow MLP to obtain the final classification. 
+CNNs are useful when the input data contains spatially invariant patterns.  Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
+CNNs are also extremely promising for the application to nucleotide sequences: 
+\begin{itemize}
+	\item We expect to find motifs (nucleotide sequence patterns conjectured to be biologically significant) in the input sequences. Motifs are often represented as position weight matrixes (PWMs). The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs.
+	\item These motifs may be found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence.
+\end{itemize}
 
-Concretely, a CNN block consists of three convolutional layers. The first convolutional layer has a window size of 7 units and 32 filters, the second has a window size of 4 units and 8 filters and the third has a window size of 3 units and 8 filters. Each convolutional layer is followed by a dropout layer with dropout probability 0.2 to reduce overfitting [cite dropout], a ReLU activation layer and a max-pooling layer with stride and window size 2 to extract the most salient features. The hyperparameters for this model were chosen with grid search by \cite{dsc}. As we are dealing with inherently 1-dimensional textual data instead of inherently 2-dimensional image data, 1D convolution layers are used.
+Keeping this motivation in mind, DSC extracts features from the two input sequences using CNN-based blocks. A CNN feature extraction block with the same architecture but independently learned weights is used for each input sequence. This is to accommodate the model learning to extract different features from the exon start and exon end sequence.
+% The extracted features are used by a shallow MLP to obtain the final classification. 
+
+Concretely, each of the two CNN blocks consists of three convolutional layers. The first convolutional layer has a window size of 7 units and 32 filters, the second has a window size of 4 units and 8 filters and the third has a window size of 3 units and 8 filters. Each convolutional layer is followed by a dropout layer with dropout probability 0.2 to reduce overfitting \cite{dropout}, a ReLU activation layer \cite{relu} and a max-pooling layer with stride and window size 2 to extract the most salient features. The hyperparameters for this model were chosen with grid search by \cite{dsc}. As we are dealing with inherently 1-dimensional textual data instead of inherently 2-dimensional image data, 1D convolution layers are used.
 
 
 
