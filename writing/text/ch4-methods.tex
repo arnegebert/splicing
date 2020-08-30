@@ -375,97 +375,69 @@ The end results is that a single training sample for the model contains two 140x
 % todo here on my go through the methods section
 %TODO: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
 % TODO add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
-further analysis postponed until I ran experiments again and decided for which datasets I will show results 
 
-i think i propose skipping majiq junction datasets
-%hexevent:
-%Total number of exons: 50918
-%Number of low PSI exons: 39128
-%Number of high PSI exons: 4952
-%Number of cons exons: 6838
-%gtex exon brain
-%Number of generated training samples: 32682
-%Number of low PSI exons: 15872
-%Number of high PSI exons: 7961
-%Number of cons exons: 8849
-%gtex exon cerebellum
-%Number of generated training samples: 39874
-%Number of low PSI exons: 19355
-%Number of high PSI exons: 6791
-%Number of cons exons: 13728
-%gtex exon heart
-%Number of generated training samples: 20806
-%Number of low PSI exons: 9569
-%Number of high PSI exons: 5216
-%Number of cons exons: 6021
-%gtex junction brain
-%Number of generated training samples: 127908
-%Number of low PSI exons: 58560
-%Number of high PSI exons: 14538
-%Number of cons exons: 54810
-%gtex junction heart
-%Number of generated training samples: 81659
-%Number of low PSI exons: 36354
-%Number of high PSI exons: 9389
-%Number of cons exons: 35916
-%gtex junction cerebellum
-%Number of generated training samples: 161310
-%Number of low PSI exons: 74139
-%Number of high PSI exons: 13151
-%Number of cons exons: 74020
-%gtex reconstruction junc (brain)
-%Number of skipped non-DSC junctions: 71868
-%Number of low PSI junctions: 23943
-%Number of high PSI junctions: 7281
-%Number of cons junctions: 25977
-%Total number of junctions: 57201
-%gtex reconstruction exon (brain)
-%Number of low PSI exons: 3458
-%Number of high PSI exons: 1989
-%Number of cons exons: 23505
-%Total number of exons: 28952
-%hipsci majiq junc (neuron)
-%total: 90627
-%Number of cons junctions: 48163
-%Number of alt juncs: 42464 (from 21232 exons)
-%Number of low PSI exons: 22834
-%Number of high PSI exons: 19630
-%hipsci majiq exon (neuron)
-%total: 44746
-%Number of cons exon: 26394
-%Number of alt exons: 18352
-%Number of low PSI exons: 8201
-%Number of high PSI exons: 10151
-%hipsci suppa exon (neuron)
-%Number of samples: 17863
-%Number of low PSI exons: 9828
-%Number of high PSI exons: 311
-%Number of cons exons: 7724
-%hipsci majiq exon (iPSC)
-%total: 48489
-%Number of cons exon: 27371
-%Number of generated training samples: 21118
-%Number of low PSI exons: 9299
-%Number of high PSI exons: 11819
-%some analysis of the numbers, e.g. junction datasets way larger
-%probably won't include reconexon/junction dataset
+Table \ref{table:datasets} shows the number of obtained training samples in each datasets. Among the exon-centric datasets, the dataset based on HEXEvent contains the most samples, followed by the dataset based on HipSci data processed with MAJIQ, followed by the dataset based on GTEx data and, lastly, followed by the dataset based on HipSci and processing with MAJIQ. The HEXEvent-based and HipSci MAJIQ-based datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. Unlike between samples from neuron and iPSC cell lines, there are significant cross-tissue differences between the number of training samples in GTEx-based datasets: the cerebellum tissue datasets contain roughly twice as many training samples as the heart tissue datasets. This is a result of the cerebellum tissue containing 10,000 highly-expressed whereas the heart sample contains only 5,000 highly expressed genes. Surprisingly, there are 17 million exon-exon junction reads from the heart sample compared to the cerebellum's 8 million exon-exon junction reads. The additional reads from the heart sample are concentrated in a few extremely highly expressed genes (e.g. gene ENSG00000198886 is expressed 1000-times as often as the median highly expressed gene) and while this concentration of reads also appear in the cerebellum tissue, it is less extreme.
+
+The same cross-tissue observations also holds for the intron-centric datasets. The intron-centric datasets contains significantly more training samples than the exon-centric datasets because they are not constrained to cassette exons (which would lead to the expectation that the intron-centric datasets contain roughly twice as many samples as the exon-centric datasets), but contain all non-filtered junctions. 
+% ENSG00000198886 - MT-ND4 - https://www.proteinatlas.org/ENSG00000198886-MT-ND4
+%
+%ENSG00000198899 - MT-ATP6 - https://www.proteinatlas.org/ENSG00000198899-MT-ATP6/tissue - very highly expressed in blood
+%ENSG00000198712 - MT-CO2 - https://www.proteinatlas.org/ENSG00000198712-MT-CO2/tissue - very highly expressed in blood / muscle tissues
+%ENSG00000198804 - MT-CO1 - https://www.proteinatlas.org/ENSG00000198804-MT-CO1/tissue - very high muscle yep
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{l | c c | c c c} 
+		%   \hline
+		\toprule
+		Name & Tissue & Type & Number of samples\\
+		%   \hline
+		\toprule
+		HEXEvent & mixed & exon & 50,918 \\
+		\hline
+		GTEx & brain & exon & 30,466\\
+		GTEx & cerebellum & exon & 37,095\\
+		GTEx & heart & exon & 19,257\\
+		\hline
+		GTEx & brain & intron & 127,908\\
+		GTEx & cerebellum & intron & 161,310\\
+		GTEx & heart & intron & 81,659\\
+		%   \hline
+		\hline
+		%   GTEx HEXEvent Reconstruction & brain & exon & 28,952\\
+		%   \hline
+		HipSci SUPPA & neuron & exon & 17,863 \\
+		HipSci MAJIQ & neuron & exon & 44,746 \\
+		HipSci MAJIQ & iPSC & exon & 48,489 \\
+		%   \hline
+		\hline
+		
+		%   GTEx HEXEvent Reconstruction & brain & junction & 57,201\\
+		%   HipSci MAJIQ & neuron & junction & 90,627 \\
+		%   \hline
+	\end{tabular}
+	\caption{Type, tissue and number of training samples per dataset. Type refers to whether the dataset is intron- or exon-centric.
+	}
+	\label{table:datasets}
+\end{table}
 
 %gtex number of reads:
 %The initial dataset contained roughly 10 million total exon-exon junction read count for each tissue distributed over roughly 330,000 unique junctions.
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/dataset_histograms_seaborn.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/dataset_histograms_seaborn.png} 
 	\caption[test.]{
 		Histograms comparing the exon-centric versions of the four fundamentally different training datasets used. The shown GTEx dataset is based on samples from brain cortex tissue and  the shown HipSci datasets are based on samples from iPSC cells differentiated to neurons. 
 	}
 	\label{fig:datahistograms}
 \end{figure}
 
-Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that in each dataset the distribution of PSI values is bi-modal with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). This aligns well with previous observations that alternatively spliced junctions and exons tend to be very frequently or very rarely included \cite{buschhertel} \cite{bimodalpsivalues1} \cite{bimodalpsivalues2}.
- However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
-Due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. 
+Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that in each dataset the distribution of PSI values is bi-modal with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). This aligns well with previous observations that alternatively spliced junctions and exons tend to be very frequently or very rarely included \cite{buschhertel} \cite{bimodalpsivalues1} \cite{bimodalpsivalues2}.\\
+The lack of non-cassette constitutive exons is visible in theGTEx and HipSci SUPPA-based datasets containing significantly constitutive samples; the other two primary datasets contain roughly three times as many constitutive as non-constitutive samples. \\
+% However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
+%Due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. 
 % liekly false for suppa Another factor is that they only estimate PSI based on one biological sample in contrast to the other datasets. 
-HipSci SUPPA especially has an extremely low number of non-rarely or frequently included exons which is likely an artefact of its coarse, transcription-level estimation method.\\
+In particular, HipSci SUPPA-based dataset contains an extremely low number of non-rarely or frequently included exons (only ~1\%) which is likely an artefact of its coarse, transcription-level estimation method.\\
 %The relatively low number of non-constitutive exon samples in the HEXEvent dataset is likely influenced by the ESTs coming from a mix of biological samples from different tissues. Among many tissues, there are likely few tissues that contain some exons
 %should also hold for constitutive exons; so rarely exons constitutive, so more with middle psi values
 %SCEPTICAL -- unlikely to include
@@ -655,6 +627,29 @@ One detail not mentioned yet is that the input to the BiLSTM blocks is a dense 4
 
 \subsection{Alternative implementations of attention} \label{subsec:alternative_attention}
 In the following, we introduce multiple extensions which were attempted which didn't lead to improved results. For most of these, initial results clearly showed that the results weren't improved by using them. As such, we didn't test these extensions more extensively than initial experiments because we felt the initial results were already instructive enough and no further investigation was warranted. Thus, the analysis of the results won't be as extensive as for the extensions which worked.
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{| c c c | c c | c} 
+		\hline
+		%   & configuration & & performance & \\
+		heads & no query & conv & $\mu$ & $\sigma$ \\
+		\hline
+		0 & 0 & 0 & 0.832 & 0.025 \\
+		0 & 0 & 1 & 0.860 & 0.021 \\
+		0 & 1 & 0 & 0.851 & 0.013 \\
+		0 & 1 & 1 & 0.818 & 0.019 \\
+		1 & 0 & 0 & \textbf{0.865} & 0.011 \\
+		1 & 0 & 1 & 0.824 & \textbf{0.010} \\
+		1 & 1 & 0 & 0.852 & 0.017 \\
+		1 & 1 & 1 & 0.846 & 0.017 \\
+		\hline
+	\end{tabular}
+	\caption{Results of evaluating the extensions to the Attention mechanism given as AUC. heads = multiple attention heads were used, no query = no conceptual query vector was used, conv = an additional convolution operation was applied to the key and value matrices. 0 codes for the extension not being used, 1 codes for the extension being used.
+	}
+	\label{table:attn_gridsearch}
+\end{table}
+
 \subsubsection{No query} \label{subsubsec:noquery}
 As the query matrix ${Q}^*$ is already the same independent of the exact input sequence, it could be possible to drop it and compute the attention weights sorely based on the key matrix K.
 This is possible by learning a key weight matrix $W^{K^*} \in \mathcal{R}^{in \times 1}$ and computing attention as:

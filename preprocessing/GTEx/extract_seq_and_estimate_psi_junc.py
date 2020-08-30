@@ -13,7 +13,7 @@ parser.add_argument('--tissue', type=str, default='', metavar='tissue',
 args = parser.parse_args()
 
 startt = timer()
-tissue = 'cerebellum' if not args.tissue else args.tissue
+tissue = 'heart' if not args.tissue else args.tissue
 
 assert tissue in ['brain', 'cerebellum', 'heart']
 data_path = '../../data'
@@ -32,6 +32,7 @@ save_to_low = f'gtex_processed/junc/{tissue}/low.npy'
 save_to_high = f'gtex_processed/junc/{tissue}/high.npy'
 save_to_cons = f'gtex_processed/junc/{tissue}/cons.npy'
 
+total_reads = 0
 print('-'*40)
 print(f'Processing tissue type: {tissue}')
 print('-'*40)
@@ -113,6 +114,7 @@ with open(path_filtered_reads) as f:
         junction = line[0].split('_')
         start, end = int(junction[1]), int(junction[2])
         read_count = int(line[1])
+        total_reads += read_count
         gene = line[2]
         try:
             read_chrom = int(junction[0].replace('chr', ''))
@@ -265,15 +267,12 @@ std_len = np.std(l1_lens)
 print(f'Average length of l1: {avg_len}')
 print(f'Standard deviation of l1: {std_len}')
 
-np.save(f'{data_path}/{save_to_low}', low_exons)
-np.save(f'{data_path}/{save_to_high}', high_exons)
-np.save(f'{data_path}/{save_to_cons}', cons_exons)
+print(f'SAVING COMMENTED OUT ATM')
+# np.save(f'{data_path}/{save_to_low}', low_exons)
+# np.save(f'{data_path}/{save_to_high}', high_exons)
+# np.save(f'{data_path}/{save_to_cons}', cons_exons)
 
-# with open(f'{data_path}/{save_to}', 'w') as f:
-#     f.write(f'{avg_len},{std_len}\n')
-#     print('Beginning to write estimated PSIs and extracted sequences')
-#     for junction, (start_seq, end_seq, psi) in seqs_psis.items():
-#         f.write(f'{junction},{start_seq},{end_seq},{psi}\n')
+print(f'Total reads: {total_reads}')
 
 print('Processing finished')
 endt = timer()
