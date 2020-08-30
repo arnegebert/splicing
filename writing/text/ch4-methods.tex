@@ -319,7 +319,7 @@ Vertices which have more than 3 incoming edges are denoted as local splicing var
 \end{figure}
 
 \textbf{Using MAJIQ:} MAJIQ requires sequence files in bam format (along with their respective index files) and an annotation DB (we used human GRCh38 release 13) in gff3 format. The bam format is a format for aligned RNA-seq reads. 
-To this end, the raw reads from each sample were uploaded to the bioinformatics data processing platform Galaxy \cite{galaxy} from the European Nucleotide Archive (ENA). For each sample, the raw reads in FASTQ format were then mapped to the reference genome GRCh38 using STAR \cite{star}. STAR produces the required bam and bai format files as output.
+To this end, the raw reads from each sample were uploaded to the bioinformatics data processing platform Galaxy \cite{galaxy} from the European Nucleotide Archive (ENA). For each sample, the raw reads in FASTQ format were then mapped to the reference genome GRCh38 \cite{hg38} using STAR \cite{star}. STAR produces the required bam and bai format files as output.
 
 MAJIQ use then proceeds in three stages. First MAJIQ Builder takes a configuration file, the gff3 annotation and the bam and bai files of all samples as input and builds up the splicing graph. At this stage, MAJIQ also identifies constitutive exons and optionally saves them to a file. This option was used.
 Secondly, MAJIQ PSI estimates the PSI of the LSV candidates obtained through MAJIQ Builder. MAJIQ PSI improves the accuracy of its PSI estimate by integrating evidence across multiple samples.
@@ -372,9 +372,9 @@ In some of the datasets there are significantly more constitutive, than non-cons
 
 The end results is that a single training sample for the model contains two 140x4 one-hot encoded matrixes and three normalized length values. This is the model input. The associated ground truth with each sample is the scalar 1 if the respective exon or junction is constitutive, and 0 if not.
 \subsection{Dataset statistics} \label{subsec:datasetstatistics}
-% todo here on my go through the methods section
-%TODO: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
-% TODO add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
+
+%: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
+% add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
 
 Table \ref{table:datasets} shows the number of obtained training samples in each datasets. Among the exon-centric datasets, the dataset based on HEXEvent contains the most samples, followed by the dataset based on HipSci data processed with MAJIQ, followed by the dataset based on GTEx data and, lastly, followed by the dataset based on HipSci and processing with MAJIQ. The HEXEvent-based and HipSci MAJIQ-based datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. Unlike between samples from neuron and iPSC cell lines, there are significant cross-tissue differences between the number of training samples in GTEx-based datasets: the cerebellum tissue datasets contain roughly twice as many training samples as the heart tissue datasets. This is a result of the cerebellum tissue containing 10,000 highly-expressed whereas the heart sample contains only 5,000 highly expressed genes. Surprisingly, there are 17 million exon-exon junction reads from the heart sample compared to the cerebellum's 8 million exon-exon junction reads. The additional reads from the heart sample are concentrated in a few extremely highly expressed genes (e.g. gene ENSG00000198886 is expressed 1000-times as often as the median highly expressed gene) and while this concentration of reads also appear in the cerebellum tissue, it is less extreme.
 
@@ -437,7 +437,7 @@ The lack of non-cassette constitutive exons is visible in theGTEx and HipSci SUP
 % However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
 %Due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. 
 % liekly false for suppa Another factor is that they only estimate PSI based on one biological sample in contrast to the other datasets. 
-In particular, HipSci SUPPA-based dataset contains an extremely low number of non-rarely or frequently included exons (only ~1\%) which is likely an artefact of its coarse, transcription-level estimation method.\\
+In particular, HipSci SUPPA-based dataset contains an extremely low number of non-rarely or frequently included exons (only ~1\%) which is likely an artefact of its coarse, transcription-level estimation method.
 %The relatively low number of non-constitutive exon samples in the HEXEvent dataset is likely influenced by the ESTs coming from a mix of biological samples from different tissues. Among many tissues, there are likely few tissues that contain some exons
 %should also hold for constitutive exons; so rarely exons constitutive, so more with middle psi values
 %SCEPTICAL -- unlikely to include
@@ -445,7 +445,7 @@ In particular, HipSci SUPPA-based dataset contains an extremely low number of no
 \section{Models} \label{sec:models}
 All three models are fundamentally split into two components: 
 \begin{enumerate}
-	\item The first component extracts the most relevant features of the two input sequences of nucleotides. The feature extraction for the sequence around the exon start and the exon end is done independently. Depending on the exact model, the feature extraction is based either on CNNs, BiLSTMs or MLP. The extracted features of this layer are concatenated along with the length features and fed as input to the second component.
+	\item The first component extracts the most relevant features of the two input sequences of nucleotides.  Depending on the exact model, the feature extraction is based either on CNNs, word embeddings or BiLSTMs and an attention layer. The extracted features are concatenated along with the length features and fed as input to the second component. 
 	
 	\item The second component uses the extracted features and length features to perform binary classification. This component is implemented as a shallow MLP for all models. It consists of one or two fully connected layers followed by dropout and activation layers. A sigmoid activation function is used after the last layer to obtain an output from [0, 1].
 \end{enumerate}
@@ -453,64 +453,72 @@ All three models are fundamentally split into two components:
 \subsection{DSC: CNN-based} \label{subsec:dsc}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/dsc_architecture.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/dsc_architecture.png} 
 	\caption{
 		Architecture of DSC \cite{dsc}. The one-hot encoded sequences are fed into two convolutional blocks which generate features that are concatenated with the exon and intron lengths. The sequence and length features are then used by a fully-connected layer to obtain the classification output.
 	}
 	\label{fig:dsc_architecture}
 \end{figure}
-
-This model is the same as the Deep Splicing Code (DSC) model from \cite{dsc} and is based on CNNs.
+The first model we introduce is the state-of-the-art CNN-based model dubbed Deep Splicing Code (DSC) from \cite{dsc}.
 CNNs are useful when the input data contains spatially invariant patterns.  Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
-CNNs are also extremely promising for the application to nucleotide sequences: 
+CNNs are also promising for the application to genomic data, that is, nucleotide sequences: 
 \begin{itemize}
-	\item We expect to find motifs (nucleotide sequence patterns conjectured to be biologically significant) in the input sequences. Motifs are often represented as position weight matrixes (PWMs). The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs.
-	\item These motifs may be found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence.
+	\item Nucleotide sequences contain motifs (nucleotide sequence patterns conjectured to be biologically significant). Motifs can be represented as matrixes and indeed, they are frequently represented as position weight matrixes (PWMs) with particular weights. The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs.
+	\item Motifs are found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence.
 \end{itemize}
 
 Keeping this motivation in mind, DSC extracts features from the two input sequences using CNN-based blocks. A CNN feature extraction block with the same architecture but independently learned weights is used for each input sequence. This is to accommodate the model learning to extract different features from the exon start and exon end sequence.
 % The extracted features are used by a shallow MLP to obtain the final classification. 
 
-Concretely, each of the two CNN blocks consists of three convolutional layers. The first convolutional layer has a window size of 7 units and 32 filters, the second has a window size of 4 units and 8 filters and the third has a window size of 3 units and 8 filters. Each convolutional layer is followed by a dropout layer with dropout probability 0.2 to reduce overfitting \cite{dropout}, a ReLU activation layer \cite{relu} and a max-pooling layer with stride and window size 2 to extract the most salient features. The hyperparameters for this model were chosen with grid search by \cite{dsc}. As we are dealing with inherently 1-dimensional textual data instead of inherently 2-dimensional image data, 1D convolution layers are used.
+Concretely, each CNN block consists of three convolutional layers. The first convolutional layer has a window size of 7 units and 32 filters, the second has a window size of 4 units and 8 filters and the third has a window size of 3 units and 8 filters. Each convolutional layer is followed by a dropout layer with dropout probability 0.2 to reduce overfitting \cite{dropout}, a ReLU activation layer \cite{relu} and a max-pooling layer with stride and window size 2 to extract the most salient features. The hyperparameters for this model were chosen with grid search by \cite{dsc}. 1D convolution layers are used. 
+%In contrast to images from Computer Vision, sequences from genomics are 1-dimensional, and  
+%As we are dealing with 1-dimensional textual data instead of inherently 2-dimensional image data, 1D convolution layers are used.
 
 
 
 %https://stats.stackexchange.com/questions/288261/why-is-max-pooling-necessary-in-convolutional-neural-networks
 %no one knows why max-pooling works
 
-The extracted features for both genomic sequences are concatenated along with the normalized exon and flanking introns and input to a fully connected layer with 64 neurons. A ReLU activation function, as well as a dropout layer with probability 0.5, is applied to the output of this layer. The final layer takes in the 64 outputs from the previous layer, predicts a single value and is followed by a sigmoid activation layer.
-a word on 1d convolution?
+%The extracted features for both genomic sequences are concatenated along with the normalized exon and flanking introns and input to a fully connected layer with 64 neurons. A ReLU activation function, as well as a dropout layer with probability 0.5, is applied to the output of this layer. The final layer takes in the 64 outputs from the previous layer, predicts a single value and is followed by a sigmoid activation layer.
+
 \subsubsection{Applying NLP techniques to genomic data}
 Like text, genomic data is fundamentally a sequence of characters.
 This makes it possible to apply techniques known from Natural Language Processing (NLP) to genomic data. This is an especially promising area of cross-pollination because of the large strides NLP has been able to make in recent years using deep learning.
-Some of the most important milestones in NLP have been efficient embeddings via word2vec, applying RNNs to text as in seq2seq and extremely powerful and deep Transformers.\\
-In this work, we will test the application of doc2vec (a derivative of word2vec) and seq2seq models to the task of alternative splicing classification. The current state-of-the-art transformer models, albeit very potent, usually require huge datasets in the order of millions of samples which aren't available for this task. While scaling them down might be an interesting avenue of research even heavily scaled-down models might still be over parametrized for the task as it has frequently been shown that very shallow networks (with less than 5 layers) perform best on genomic data. Additionally, our input sequences are very long; generally 140 tokens long. Initial tests showed that this also leads to memory problems when training on only one GPU, as the memory requirements of Transformers grows quadratically with respect to the length of the input sequence, further complicating their application. Due to these considerations, we chose to forego the evaluation of Transformer-based models in this study.
+Some of the most important milestones in NLP have been efficient embeddings via Word2Vec \cite{w2v1} \cite{w2v2}, applying Recurrent Neural Networkss (RNNs) to text as in Sequence-to-Sequence (seq2seq) learning \cite{seq2seq} and leveraging attention as in the extremely powerful and deep Transformer models \cite{allyouneed} \cite{bert}.\\
+In this work, we evaluate the application of Doc2Vec (a derivative of Word2Vec), Seq2Seq models and the attention mechanism to the task of alternative splicing classification. We don't evaluate the current state-of-the-art Transformer models. Albeit very potent, they usually require huge datasets in the order of millions of samples which aren't available for this task. Nonetheless, we do adapt the attention mechanism as known from Transformers for our task. In this way, we feel the evaluated models make use of the most important milestones using deep learning in NLP.
+
+%While scaling down Transformers and then applying is an interesting avenue of research, even heavily scaled-down models might still be over parametrized for the task as it has frequently been shown that very shallow networks (with less than 5 layers) perform best on genomic data \cite{}. Additionally, our input sequences are very long; generally 140 tokens or more. Initial tests showed that this also leads to memory problems when training on only one GPU, as the memory requirements of Transformers grows quadratically with respect to the length of the input sequence, further complicating their application. Due to these considerations, we chose to forego the evaluation of Transformer-based models in this study.
 \subsection{D2V: MLP-based} \label{subsec:d2v}
 %If I want to expand this section:
 %Asgari, E., & Mofrad, M. R. (2015). Continuous distributed representation of biological sequences for deep proteomics and genomics. PloS one, 10(11), e0141287.
 %Contains very good explanations / phrasings
 \subsubsection{Introduction to word embeddings}
-Word2Vec is a neural network-based model from Natural Language Processing (NLP) which provides a continuously distributed (vector) representation for each word within a sentence \cite{w2v1}\cite{w2v2}. The main idea of Word2Vec is that the meaning of a word is characterized by its context and therefore semantically related words will be similarly represented. The classic example is that
+Word2Vec is a neural network-based model which provides a continuously distributed (vector) representation for each word within a sentence \cite{w2v1}\cite{w2v2}. The main idea of Word2Vec is that the meaning of a word is characterized by its context. Additionally, we want the representations of words which occur in similar contexts to be similar. Since each word is represented as a numerical vector, mathematical operations can be applied to these vectors. In practice, Word2Vec recovers semantic relationships such as: 
+%This works extremely well in practice and the representation of semantically related words is often similar. If Word2Vec is trained on a large corpus of text, then often one obtains equations such as 
 
 %Distributed representation has proved one of the most successful approaches in machine learning [6–10]. The main idea in this approach is encoding and storing information about an item within a system through establishing its interactions with other members. [biobvec]
 
 $\vec{King} - \vec{Man} + \vec{Woman} ~= \vec{Queen}$
-when adding the Word2Vec representations of the respective words.
-Doc2Vec is an extension of Word2Vec which can handle variable length texts (such as paragraphs and complete documents) \cite{d2v1} \cite{d2v2}. It returns a fixed-length representation independent of input size.
+when adding the Word2Vec vector representations of the respective words.\\
+Doc2Vec is an extension of Word2Vec which uses the same principles, but can also handle variable length texts (such as paragraphs and complete documents) \cite{d2v1} \cite{d2v2}. It returns a fixed-length representation independent of input size.
 
 \subsubsection{Training}
-To train word2vec or doc2vec a large corpus of unlabelled data is needed. As we are training on genomic data, the largest corpus is the complete genome itself. The complete human reference genome GRCh38 \cite{hg38} was obtained from UCSC \cite{ucsc}.\\ %http://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/
-During training on text data, the corpus is split into documents which are ideally semantically meaningful (like paragraphs). Due to memory limitations and due to corresponding to the average gene size \cite{bionumbers}, we split the genome into sequences of 28,000 nucleotide sequences. However, tests with sequences of length 10,000 showed that this boundary length does not seem to affect model performance in a meaningful way.
+To train Word2Vec or Doc2Vec, a large corpus of unlabelled data is needed. As we are training on genomic data, the largest corpus is the complete genome itself. The complete human reference genome GRCh38 was obtained from UCSC \cite{ucsc}.\\ %http://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/
+During training on text data, the corpus is split into documents which are ideally semantically meaningful (like paragraphs). Due to memory limitations and due to corresponding to the average gene size \cite{bionumbers}, we split the genome into sequences of 28,000 nucleotide sequences. However, tests with sequences of length 10,000 showed that the effect of this document length parameter on performance is negligible. 
+%does not seem to affect model performance in a meaningful way.
 \subsubsection{Using k-mers}\label{subsubsec:kmers}
-Naively applying word2vec or doc2vec to genomic data would mean treating each nucleotide as a token. Drawing the parallel to natural language, this would mean wanting to embed each character in a word. However, a single character or nucleotide (which on top comes from an alphabet of only four characters) does likely not contain enough information by itself. Therefore, it is desirable to embed a k-mer.
-One major difference between text and genomic data is the single-token complexity: a word contains far more information than a single nucleotide.
-Multiple studies have explored this issue and found 3-mers to perform the best. %TODO:[add quotes from IEEE, IEEE itself]
- We follow their recommendation in this work and split each sequence of nucleotides into overlapping 3-mers. Overlapping means that in the case of the sequence 'AACGAT' the resulting overlapping 3-mer sequence is 'AAC', 'ACG', 'CGA' and 'GAT'. Therefore, the 28,000 nucleotides long pre-training sequences are split into overlapping 3-mer sequences (sentences) of length 27,998.
+Naively applying Word2Vec or Doc2Vec to genomic data would mean treating each nucleotide as a word. Drawing the parallel to natural language, this would mean wanting to embed each character in a word. However, a single character or nucleotide (which on top comes from an alphabet of only four characters) is not unique enough and occurs in too many contexts to obtain meaningful representations. Therefore, it is desirable to embed multiple characters or multiple sequences, that is a word or a k-mer. While a sentence can easily be split into words, the split of a nucleotide sequence into k-mers is not as clear-cut: we don't know the functionality of most nucleotides and therefore can't split a sequence into semantically meaningful units.
+Previous studies have explored this issue \cite{kmerlength1} \cite{kmerlength2}, and found that the compromise of splitting each nucleotide sequence into overlapping 3-mers is a good solution. 
+
+%Following this recommendation, we split each sequence of nucleotides into overlapping 3-mers. 
+Overlapping means that in the case of the sequence 'AACGAT' the resulting overlapping 3-mer sequence is 'AAC', 'ACG', 'CGA' and 'GAT'. Following this recommendation, we split the 28,000 nucleotides long pre-training sequences into 27,998 overlapping 3-mers.
 \subsubsection{Pre-training of word embeddings}
-The pre-training for word2vec uses a shallow neural network with an input, hidden and output layer. If the continuous bag-of-words technique (CBOW) is used, all words in a window except the current word are given as input and the target output is the current word. Typical window size is 5. % TODO[WHAT DOES THE HIDDEN LAYER LOOK LIKE? -- could honestly skip this]
-If the skip-gram technique is used, only the current word is given as input and the task is to predict the surrounding words in the window. Doc2Vec works similarly. In the CBOW equivalent called distributed memory (DM), a document identifier (usually just an integer enumerating all documents) is given as additional input. In the skip-gram equivalent distributed bag of words (DBOW), the current word is replaced by the document identifier and the task is to predict all words in the window. All four different training methods are visualized in Figure \ref{fig:w2vd2vtrainingvariants}.\\
+The pre-training for Word2Vec and Doc2Vec uses a shallow neural network with an input, hidden and output layer. During a pre-training epoch, each word is once in the center of a sliding window or context window. One of two techniques is typically used for pre-training: either continuous bag-of-words (CBOW) or skip-gram. If CBOW is used, all words in a window except the current word are given as input and the target output is the current word. % [WHAT DOES THE HIDDEN LAYER LOOK LIKE? -- could honestly skip this]
+If the skip-gram technique is used, only the current word is given as input and the task is to predict the surrounding words in the window. A typical window size is 5  words. 
+%TODO: make sure i am consistent between w2v and W2V
+Doc2Vec works similarly. In the CBOW equivalent called distributed memory (DM), a document identifier (usually just an integer enumerating all documents) is given as additional input. In the skip-gram equivalent distributed bag of words (DBOW), the current word is replaced by the document identifier and the task is to predict all words in the window. All four different training methods are visualized in Figure \ref{fig:w2vd2vtrainingvariants}.\\
 There is no clear choice for when which training method should be used for Word2Vec or Doc2Vec as they tend to perform similarly. However, DM (and also CBOW) preserve the order of words and as the order of words (3-mers) is likely significant, we chose DM as pre-training method.
-Pre-processing the human genome like above and using the DM training method, we trained the Doc2Vec model to output a 100-dimensional embedding for each document.
+Pre-processing the human genome like above and using the DM training method, we trained a Doc2Vec model to output a 100-dimensional embedding for each document.
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/d2v_training_cropped.png} 
 	\caption{
@@ -528,6 +536,11 @@ Pre-processing the human genome like above and using the DM training method, we 
 	}
 	\label{fig:w2vd2vtrainingvariants}
 \end{figure}
+
+\subsubsection{Obtaing the embeddings}
+After pre-training, the embedding for a given word or document is then the value of the hidden cells of the shallow MLP using during pre-training\footnote{In practice, the words in a corpus are one-hot encoded and the value of the hidden layers doesn't need to be computed. Instead, only the learned weights in the n-dimensional column which belong to the one-hot encoded word need to be retrieved, since all other columns will be multipled by 0.}. In the case of 100-dimensional embeddings, this means that the hidden layer contains 100 neurons. The intuition behind this is that the models learned a representation which is helpful for the prediction task the model was trained on. Since the prediction task was either to reconstruct a word or document given its context or vice-versa, the representation for a given word or document should encode its context. Thus, the main idea behind Word2Vec and Doc2Vec, that a word or document is defined by the context in which it occurs and its representation should encode this context, is achieved.
+
+
 
 \subsubsection{Analyzing the obtained embeddings}
 
@@ -549,7 +562,7 @@ During inference, the Doc2Vec model outputs 100-dimensional embeddings for each 
 
 %[discussion of the tsne embeddings here]
 %research on what to write:
-%doc2vec will map words (3-mers) which are used in similar contexts to similar representations
+%Doc2Vec will map words (3-mers) which are used in similar contexts to similar representations
 %wil: codon usage bias; not all encodings of a codon will be used with the same frequency
 %the bias of codon usage at exon boundaries
 %Laurence Hurst paper looks at biases in the first and last 30 nucleotides within an exon
