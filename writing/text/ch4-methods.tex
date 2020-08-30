@@ -451,6 +451,7 @@ All three models are fundamentally split into two components:
 \end{enumerate}
 
 \subsection{DSC: CNN-based} \label{subsec:dsc}
+This model is a reimplementation of the Deep Splicing Code (DSC) from \cite{dsc} and the state-of-the-art model for alternative splicing classification. 
 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/dsc_architecture.png} 
@@ -459,7 +460,7 @@ All three models are fundamentally split into two components:
 	}
 	\label{fig:dsc_architecture}
 \end{figure}
-The first model we introduce is the state-of-the-art CNN-based model dubbed Deep Splicing Code (DSC) from \cite{dsc}.
+DSC uses CNNs for feature extraction. 
 CNNs are useful when the input data contains spatially invariant patterns.  Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
 CNNs are also promising for the application to genomic data, that is, nucleotide sequences: 
 \begin{itemize}
@@ -489,22 +490,30 @@ In this work, we evaluate the application of Doc2Vec (a derivative of Word2Vec),
 
 %While scaling down Transformers and then applying is an interesting avenue of research, even heavily scaled-down models might still be over parametrized for the task as it has frequently been shown that very shallow networks (with less than 5 layers) perform best on genomic data \cite{}. Additionally, our input sequences are very long; generally 140 tokens or more. Initial tests showed that this also leads to memory problems when training on only one GPU, as the memory requirements of Transformers grows quadratically with respect to the length of the input sequence, further complicating their application. Due to these considerations, we chose to forego the evaluation of Transformer-based models in this study.
 \subsection{D2V: MLP-based} \label{subsec:d2v}
+%TODO not sure if I explain window correctly
+This model is a reimplementation of the model used for PSI regression on the mouse genome in \cite{d2vsplicing}. The only architectural difference is that we possibly use a differently-sized MLP for classification, as no details on the MLP size and no publicly available implementation were given. 
 %If I want to expand this section:
 %Asgari, E., & Mofrad, M. R. (2015). Continuous distributed representation of biological sequences for deep proteomics and genomics. PloS one, 10(11), e0141287.
 %Contains very good explanations / phrasings
 \subsubsection{Introduction to word embeddings}
-Word2Vec is a neural network-based model which provides a continuously distributed (vector) representation for each word within a sentence \cite{w2v1}\cite{w2v2}. The main idea of Word2Vec is that the meaning of a word is characterized by its context. Additionally, we want the representations of words which occur in similar contexts to be similar. Since each word is represented as a numerical vector, mathematical operations can be applied to these vectors. In practice, Word2Vec recovers semantic relationships such as: 
+Word2Vec is a neural network-based model which provides a continuously distributed (vector) representation for each word within a sentence \cite{w2v1}\cite{w2v2}. The representation is chosen so that semantically and syntactically similar words have similar representations. The key idea through which Word2Vec achieves this is by representing words based on the context they appear in. To obtain the word representations, a shallow neural network is trained on a large corpus of unlabelled text with a loss which incentivices the model to learn such a representation.
+
+Trained Word2Vec models have been shown to recover semantic and syntactic relationships. Keeping in mind that each word is represented as a numerical vector, the following equation usually holds on trained Word2Vec models: 
+$\vec{King} - \vec{Man} + \vec{Woman} ~= \vec{Queen}$ 
+where $\vec{x}$ represents the vector representation or embedding of word $x$.
+% Since each word is represented as a numerical vector, mathematical operations can be applied to these vectors. In practice, Word2Vec recovers semantic relationships such as: 
 %This works extremely well in practice and the representation of semantically related words is often similar. If Word2Vec is trained on a large corpus of text, then often one obtains equations such as 
 
 %Distributed representation has proved one of the most successful approaches in machine learning [6–10]. The main idea in this approach is encoding and storing information about an item within a system through establishing its interactions with other members. [biobvec]
 
-$\vec{King} - \vec{Man} + \vec{Woman} ~= \vec{Queen}$
-when adding the Word2Vec vector representations of the respective words.\\
-Doc2Vec is an extension of Word2Vec which uses the same principles, but can also handle variable length texts (such as paragraphs and complete documents) \cite{d2v1} \cite{d2v2}. It returns a fixed-length representation independent of input size.
+
+
+Doc2Vec is an extension of Word2Vec which uses the same principles, but can handle variable length texts (such as paragraphs and complete documents) \cite{d2v1} \cite{d2v2}. It returns a fixed-length representation independent of input size.
 
 \subsubsection{Training}
-To train Word2Vec or Doc2Vec, a large corpus of unlabelled data is needed. As we are training on genomic data, the largest corpus is the complete genome itself. The complete human reference genome GRCh38 was obtained from UCSC \cite{ucsc}.\\ %http://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/
-During training on text data, the corpus is split into documents which are ideally semantically meaningful (like paragraphs). Due to memory limitations and due to corresponding to the average gene size \cite{bionumbers}, we split the genome into sequences of 28,000 nucleotide sequences. However, tests with sequences of length 10,000 showed that the effect of this document length parameter on performance is negligible. 
+To train Word2Vec or Doc2Vec, a large corpus of unlabelled data is needed. As we are training on genomic data, the largest corpus is the complete genome itself. To this end, we obtained the complete human reference genome GRCh38 from UCSC \cite{ucsc}.\\ %http://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/
+During training on text data, the corpus is split into documents which are ideally semantically meaningful (like paragraphs). Due to memory limitations and due to corresponding to the average gene size \cite{bionumbers}, we split the genome into sequences of 28,000 nucleotide sequences. Tests with splitting the genome into sequences of length 10,000 that effect of this choice on model performance is negligible. 
+%showed that the effect of this document length parameter on performance is negligible. 
 %does not seem to affect model performance in a meaningful way.
 \subsubsection{Using k-mers}\label{subsubsec:kmers}
 Naively applying Word2Vec or Doc2Vec to genomic data would mean treating each nucleotide as a word. Drawing the parallel to natural language, this would mean wanting to embed each character in a word. However, a single character or nucleotide (which on top comes from an alphabet of only four characters) is not unique enough and occurs in too many contexts to obtain meaningful representations. Therefore, it is desirable to embed multiple characters or multiple sequences, that is a word or a k-mer. While a sentence can easily be split into words, the split of a nucleotide sequence into k-mers is not as clear-cut: we don't know the functionality of most nucleotides and therefore can't split a sequence into semantically meaningful units.
@@ -513,22 +522,23 @@ Previous studies have explored this issue \cite{kmerlength1} \cite{kmerlength2},
 %Following this recommendation, we split each sequence of nucleotides into overlapping 3-mers. 
 Overlapping means that in the case of the sequence 'AACGAT' the resulting overlapping 3-mer sequence is 'AAC', 'ACG', 'CGA' and 'GAT'. Following this recommendation, we split the 28,000 nucleotides long pre-training sequences into 27,998 overlapping 3-mers.
 \subsubsection{Pre-training of word embeddings}
-The pre-training for Word2Vec and Doc2Vec uses a shallow neural network with an input, hidden and output layer. During a pre-training epoch, each word is once in the center of a sliding window or context window. One of two techniques is typically used for pre-training: either continuous bag-of-words (CBOW) or skip-gram. If CBOW is used, all words in a window except the current word are given as input and the target output is the current word. % [WHAT DOES THE HIDDEN LAYER LOOK LIKE? -- could honestly skip this]
+The pre-training for Word2Vec and Doc2Vec uses a shallow neural network with one hidden layer. During a pre-training epoch, each word is once in the center of a sliding window or context window. One of two techniques is typically used for pre-training: either continuous bag-of-words (CBOW) or skip-gram. If CBOW is used, all words in a window except the current word are given as input and the target output is the current word. % [WHAT DOES THE HIDDEN LAYER LOOK LIKE? -- could honestly skip this]
 If the skip-gram technique is used, only the current word is given as input and the task is to predict the surrounding words in the window. A typical window size is 5  words. 
 %TODO: make sure i am consistent between w2v and W2V
 Doc2Vec works similarly. In the CBOW equivalent called distributed memory (DM), a document identifier (usually just an integer enumerating all documents) is given as additional input. In the skip-gram equivalent distributed bag of words (DBOW), the current word is replaced by the document identifier and the task is to predict all words in the window. All four different training methods are visualized in Figure \ref{fig:w2vd2vtrainingvariants}.\\
 There is no clear choice for when which training method should be used for Word2Vec or Doc2Vec as they tend to perform similarly. However, DM (and also CBOW) preserve the order of words and as the order of words (3-mers) is likely significant, we chose DM as pre-training method.
 Pre-processing the human genome like above and using the DM training method, we trained a Doc2Vec model to output a 100-dimensional embedding for each document.
-\begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/d2v_training_cropped.png} 
-	\caption{
-		Process by which the 100-dimensional embeddings are obtained \cite{d2vsplicing}: the input sequence is split into overlapping 3-mers which are then fed as input into the pre-trained d2v model. 
-		% TODO add sentence how 100-dimensional embedding is actually obtained
-	}
-	\label{fig:d2vtraining}
-\end{figure}
+%\begin{figure}
+%	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/d2v_training_cropped.png} 
+%	\caption{
+%		Process by which the 100-dimensional embeddings are obtained \cite{d2vsplicing}: the input sequence is split into overlapping 3-mers which are then fed as input into the pre-trained d2v model. 
+%		% add sentence how 100-dimensional embedding is actually obtained
+%	}
+%	\label{fig:d2vtraining}
+%\end{figure}
 
-
+%TODO table with d2v hyperparameters
+% TODO explaining the D2V hyperparameters I use and what they mean
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/w2v_d2v_training_variants.png} 
 	\caption{
@@ -538,7 +548,7 @@ Pre-processing the human genome like above and using the DM training method, we 
 \end{figure}
 
 \subsubsection{Obtaing the embeddings}
-After pre-training, the embedding for a given word or document is then the value of the hidden cells of the shallow MLP using during pre-training\footnote{In practice, the words in a corpus are one-hot encoded and the value of the hidden layers doesn't need to be computed. Instead, only the learned weights in the n-dimensional column which belong to the one-hot encoded word need to be retrieved, since all other columns will be multipled by 0.}. In the case of 100-dimensional embeddings, this means that the hidden layer contains 100 neurons. The intuition behind this is that the models learned a representation which is helpful for the prediction task the model was trained on. Since the prediction task was either to reconstruct a word or document given its context or vice-versa, the representation for a given word or document should encode its context. Thus, the main idea behind Word2Vec and Doc2Vec, that a word or document is defined by the context in which it occurs and its representation should encode this context, is achieved.
+After pre-training, the embedding for a given word or document is then the value of the hidden cells of the shallow MLP using during pre-training\footnote{In practice, the words in a corpus are one-hot encoded and the value of the hidden layers doesn't need to be computed. Recalling that the weights of the hidden layer are represented as a $N\times d$ matrix, only the values in the d-dimensional column which belongs to the one-hot encoded word need to be retrieved. All other columns will be multipled by 0. $N$ represents the size of the vocabulary (64 for us) and $d$ the number of embedding dimensions (100 for us).}. In the case of 100-dimensional embeddings, this means that the hidden layer contains 100 neurons. The intuition behind this is that the models learned a representation which is helpful for the prediction task the model was trained on. Since the prediction task was either to reconstruct a word or document given its context or vice-versa, the representation for a given word or document should encode its context. Thus, the main idea behind Word2Vec and Doc2Vec, that a word or document is defined by the context in which it occurs and its representation should encode this context, is achieved.
 
 
 
@@ -556,8 +566,10 @@ We visualize the embeddings for all 64 possible 3-mers using Stochastic Neighbor
 
 Doc2Vec is trained to map words (3-mers) which occur in a similar context to similar representations. We observe that this often translates to mapping the same amino acids to similar representations. There are some instances when different amino acids are mapped together like the quartet Ala, Thr, Pro and Ser in the top-left corner. Displaying the 3-mers associated with the amino acids, that this likely occurs because these different amino acids share two out of three nucleotides at the same positions. We take this visualization as an indication that Doc2Vec was able to learn biologically useful embeddings for the overlapping 3-mers.
 [maybe] Making use of these pre-trained embeddings, each 140 nucleotide input sequence is split into overlapping 3-mers and mapped to a 100-dimensional vector. Like in the other models, a shallow MLP using these sequence features in conjunction with length features for classification.
-\subsubsection{Inference} \label{subsubsec:d2vinference}
-During inference, the Doc2Vec model outputs 100-dimensional embeddings for each input sequence. These, along with the length features, are fed into the shallow MLP for classification. The shallow MLP consists of two layers with 16 and 8 neurons each respectively followed by a dropout layer with dropout probability of 0.2.
+\subsubsection{Putting it all together} \label{subsubsec:d2vinference}
+The resulting model uses the trained Doc2Vec model to obtain a 100-dimensional embedding of the window around the exon start and exon end. These two embeddings, along with the length features, are then given to a shallow MLP for classification. We refer to this model as the D2V model. 
+
+%During inference, the Doc2Vec model outputs 100-dimensional embeddings for each input sequence. These, along with the length features, are fed into the shallow MLP for classification. The shallow MLP consists of two layers with 16 and 8 neurons each respectively followed by a dropout layer with dropout probability of 0.2.
 
 
 %[discussion of the tsne embeddings here]
@@ -638,6 +650,12 @@ One detail not mentioned yet is that the input to the BiLSTM blocks is a dense 4
 	\label{fig:attnbilstm}
 \end{figure}
 
+%TODO LSTM opposed to unmodified RNNs are used as they have been shown to be better at retaining information over long sequences and dealing with vanishing and exploding gradient problems. 
+%Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural computation, 9(8), 1735-1780.
+%BiLSTM citation:
+%Graves, A., Jaitly, N., & Mohamed, A. R. (2013, December). Hybrid speech recognition with deep bidirectional LSTM. In Automatic Speech Recognition and Understanding (ASRU), 2013 IEEE Workshop on (pp. 273-278). IEEE.
+
+
 \subsection{Alternative implementations of attention} \label{subsec:alternative_attention}
 In the following, we introduce multiple extensions which were attempted which didn't lead to improved results. For most of these, initial results clearly showed that the results weren't improved by using them. As such, we didn't test these extensions more extensively than initial experiments because we felt the initial results were already instructive enough and no further investigation was warranted. Thus, the analysis of the results won't be as extensive as for the extensions which worked.
 
@@ -712,10 +730,6 @@ A small implementational detail regarding the attention blocks: the query, key a
 
 For this model, the hyperparameter space was a lot larger and model performance was very sensitive to the hyperparameter choice. The most crucial hyperparameters were the number of encoder dimensions and the number of dimensions of the attention layer. Hyperparameters were optimized via grid search on the HipSci MAJIQ dataset.
 
-putting model parameters into the text instead of a table:
-Concretely, each LSTM block consists of a BiLSTM with one (?) layer which outputs 50 features.
-The shallow MLP used for classification uses a single layer with 128 (?) neurons and is followed by a dropout layer with dropout probability of 0.5.
-
 
 \section{Training and implementation details} \label{sec:implementation_details}
 \subsection{Implementation} \label{subsec:implementation_details}
@@ -784,7 +798,7 @@ The output of our models is a single, continuous scalar $\hat{y} \in [0, 1]$. As
 TODO: [mention respective model sizes here]
 bilstm + attn 66861, dsc 20.001, d2v 6801
 
-Exact hyperparameters used for training the models are given in table \ref{table:hyperparameters}.
+The hyperparameters used for training the models are given in table \ref{table:hyperparameters}. More details on the Doc2Vec pre-training procedure and hyperparameters values are given in the appendix \ref{app:d2v}.
 The DSC, D2V and BiLSTM + Attn models respectively contain 20,001, 6,801, and 66,861 trainable weights. In absolute terms, all of these model are still small compared to models known from Computer Vision and Natural Language Processing. The number of training weights is also reflected in the training times with the models respectively taking between 5 to 30 minutes, 1 to 5 minutes and 15 to 75 minutes to train once (depending on dataset). 
 
  

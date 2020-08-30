@@ -6,7 +6,7 @@ The heart of animals is the foundation of their life, the sovereign of everythin
   }
 \end{savequote}
 
-\chapter{\label{app:1-cardiophys}Appendix}
+\chapter{\label{app:appendix}Appendix}
 
 \minitoc
 
@@ -114,4 +114,44 @@ Similarly, all of the above biological replicates were used in the MAJIQ Builder
 %
 %ERR2278244
 %ERR2278245
+
+\subsection{Additional Doc2Vec training details} \label{app:d2v}
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{ c c c  c c c} 
+		\hline
+		%   & configuration & & performance & \\
+		Training method & DM \\
+		Embedding dimensions & 100 \\
+		Corpus & Human Genome GRCh38 \\
+		Window size & 5\\
+		Minimum count & 5\\
+		Negative sampling & 5\\
+		Epochs & 5\\
+		
+		\hline
+	\end{tabular}
+	\caption{Exact hyperparameters used for training Doc2Vec model.
+	}
+	\label{table:d2vparams}
+\end{table}
+
+The hyperparameters used during pre-training are given in table \ref{table:d2vparams}. Except for the number of epochs, these are the same as in the baseline paper \cite{d2vsplicing}. We reduced the number of epochs from 20 to 5, as initial tests showed no performance difference between these two values. However, while \cite{d2vsplicing} don't mention what Doc2Vec implementation they use, almost all of these parameters are the same as the default parameters from the gensim library. Therefore, we believe that these parameters weren't fine-tuned very intensively. 
+
+Two hyperparameters, not yet introduced, are mentioned in Table \ref{table:d2vparams}. Although these hyperparameters aren't very impactful when training on genomic data, we mention them for completeness (as they are also mentioned in \cite{d2vsplicing}):
+\begin{itemize}
+	\item The minimum count parameters eliminates all words which occur fewer than the minumum amount from the corpus. Infrequent words don't have enough examples to allow the model to learn a good representation of them. Additionally, while the individual words might uncommon, there might be a lot of them, leading to an additional computational effort.
+	
+	\item Negative sampling \cite{w2v2} 
+	is a technique to reduce the computational cost of backpropagation steps. The size of the weights in the Word2Vec or Doc2Vec can be easily reach millions of learnable weights with a medium sized vocabulary: for 10,000 words in the vocabulary and 300-diimensional embedding, the matrix representing the hidden weights already has 3 million weights. 
+	When negative sampling is enabled, by default only the weights connected to the word we want to predict will be updated via backpropagation. Additionally, a certain number of negative samples, words which the network shouldn't predict, are randomly chosen and their weights updated too. This dramatically reduces the computational effort for each backpropagation step, since only the weights of very few words in the vocabulary are updated. 
+\end{itemize}
+
+
+
+ 
+%TODO do I even need to explain these if I just use the default gensim option either way?
+% ---> could just explain sub-sampling too if I have time cause more text and I sound smarter
+%http://mccormickml.com/2017/01/11/word2vec-tutorial-part-2-negative-sampling/
 
