@@ -257,3 +257,30 @@ continuous psi prediction too
 interpretation of F1 score
 
 interpretation of attention mechanism etc follows here; some pretty graphics to follow
+
+
+\subsection{Choosing the exact attention mechanism} \label{subsubsec:attn_hyperparams}
+- say that conv overfits a lot
+
+- ideally show training conv of conv + no query vs no query
+compute average of conv training error: 0.9884710561726501 for conv + no query
+
+
+No query: 
+However, in initial experiments, the attention** mechanism performed significantly worse than the attention* mechanism. The extra representational capacity by having a query matrix seems to be important for performance. 
+In practice, this lead to a model about 10\% smaller. 
+In practice, this lead to an about 10\% smaller model.
+
+heads:
+While these extra representational subspaces might make the model more powerful and also more robust (in the sense that multiple attention heads act like an ensemble model), it also increases the number of learnable weights potentially leading to overfitting. In practice, this extension roughly doubled the number of learnable weights.
+
+Conv: 
+Testing this extension on the HipSci MAJIQ dataset didn't lead to improved results. Although the convergence speed increased rapidly (from around 180 epochs to 20 epochs), we also observed heavy overfitting. To alleviate this, we added dropout and batch normalization layers. After adding two dropout layers with a high dropout probability (one after computing the attention weights and one after the convolution layers with p=0.5 each) and setting the convolutional filter size to no higher than 3, overfitting issues ameliorated. However, after adding these layers convergence was no faster than for the case without convolutional layers and the performance did not improve. Thus, for the sake of a simpler model, we opted to not use this extension for the rest of the experiments.
+Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences compared to \cite{ghentransformers}:
+\begin{enumerate}
+	\item Although we process the input at single-nucleotide resolution, the use of a BiLSTM means that the encoder is aware of the nucleotides which precede and follow it. Therefore, information about the neighbouring nucleotides is likely already represented in the representation for a given nucleotide. This is in contrast to a Transformer model where the layers are non-recurrent and only work at single-symbol resolution. Thus, the convolutional layers likely don't give the model a lot more flexibility.
+	\item In \cite{ghentransformers}, the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
+	%		they: 3000 nucleotides, convolution filter of 7
+\end{enumerate}
+
+Similar to the extension of multiple attention heads, this extension makes the model more powerful, but also roughly doubles the number of learnable weights. It might be surprising that adding a single convolution layer, adds the same number of 

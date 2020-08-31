@@ -419,7 +419,7 @@ class AttentionBlockWithConv(BaseModel):
         self.drop_conv = torch.nn.Dropout2d(0)
         self.bn_values = torch.nn.BatchNorm1d(out_dim)
         self.bn_keys = torch.nn.BatchNorm1d(out_dim)
-        self.conv = torch.nn.Conv1d(out_dim, out_dim, kernel_size, padding=kernel_size//2)
+        # self.conv = torch.nn.Conv1d(out_dim, out_dim, kernel_size, padding=kernel_size//2)
 
     def forward(self, input_seq):
         batch_size = input_seq.shape[0]
