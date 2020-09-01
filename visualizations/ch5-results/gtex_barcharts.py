@@ -6,7 +6,7 @@ def bar_charts_exons():
     plt.style.use('seaborn')
     with_extra_random_guessing_plot = False
     # can be further fine-tuned; either 0.5 from start or I include baseline model
-    labels = ['DSC', 'D2V', 'Attn']
+    labels = ['DSC', 'D2V', 'RASC']
     brain_means = [0.664, 0.617, 0.645]
     cerebellum_means = [0.649, 0.610, 0.631]
     heart_means = [0.657, 0.604, 0.627]
@@ -67,7 +67,7 @@ def bar_charts_juncs():
     plt.style.use('seaborn')
     with_extra_random_guessing_plot = False
     # can be further fine-tuned; either 0.5 from start or I include baseline model
-    labels = ['DSC', 'D2V', 'Attn']
+    labels = ['DSC', 'D2V', 'RASC']
     brain_means = [0.689, 0.670, 0.798]
     cerebellum_means = [0.715, 0.675, 0.803]
     heart_means = [0.685, 0.671, 0.768]

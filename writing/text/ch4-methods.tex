@@ -17,14 +17,14 @@
 In this chapter, we give more details about the exact task we are trying to solve, introduce the primary data sources and describe how these were used to obtain the training datasets. Additionally, we motivate and explain the evaluated models and describe how these were implemented and trained.
 % We also give implementation details regarding processing steps, model implementation, and model training.
 
-\subsubsection{Why PSI?} \label{subsubsec:whypsi}
-
-- why not more ambitious? why not predict whole transcript directly? --> but this should be somewhere else, like in the task formulation section
-
-ok, older works use PSI -- but why do we use it?
-
-High-throughput sequencing methods are a popular and potent tool to investigate RNA expression and post-transcriptional regulation. However, due to limited coverage, short read length, and experimental biases they are not able to provide a full view of post-transcriptional processing so far \cite{berlinpsi}.
--> this is why you introduce alternative splicing events; as reads are too short to identify splicing events
+%\subsubsection{Why PSI?} \label{subsubsec:whypsi}
+%
+%- why not more ambitious? why not predict whole transcript directly? --> but this should be somewhere else, like in the task formulation section
+%
+%ok, older works use PSI -- but why do we use it?
+%
+%High-throughput sequencing methods are a popular and potent tool to investigate RNA expression and post-transcriptional regulation. However, due to limited coverage, short read length, and experimental biases they are not able to provide a full view of post-transcriptional processing so far \cite{berlinpsi}.
+%-> this is why you introduce alternative splicing events; as reads are too short to identify splicing events
 
 
 \section{Task formulation} \label{sec:task_formulation}
@@ -334,12 +334,12 @@ Finally, the obtained LSVs can be visualized using VOILA. See Figure \ref{fig:vo
 \end{figure}
 
 
-Our implementation of PSI estimation was applied to the GTEx dataset. SUPPA and MAJIQ were applied to the data from the HipSci repository.
+Our implementation of PSI estimation was applied to the GTEx dataset. SUPPA and MAJIQ were applied to the data from the HipSci repository. We refer to the GTEx-based and with our own PSI estimation method processed dataset, to the HipSci-based and with SUPPA processed dataset and to the HipSci-based and with MAJIQ processed dataset as GTEx dataset, HipSci SUPPA dataset and HipSci MAJIQ dataset for brevity. 
 \subsection{Final sample processing} \label{subsec:finalsampleprocessing}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/input_schematic.png} 
-	\caption[bla.]{Schematic of model input for an exon-centric training sample \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. The input for intron-centric training samples is analogue.}
+	\caption{Schematic of model input for an exon-centric training sample \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. The input for intron-centric training samples is analogue.}
 	\label{fig:inputschematic}
 \end{figure}
 
@@ -376,7 +376,7 @@ The end results is that a single training sample for the model contains two 140x
 %: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
 % add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
 
-Table \ref{table:datasets} shows the number of obtained training samples in each datasets. Among the exon-centric datasets, the dataset based on HEXEvent contains the most samples, followed by the dataset based on HipSci data processed with MAJIQ, followed by the dataset based on GTEx data and, lastly, followed by the dataset based on HipSci and processing with MAJIQ. The HEXEvent-based and HipSci MAJIQ-based datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. Unlike between samples from neuron and iPSC cell lines, there are significant cross-tissue differences between the number of training samples in GTEx-based datasets: the cerebellum tissue datasets contain roughly twice as many training samples as the heart tissue datasets. This is a result of the cerebellum tissue containing 10,000 highly-expressed whereas the heart sample contains only 5,000 highly expressed genes. Surprisingly, there are 17 million exon-exon junction reads from the heart sample compared to the cerebellum's 8 million exon-exon junction reads. The additional reads from the heart sample are concentrated in a few extremely highly expressed genes (e.g. gene ENSG00000198886 is expressed 1000-times as often as the median highly expressed gene) and while this concentration of reads also appear in the cerebellum tissue, it is less extreme.
+Table \ref{table:datasets} shows the number of obtained training samples in each datasets. Among the exon-centric datasets, the HEXEvent dataset contains the most samples, followed by the HipSci MAJIQ, GTEx and HIPSCI MAJIQ dataset. The HEXEvent and HipSci MAJIQ datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. Unlike between samples from neuron and iPSC cell lines, there are significant cross-tissue differences between the number of training samples in GTEx-based datasets: the cerebellum tissue datasets contain roughly twice as many training samples as the heart tissue datasets. This is a result of the cerebellum tissue containing 10,000 highly-expressed whereas the heart sample contains only 5,000 highly expressed genes. Surprisingly, there are 17 million exon-exon junction reads from the heart sample compared to the cerebellum's 8 million exon-exon junction reads. The additional reads from the heart sample are concentrated in a few extremely highly expressed genes (e.g. gene ENSG00000198886 is expressed 1000-times as often as the median highly expressed gene) and while this concentration of reads also appear in the cerebellum tissue, it is less extreme.
 
 The same cross-tissue observations also holds for the intron-centric datasets. The intron-centric datasets contains significantly more training samples than the exon-centric datasets because they are not constrained to cassette exons (which would lead to the expectation that the intron-centric datasets contain roughly twice as many samples as the exon-centric datasets), but contain all non-filtered junctions. 
 % ENSG00000198886 - MT-ND4 - https://www.proteinatlas.org/ENSG00000198886-MT-ND4
@@ -433,11 +433,11 @@ The same cross-tissue observations also holds for the intron-centric datasets. T
 \end{figure}
 
 Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that in each dataset the distribution of PSI values is bi-modal with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). This aligns well with previous observations that alternatively spliced junctions and exons tend to be very frequently or very rarely included \cite{buschhertel} \cite{bimodalpsivalues1} \cite{bimodalpsivalues2}.\\
-The lack of non-cassette constitutive exons is visible in theGTEx and HipSci SUPPA-based datasets containing significantly constitutive samples; the other two primary datasets contain roughly three times as many constitutive as non-constitutive samples. \\
+The lack of non-cassette constitutive exons is visible in the GTEx and HipSci SUPPA datasets containing significantly constitutive samples; the other two primary datasets contain roughly three times as many constitutive as non-constitutive samples. \\
 % However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
 %Due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. 
 % liekly false for suppa Another factor is that they only estimate PSI based on one biological sample in contrast to the other datasets. 
-In particular, HipSci SUPPA-based dataset contains an extremely low number of non-rarely or frequently included exons (only ~1\%) which is likely an artefact of its coarse, transcription-level estimation method.
+In particular, the HipSci SUPPA dataset contains an extremely low number of non-rarely or frequently included exons (only ~1\%) which is likely an artefact of its coarse, transcription-level estimation method.
 %The relatively low number of non-constitutive exon samples in the HEXEvent dataset is likely influenced by the ESTs coming from a mix of biological samples from different tissues. Among many tissues, there are likely few tissues that contain some exons
 %should also hold for constitutive exons; so rarely exons constitutive, so more with middle psi values
 %SCEPTICAL -- unlikely to include
@@ -464,7 +464,7 @@ DSC uses CNNs for feature extraction.
 CNNs are useful when the input data contains spatially invariant patterns.  Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
 CNNs are also promising for the application to genomic data, that is, nucleotide sequences: 
 \begin{itemize}
-	\item Nucleotide sequences contain motifs (nucleotide sequence patterns conjectured to be biologically significant). Motifs can be represented as matrixes and indeed, they are frequently represented as position weight matrixes (PWMs) with particular weights. The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs.
+	\item Nucleotide sequences contain motifs (nucleotide sequence patterns conjectured to be biologically significant). Motifs can be represented as matrixes and indeed, they are frequently represented as position weight matrixes (PWMs) with particular weights. The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs. % TODO; don't learn this wording
 	\item Motifs are found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence.
 \end{itemize}
 
@@ -581,7 +581,7 @@ The resulting model uses the pre-trained Doc2Vec network to obtain a 100-dimensi
 
 
 \subsection{RASC: BiLSTM and Attention-based} \label{subsec:bilstm}
-% TODO: I AM RASC
+
 \subsubsection{Seq2Seq} \label{subsubsec:seq2seq}
 Sequence-to-sequence learning (Seq2seq) \cite{seq2seq} is a general deep learning-based framework for mapping one sequence to another. The first part of the framework is an encoder which processes the input symbol-by-symbol and produces a vector representation for each input symbol. The second part is a decoder which predicts the output sequence symbol-by-symbol based on the representation computed by the decoder. In the first timestep, the decoder uses the last output of the encoder and in all other timesteps, it uses its own output from the previous time step as input. The encoder and decoder are typically RNN-based networks such as LSTMs \cite{lstm} or GRUs \cite{gru}. Encoder and decoder are jointly trained to maximize the probability of a correct output. This framework has been particularly successful in machine translation (MT): for instance, Google announced in 2016 that it started using them for their MT \cite{googlemt2016}. Figure \ref{fig:encdec} visualizes an encoder-decoder model.
 
@@ -615,7 +615,7 @@ The attention mechanism also adds interpretability to the model because it indic
 %Attention is a very general mechanism not limited to the Seq2seq framework and different forms of it (such as additive \cite{attention} or multiplicative attention \cite{allyouneed}) are used in practice. 
 
 
-% TODO: how attention hasn't been used in genomics so far
+% how attention hasn't been used in genomics so far
 %[transformer here and why I don't use it]
 %[More applications of attention]
 %It has been applied to constituency parsing (Vinyals et al., 2015)
@@ -643,7 +643,7 @@ where $Z \in \mathbb{R}^{l \times out}$.
 Note that this makes use of the fact that $Q\cdotp K = QK^T$ where $\cdotp$ denotes the dot product.
 %This form of attention is also visualized in Figure !](https://jalammar.github.io/images/t/self-attention-matrix-calculation.png) and ![
 %from https://jalammar.github.io/illustrated-transformer/
-%todo: remove this division by square-root -- maybe ask Kuba how to photoshop this away
+%remove this division by square-root -- maybe ask Kuba how to photoshop this away
 
 
 As shown, multiplicative self-attention computes a separate query for each input token. It is called self-attention because it allows a sequence to pay attention to 'itself'. (Unmasked) self-attention is mainly used in the encoder part of Transformer architectures to improve the representation for each word.\\
@@ -703,45 +703,24 @@ where the $start$ and $end$ superscript respectively refer to the sequence aroun
 
 A small implementational detail regarding the attention blocks: the query, key and value parameter matrices are implemented via a linear layer with the appropriate dimensions. These also learn bias weights which are added to the output by default. While in theory the bias weights should be turned off to implement exactly the shown formulas, in practice other attention mechanism implementations leave these turned on \cite{annotatedtransformer} and so we follow suit. Thus, to be precise, the query, key and value matrix computation should be:
 $$K, V = IW^K + B^K, IW^V + B^V$$
-%TODO this formula of the attention mechanism
 $$Z^* = {attention}^*(I) = softmax(({Q}^*K^T)+B^{Q^*})V$$
 where the query, key and value bias matrices $B^{Q^*}, B^K$ and $B^V \in \mathbb{R}^{1 \times out}$.
-%TODO here
+
 \subsubsection{Putting it all together:} 
-Like a Seq2Seq model, an RNN-based Encoder is used to capture a representation of the input sequence. We select the most important representations of the encoded input using the modified attention mechanism we introduced. Instead of a recursive decoder, we use a shallow MLP for classification based on the selected features. The architecture of our model is visualized in Figure \ref{fig:attnbilstm}.
+Like in a Seq2Seq model, an RNN-based Encoder is used to capture a representation of the input sequence. We select the most important representations of the encoded input using the modified attention mechanism we introduced. Instead of a recursive decoder, we use a shallow MLP for classification based on the selected features. 
 
-LSTM cells opposed to unmodified RNNs are used as encoder as LSTMs have been shown to be better at retaining information over long sequences and dealing with the vanishing and exploding gradient problems \cite{lstm}. In particular, we use Bidirectional LSTM (BiLSTM) \cite{bidirection} to model that the splicing of an exon likely depends on bidirectionally interacting factors.
+The input to the encoder blocks is a dense 4-dimensional embedding of the one-hot encoded sequences. This dense embedding is the same for each sequence and jointly learned during training. The extra embedding layer is included as previous work \cite{embeddingneeded} has shown that otherwise the model might suffer from limited generalization performance, caused by the sparsity of the one-hot encoded representations. 
 
-The input to the BiLSTM blocks is a dense 4-dimensional embedding of the one-hot encoded sequences. This dense embedding is the same for each sequence and jointly learned during training. The extra embedding layer is included as previous work \cite{embeddingneeded} has shown that otherwise the model might suffer from limited generalization performance, caused by the sparsity of the one-hot encoded representations. 
+LSTM cells opposed to unmodified RNNs are used as encoder as LSTMs have been shown to be better at retaining information over long sequences and avoiding the vanishing and exploding gradient problems \cite{lstm}. In particular, we use Bidirectional LSTM (BiLSTM) \cite{bidirection} to model that the splicing of an exon likely depends on bidirectionally interacting factors. A separate BiLSTM is used for finding for encoding the exon start and exon end sequence. 
 
+We pre-empt the results chapter by noting that we only use the extension of multiple attention heads of the three modifications and extensions of the attentin mechanisms we considered. 
+The architecture of our model is visualized in Figure \ref{fig:attnbilstm}. We refer to this new model as Recursive Attentive Splicing Code (RASC). 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/visualizations-AttnBiLSTM.pdf} 
-	\caption{Architecture of the new attention-based model we introduce. }
+	\caption{Architecture of RASC. }
 	\label{fig:attnbilstm}
 \end{figure}
 
-
-\begin{table}[h!]
-	\centering
-	\begin{tabular}{| c c c | c c | c} 
-		\hline
-		%   & configuration & & performance & \\
-		heads & no query & conv & $\mu$ & $\sigma$ \\
-		\hline
-		0 & 0 & 0 & 0.832 & 0.025 \\
-		0 & 0 & 1 & 0.860 & 0.021 \\
-		0 & 1 & 0 & 0.851 & 0.013 \\
-		0 & 1 & 1 & 0.818 & 0.019 \\
-		1 & 0 & 0 & \textbf{0.865} & 0.011 \\
-		1 & 0 & 1 & 0.824 & \textbf{0.010} \\
-		1 & 1 & 0 & 0.852 & 0.017 \\
-		1 & 1 & 1 & 0.846 & 0.017 \\
-		\hline
-	\end{tabular}
-	\caption{Results of evaluating the extensions to the Attention mechanism given as AUC. heads = multiple attention heads were used, no query = no conceptual query vector was used, conv = an additional convolution operation was applied to the key and value matrices. 0 codes for the extension not being used, 1 codes for the extension being used.
-	}
-	\label{table:attn_gridsearch}
-\end{table}
 
 %   old motivation:
 %The architecture of this model can be motivated in two ways:
@@ -752,36 +731,55 @@ The input to the BiLSTM blocks is a dense 4-dimensional embedding of the one-hot
 %This is a standard LSTM architecture and a similar architecture have been successfully applied to the related task of finding new splice junctions. [https://arxiv.org/pdf/1512.05135.pdf, https://www.sciencedirect.com/science/article/pii/S0010482519304135]
 %simple feature extraction + classification model as eg in [https://www.researchgate.net/figure/An-example-of-bidirectional-LSTM-tagger-architecture_fig1_330276457 ] -- 5 citations
 
-For this model, the hyperparameter space was a lot larger and model performance was very sensitive to the hyperparameter choice. The most crucial hyperparameters were the number of encoder dimensions and the number of dimensions of the attention layer. Hyperparameters were optimized via grid search on the HipSci MAJIQ dataset.
+For RASC, the hyperparameter space was a lot larger and model performance was very sensitive to the hyperparameter choice. The most crucial hyperparameters were the number of encoder dimensions and the number of dimensions of the attention layer. Hyperparameters were optimized via a grid search on the HipSci MAJIQ dataset.
 
 
 \section{Training and implementation details} \label{sec:implementation_details}
 \subsection{Implementation} \label{subsec:implementation_details}
-All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. It was chosen (over TensorFlow) as the main author already had more experience with PyTorch. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The latest versions of SUPPA (SUPPA v2.3) and MAJIQ (MAJIQ v2.0) available as of July 2020 were used. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 12 different datasets and 3 different models are used, the codebase contains only 2 different data loader and trainer classes.
+All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. PyTorch and gensim are both standard choices when implementing Deep Learning algorithms or text embedding models. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The latest versions of SUPPA (version 2.3) and MAJIQ (version 2.0) available as of July 2020 were used. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 10 different datasets and 3 different models are used, the codebase contains only 2 different data loader and trainer classes.
+%they all use the same data loading and training code. %
 
+The structure of the repository was based on the PyTorch Deep Learning Project template available at \url{github.com/victoresque/pytorch-template}. This template provides abstract classes for data loaders, trainers and the models themselves. These abstract classes already contain a lot of the implementation-independent code to log results and train and save models. These base classes were then extended with implementation-specific code as e.g. exact data formats. Using this structure avoids the duplication of a lot of boilerplate code.\\
+To run an experiment, the experimental settings are defined in a separate JSON file. This allows for easy and unambiguous reproduction of results. All experiments for whom results in this study are shown are available as JSON files that define the exact parameters used.
+The code repository itself contains multiple README which give more details about the code structure, how to run experiments and what naming conventions are used. 
+%which go into more details towards the structuring and using of the code and also define naming conventions.\\
 
-The structure of the repository was based on the PyTorch Deep Learning Project template available at \url{github.com/victoresque/pytorch-template}. This template provides access to abstract classes for data loaders, trainers and the models themselves. These abstract classes already contain a lot of the implementation-independent code to log results and train and save models. These abstract classes can then be extended with implementation-specific code as e.g. exact data formats. Using this structure avoids the duplication of a lot of boilerplate code.\\
-To run an experiment, the experimental settings are defined in separate JSON files. This allows for easy and unambiguous reproduction of results. All experiments for whom results in this study are shown are available as JSON files that define the exact parameters used.
-The code repository itself contains multiple README which go into more details towards the structuring and using of the code and also define naming conventions.\\
-
-TODO: total code base contained roughly ... lines of code. the majority of these were in preprocessing section [maybe exclude this]
+%total code base contained roughly ... lines of code. the majority of these were in preprocessing section [maybe exclude this]
 
 \subsection{Training} \label{subsec:training_details}
-The training was done using one NVIDIA GeForce GTX 1080 Ti GPU. This proved to be sufficient as initial exploratory experiments showed no advantage of using deep networks and the resulting networks used are all relatively shallow. The pre-training of the Doc2Vec model on the human genome took 3 hours. We randomly split each dataset into 10 folds; in a given run, 8 folds were used for training, 1 fold for validation and 1 fold for testing. Each model was trained with different folds 9 times.
-The training time for training a single model once varied between 1 minute and 75 minutes (see [table with training times]). The models were trained with early stopping on the validation fold until they stopped improving for 15 epochs. This typically occurred after 70 - 150 training epochs.
-Where we established in a base experiment that the variance for a given model was low between runs (lower than ~1%), we only trained the model in follow-up experiments once for practical reasons.
+The training was done using one NVIDIA GeForce GTX 1080 Ti GPU. This proved to be sufficient as initial exploratory experiments showed no advantage of using deep networks and the networks we evaluate are all relatively shallow. For training and testing, we randomly split each dataset into 10 folds; in a given run, 8 folds were used for training, 1 fold for validation and 1 fold for testing. Each model was trained with different folds 9 times and we compute the average test set performance.\\
+%The median training times for one complete training run were 1-5 minutes 
+The models were trained with early stopping on the validation fold until they stopped improving for 15 epochs. This typically occurred after 70 - 150 training epochs.
+Where we established in a base experiment that the variance for a given model was low between runs (lower than ~1\%), we only trained the model once in follow-up experiments for practical reasons.
+The pre-training of the Doc2Vec model on the human genome took 3 hours. 
+
+The DSC, D2V and BiLSTM + Attn models respectively contain 20,001, 6,801, and 66,861 trainable weights. In absolute terms, all of these model are still small compared to models known from Computer Vision and Natural Language Processing. The number of training weights is also reflected in the training times with the models respectively taking between 5 to 30 minutes, 1 to 5 minutes and 15 to 75 minutes to train once (depending on dataset). 
+
+The hyperparameters used for training the models are given in table \ref{table:hyperparameters}. More details on the Doc2Vec pre-training procedure and hyperparameters values are given in the appendix \ref{app:d2v}.
+
 \subsubsection{Loss}  \label{subsubsec:loss}
 All models were trained to minimize the binary cross-entropy loss:
 $$\mathbb{L} = - (y \log(\hat{y}) + (1 - y) \log (1 - \hat{y}))$$
-where the ground truth $y \in \{0, 1\}$ and the prediction of the model $\hat{y} \in [0, 1]$. The binary cross-entropy is the standard loss for training deep learning-based (binary) classifiers.
+where the ground truth $y \in \{0, 1\}$ and the prediction of the model $\hat{y} \in [0, 1]$. The binary cross-entropy loss is the standard loss for training deep learning-based (binary) classifiers.
 \subsubsection{Metrics} \label{subsubsec:metrics}
-As in previous work \cite{dsc}, we evaluate all models using the Area under ROC curve (AUC). The AUC provides an aggregate measure of performance across all possible decision thresholds.
-However, some of our datasets were unbalanced. This may lead to a degenerating behaviour where a model only predicts the majority class. Additionally, only looking at the AUC does not give a good sense of the .... specificity.. recall?
-This is not captured by the AUC. \\
-Thus, we also evaluated the F1 of our models when working with an unbalanced dataset as in the case of the HipSci-based dataset processed with MAJIQ.
-The output of our models is a single, continuous scalar $\hat{y} \in [0, 1]$. As the AUC itself is an aggregate measure across all decision thresholds, we don't need to set it to a certain value that translates the continuous prediction into a discrete positive or negative class prediction. To compute the F1 score, we do. Naively, this threshold may be set to 0.5; that is, all outputs above 0.5 will be interpreted as a prediction of the positive class and all other outputs as a prediction of the negative class. However, this threshold may not be optimal to maximize the F1 score, especially when working with unbalanced datasets. We choose the threshold which maximizes the F1 score on the test set.
+As in previous work \cite{dsc} \cite{buschhertel}, we use the Area under the receiver operating characteristic curve (AUC) as evaluation metric. The AUC provides an aggregate measure of the classification performance across all possible decision thresholds.\\
+However, the AUC doesn't provide information about model performance at a particular decision threshold. To evaluate whether a model is fit for clinical use, decision threshold-specific metrics like sensitivity and specificity are crucial to know.
+To evaluate these, we analytically compute the decision threshold which maximizes the F1 score. The F1 score provides an aggregate measure which treats precision and recall equally and is defined as the harmonic mean of precision and recall. It is a common measure to evaluate the performance of classifiers and we use it as starting point for our further analysis. 
+%To evaluate these, a decision threshold above which all outputs are counted as positive and below which all outputs are counted as negative. For our further analysis, we use the decision threshold which maximizes the F1 score and also evaluate the sensitivity and specificity. 
 
+%For our analysis, we analytically compute and use the decision threshold which maximizes the harmonic mean of the precision and recall, that is, the F1 score. 
 
+% : say which metrics you actually evaluate here
+%Naively, this threshold may be set to 0.5, but this will not necessarily be the 'optimal' decision threshold in the sense of the optimality we define.  that it doesn't balance the trade-off between false positive false negatives in the way we want. We analytically compute the decision 
+%
+%For further analysis, we also evaluate sensitivity, specificity and F1 score on the HipSci MAJIQ dataset. Since the AUC is an aggreg
+%
+%The AUC implicitly treats sensitivity and specifity as equal when averaged across all thresholds. 
+%On the unbalanced datasets, we also evaluate recall, specificity and the F1 score since the AUC does not give information about the . 
+%However, some of our datasets were unbalanced. This may lead to a degenerating behaviour where a model only predicts the majority class. Additionally, only looking at the AUC does not give a good sense of the .... specificity.. recall?
+%This is not captured by the AUC. \\
+%Thus, we also evaluated the F1 of our models when working with an unbalanced dataset as in the case of the HipSci-based dataset processed with MAJIQ.
+%The output of our models is a single, continuous scalar $\hat{y} \in [0, 1]$. As the AUC itself is an aggregate measure across all decision thresholds, we don't need to set it to a certain value that translates the continuous prediction into a discrete positive or negative class prediction. To compute the F1 score, we do. Naively, this threshold may be set to 0.5; that is, all outputs above 0.5 will be interpreted as a prediction of the positive class and all other outputs as a prediction of the negative class. However, this threshold may not be optimal to maximize the F1 score, especially when working with unbalanced datasets. We choose the threshold which maximizes the F1 score on the test set.
 
 \begin{table}[h!]
 	\centering
@@ -818,12 +816,3 @@ The output of our models is a single, continuous scalar $\hat{y} \in [0, 1]$. As
 	}
 	\label{table:hyperparameters}
 \end{table}
-
-TODO: [mention respective model sizes here]
-bilstm + attn 66861, dsc 20.001, d2v 6801
-
-The hyperparameters used for training the models are given in table \ref{table:hyperparameters}. More details on the Doc2Vec pre-training procedure and hyperparameters values are given in the appendix \ref{app:d2v}.
-The DSC, D2V and BiLSTM + Attn models respectively contain 20,001, 6,801, and 66,861 trainable weights. In absolute terms, all of these model are still small compared to models known from Computer Vision and Natural Language Processing. The number of training weights is also reflected in the training times with the models respectively taking between 5 to 30 minutes, 1 to 5 minutes and 15 to 75 minutes to train once (depending on dataset). 
-
- 
-%TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation

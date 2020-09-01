@@ -1,13 +1,13 @@
 \chapter{\label{ch:ch5-results}Results}
 
-
-This section shows and discusses the results of our experiments based on the models and the datasets introduced in Chapter \ref{ch:4-methods}. It also describes the rationale behind deciding which experiments should be run.
+This section presents and discusses the results of our experiments based on the three models and the datasets introduced in Chapter \ref{ch:4-methods}. It also describes the rationale behind deciding which experiments should be run.
 
 \section{HEXEvent dataset} \label{sec:hexevent_results} %TODO> hexvent dataset section whether the other ones are not
-To obtain a baseline, we evaluate the reimplemented and proposed model on the HEXEvent dataset as used in \cite{dsc} and introduced in \ref{subsec:hexevent}. The results of these experiments are shown in Figure \ref{fig:hexevent_auc}.
+To obtain a baseline, we evaluate all three models on the HEXEvent dataset as used in \cite{dsc} and introduced in \ref{subsec:hexevent}. The results of these experiments are shown in Figure \ref{fig:hexevent_auc}.
 
 \subsubsection{Analysis of main findings}
-Generally all models perform extremely well with AUCs nearing 90\%. They also perform very similarly, making it hard to differentiate them based on their ROC curves. The Attn model seems to perform slightly better than the other models. 
+Generally all models perform extremely well with AUCs nearing 90\%. While differences are small, RASC seems to perform slightly better than the other models.
+%They also perform very similarly, making it hard to differentiate them based on their ROC curves. The Attn model seems to perform slightly better than the other models. 
 
 Assessing our reimplementation, we observe a small difference between the AUC value reported in \cite{dsc} (mean 0.899, standard deviation of 0.18) and the ones we observe (mean 0.873, standard deviation of 0.06). This is likely just a result of random statistical noise influenced by different random seeds between runs and differences between TensorFlow / Keras (their implementation) and PyTorch (our implementation). Notably, when reevaluating the publically available original implementation, in a single run we also obtain results (0.872 AUC) closer to the results of our reimplementation. 
 %There is a small (~2\%) difference in the AUC values in the AUC values for the DSC model reported in \cite{dsc} (89.9 AUC) and the ones we observe (87.1 AUC original). 
@@ -17,7 +17,7 @@ Thus, we conclude that, albeit with minor caveats, the reimplementation was succ
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/hexevent_cross_model_roc_auc_comparison.png} 
-	\caption[bla.]{Comparison of the ROC curves of the three main models (as well as the original implementation) on the HEXEvent dataset. The values of the original implementation were obtained by rerunning the training on the publicly available implementation. }
+	\caption{Comparison of the ROC curves of the three models as well as the original implementation on the HEXEvent dataset. The values of the original implementation were obtained by rerunning the training on the publicly available implementation. }
 	\label{fig:hexevent_auc}
 \end{figure}
 
@@ -83,7 +83,7 @@ These findings have strong implications. It calls into questions the meaningfuln
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/dsc_funeral_barchart.png} 
-	\caption[bla.]{Stress testing the HEXEvent dataset used in \cite{dsc}. The graph shows the performance as well as the inverse of the respective model sizes used.}
+	\caption{Stress testing the HEXEvent dataset used in \cite{dsc}. The graph shows the performance as well as the inverse of the respective model sizes used.}
 	\label{fig:dsc_funeral}
 \end{figure}
 
@@ -194,7 +194,7 @@ Among these two, 2. is more likely: in retrorespect, SUPPA was not the best choi
 \subsection{MAJIQ with iPSCs differentiated to neurons (exons)} \label{sec:hipsci_neuron_majiq}
 
 \begin{figure}
-	\centering\includegraphics[width=0.5\textwidth]{../visualizations/ch5-results/majiq_neuron_cross_model_roc_auc_comparison.png} 
+	\centering\includegraphics[width=0.49\textwidth]{../visualizations/ch5-results/majiq_neuron_cross_model_roc_auc_comparison.png} 
 	\centering\includegraphics[width=0.5\textwidth]{../visualizations/ch5-results/majiq_ipsc_cross_model_roc_auc_comparison.png} 
 	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
 	\label{fig:majiq_rocs}
@@ -254,10 +254,27 @@ seems like learned features are tissue-invariant\\
 
 continuous psi prediction too
 
-interpretation of F1 score
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/confusion_matrix.png} 
+	\caption{Confusion matrix from RASC on the neuron HipSci MAJIQ dataset. 'cons' and 'non-cons' respectively abbreviate constitutive and non-constitutive exons. }
+	\label{fig:confusion_matrix}
+\end{figure}
+
+We present the confusion matrix for the binary classifier based on RASC in Figure \ref{fig:confusion_matrix}. The decision threshold which maximizes the F1 score was chosen and we obtain a F1 score of 0.88 (for the negative class of constitutive exons). We observe relatively low number of false positives, but relatively high numbers of false negatives and correspondingly obtain a low sensitivity score of 0.56, but a high specificity score of 0.93. Thus, the classifier is good at ruling in that an exon is alternatively spliced, but not good at ruling that it isn't. This means the classifier is attractive for guiding the investigation of exons, where it wasn't previously known that they are alternatively spliced. This wouldn't be possible with a less specific classifier because further investigation relies on expensive wet-labs experiments for which the number of false positives need to be minimized. In this case the decision threshold should be chosen such that the specificity is even higher (at the cost of further sensitivity) as a false positive rate of 5.3\% is still too high for wet lab experiments. Thus, we conclude that our classifier shows attractive properties, but would require further tuning before clinical use. 
+
+% todo (maybe): actually evaluate other decision thresholds here
+
+%              precision    recall  f1-score   support
+%cons       0.74      0.56      0.64      1239
+%non-cons       0.84      0.93      0.88      3234
+%accuracy                           0.82      4473
+
+
+% sensitivity: 0.56 -- ruling out alternatively spliced
+% specificity: 0.93 -- ruling in alternative spliced
+% f1 score: 0.88, precision: 0.845 (cons), recall (cons): 0.927
 
 interpretation of attention mechanism etc follows here; some pretty graphics to follow
-
 
 \subsection{Choosing the exact attention mechanism} \label{subsubsec:attn_hyperparams}
 - say that conv overfits a lot
@@ -265,6 +282,29 @@ interpretation of attention mechanism etc follows here; some pretty graphics to 
 - ideally show training conv of conv + no query vs no query
 compute average of conv training error: 0.9884710561726501 for conv + no query
 
+
+%TODO: this 
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{| c c c | c c | c} 
+		\hline
+		%   & configuration & & performance & \\
+		heads & no query & conv & $\mu$ & $\sigma$ \\
+		\hline
+		0 & 0 & 0 & 0.832 & 0.025 \\
+		0 & 0 & 1 & 0.860 & 0.021 \\
+		0 & 1 & 0 & 0.851 & 0.013 \\
+		0 & 1 & 1 & 0.818 & 0.019 \\
+		1 & 0 & 0 & \textbf{0.865} & 0.011 \\
+		1 & 0 & 1 & 0.824 & \textbf{0.010} \\
+		1 & 1 & 0 & 0.852 & 0.017 \\
+		1 & 1 & 1 & 0.846 & 0.017 \\
+		\hline
+	\end{tabular}
+	\caption{Results of evaluating the extensions to the Attention mechanism given as AUC. heads = multiple attention heads were used, no query = no conceptual query vector was used, conv = an additional convolution operation was applied to the key and value matrices. 0 codes for the extension not being used, 1 codes for the extension being used.
+	}
+	\label{table:attn_gridsearch}
+\end{table}
 
 No query: 
 However, in initial experiments, the attention** mechanism performed significantly worse than the attention* mechanism. The extra representational capacity by having a query matrix seems to be important for performance. 
@@ -282,5 +322,7 @@ Reasons for why this extension did not work might be related to the use of a rec
 	\item In \cite{ghentransformers}, the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
 	%		they: 3000 nucleotides, convolution filter of 7
 \end{enumerate}
+
+%TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation
 
 Similar to the extension of multiple attention heads, this extension makes the model more powerful, but also roughly doubles the number of learnable weights. It might be surprising that adding a single convolution layer, adds the same number of 

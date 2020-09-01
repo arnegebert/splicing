@@ -171,10 +171,12 @@ class ComparisonTrainer(BaseTrainer):
         fscore = (2 * precision * recall) / (precision + recall)
         # locate the index of the largest f score
         ix = np.nanargmax(fscore)
-        tn, fp, fn, tp = confusion_matrix(target_all, pred_all >= thresholds[ix]).ravel()
+        tp, fp, fn, tn = confusion_matrix(target_all, pred_all >= thresholds[ix]).ravel()
         self.logger.info(f'Best Threshold: {thresholds[ix]}, F-Score={fscore[ix]:.3f}')
         self.logger.info(f'Corresponding precision: {precision[ix]:.3f}, recall: {recall[ix]:.3f}')
-        self.logger.info(f'TN: {tn}, FP: {fp}, FN: {fn}, TP: {tp}')
+        # the * indicates that we fixed the bug were the namings of TP and TN were switched in the code
+        # generating the log file
+        self.logger.info(f'TP: {tp}, FP: {fp}, FN: {fn}, TN: {tn} *')
 
     def convert_to_model_input_format(self, data):
         if self.embedded:

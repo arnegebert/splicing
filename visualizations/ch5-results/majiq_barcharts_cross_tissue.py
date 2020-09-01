@@ -4,7 +4,7 @@ import numpy as np
 
 def bar_charts():
     plt.style.use('seaborn')
-    labels = ['DSC', 'D2V', 'Attn']
+    labels = ['DSC', 'D2V', 'RASC']
     same_means = [0.822, 0.720, 0.875]
     diff_lib_means = [0.856, 0.728, 0.903]
     diff_indv_means = [0.854, 0.728, 0.900]

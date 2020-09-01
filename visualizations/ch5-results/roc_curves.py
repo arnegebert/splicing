@@ -33,7 +33,7 @@ def plot_attention(attn_weights):
 
 if __name__ == '__main__':
     # config for HEXEvent
-    labels = ['DSC (original)', 'DSC (ours)', 'D2V', 'BiLSTM + Attn']
+    labels = ['DSC (original)', 'DSC (ours)', 'D2V', 'RASC']
     experiments = ['HEXEvent_DSC', 'HEXEvent_D2V_MLP', 'HEXEvent_Attn']
     file_name = 'pred_and_target_all.npy'
     run_id = 'final'
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     load_and_plot_roc('hexevent_cross_model_roc_auc_comparison', dirs, labels)
 
     # config for HipSci SUPPA
-    labels = ['DSC', 'D2V', 'BiLSTM + Attn']
+    labels = ['DSC', 'D2V', 'RASC']
     experiments = ['HIPSCI_SUPPA_DSC', 'HIPSCI_SUPPA_D2V_MLP', 'HIPSCI_SUPPA_Attn']
     file_name = 'pred_and_target_all.npy'
     run_id = 'final'
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     load_and_plot_roc('suppa_cross_model_roc_auc_comparison', dirs, labels)
 
     # config for HipSci MAJIQ neurons
-    labels = ['DSC', 'D2V', 'BiLSTM + Attn']
+    labels = ['DSC', 'D2V', 'RASC']
     experiments = ['HIPSCI_MAJIQ_DSC', 'HIPSCI_MAJIQ_D2V_MLP', 'HIPSCI_MAJIQ_Attn']
     file_name = 'pred_and_target_all.npy'
     run_id = 'final'
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     load_and_plot_roc('majiq_neuron_cross_model_roc_auc_comparison', dirs, labels)
 
     # config for MAJIQ iPSC
-    labels = ['DSC', 'D2V', 'BiLSTM + Attn']
+    labels = ['DSC', 'D2V', 'RASC']
     experiments = ['iPSC_DSC', 'iPSC_D2V_MLP', 'iPSC_Attn']
     file_name = 'pred_and_target_all.npy'
     run_id = 'final'
