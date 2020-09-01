@@ -3,52 +3,71 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from utils import one_hot_decode_seq_vanilla
 
-sample = 2
-plt.style.use('seaborn')
+def line_plot(attn_ws):
+    plt.style.use('seaborn')
+    mean, std = np.mean(attn_ws, axis=0), np.std(attn_ws, axis=0)
 
-data = np.load(f'attn_ws/val_all_data.npy')[:, :, 0]
+    # print(f'Mean std dev: {np.mean(np.std(attn_ws, axis=0))}')
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+    # xticks = np.linspace(0, 140, 5)
+    # xs= ['-70', '-35', 'start', '+35', '+70']
+    xs2 = np.arange(-70, 70)
+    ax1.set_xlim(-70, 70)
+    ax1.set_xlabel('Position relative to exon start')
+    ax2.set_xlabel('Position relative to exon end')
+    ax1.set_ylabel('Attention weight')
+
+    ax2.set_xlim(-70, 70)
+    # xticks2 = np.linspace(-70, 70, 5)
+    # ax1.set_xticks(xticks2, xs)
+    # plt.xticks(xticks2, xs)
+    ax1.errorbar(xs2, mean[:140])#, yerr=stderr[:140])
+    ax2.errorbar(xs2, mean[140:])#, yerr=stderr[140:])
+
+    plt.savefig('mean_attention_w_std.png', dpi=300, bbox='tight')
+
+    plt.show(dpi=300)
+    # print(attn_ws.shape)
+
+
+def heatmap():
+    # plt.style.use('seaborn')
+
+
+    mean_attn_ws_epochs = []
+    for i in range(1, 50):
+        attn_ws = np.load(f'attn_ws/attn_ws_{i}.npy')[:, :140, 0]
+
+        mean, std = np.mean(attn_ws, axis=0), np.std(attn_ws, axis=0)
+        mean_attn_ws_epochs.append(mean)
+    mean_attn_ws_epochs = np.concatenate(mean_attn_ws_epochs, axis=0).reshape(49, 140)
+
+    plt.imshow(mean_attn_ws_epochs, cmap='viridis')
+    plt.savefig('attention_heatmap.png', dpi=300, bbox='tight')
+
+    plt.show(dpi=300)
+
+def print_attn_sums(attn_ws):
+    print(f'{sum(attn_ws[0, :140])} vs {sum(attn_ws[0, 140:])}')
+
+heatmap()
+
 attn_ws = np.load(f'attn_ws/attn_ws_50.npy')[:, :, 0]
-data = one_hot_decode_seq_vanilla(data[sample][:-1])
-mean, std = np.mean(attn_ws, axis=0), np.std(attn_ws, axis=0)
-stderr = stats.sem(attn_ws, axis=0)
-# if False:
-#     attn_ws = attn_ws[sample, :]
-# else:
-#     attn_ws = np.mean(attn_ws, axis=0)
-
-print(f'Mean std dev: {np.mean(np.std(attn_ws, axis=0))}')
-# fig, axs = plt.subplots(1, 2, sharey=True)
-# axs[0].plot(attn_ws[:140])
-# axs[1].plot(attn_ws[140:])
-fig, ax = plt.subplots()
-
-if True:
-    #x_ticks = [i for i in range(-140, 141) if i]#np.arange(-140, -1, -1)
-    ax.set_xlim(0, 280)
-    # plt.gca().set_ylim(ymin=0)
-    xticks = np.linspace(0, 280, 5)
-    xs= ['start-70', 'exon start', 'exon start/end transition', 'exon end', 'end+70']
-    plt.xticks(xticks, xs)
-    plt.rcParams['xtick.major.size'] = 20
-    plt.rcParams['xtick.major.width'] = 4
-    plt.rcParams['xtick.bottom'] = True
-    plt.rcParams['ytick.left'] = True
-
-    ax.errorbar(x=range(0, 280), y=mean, yerr = stderr)
-    # ax.errorbar(x=range(0, 280), y=mean)
-    ax.set_ylim(bottom=0, top=None)
+print_attn_sums(attn_ws)
+line_plot(attn_ws)
 
 
-    # ax.annotate('Exon start',
-    #             xy=(0, 0),
-    #             xytext=(0, 0.001),
-    #             arrowprops = dict(facecolor='black', shrink=0.05))
-else:
-    plt.xticks(range(280), data)
-    ax.plot(attn_ws, )
 
-
-plt.savefig('mean_attention_w_std.png',bbox='tight')
-
-plt.show()
-print(attn_ws.shape)
+attn_ws_multi_heads = np.load(f'../../attn_ws_50.npy')
+attn_ws_0 = attn_ws_multi_heads[:, :, 0]
+print_attn_sums(attn_ws_0)
+line_plot(attn_ws_0)
+attn_ws_1 = attn_ws_multi_heads[:, :, 1]
+print_attn_sums(attn_ws_1)
+line_plot(attn_ws_1)
+attn_ws_2 = attn_ws_multi_heads[:, :, 2]
+print_attn_sums(attn_ws_2)
+line_plot(attn_ws_2)
+attn_ws_3 = attn_ws_multi_heads[:, :, 3]
+print_attn_sums(attn_ws_3)
+line_plot(attn_ws_3)

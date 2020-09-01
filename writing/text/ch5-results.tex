@@ -276,53 +276,98 @@ We present the confusion matrix for the binary classifier based on RASC in Figur
 
 interpretation of attention mechanism etc follows here; some pretty graphics to follow
 
-\subsection{Choosing the exact attention mechanism} \label{subsubsec:attn_hyperparams}
-- say that conv overfits a lot
+\subsection{Evaluation of the additional attention modifications} \label{subsubsec:attn_hyperparams}
 
-- ideally show training conv of conv + no query vs no query
-compute average of conv training error: 0.9884710561726501 for conv + no query
+We evaluated the three additional attention modifications described in \ref{subsec:alternative_attention} by testing them sequentially. The results of these tests are shown in Figure \ref{fig:attn_extension_barcharts}. 
 
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/attn_extension_barcharts.png} 
+	\caption{Performance evaluation of the three extensions to the attention mechanism. We abbreviate the use of multiple attention heads as 'heads', the removal of the query matrix as 'no query' and the introduction of an additional convolution as 'conv'. }
+	\label{fig:attn_extension_barcharts}
+\end{figure}
 
-%TODO: this 
-\begin{table}[h!]
-	\centering
-	\begin{tabular}{| c c c | c c | c} 
-		\hline
-		%   & configuration & & performance & \\
-		heads & no query & conv & $\mu$ & $\sigma$ \\
-		\hline
-		0 & 0 & 0 & 0.832 & 0.025 \\
-		0 & 0 & 1 & 0.860 & 0.021 \\
-		0 & 1 & 0 & 0.851 & 0.013 \\
-		0 & 1 & 1 & 0.818 & 0.019 \\
-		1 & 0 & 0 & \textbf{0.865} & 0.011 \\
-		1 & 0 & 1 & 0.824 & \textbf{0.010} \\
-		1 & 1 & 0 & 0.852 & 0.017 \\
-		1 & 1 & 1 & 0.846 & 0.017 \\
-		\hline
-	\end{tabular}
-	\caption{Results of evaluating the extensions to the Attention mechanism given as AUC. heads = multiple attention heads were used, no query = no conceptual query vector was used, conv = an additional convolution operation was applied to the key and value matrices. 0 codes for the extension not being used, 1 codes for the extension being used.
-	}
-	\label{table:attn_gridsearch}
-\end{table}
+\subsubsection{Using multiple attention heads} \ref{subsubsec:result_heads}
+Using multiple attention heads lead to a significant performance gain and reduction of the variance. The additional representational subspaces and the ensemble model effect of multiple attention heads appear to lead to a consistently improve performance. No overfitting is observed even though the number of model weights are increased from roughly 36,000 to 67,000. Due to the uniformly improved performance, we decide to incorporate multiple attention heads into RASC. 
 
-No query: 
-However, in initial experiments, the attention** mechanism performed significantly worse than the attention* mechanism. The extra representational capacity by having a query matrix seems to be important for performance. 
-In practice, this lead to a model about 10\% smaller. 
-In practice, this lead to an about 10\% smaller model.
+%36361 -> 66861 
 
-heads:
-While these extra representational subspaces might make the model more powerful and also more robust (in the sense that multiple attention heads act like an ensemble model), it also increases the number of learnable weights potentially leading to overfitting. In practice, this extension roughly doubled the number of learnable weights.
+\subsubsection{Removing the query matrix}  % 56465 parameters
+We observe slighlty diminished performance upon removing the query matrix. The extra representational capacity afforded to RASC by having query matrices seems to improve it's predictive power. Despite decreasing model size by roughly 10,000 parameters when removing the query matrices, we decide to not incorporate this adaption of the attention mechanism. 
 
-Conv: 
-Testing this extension on the HipSci MAJIQ dataset didn't lead to improved results. Although the convergence speed increased rapidly (from around 180 epochs to 20 epochs), we also observed heavy overfitting. To alleviate this, we added dropout and batch normalization layers. After adding two dropout layers with a high dropout probability (one after computing the attention weights and one after the convolution layers with p=0.5 each) and setting the convolutional filter size to no higher than 3, overfitting issues ameliorated. However, after adding these layers convergence was no faster than for the case without convolutional layers and the performance did not improve. Thus, for the sake of a simpler model, we opted to not use this extension for the rest of the experiments.
-Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences compared to \cite{ghentransformers}:
+%However, in initial experiments, the attention** mechanism performed significantly worse than the attention* mechanism. The extra representational capacity by having a query matrix seems to be important for performance. 
+%In practice, this lead to a model about 10\% smaller. 
+%In practice, this lead to an about 10\% smaller model.
+
+%all 8 possible variations of combining them. Quantitative results are reported in Table \ref{table:attn_extensions}. 
+%The overall best performing model uses multiple attention heads, but no other extensions. Using multiple attention heads appears to make the model perform consistently better than the baseline, except when paired with the convolution extension. On a closer look, this seems to be the result of the model overfitting to the dataset as shown in Figure [...]. %TODO
+\subsubsection{Adding an extra convolution}
+Adding an additional convolution operation to the attention mechanism, surprisingly leads to decreased performance, even worse than the baseline with no extensions. This in contrast to \cite{ghentransformers} where this extension lead to very significant relative performance improvements. There are likely multiple factors affecting the different performance impacts:
+% Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences:
 \begin{enumerate}
 	\item Although we process the input at single-nucleotide resolution, the use of a BiLSTM means that the encoder is aware of the nucleotides which precede and follow it. Therefore, information about the neighbouring nucleotides is likely already represented in the representation for a given nucleotide. This is in contrast to a Transformer model where the layers are non-recurrent and only work at single-symbol resolution. Thus, the convolutional layers likely don't give the model a lot more flexibility.
 	\item In \cite{ghentransformers}, the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
-	%		they: 3000 nucleotides, convolution filter of 7
+		%		they: 3000 nucleotides, convolution filter of 7
+	\item We observe increased overfitting when using this extension. The training curve in Figure [...] %TODO add this and finish this section
+	showcases this behaviour. We observe overfitting despite using the same convolution across multiple heads, introducing additional batch normalization and limiting the convolution size to 3. 
 \end{enumerate}
+
+
+In summary, we only extend RASC with multiple attention heads. The results of RASC we report on the other datasets also use the model with multiple attention heads. 
+%include the extension, that is, of 
+%
+%The architecture of RASC, as selected on the HipSci MAJIQ dataset, was applied While the selection of which extension should be used was based on the HipSci MAJIQ dataset, we applied 
+%The convolution extension generally appears to lead to overfitting. 
+%Conv: 
+%Testing this extension on the HipSci MAJIQ dataset didn't lead to improved results. Although the convergence speed increased rapidly (from around 180 epochs to 20 epochs), we also observed heavy overfitting. To alleviate this, we added dropout and batch normalization layers. After adding two dropout layers with a high dropout probability (one after computing the attention weights and one after the convolution layers with p=0.5 each) and setting the convolutional filter size to no higher than 3, overfitting issues ameliorated. However, after adding these layers convergence was no faster than for the case without convolutional layers and the performance did not improve. Thus, for the sake of a simpler model, we opted to not use this extension for the rest of the experiments.
+%Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences compared to \cite{ghentransformers}:
+%\begin{enumerate}
+%	\item Although we process the input at single-nucleotide resolution, the use of a BiLSTM means that the encoder is aware of the nucleotides which precede and follow it. Therefore, information about the neighbouring nucleotides is likely already represented in the representation for a given nucleotide. This is in contrast to a Transformer model where the layers are non-recurrent and only work at single-symbol resolution. Thus, the convolutional layers likely don't give the model a lot more flexibility.
+%	\item In \cite{ghentransformers}, the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
+%	%		they: 3000 nucleotides, convolution filter of 7
+%\end{enumerate}
+
+
+%Testing this extension on the HipSci MAJIQ dataset didn't lead to improved results. Although the convergence speed increased rapidly (from around 180 epochs to 20 epochs), we also observed heavy overfitting. To alleviate this, we added dropout and batch normalization layers. After adding two dropout layers with a high dropout probability (one after computing the attention weights and one after the convolution layers with p=0.5 each) and setting the convolutional filter size to no higher than 3, overfitting issues ameliorated. However, after adding these layers convergence was no faster than for the case without convolutional layers and the performance did not improve. Thus, for the sake of a simpler model, we opted to not use this extension for the rest of the experiments.
+%Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences compared to \cite{ghentransformers}:
+%\begin{enumerate}
+%	\item Although we process the input at single-nucleotide resolution, the use of a BiLSTM means that the encoder is aware of the nucleotides which precede and follow it. Therefore, information about the neighbouring nucleotides is likely already represented in the representation for a given nucleotide. This is in contrast to a Transformer model where the layers are non-recurrent and only work at single-symbol resolution. Thus, the convolutional layers likely don't give the model a lot more flexibility.
+%	\item In \cite{ghentransformers}, the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
+%	%		they: 3000 nucleotides, convolution filter of 7
+%\end{enumerate}
+
+%TODO attention visualization
+
+
+%- say that conv overfits a lot
+%
+%- ideally show training conv of conv + no query vs no query
+%compute average of conv training error: 0.9884710561726501 for conv + no query
+
+%
+%\begin{table}[h!]
+%	\centering
+%	\begin{tabular}{| c c c | c c | c} 
+%		\hline
+%		%   & configuration & & performance & \\
+%		heads & no query & conv & $\mu$ & $\sigma$ \\
+%		\hline
+%		0 & 0 & 0 & 0.832 & 0.025 \\
+%		0 & 0 & 1 & 0.860 & 0.021 \\
+%		0 & 1 & 0 & 0.851 & 0.013 \\
+%		0 & 1 & 1 & 0.818 & 0.019 \\
+%		1 & 0 & 0 & \textbf{0.865} & 0.011 \\
+%		1 & 0 & 1 & 0.824 & \textbf{0.010} \\
+%		1 & 1 & 0 & 0.852 & 0.017 \\
+%		1 & 1 & 1 & 0.846 & 0.017 \\
+%		\hline
+%	\end{tabular}
+%	\caption{Results of evaluating the three additional attention extensions. $\mu$ denotes the average AUC across 9 experiments and $\sigma$ the respective standard deviation. 0 codes for the extension not being used, 1 codes for the extension being used. The extensions were abbreviated as follows: heads = multiple attention heads were used, no query = no conceptual query matrix was used, conv = an additional convolution operation was applied to the key and value matrices.
+%	}
+%	\label{table:attn_extensions}
+%\end{table}
+
+
 
 %TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation
 
-Similar to the extension of multiple attention heads, this extension makes the model more powerful, but also roughly doubles the number of learnable weights. It might be surprising that adding a single convolution layer, adds the same number of 
+%Similar to the extension of multiple attention heads, this extension makes the model more powerful, but also roughly doubles the number of learnable weights. It might be surprising that adding a single convolution layer, adds the same number of 

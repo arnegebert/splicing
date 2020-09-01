@@ -161,7 +161,7 @@ class BaseTrainer:
         }
         filename = str(self.checkpoint_dir / 'checkpoint-epoch{}.pth'.format(epoch))
         torch.save(state, filename)
-        if True:
+        if False:
             self.logger.info(f'Directory of the current run: {filename}')
             self.logger.info(f'Explicitly not saving model')
         else:

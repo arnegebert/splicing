@@ -329,7 +329,7 @@ class AttentionBlockWithHeads(BaseModel):
             attn_ws.append(attn_w)
 
         zs = torch.cat(outputs, dim=1)
-        attn_ws = torch.cat(attn_ws, dim=1)
+        attn_ws = torch.cat(attn_ws, dim=2)
         z = self.heads_unifier(zs)
         return z, attn_ws
 
@@ -358,7 +358,7 @@ class AttentionBlockWithoutQueryWithHeads(BaseModel):
             attn_ws.append(attn_w)
 
         zs = torch.cat(outputs, dim=1)
-        attn_ws = torch.cat(attn_ws, dim=1)
+        attn_ws = torch.cat(attn_ws, dim=2)
         z = self.heads_unifier(zs)
         return z, attn_ws
 
@@ -523,7 +523,7 @@ class AttentionBlockWithConvWithHeads(BaseModel):
             attn_ws.append(attn_w)
 
         zs = torch.cat(outputs, dim=1)
-        attn_ws = torch.cat(attn_ws, dim=1)
+        attn_ws = torch.cat(attn_ws, dim=2)
         z = self.heads_unifier(zs)
         return z, attn_ws
 
@@ -605,7 +605,7 @@ class AttentionBlockWithoutQueryWithConvWithHeads(BaseModel):
             attn_ws.append(attn_w)
 
         zs = torch.cat(outputs, dim=1)
-        attn_ws = torch.cat(attn_ws, dim=1)
+        attn_ws = torch.cat(attn_ws, dim=2)
         z = self.heads_unifier(zs)
         return z, attn_ws
 

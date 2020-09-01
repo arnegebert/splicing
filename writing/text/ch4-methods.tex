@@ -659,13 +659,13 @@ The input $I$ is a concatenation (along the first dimension) of the representati
 
 
 
-\subsection{Variant and extensions of the attention mechanism} \label{subsec:alternative_attention}
-In the following, we introduce multiple variants and extensions of the attention mechanism which we evaluated separately.
+\subsection{Further modifications of the attention mechanism} \label{subsec:alternative_attention}
+In the following, we introduce three further modifications of the attention mechanism which we evaluated separately from the modifications described so far.
 %In the following, we introduce multiple extensions which were attempted which didn't lead to improved results. For most of these, initial results clearly showed that the results weren't improved by using them. As such, we didn't test these extensions more extensively than initial experiments because we felt the initial results were already instructive enough and no further investigation was warranted. Thus, the analysis of the results won't be as extensive as for the extensions which worked.
 
 
 
-\subsubsection{No query} \label{subsubsec:noquery}
+\subsubsection{No query matrix} \label{subsubsec:noquery}
 As the query matrix ${Q}^*$ is the same independent of the exact input sequences, it could be possible to remove the query matrix and compute the attention weights sorely based on the key matrix $K$.
 This is possible by learning a key weight matrix $W^{K_{no\_query}} \in \mathcal{R}^{in \times 1}$ and computing attention as:
 $$K_{no\_query} = IW^{K_{no\_query}}$$
@@ -683,6 +683,7 @@ The final output matrix $Z_{final} \in \mathcal{R}^{l \times out}$ is then compu
 $$Z_{final} = concat(Z_1^*, \dots, Z_{h}^*) W^O$$
 where the concatenation occurs along the second dimension and $W^O \in \mathcal{R}^{out * h \times out_{new}}$. $out_{new}$ represents the new output dimension of the attention layer, which is arrived at by combining the dimensions of the $h$ attention heads.
 
+While these extra representational subspaces might make the model more powerful and also more robust (in the sense that multiple attention heads act like an ensemble model), it also increases the number of learnable weights potentially leading to overfitting.
 \subsubsection{Convolution in attention heads} \label{subsubsec:attention_conv}
 The information contained in a single nucleotide is very low. 
 This motivated \cite{ghentransformers} to integrate an additional 1D convolution into the computation of the query, key and value matrices Q, K and V which is applied after the multiplication with the weight matrices $W^Q, W^K$ and $W^V$. This convolution allows the model to more effectively integrate information from multiple neighbouring nucleotides. This extension can also be understood as an alternative to splitting the input nucleotide sequence into k-mers (similar to the split into overlapping 3-mers for the input of the D2V model \ref{subsubsec:kmers}) and provided better results than splitting the input nucleotide sequence into k-mers when using a Transformer network for a genome annotation task in \cite{ghentransformers}.
@@ -713,7 +714,7 @@ The input to the encoder blocks is a dense 4-dimensional embedding of the one-ho
 
 LSTM cells opposed to unmodified RNNs are used as encoder as LSTMs have been shown to be better at retaining information over long sequences and avoiding the vanishing and exploding gradient problems \cite{lstm}. In particular, we use Bidirectional LSTM (BiLSTM) \cite{bidirection} to model that the splicing of an exon likely depends on bidirectionally interacting factors. A separate BiLSTM is used for finding for encoding the exon start and exon end sequence. 
 
-We pre-empt the results chapter by noting that we only use the extension of multiple attention heads of the three modifications and extensions of the attentin mechanisms we considered. 
+We pre-empt the results chapter by noting that we only use the extension of multiple attention heads of the three additional modifications of the attentin mechanisms we considered. 
 The architecture of our model is visualized in Figure \ref{fig:attnbilstm}. We refer to this new model as Recursive Attentive Splicing Code (RASC). 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/visualizations-AttnBiLSTM.pdf} 

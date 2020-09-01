@@ -1,5 +1,5 @@
 {
-    "name": "MultiHeads",
+    "name": "MultiHeadsConvDropout",
 
     "n_gpu": 1,
     "run_id": "",
@@ -7,13 +7,8 @@
     "arch": {
         "type": "AttnBiLSTM",
         "args": {
-            "LSTM_dim": 50,
-            "attn_dim": 100,
-            "n_heads": 4,
-            "head_dim": 50,
-            "fc_dim": 128,
-            "attn_mode": "heads",
-            "attn_dropout": 0.4
+          "attn_dropout": 0.5,
+          "attn_mode": "heads_conv"
         }
     },
     "data_loader": {
