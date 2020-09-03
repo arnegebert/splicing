@@ -41,7 +41,7 @@ Three primary sources for genomic data were used in this study: the Human Exon s
 The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons). It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information. ESTs are short cDNA sequences which have been used in older sequencing techniques (before the advent of modern high-throughput sequencing technologies). 
 
 %perhaps extra section where I discuss the merit of each dataset because right now it doesn't fit
-Some issues with ESTs which therefore also affect HEXEvent are worth highlighting. EST are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error prone \cite{hitchhiker}. Additionally, ESTs underpresent less frequent transcripts and as a result often only capture 50 - 65\% of an organism's genes \cite{estunderrepresenttransripts}. Thus, these biases may also have an adverse effect on the HEXEvent database's data quality.
+Some issues with ESTs which therefore also affect HEXEvent are worth highlighting. ESTs are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error prone \cite{hitchhiker}. Additionally, ESTs underpresent less frequent transcripts and as a result often only capture 50 - 65\% of an organism's genes \cite{estunderrepresenttransripts}. Thus, these biases may also have an adverse effect on the HEXEvent database's data quality.
 
 %Thus, great care needs taken to account for these systematic biases when working with EST data.
 %It was chosen as a data source for direct comparability with the baseline paper \cite{dsc}.
@@ -128,13 +128,14 @@ $$PSI = \frac{\#IR}{(\#IR+\#ER)}$$
 Figure \ref{fig:psiestimation} illustrates the process of estimating PSI based on RNA-seq reads.  
 The advantage of this estimate lies in its simplicity and flexibility. It is quick and easy to implement (hopefully bug-free). It is independent of library size. It can easily be adapted to estimate the PSI of a junction by redefining \#IR and \#ER to count the inclusion and exclusion read for that junction.
 
-\begin{figure}
+\begin{figure}[h]
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/psi_estimation.png} 
 	\caption{
-		Process of estimating PSI based off RNA-seq reads \cite{berlinpsi}. The reads are mapped to the transcript. Based on annotation files, the reads overlapping exon/intron junctions are classfied as including or excluding reads for a particular exon. Based on the observed IR and ER, the PSI for a given exon is estimated.
+		Process of estimating PSI based off RNA-seq reads \cite{berlinpsi}. First, the reads are mapped to the transcript. Based on annotation files, the reads overlapping exon/intron junctions are classfied as including or excluding reads for a particular exon. Based on the observed IR and ER, the PSI for a given exon is then estimated.
 		}
 	\label{fig:psiestimation}
 \end{figure}
+%TODO: lix says make sure this figure precedes list below; added [h]
 %'deceptively simple'?
 
 However, this estimate also has various issues:
@@ -142,7 +143,7 @@ However, this estimate also has various issues:
 	\item It doesn't account for uncertainty in the estimate. A rarely expressed gene may only experience a few reads of a particular exon leading to a very uncertain estimate. For instance, if we observe 1 IR and 1 ER for exon E1: $PSI_{E1} = \frac{1}{2} = 50\%$. Compare this to E2 where we observed 15 inclusion and 15 exclusion reads: $PSI_{E2} = \frac{15}{30} = 50\%$.\\
 	The estimate of $PSI_{E2}$ is likely to be more accurate, but this information is not contained in the estimate. Concretely, these two samples would be treated as equally important by the network even though they likely shouldn't.
 	
-	To account for this, it is possible to only count exons who experienced at least a certain number of reads. However, raw read counts are very unreliable when not accounting for gene expressiveness: 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the expressiveness of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM). Of these, TPM is usually the most common choice. Therefore, a better solution is likely to only count reads from genes whose TPM is above a certain threshold. \\
+	To account for this, it is possible to only count exons who experienced at least a certain number of reads. However, raw read counts are very unreliable when not accounting for overall gene expression: 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the abundance of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM). Of these, TPM is usually the most common choice. Therefore, a better solution is likely to only count reads from genes whose TPM is above a certain threshold. \\
 	Note that there is not a principled way to choose this threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and data quantity. In practice, the 'optimal' cutoff threshold will be unknown and vary from dataset to dataset.
 	% reformulate once again to say just take TPM values bitch no cut-off
 %	However, assuming this solution is taken, there are additional two aspects worth discussing:
@@ -218,7 +219,7 @@ In more general terms, the data on which the estimate is based on is biased in m
 The HEXEvent database already provides PSI estimates based on EST counts for each exon and facilitates standard filtering steps (e.g. only select cassette exons). 
 The baseline paper \cite{dsc} takes HEXEvent as a starting point and generates three different datasets respectively only containing cassette exons, exons with an alternative 3' splice and exons with an alternative 5' splice site. Each of these datasets also contains constitutive exons. To account for the biases inherent in EST data, it applies multiple filtering steps such as requiring a minimum number of supporting ESTs and only using exons which display a single type of alternative splicing. They make the resulting datasets publicly available and we use the dataset containing cassette exons for direct comparability. 
 
-However, it should be noted that HEXEvent uses the critized naive estimation method for PSI, i.e., they estimate PSI as $PSI = \frac{\#IR}{(\#IR+\#ER)}$. Except for requiring a minimum number of supporting ESTs, none of the five main critique points above are explicitly accounted for by \cite{dsc}. The EST data available by UCSC is based on many different tissues which may lead to the derived alternative splicing behaviour being an average of the splicing behaviour of many tissues which never occurs in any singular tissue. %distort view, confuse nice words here
+However, it should be noted that HEXEvent uses the critized naive estimation method for PSI, i.e., they estimate PSI as $PSI = \frac{\#IR}{(\#IR+\#ER)}$. Except for requiring a minimum number of supporting ESTs, none of the five main critique points above are explicitly accounted for by \cite{dsc}. The EST data available from UCSC is based on many different tissues which may lead to the derived alternative splicing behaviour being an average of the splicing behaviour of many tissues which never occurs in any singular tissue. %distort view, confuse nice words here
 Therefore, care should be taken when drawing conclusions based on the PSI estimates of this dataset. 
 
 \subsubsection{Our PSI estimation implementation} \label{subsubsec:implementedpsiestimation}
@@ -248,7 +249,7 @@ Reads may also be misattributed in our cassette exon PSI estimation as described
 % tpm value histogram
 %\begin{figure}
 %	\centering%\includegraphics[width=0.7\textwidth]{../visualizations/suppa_cross_model_roc_auc_comparison.png} 
-%	\caption{%TODO tpm value histogram
+%	\caption{
 %		Distribution of TPM values. The cut-off we chose is marked in red. Concretely, this lead to filtering ... out of ... genes. }
 %	\label{fig:tpm_distribution}
 %\end{figure}
@@ -277,7 +278,7 @@ Several approaches have been developed which try to address the issues in estima
 %isoform-based vs count-based methods
 %	count-based methods = exon based and event-based methods
 \subsubsection{SUPPA}\label{subsubsec:suppa}
-SUPPA \cite{suppa2} estimates the PSI value for each alternative splicing event based on transcript abundances. It operates in 2 steps for quantifying the PSI of an alternative splicing event:
+SUPPA \cite{suppa2} estimates the PSI value for each alternative splicing event based on transcript abundance. It operates in 2 steps for quantifying the PSI of an alternative splicing event:
 1) Given an input annotation file in GTF format, it generates the transcript isoforms which count as IR or ER for a given alternative splicing event.
 2) Given the information which transcript count as IR or ER from 1) and how frequently each transcript occurs, it estimates the PSI value via $PSI = \frac{TPM_{IR}}{TPM_{IR} + TPM_{ER}}$. $TPM_{IR}$ and $TPM_{ER}$ respectively refer to the total TPM of transcripts supporting a certain exon being included or excluded. SUPPA can integrate the TPM values from multiple samples.
 %because it is so naive is probably the reason why it performs so badly
@@ -285,7 +286,7 @@ SUPPA \cite{suppa2} estimates the PSI value for each alternative splicing event 
 
 
 \textbf{Using SUPPA:}
-SUPPA requires a GTF annotation file and a file quantifying the abundance of each transcript. A GENCODE version 34 annotation file obtained from Ensembl was used as an annotation file. Salmon \cite{salmon} was used for quantifying the relative abundance of each transcript in TPM. Salmon's quantification is based on the raw RNA-seq reads in FASTQ format, takes into account experimental attributes and corrects for biases commonly observed in RNA-seq data. After extracting the TPM values provided by Salmon into the format required by SUPPA (a tsv-file with one column for the transcript id and one column for the TPM value), SUPPA estimates the PSI for each alternative splicing event.
+SUPPA requires a GTF annotation file and a file quantifying the abundance of each transcript. A GENCODE version 34 annotation file obtained from Ensembl was used as an annotation file. Salmon \cite{salmon} was used to quantify the relative abundance of each transcript in TPM. Salmon's quantification is based on the raw RNA-seq reads in FASTQ format, takes into account experimental attributes and corrects for biases commonly observed in RNA-seq data. After extracting the TPM values provided by Salmon into the format required by SUPPA (a tsv-file with one column for the transcript id and one column for the TPM value), SUPPA estimates the PSI for each alternative splicing event.
 %[https://github.com/comprna/SUPPA/releases/tag/v2.3 if I feel like it]
 
 SUPPA operates on at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Of the discussed issues in \ref{subsubsec:naivepsi}, it accounts for 2 of them: 
@@ -347,14 +348,15 @@ At this point, the datasets have been preprocessed such that we have the followi
 \begin{itemize}
 	\item chromosome and strand information of the to-be-classified exon or junction,
 	\item start and end coordinates of the exon or junction within a chromosome,
-	\item the lengths of neighbouring introns or exons*\footnote{Due to data limitations, we don't know the length of neighbouring exons when creating intron-centric training samples from GTEx data. In this case, the length of neighbouring exons is set to a constant 0. }.
+	\item the lengths of neighbouring introns or exons*\footnote{Due to data limitations, we don't know the length of neighbouring exons when creating intron-centric training samples from GTEx data. In this case, the length of neighbouring exons is set to 0. }.
 \end{itemize}
 
 Using this information, now either exon-centric or intron-centric training samples are created. Exon-centric training samples are created when the task of the network is to classify an exon as constitutive or not. Intron-centric training samples are created when the task of the network is to classify whether a junction is constitutive or not.
 
 
-Using the chromosome information and the start and end coordinates, two 140 nucleotide window around the start and end coordinates were extracted from the human reference genome GRCh38 (see Figure \ref{fig:inputschematic}). Furthermore, if an exon or junction is taken from a negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed and each extracted nucleotide is converted to its reverse complement. This mirrors biology as the spliceosome also observes the exon start and end sites as switched and reverse complemented between the + and - strand. Presumably, this means the models the models don't have to learn different features for exons or junctions on the + and - strand. \\
-Samples from the chromosomes X, Y and M were excluded due to the fundamental functional differences between them and the autosomes (e.g. there only exists one copy of the sex chromosomes).
+Using the chromosome information and the start and end coordinates, two 140 nucleotide window around the start and end coordinates were extracted from the human reference genome GRCh38 (see Figure \ref{fig:inputschematic}). Furthermore, if an exon or junction is taken from a negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed and each extracted nucleotide is converted to its reverse complement. This mirrors biology, as the spliceosome also observes the exon start and end sites as switched and reverse complemented between the + and - strand.\\ 
+%Presumably, this means the models the models don't have to learn different features for exons or junctions on the + and - strand. \\
+Samples from the chromosomes X, Y and M were excluded due to the fundamental functional differences between them and the autosomes (e.g. there only exists one functional copy of the sex chromosomes).
 
 The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine 'A' is encoded as [1 0 0 0], cytosine 'C' as [0 1 0 0], guanine 'G' as [0 0 1 0] and thymine 'T' as [0 0 0 1]. Thus, each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encoded nucleotides.
 
@@ -376,7 +378,7 @@ The end results is that a single training sample for the model contains two 140x
 %: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
 % add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
 
-Table \ref{table:datasets} shows the number of obtained training samples in each datasets. Among the exon-centric datasets, the HEXEvent dataset contains the most samples, followed by the HipSci MAJIQ, GTEx and HIPSCI MAJIQ dataset. The HEXEvent and HipSci MAJIQ datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. Unlike between samples from neuron and iPSC cell lines, there are significant cross-tissue differences between the number of training samples in GTEx-based datasets: the cerebellum tissue datasets contain roughly twice as many training samples as the heart tissue datasets. This is a result of the cerebellum tissue containing 10,000 highly-expressed whereas the heart sample contains only 5,000 highly expressed genes. Surprisingly, there are 17 million exon-exon junction reads from the heart sample compared to the cerebellum's 8 million exon-exon junction reads. The additional reads from the heart sample are concentrated in a few extremely highly expressed genes (e.g. gene ENSG00000198886 is expressed 1000-times as often as the median highly expressed gene) and while this concentration of reads also appear in the cerebellum tissue, it is less extreme.
+Table \ref{table:datasets} shows the number of obtained training samples in each datasets. Among the exon-centric datasets, the HEXEvent dataset contains the most samples, followed by the HipSci MAJIQ, GTEx and HIPSCI MAJIQ dataset. The HEXEvent and HipSci MAJIQ datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. Unlike between samples from neuron and iPSC cell lines, there are significant cross-tissue differences between the number of training samples in GTEx-based datasets: the cerebellum tissue datasets contain roughly twice as many training samples as the heart tissue datasets. This is a result of the cerebellum tissue containing 10,000 genes whereas the heart sample contains only 5,000. Surprisingly, there are 17 million exon-exon junction reads from the heart sample compared to the cerebellum's 8 million exon-exon junction reads. The additional reads from the heart sample are concentrated in a few extremely highly expressed genes (e.g. gene ENSG00000198886 is expressed 1000-times as often as the median highly expressed gene) and while this concentration of reads also appear in the cerebellum tissue, it is less extreme.
 
 The same cross-tissue observations also holds for the intron-centric datasets. The intron-centric datasets contains significantly more training samples than the exon-centric datasets because they are not constrained to cassette exons (which would lead to the expectation that the intron-centric datasets contain roughly twice as many samples as the exon-centric datasets), but contain all non-filtered junctions. 
 % ENSG00000198886 - MT-ND4 - https://www.proteinatlas.org/ENSG00000198886-MT-ND4
@@ -395,11 +397,11 @@ The same cross-tissue observations also holds for the intron-centric datasets. T
 		\toprule
 		HEXEvent & mixed & exon & 50,918 \\
 		\hline
-		GTEx & brain & exon & 30,466\\
+		GTEx & brain cortex & exon & 30,466\\
 		GTEx & cerebellum & exon & 37,095\\
 		GTEx & heart & exon & 19,257\\
 		\hline
-		GTEx & brain & intron & 127,908\\
+		GTEx & brain cortex & intron & 127,908\\
 		GTEx & cerebellum & intron & 161,310\\
 		GTEx & heart & intron & 81,659\\
 		%   \hline
@@ -714,6 +716,8 @@ The input to the encoder blocks is a dense 4-dimensional embedding of the one-ho
 
 LSTM cells opposed to unmodified RNNs are used as encoder as LSTMs have been shown to be better at retaining information over long sequences and avoiding the vanishing and exploding gradient problems \cite{lstm}. In particular, we use Bidirectional LSTM (BiLSTM) \cite{bidirection} to model that the splicing of an exon likely depends on bidirectionally interacting factors. A separate BiLSTM is used for finding for encoding the exon start and exon end sequence. 
 
+As this lead to empirically better results, we also introduce a 1D batch normalization layer before the attention layer. A dropout layer in the attention head is used for the same reason. 
+
 We pre-empt the results chapter by noting that we only use the extension of multiple attention heads of the three additional modifications of the attentin mechanisms we considered. 
 The architecture of our model is visualized in Figure \ref{fig:attnbilstm}. We refer to this new model as Recursive Attentive Splicing Code (RASC). 
 \begin{figure}
@@ -800,7 +804,7 @@ To evaluate these, we analytically compute the decision threshold which maximize
 		Neurons (fully-connected layers) & 32, 8\\
 		Dropout (fully-connected layers) & 0.2, 0.2\\
 		\hline
-		\textbf{BiLSTM + Attention} \\
+		\textbf{RASC} \\
 		\hline
 		Dense embedding dimensions & 4\\
 		BiLSTM dimension & 50\\
@@ -813,7 +817,7 @@ To evaluate these, we analytically compute the decision threshold which maximize
 		Dropout (after fully-connected layer) & 0.5\\
 		\hline
 	\end{tabular}
-	\caption{Hyperparameters of the main models
+	\caption{Hyperparameters of the three models
 	}
 	\label{table:hyperparameters}
 \end{table}

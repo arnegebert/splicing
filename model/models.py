@@ -313,6 +313,8 @@ class AttentionBlockWithHeads(BaseModel):
 
     def forward(self, input_seq):
         batch_size = input_seq.shape[0]
+        # input_seq[:, :140] = torch.zeros_like(input_seq[:, :140])
+        # input_seq[:, 140:] = torch.zeros_like(input_seq[:, 140:])
 
         outputs, attn_ws = [], []
         for i in range(self.n_heads):

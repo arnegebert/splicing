@@ -31,14 +31,14 @@ def bar_charts():
     ax.set_xticklabels(labels)
     ax.legend()
 
-    def autolabel(rects, labels=None):
+    def autolabel(rects, labels=None, stds=None):
         """Attach a text label above each bar in *rects*, displaying its height."""
         for i, rect in enumerate(rects):
             label = labels[i] if labels else rect.get_height()
             height = rect.get_height()
-            if label == '1/20,000': continue
+            y_label = height + 0.0075 if not stds else height + stds[i]*0.7 + 0.0075
             ax.annotate(f'{label}',
-                        xy=(rect.get_x() + rect.get_width() / 2, height + 0.0075),
+                        xy=(rect.get_x() + rect.get_width() / 2, y_label),
                         xytext=(0, 3),  # 3 points vertical offset
                         textcoords="offset points",
                         ha='center', va='bottom')

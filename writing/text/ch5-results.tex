@@ -2,16 +2,16 @@
 
 This section presents and discusses the results of our experiments based on the three models and the datasets introduced in Chapter \ref{ch:4-methods}. It also describes the rationale behind deciding which experiments should be run.
 
-\section{HEXEvent dataset} \label{sec:hexevent_results} %TODO> hexvent dataset section whether the other ones are not
+\section{HEXEvent dataset} \label{sec:hexevent_results}
 To obtain a baseline, we evaluate all three models on the HEXEvent dataset as used in \cite{dsc} and introduced in \ref{subsec:hexevent}. The results of these experiments are shown in Figure \ref{fig:hexevent_auc}.
 
 \subsubsection{Analysis of main findings}
 Generally all models perform extremely well with AUCs nearing 90\%. While differences are small, RASC seems to perform slightly better than the other models.
 %They also perform very similarly, making it hard to differentiate them based on their ROC curves. The Attn model seems to perform slightly better than the other models. 
 
-Assessing our reimplementation, we observe a small difference between the AUC value reported in \cite{dsc} (mean 0.899, standard deviation of 0.18) and the ones we observe (mean 0.873, standard deviation of 0.06). This is likely just a result of random statistical noise influenced by different random seeds between runs and differences between TensorFlow / Keras (their implementation) and PyTorch (our implementation). Notably, when reevaluating the publically available original implementation, in a single run we also obtain results (0.872 AUC) closer to the results of our reimplementation. 
+Assessing our reimplementation, we observe a small difference between the AUC value reported in \cite{dsc} (mean 0.899, standard deviation of 0.18) and the ones we observe (mean 0.873, standard deviation of 0.06). This is likely the result of random statistical noise influenced by different random seeds between runs and differences between TensorFlow/Keras (their implementation) and PyTorch (our implementation). Notably, when reevaluating the publically available original implementation in a single run, we also obtain results (0.872 AUC) closer to the results of our reimplementation. 
 %There is a small (~2\%) difference in the AUC values in the AUC values for the DSC model reported in \cite{dsc} (89.9 AUC) and the ones we observe (87.1 AUC original). 
-Thus, we conclude that, albeit with minor caveats, the reimplementation was successful and that we are able to replicate the results of \cite{DSC}.
+Thus, we conclude that, albeit with minor caveats, the reimplementation and replication of \cite{dsc} was successful.
 %TODO say somewhere that validation and test error are always the same
 %TOOO also talk about training error
 
@@ -30,7 +30,7 @@ Thus, we conclude that, albeit with minor caveats, the reimplementation was succ
 % Observation: Performance heavily drops when no lengths feature is used
 
 \subsubsection{Length features are necessary}
-Reimplementation was done piece-wise, that is, first the sequence features were added as input, then the networks were trained to make sure that this was done correctly and then the length features were added. This lead to an interesting observation: model performance is significantly worse when no length features are given to the models. Quantitative results for this observation are given in table \ref{table:results_hexevent}. This observation is true across models and leads to an average relative performance drop of over 66\%. The information about the secondary structure obtained in the lengths seems to be necessary for the models to obtain good predictive power.
+Reimplementation was completed piece-wise, that is, first the sequence features were added as input, then the networks were trained to make sure that this was done correctly and then the length features were added. This lead to an interesting observation: model performance is significantly worse when no length features are given to the models. Quantitative results for this observation are given in table \ref{table:results_hexevent}. This observation is true across models and leads to an average relative performance drop of over 66\%. The information about the secondary structure obtained in the lengths seems to be necessary for the models to obtain good predictive power.
 
 % 0.684, 0.737, 0.663
 %0.255, 0.282, 0.268
@@ -38,31 +38,33 @@ Reimplementation was done piece-wise, that is, first the sequence features were 
 	\centering
 	\begin{tabular}{| l | c | c | c| c} 
 		\hline
-		Model name & Only sequences & Sequences + lengths & Relative performance improvement\\
+		Model name & Only sequences & Sequences + lengths & Relative performance difference\\
 		\hline
 		DSC & 0.618 & 0.873 & 0.684\\
 		D2V & 0.614 & 0.896 & 0.737\\
 		BiLSTM + Attn & \textbf{0.636} & \textbf{0.904} & 0.663\\
 		\hline
 	\end{tabular}
-	\caption{Performance of the main models on the HEXEvent dataset with and without length features given as AUC. The relative performance improvement (from adding the length features) was computed as $\frac{AUC_{lengths} - AUC{no\_lengths}}{AUC_{lengths} - 0.5}$. Computing it this way accounts for the baseline AUC of random guessing being 0.5.
+	\caption{Performance of the main models on the HEXEvent dataset with and without length features given as AUC. The relative performance improvement (from adding the length features) was computed as $\frac{AUC - AUC_{no\_lengths}}{AUC - 0.5}$. Computing it this way accounts for the baseline AUC of random guessing being 0.5.
 	}
 	\label{table:results_hexevent}
 \end{table}
 
 \subsubsection{Further investigations}
-To further investigate, we also test three other models: MLP100, MLP20 and MLPLinear which respectively contain 100, 20 and 20 trainable parameters. The models are simple MLPs with one hidden layer which only take the length features as inputs. MLPLinear doesn't use a non-linear activation function after its hidden layer.
+To further investigate, we also test three other models: MLP100, MLP20 and MLPLinear which respectively contain 100, 20 and 20 trainable parameters. The models are MLPs with one hidden layer that only take the length features as inputs. MLPLinear doesn't contain a non-linear activation function after its hidden layer.
 
 Surprisingly, the results in Figure \ref{fig:dsc_funeral} show that it is possible to replicate the results of \cite{dsc} with these very simple models using two to three orders of magnitude fewer parameters. Model performance is improved by adding further parameters and breaks down when no non-linearities are used in the network. This indicates that the models capture a relatively simple, but non-linear relationship between the lengths and the classification of an exon in the dataset. 
 There are multiple possible explanations for why this is:
 \begin{enumerate}
-	\item there are confounders in the dataset learned by the model. As discussed in Section \ref{subsec:hexevent}, EST-based is inherently biased. The biases inherent in EST-based data could be captured by the exon and intron structure and the model is learning to make its prediction based on this bias. This explanation is made more likely, if the findings on the HEXEvent dataset don't replicate on the other datasets we evaluate.
-	\item exon splicing is extremely well predictable based on the lengths of neighbouring introns and exons. This is very unlikely given that research into splicing has been going on for over 40 years. This explanation, albeit unlikely already, can be disproven if this observation fails to replicate on other datasets.
-	\item there are bugs (e.g. mixing of testing and validation data) in our reimplementation. In the first instance, this is unlikely given that we were able to replicate the original results of \cite{dsc}. To reduce complexity and further reduce the likelihood of a bug leading to these observations, we extracted the complete code for replicating the results of the simple MLP models from \ref{fig:dsc_funeral} into a single file. Additionally, in case of a simple bug the performance of the linear model likely wouldn't break down either. Therefore, we think that this possibility is unlikely. 
+	\item There are confounders in the dataset learned by the model. As discussed in Section \ref{subsec:hexevent}, EST-based data is inherently biased. The biases inherent in EST-based data could be captured by the exon and intron structure and the model is learning to make its prediction based on this bias. This explanation is made more likely, if the findings on the HEXEvent dataset don't replicate on the other datasets we evaluate.
+	\item Exon splicing is extremely well predictable based on the lengths of neighbouring introns and exons. This is very unlikely given that research into splicing has been going on for over 40 years. This explanation, albeit unlikely already, can be disproven if this observation fails to replicate on other datasets.
+	\item There are bugs (e.g. mixing of testing and validation data) in our reimplementation. In the first instance, this is unlikely given that we were able to replicate the original results of \cite{dsc}. To reduce complexity and further reduce the likelihood of a bug leading to these observations, we extracted the complete code for replicating the results of the simple MLP models from \ref{fig:dsc_funeral} into a single file. Additionally, in case of a data leakage bug, the performance of the linear model likely wouldn't break down either. Therefore, we judge bugs in our reimplementation unlikely.
 \end{enumerate}
 
 Overall, we conclude that the HEXEvent-based dataset is most likely fundamentally flawed and suffers from confounders.
-These findings have strong implications. It calls into questions the meaningfulness of \cite{dsc}'s results, showing the competitiveness of their model. These findings likely also warrant a critical investigation of any other conclusions drawn from papers based on the HEXEvent database. At the time of writing, the HEXEvent paper is cited 34 times. While most of these citations are just in passing, there are also multiple papers which use a HEXEvent-derived dataset for the training of Machine Learning models such as SVMs \cite{buschhertel}, Random Forests \cite{flawed1} \cite{flawed4}, Decision Trees \cite{flawed2} or AdaBoost-based algorithms \cite{flawed3}. Due to these data quality issue, we try to construct an alternative dataset.
+These findings have strong implications. It calls into questions the meaningfulness of \cite{dsc}'s results, showing the competitiveness of their model. These findings likely also warrant a critical investigation of any other conclusions drawn from papers based on the HEXEvent database. At the time of writing, the HEXEvent paper is cited 34 times. While most of these citations are just in passing, there are also multiple papers which use a HEXEvent-derived dataset for the training of Machine Learning models such as SVMs \cite{buschhertel}, Random Forests \cite{flawed4} \cite{flawed1}, Decision Trees \cite{flawed2} or AdaBoost-based algorithms \cite{flawed3}. The validity of these papers results are questioned by these findings.
+
+These data quality issues, motivated us to construct alternative, better, datasets. We now give their results.
 
 
 % many of them, even correlational studies, say that this is a feature, rather than a bug
@@ -93,21 +95,24 @@ These findings have strong implications. It calls into questions the meaningfuln
 \section{GTEx-based datasets} \label{sec:gtex}
 \subsection{Cassette exon-based datasets} \label{subsec:gtex_exon}
 
+%TODO: improve error bar labelling
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_exon_barcharts.png} 
-	\caption{Performance on the GTEx-based exon datasets for different tissues. The error bars give the standard deviation across all cross-validation runs. }
+	\caption{Performance on the GTEx-based exon-centric datasets for different tissues. The error bars give the standard deviation across all cross-validation runs. }
 	\label{fig:gtex_exon_barcharts}
 \end{figure}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../saved/log/GTEx_Exon_Brain_DSC/final/ROC.png} 
-	\caption{Bar chart of the performance on the GTEx-based exon datasets for different tissues. The error bars give the standard deviation across all cross-validation runs.  }
+	\caption{
+	
+  }
 	\label{fig:gtex_exon_roc}
 \end{figure}
 
-Results are given in Figure (....). Across all models, the performance is poor and the predictive power of the models is low. Surprisingly, performance is also very similar across tissues: the mean performance between tissues differs roughly by one standard deviation of the mean performance between runs. This is surprising from a biological perspective as splicing across tissues is known to differ a lot. However, since our models perform so poorly they likely already struggle to learn the baseline splicing behaviour invariant across tissues. From a machine learning perspective, this is a bit surprising as the cerebellum tissue-based dataset is almost twice as large as the heart tissue-based dataset. This indicates that either 1) the models have already hit a point of diminishing returns for adding more data or 2) the models generally require magnitudes more of data. All models perform best on the dataset based on a brain cortex sample. \\
-The relative cross-model performance also stays the same between tissues: DSC tends to perform best, followed by Attn, followed by the D2V model. The variance of the Attn model between runs is comparatively very high; the Attn model is the best performing model, as measured by the maximum rather than mean AUC value, on the brain cortex tissue-based and cerebellum tissue-based datasets. This indicates that on this dataset the Attn model needed more regularization and dataset specific fine-tuning would've lead to it performing the best. 
+Results are given in Figure \ref{fig:gtex_exon_barcharts}. Across all models, the performance is poor and the predictive power of the models is low. Surprisingly, performance is also very similar across tissues: the mean performance between tissues differs roughly by one standard deviation of the mean performance between runs. This is surprising from a biological perspective as splicing across tissues is known to differ a lot. However, since our models perform so poorly they likely already struggle to learn the baseline splicing behaviour invariant across tissues. From a machine learning perspective, this is a bit surprising as the cerebellum tissue-based dataset is almost twice as large as the heart tissue-based dataset. This indicates that either 1) the models have already hit a point of diminishing returns for adding more data or 2) the models generally require magnitudes more of data. All models perform best on the dataset based on a brain cortex sample. \\
+The relative cross-model performance also stays the same between tissues: DSC tends to perform best, followed by RASC, followed by the D2V model. The variance of the Attn model between runs is comparatively very high; the Attn model is the best performing model, as measured by the maximum rather than mean AUC value, on the brain cortex tissue-based and cerebellum tissue-based datasets. This indicates that on this dataset the Attn model needed more regularization and dataset specific fine-tuning would've lead to it performing the best. 
 
 
 Figure \ref{fig:gtex_exon_roc} gives more insight into the model performance. The performance on highly included, alternatively spliced exons (80\% <= PSI < 99\%) is significantly worse than on more rarely included, alternatively spliced exons (PSI < 80\%). From the definition of the AUC it follows that the AUC on the mixed dataset including exons with low and high PSI lies in-between these two extremes. In this case, only ~28\% of alternatively spliced exons belong to the exons with a high PSI and therefore the combined AUC is heavily weighted towards the AUC on the exons with low PSI. These observations align with similar observations made on the HEXEvent dataset \cite{dsc}.
@@ -303,37 +308,28 @@ We observe slighlty diminished performance upon removing the query matrix. The e
 \subsubsection{Adding an extra convolution}
 Adding an additional convolution operation to the attention mechanism, surprisingly leads to decreased performance, even worse than the baseline with no extensions. This in contrast to \cite{ghentransformers} where this extension lead to very significant relative performance improvements. There are likely multiple factors affecting the different performance impacts:
 % Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences:
+
+\begin{figure}
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/training_curve_conv_heads.png} 
+	\caption{RASC overfits when the additional convolution operation is introduced into the attention heads. The baseline refers to RASC with multiple attention heads. }
+	\label{fig:training_curve}
+\end{figure}
+
+
 \begin{enumerate}
 	\item Although we process the input at single-nucleotide resolution, the use of a BiLSTM means that the encoder is aware of the nucleotides which precede and follow it. Therefore, information about the neighbouring nucleotides is likely already represented in the representation for a given nucleotide. This is in contrast to a Transformer model where the layers are non-recurrent and only work at single-symbol resolution. Thus, the convolutional layers likely don't give the model a lot more flexibility.
 	\item In \cite{ghentransformers}, the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
 		%		they: 3000 nucleotides, convolution filter of 7
-	\item We observe increased overfitting when using this extension. The training curve in Figure [...] %TODO add this and finish this section
-	showcases this behaviour. We observe overfitting despite using the same convolution across multiple heads, introducing additional batch normalization and limiting the convolution size to 3. 
+	\item We observe overfitting when using this extension. The training curve in Figure \ref{fig:training_curve} %TODO add this and finish this section
+	showcases this behaviour. We observe overfitting despite using the same convolution across multiple heads, increasing the dropout probability in the attention heads, introducing additional batch normalization layers and limiting the convolution kernel size to 3 
+	%TODO(see Table \ref{app:conv_tests} in the appendix for further results)
+	. 
 \end{enumerate}
 
 
-In summary, we only extend RASC with multiple attention heads. The results of RASC we report on the other datasets also use the model with multiple attention heads. 
-%include the extension, that is, of 
-%
-%The architecture of RASC, as selected on the HipSci MAJIQ dataset, was applied While the selection of which extension should be used was based on the HipSci MAJIQ dataset, we applied 
-%The convolution extension generally appears to lead to overfitting. 
-%Conv: 
-%Testing this extension on the HipSci MAJIQ dataset didn't lead to improved results. Although the convergence speed increased rapidly (from around 180 epochs to 20 epochs), we also observed heavy overfitting. To alleviate this, we added dropout and batch normalization layers. After adding two dropout layers with a high dropout probability (one after computing the attention weights and one after the convolution layers with p=0.5 each) and setting the convolutional filter size to no higher than 3, overfitting issues ameliorated. However, after adding these layers convergence was no faster than for the case without convolutional layers and the performance did not improve. Thus, for the sake of a simpler model, we opted to not use this extension for the rest of the experiments.
-%Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences compared to \cite{ghentransformers}:
-%\begin{enumerate}
-%	\item Although we process the input at single-nucleotide resolution, the use of a BiLSTM means that the encoder is aware of the nucleotides which precede and follow it. Therefore, information about the neighbouring nucleotides is likely already represented in the representation for a given nucleotide. This is in contrast to a Transformer model where the layers are non-recurrent and only work at single-symbol resolution. Thus, the convolutional layers likely don't give the model a lot more flexibility.
-%	\item In \cite{ghentransformers}, the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
-%	%		they: 3000 nucleotides, convolution filter of 7
-%\end{enumerate}
+In summary, we extend RASC with multiple attention heads. The results of RASC we report on the other datasets also use the model with multiple attention heads. 
 
 
-%Testing this extension on the HipSci MAJIQ dataset didn't lead to improved results. Although the convergence speed increased rapidly (from around 180 epochs to 20 epochs), we also observed heavy overfitting. To alleviate this, we added dropout and batch normalization layers. After adding two dropout layers with a high dropout probability (one after computing the attention weights and one after the convolution layers with p=0.5 each) and setting the convolutional filter size to no higher than 3, overfitting issues ameliorated. However, after adding these layers convergence was no faster than for the case without convolutional layers and the performance did not improve. Thus, for the sake of a simpler model, we opted to not use this extension for the rest of the experiments.
-%Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences compared to \cite{ghentransformers}:
-%\begin{enumerate}
-%	\item Although we process the input at single-nucleotide resolution, the use of a BiLSTM means that the encoder is aware of the nucleotides which precede and follow it. Therefore, information about the neighbouring nucleotides is likely already represented in the representation for a given nucleotide. This is in contrast to a Transformer model where the layers are non-recurrent and only work at single-symbol resolution. Thus, the convolutional layers likely don't give the model a lot more flexibility.
-%	\item In \cite{ghentransformers}, the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
-%	%		they: 3000 nucleotides, convolution filter of 7
-%\end{enumerate}
 
 %TODO attention visualization
 
@@ -367,6 +363,49 @@ In summary, we only extend RASC with multiple attention heads. The results of RA
 %\end{table}
 
 
+\subsubsection{Interpreting RASC} \label{subsubsec:attn_interpretation}
+
+We visualize to what parts of the input sequence RASC pays attention to in \ref{fig:attn_distribution}. %TODO
+
+graphics in this section:\\
+- 4x2 heatmaps of mean attention over epochs of all four attention heads\\
+- 1 barchart of final mean attention over mean of all attention heads\\
+- 1+ barcharts for analyzing specific exons
+
+- in contrast to the single attention head case, with multiple attention heads they focus on solely on the start or end sequence\\
+- decision where an attention head focuses is made early on in training - within the first epoch even(?). similar as observation from, do you really need 16 attention heads paper, where attention heads become more or less important as time goes on\\
+-> show attention distribution across one model\\
+- attention heads split that at least one head focuses on either sequence\\
+%- worst run is where attention heads purely focus on end sequence (?) -> no, never happens
+
+
+% how do I best visualize my findings?
+% - I want to showcase all attention heads at some point
+- I want heatmaps at some points since prettier, but line graphs are probably clearer so important too
+- 
+--> perhaps most sensible thing would be to show
+
+%attention distribution, proper:
+%run id | distribution of heads
+%0 | end/end/end/start
+%1 | start/end/end/end
+%2 | start/start/end/end
+%3 | start/start/start/start but then mixed/mixed/mixed/mixed
+%4 | end/start/end/start
+%5 | start/start/start/mixed
+%6 | start/end/start/start (tiny bit mixed 0.8)
+%7 | start/end/start/start
+%8 | end/mixed/end/mixed (from end/end/end/end at the beginning, switch after like 60 epochs)
+%
+%---> get one good run where all heads focus on the sma esequence 
+%---> one run where they don't
+%- hopefully both runs are long (150 epochs+)
+
+
+
+
+
+%TODO attention difference beteween constitutive and non-constitutive samples
 
 %TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation
 
