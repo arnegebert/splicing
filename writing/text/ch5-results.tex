@@ -93,110 +93,126 @@ These data quality issues, motivated us to construct alternative, better, datase
 
 
 \section{GTEx-based datasets} \label{sec:gtex}
-\subsection{Cassette exon-based datasets} \label{subsec:gtex_exon}
-
-%TODO: improve error bar labelling
+\subsection{Exon-centric datasets} \label{subsec:gtex_exon}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_exon_barcharts.png} 
-	\caption{Performance on the GTEx-based exon-centric datasets for different tissues. The error bars give the standard deviation across all cross-validation runs. }
+	\caption{Performance on the GTEx-based exon-centric datasets across different tissues. The error bars give the standard deviation across all cross-validation runs. }
 	\label{fig:gtex_exon_barcharts}
 \end{figure}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../saved/log/GTEx_Exon_Brain_DSC/final/ROC.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../saved/log/GTEx_Exon_Brain_Attn/final/ROC.png} 
 	\caption{
-	
+	ROC curve of RASC on GTEx-based exon-centric brain cortex dataset. 
   }
 	\label{fig:gtex_exon_roc}
 \end{figure}
 
-Results are given in Figure \ref{fig:gtex_exon_barcharts}. Across all models, the performance is poor and the predictive power of the models is low. Surprisingly, performance is also very similar across tissues: the mean performance between tissues differs roughly by one standard deviation of the mean performance between runs. This is surprising from a biological perspective as splicing across tissues is known to differ a lot. However, since our models perform so poorly they likely already struggle to learn the baseline splicing behaviour invariant across tissues. From a machine learning perspective, this is a bit surprising as the cerebellum tissue-based dataset is almost twice as large as the heart tissue-based dataset. This indicates that either 1) the models have already hit a point of diminishing returns for adding more data or 2) the models generally require magnitudes more of data. All models perform best on the dataset based on a brain cortex sample. \\
-The relative cross-model performance also stays the same between tissues: DSC tends to perform best, followed by RASC, followed by the D2V model. The variance of the Attn model between runs is comparatively very high; the Attn model is the best performing model, as measured by the maximum rather than mean AUC value, on the brain cortex tissue-based and cerebellum tissue-based datasets. This indicates that on this dataset the Attn model needed more regularization and dataset specific fine-tuning would've lead to it performing the best. 
+Results are given in Figure \ref{fig:gtex_exon_barcharts}. Across all models, performance is poor and the predictive power of the models is low. Surprisingly, performance is also very similar across tissues: the mean cross-tissue performance difference of 0.007 AUC is smaller than the mean cross-run difference of 0.014 AUC. This is surprising from a biological perspective as cross-tissue splicing differences are well-documented \cite{crosstissuesplicing}. Most likely, the models are already struggling to learn the baseline splicing behaviour invariant across tissues and don't learn finer cross-tissue differences. 
+% that Since our models perform so poorly they likely already struggle to learn the baseline splicing behaviour invariant across tissues. 
+This is also surprising from a machine learning perspective, as the cerebellum tissue-based dataset contains almost twice as many training samples as the heart tissue-based dataset. This indicates that either 1) the models have already hit a point of diminishing returns for adding more data or 2) the models generally require significantly more training samples. All models perform best on the dataset based on a brain cortex sample. %TODO: not happy with the wording of this section yet; could be more dense.
+%even if splicing varies across tissues, performance as measured by AUC could be the same if roughly same level of complexity -- avoid this issue by referrering to it as most likely explanation
+
+Relative model performance stays the same between tissues: DSC tends to perform best, followed by RASC and the D2V model. The variance of RASC between runs is on average twice as twice as high as the respective variance of DSC and D2V. As a result, RASC is the best performing model, as measured by the maximum rather than mean AUC value, on the brain cortex tissue-based and cerebellum tissue-based datasets. This indicates that RASC needed more regularization on this dataset and dataset specific fine-tuning could've lead to it performing the best across cross-validation runs.
 
 
-Figure \ref{fig:gtex_exon_roc} gives more insight into the model performance. The performance on highly included, alternatively spliced exons (80\% <= PSI < 99\%) is significantly worse than on more rarely included, alternatively spliced exons (PSI < 80\%). From the definition of the AUC it follows that the AUC on the mixed dataset including exons with low and high PSI lies in-between these two extremes. In this case, only ~28\% of alternatively spliced exons belong to the exons with a high PSI and therefore the combined AUC is heavily weighted towards the AUC on the exons with low PSI. These observations align with similar observations made on the HEXEvent dataset \cite{dsc}.
+Figure \ref{fig:gtex_exon_roc} gives more insight into model performance. 
+%TODO: mention in methods section the dataset split
+The performance on highly included, alternatively spliced exons (80\% <= PSI < 99\%) is significantly worse than on more rarely included, alternatively spliced exons (PSI < 80\%). Per AUC definition, the AUC on the allPSI dataset lies in-between these two extremes. In this case, only ~28\% of alternatively spliced exons belong to the exons with a high PSI and therefore the combined AUC is heavily weighted towards the AUC on the exons with low PSI. These observations mirror analogue observations made on the HEXEvent dataset \cite{dsc}.
 
----- removing length feature would be interesting; doing it on brain as best performance and sort of lowest combined variance\\
-
-%- low/high observation holds --> AUC curve 
-
-
-
-%inter-runs variance low\\
-%- inter-tissue variance generally low; means of different tissues roughly one inter-run standard deviation away\\
-%- brain cortex best; bit surprising as cerebellum has \\
-%- some overfitting\\
-%
-%- all pretty bad; very poor AUC values\\
-%- DSC ok, Attn medium, D2V worst\\
-%- Attn very high variance on Cerebellum, sometimes as good or better than DSC, but sometimes worse than D2V\\
-
-- could note that in earlier variation of the dataset where no TPM treshold was used (?) the networks didn't learn anything\\
-	-- would be great finding out / remembering what exact step is the crucial one
-	
+%---- removing length feature would be interesting; doing it on brain as best performance and sort of lowest combined variance\\
 
 
-Overall, 
-\textbf{conclusions:}\\
-	- performance generally poor\\
-	- inter-tissue variance low\\
-	- due to issues with GTEx data, likely desirable to test with other datasets
+%- could note that in earlier variation of the dataset where no TPM treshold was used (?) the networks didn't learn anything\\
+%	-- would be great finding out / remembering what exact step is the crucial one
+%	
+
+
+
+
+%\textbf{conclusions:}\\
+%	- performance generally poor\\
+%	- inter-tissue variance low\\
+%	- due to issues with GTEx data, likely desirable to test with other datasets
 	
 	
 	
 
-\subsection{Junction-based datasets} \label{subsec:gtex_junc}
+\subsection{Intron-centric datasets} \label{subsec:gtex_junc}
 
 \begin{figure}[h]
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_junc_barcharts.png} 
-	\caption{Performance on the GTEx-based junction datasets for different tissues. }
+	\centering\includegraphics[width=0.9\textwidth]{../visualizations/ch5-results/gtex_junc_barcharts.png} 
+	\caption{Performance on the GTEx-based junction datasets across different tissues. }
 	\label{fig:gtex_junc_barcharts}
+%	TODO: should these bars move closer together?
 \end{figure}
+
 
 \begin{figure}[h]
 	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_DSC/final/ROC.png} 
-	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_Attn/final/ROC.png}
-	\caption{Left: ROC curve of the DSC model on heart tissue. Right: ROC curve of the Attn model on heart tissue. }
+	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_Attn/junc_cv_final/ROC.png}
+	\caption{ROC curves when training GTEx-based intron-centric heart tissue dataset. Left: ROC curve of DSC. Right: ROC curve of RASC. }
+%	TODO: make figure share y-axis; fix t=plot titles
 	\label{fig:gtex_junc_rocs}
 \end{figure}
-TODO: motivation for using junction-centric datasets
-TODO: rerun these with cross-validation (will take ~30 hours of trainig time though)
 
-- performance across the board a lot better; seemingly an easier task\\
-- fairly clear correlation with more training samples -> more performance (cerebellum has most, heart has fewest)\\
-- high / low difficulty trend doesn't really hold. 
+%TODO: motivation for using junction-centric datasets
+%TODO: rerun these with cross-validation (will take ~30 hours of trainig time though)
+
+Figure \ref{fig:gtex_junc_barcharts} shows that junction classification is seemingly an easier task: the AUC of all models increases by at least 0.05 to 0.06. This is likely a result of the intron-centric datasets containing on four times more training samples. RASC significantly outperforms DSC and D2V. The performance differences between tissues vary per model, however, all models tend to perform the best on the cerebellum tissue which also contains the most training samples. 
+
+Surprisingly, the performance across rarely and highly included junctions is no longer very disparate (see Figure \ref{fig:gtex_junc_rocs}). This indicates that the models learn to recognize motifs which separate constitutive and alternatively spliced junctions, but can't do so for exons. However, this observation may also be  as only 15\%
+
+%15 \% of alternatively spliced exons are highly included 
+%
+%TODO: no lens experiments (done on cerebellum): DSC + RASC missing
+%TODO: run cross-validation runs of this: DSC Heart + DSC Brain missing
+%- performance across the board a lot better; seemingly an easier task\\
+%- fairly clear correlation with more training samples -> more performance (cerebellum has most, heart has fewest)\\
+%- high / low difficulty trend doesn't really hold. 
 
 
-\subsection{Reconstructing HEXEvent-dataset with GTEx data}
-- dataset where I only took exons which were also in GTEx data
-- seriously considering not showing these results as I basically already debunked HEXEvent at this point -- so from a narrative perspective, why spend effort on replicating it?
+%\subsection{Reconstructing HEXEvent-dataset with GTEx data}
+%- dataset where I only took exons which were also in GTEx data\\
+%- seriously considering not showing these results as I basically already debunked HEXEvent at this point -- so from a narrative perspective, why spend effort on replicating it?
 
 
 
+%TODO overall conclusion here
 In \ref{subsubsec:naivepsi}, we mentioned issues when trying to estimate PSI naively. Although we tried to alleviate these as far as possible in pre-processing, we don't account for the information contained in non-junction reads and that from multiple samples. As a result, data quality is likely still an issue distoring the results in this section. Alleviating these issues, we next evaluate our models based on a primary data source which gives access to raw RNA-seq reads. This enables us to use methods from the literature which leverage information from non-junction reads and multiple samples.
+
+Overall, we observe poor model performance and biologically surprising low cross-tissue performance differences. This indicates that the GTEx-based exon-centric dataset is not fit for training neural-network based splicing codes and conclude that evaluating the models on other datasets is desirable.
+
 
 \section{HipSci-based datasets} \label{sec:hipsci} 
 
-\subsection{SUPPA with neuron tissue induced iPSCs} \label{subsec:hipsci_suppa}
+\subsection{HipSci SUPPA datasets} \label{subsec:hipsci_suppa}
+\subsubsection{Dataset based on sensory neuron cell lines}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/suppa_cross_model_roc_auc_comparison.png} 
-	\caption{Comparison of the ROC curves of the three main models on the HipSci dataset derived by using SUPPA. }
+	\caption{Comparison of the ROC curves of the three models on the HipSci SUPPA dataset. The dataset is based on iPSC cell lines differentiated to sensory neuron cell lines. }
 	\label{fig:suppa_auc_roc}
 \end{figure}
 
-Figure \ref{fig:suppa_auc_roc} shows poor model performance across the board. The predictive power of our models on the SUPPA-based HipSci dataset is worse than on the GTEx dataset and roughly equal to performance the HEXEvent dataset without length features. This indicates that 
+Figure \ref{fig:suppa_auc_roc} shows how the model perform very poorly on the HipSci SUPPA dataset. The performance is worse than on the GTEx-based exon-centric dataset and roughly equal to the performance on the HEXEvent dataset without length features. This indicates that 
 \begin{enumerate}
 	\item either we arrive at a strong dataset here and that constitutive exon classification is more challenging than so far anticipated,
 	\item or this dataset suffers from data quality issues which make constitutive exon classification very challenging for the models.
 \end{enumerate}
-Among these two, 2. is more likely: in retrorespect, SUPPA was not the best choice for dataset processing. It operates at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Additionally, it does not make it possible to generate a list of non-cassette constitutive exons, therefore roughly halving the size of the training set and the number of samples the model can learn from. Its PSI estimation is very simplistic and doesn't account for multiple of the issues highlighted in \ref{subsec:psiestimation}. Thus, we now turn to data processing with MAJIQ in hopes of better results. 
+
+Among these two, 2. is more likely due to SUPPA not addressing various challenges in PSI estimation and due to SUPPA not generating constitutive training samples (see also \ref{subsubsec:suppa}). SUPPA does not appear to be accurate enough for our purposes. Therefore, we don't evaluate our models on the HipSci SUPPA dataset based on undifferentiated iPSC cell lines.
+
+
+%in retrorespect, SUPPA was not the best choice for dataset processing. It operates at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Additionally, it does not make it possible to generate a list of non-cassette constitutive exons, therefore roughly halving the size of the training set and the number of samples the model can learn from. Its PSI estimation is very simplistic and doesn't account for multiple of the issues highlighted in \ref{subsec:psiestimation}. Thus, we now turn to data processing with MAJIQ in hopes of better results. 
 
 % TODO thought: what if AUC here is only worse because the model doesn't have easy to classify constitutive exons which boost the AUC? 
 
 
-\subsection{MAJIQ with iPSCs differentiated to neurons (exons)} \label{sec:hipsci_neuron_majiq}
+\subsection{HipSci MAJIQ datasets} \label{subsec:majiq}
+
+\subsubsection{Dataset based on sensory neuron and iPSC cell lines}\label{sec:hipsci_neuron_majiq}
 
 \begin{figure}
 	\centering\includegraphics[width=0.49\textwidth]{../visualizations/ch5-results/majiq_neuron_cross_model_roc_auc_comparison.png} 
@@ -204,9 +220,10 @@ Among these two, 2. is more likely: in retrorespect, SUPPA was not the best choi
 	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
 	\label{fig:majiq_rocs}
 \end{figure}
+%TODO: make this one figure with shared axes (finetuning)
+All models perform significantly better than on previous datasets and we observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by RASC. Adding attention to RSC promotes it from the worst to the best performing model, validating our choice. 
 
-All models perform better than in previous datasets, but in contrast to previous datasets we also observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by BiLSTM + Attn. The dataset based on undifferentiated iPSC samples seems to be slightly easier for the models, with AUC values across the board increasing by roughly 2\%. At a closer look at the dataset distribution....
-Applying the same test of evaluating the models with and without the length features, the results are very promising. 
+%The dataset based on undifferentiated iPSC cells seems to be less challenging: the AUCs are roughly 0.02 higher than on the dataset based on sensory neuron cells. At a closer look at the dataset distribution....
 
 % TODO: investigate whether this is just a result of dataset composition --> not at first look
 % neuron: 26394 / 8201 / 10151 = 44746
@@ -217,6 +234,13 @@ Applying the same test of evaluating the models with and without the length feat
 
 %todo thought: it would be interesting to reevaluate all models without constitutive exons to see whether they actually perform better than in suppa dataset
 
+\subsubsection{Impact of architectural choices}
+The poor performance of D2V is likely a result of its architecture: the 100-dimensional embeddings used for classification weren't optimizely jointly during training and likely don't contain fine-grained information, such as the specific positons of motifs, required for accurate splicing prediction. We conjecture that D2V would benefit from receiving further split input sequences, e.g. input sequences containing 35 nucleotides. The best solution, while keeping the word embeddings, would likely be to embed the overlapping 3-mers in the sequence via word2vec and combine this with an efficient convolutional architecture, as done in \cite{d2vsplicing}.
+
+
+
+\subsubsection{Assessing the dataset quality}
+
 \begin{table}[h!]
 	\centering
 	\begin{tabular}{| l | c | c | c| c} 
@@ -225,22 +249,95 @@ Applying the same test of evaluating the models with and without the length feat
 		\hline
 		DSC & 0.811 & 0.808 & -0.010\\
 		D2V & 0.665 & 0.715 & 0.233\\
-		BiLSTM + Attn & \textbf{0.853} & \textbf{0.865} & 0.033\\
+		RASC & \textbf{0.853} & \textbf{0.865} & 0.033\\
 		\hline
 	\end{tabular}
-	\caption{Performance on the dataset based on processing with MAJIQ and iPSC cells differentiated to neurons with and without length features given. Note that the relative performance drop was computed with reference to the baseline AUC value of 0.5.
+	\caption{Performance on the dataset based on processing with MAJIQ and iPSC cells differentiated to neurons with and without length features given. 
+		%		Note that the relative performance drop was computed with reference to the baseline AUC value of 0.5.
 	}
 	\label{table:majiq_nolens}
 \end{table}
 
+As litmus test for dataset quality, we repeat the same experiment as on the HEXEvent dataset and remove the length features as model input. We document the results in Table \ref{table:majiq_nolens}.
+They reveal that a large part of D2V's performance relies on information contained in the length features. However, since removing the length features only marginally affects the performance of DSC and RASC, we conclude that D2V is unable to effectively incorporate information from the sequences and that the dataset is not biased in the same way as the HEXEvent dataset. 
+
+Giving the strong model performance independent of the length features and the prior expectation for MAJIQ to produce the highest quality PSI estimates, we conclude that it does. This gives further weight to the conclusions that the poor performance on the exon-centric GTEx-based and HipSci SUPPA datasets is a result of poor data quality, and not due to the inherent hardness of the splicing classification task. Thus, using the HipSci MAJIQ datasets is preferable to using any of the other datasets we have evaluated. 
+
+Motivated by this observation, we use the HipSci MAJIQ dataset to validate our architectural choices for RASC and to carry out further analysis omitted on the other datasets.
 
 
-\subsection{MAJIQ with iPSCs differentiated to neurons (junctions)}
-haven't run experiments yet, not sure if results are interesting (but probably yes)\\
-due to training times, probably don't want to run these with cross-validation as that would take 15 hours+
 
 
-\subsection{MAJIQ with undifferentiated iPSCs} \label{subsec:hipsci_ipsc_majiq}
+
+\subsection{Evaluation of the additional attention modifications} \label{subsubsec:attn_hyperparams}
+
+We evaluate the three additional attention modifications described in \ref{subsec:alternative_attention} by testing them sequentially. The results of these tests are shown in Figure \ref{fig:attn_extension_barcharts}. 
+
+\begin{figure}
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attn_extension_barcharts.png} 
+	\caption{Performance evaluation of the three extensions to the attention mechanism. We abbreviate the use of multiple attention heads as 'heads', the removal of the query matrix as 'no query' and the introduction of an additional convolution as 'conv'. }
+	\label{fig:attn_extension_barcharts}
+\end{figure}
+
+\subsubsection{Using multiple attention heads} \label{subsubsec:result_heads}
+Using multiple attention heads leads to significantly improved performance and to significantly reduced variance between runs. Thus, the additional representational subspaces appear to improve performance and the ensemble model effect of multiple attention heads appear to reduce variance. No overfitting is observed, despite the number of model weights increasing from roughly 36,000 to 67,000 compared to the single attention head model. Due to the uniformly improved performance, we elect to incorporate multiple attention heads into RASC. 
+
+%36361 -> 66861 
+
+\subsubsection{Removing the query matrix}  % 56465 parameters
+We observe slightly diminished performance upon removing the query matrix. The extra representational capacity afforded to RASC by having query matrices appears to improve it's predictive power. Despite decreasing model size by roughly 10,000 parameters when removing the query matrices, we decide to not incorporate this adaption of the attention mechanism. 
+
+%However, in initial experiments, the attention** mechanism performed significantly worse than the attention* mechanism. The extra representational capacity by having a query matrix seems to be important for performance. 
+%In practice, this lead to a model about 10\% smaller. 
+%In practice, this lead to an about 10\% smaller model.
+
+%all 8 possible variations of combining them. Quantitative results are reported in Table \ref{table:attn_extensions}. 
+%The overall best performing model uses multiple attention heads, but no other extensions. Using multiple attention heads appears to make the model perform consistently better than the baseline, except when paired with the convolution extension. On a closer look, this seems to be the result of the model overfitting to the dataset as shown in Figure [...]. %TODO
+\subsubsection{Adding an extra convolution}
+Adding an additional convolution operation to the attention mechanism, surprisingly leads to decreased performance, even comparing unfavorably to the baseline single-head attention model. This in contrast to \cite{ghentransformers} where this extension lead to very significant relative performance improvements. There are likely multiple factors contributing to these varying results:
+% Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences:
+
+\begin{figure}
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/training_curve_conv_heads.png} 
+	\caption{RASC overfits when the additional convolution operation is introduced into the attention heads. The baseline refers to RASC with multiple attention heads. }
+	\label{fig:training_curve}
+\end{figure}
+
+
+\begin{enumerate}
+	\item Although we process the input at single-nucleotide resolution, the use of a BiLSTM means that the encoder is aware of the nucleotides which precede and follow it. Therefore, the model can already encode information about the neighbouring nucleotides in the representation for a given nucleotide. This is in contrast to a Transformer model where the layers are non-recurrent and only work at single-nucleotide resolution. Thus, the convolutional layers likely give the model less additional modelling flexibility.
+	\item In \cite{ghentransformers}, the task is full genome transcription start site annotation (so predicting where genes start). Therefore, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives \cite{ghentransformers}'s model has to consider generally span more nucleotides and granting the model more capacity to integrate information over multiple nucleotides is more crucial. 
+	In contrast, granting RASC more capacity to integrate information over multiple nucleotides may not be necessary to identify the shorter motifs influencing splicing. 
+%	TODO: biological plausibility of this?
+%	In contrast, the comparably fine-grained working of RASC may be necessary for it to identify the shorter motifs which influence splicing. 
+%	Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
+	%		they: 3000 nucleotides, convolution filter of 7
+	\item Furthermore, we observe overfitting when using this extension. The training curve in Figure \ref{fig:training_curve}
+	showcases this behaviour. We observe overfitting despite using the same convolution across multiple heads, increasing the dropout probability in the attention heads, introducing additional batch normalization layers and limiting the convolution kernel size to 3 
+	%TODO(see Table \ref{app:conv_tests} in the appendix for further results)
+	. 
+\end{enumerate}
+
+
+In summary, we extend RASC with multiple attention heads. The results of RASC we report on the other datasets also use the model with multiple attention heads. 
+
+
+%\subsection{MAJIQ with iPSCs differentiated to neurons (junctions)}
+%haven't run experiments yet, not sure if results are interesting (but probably yes)\\
+%due to training times, probably don't want to run these with cross-validation as that would take 15 hours+
+
+
+\subsubsection{Sensitivity and specificity analysis}
+\begin{figure}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/confusion_matrix.png} 
+	\caption{Confusion matrix from RASC on the neuron HipSci MAJIQ dataset. 'cons' and 'non-cons' respectively abbreviate constitutive and non-constitutive exons. }
+	\label{fig:confusion_matrix}
+\end{figure}
+
+We present the confusion matrix for the binary classifier based on RASC in Figure \ref{fig:confusion_matrix}. The decision threshold which maximizes the F1 score was chosen resulting in a F1 score of 0.88 (for the negative class of constitutive exons). We observe comparatively few false positives, but many false negatives and correspondingly obtain a low sensitivity score of 0.56, but a high specificity score of 0.93. Thus, the classifier performs well at ruling in that an exon is alternatively spliced, but poorly at ruling that it isn't. This means the classifier is attractive for guiding the investigation of exons, where it wasn't previously known that they are alternatively spliced. This wouldn't be possible with a less specific classifier because further investigation relies on expensive wet-labs experiments for which the number of false positives need to be minimized. When employing RASC in practice, the decision threshold should be chosen such that the specificity is even higher (at the cost of further reduced sensitivity): a false positive rate of 5.3\% is still too high for wet lab experiments. Thus, we conclude that our classifier shows attractive properties, but would require further tuning before clinical use. 
+
+
+\subsection{Cross-tissue performance} \label{subsec:hipsci_ipsc_majiq}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/majiq_comparison_barcharts.png} 
@@ -259,13 +356,7 @@ seems like learned features are tissue-invariant\\
 
 continuous psi prediction too
 
-\begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/confusion_matrix.png} 
-	\caption{Confusion matrix from RASC on the neuron HipSci MAJIQ dataset. 'cons' and 'non-cons' respectively abbreviate constitutive and non-constitutive exons. }
-	\label{fig:confusion_matrix}
-\end{figure}
 
-We present the confusion matrix for the binary classifier based on RASC in Figure \ref{fig:confusion_matrix}. The decision threshold which maximizes the F1 score was chosen and we obtain a F1 score of 0.88 (for the negative class of constitutive exons). We observe relatively low number of false positives, but relatively high numbers of false negatives and correspondingly obtain a low sensitivity score of 0.56, but a high specificity score of 0.93. Thus, the classifier is good at ruling in that an exon is alternatively spliced, but not good at ruling that it isn't. This means the classifier is attractive for guiding the investigation of exons, where it wasn't previously known that they are alternatively spliced. This wouldn't be possible with a less specific classifier because further investigation relies on expensive wet-labs experiments for which the number of false positives need to be minimized. In this case the decision threshold should be chosen such that the specificity is even higher (at the cost of further sensitivity) as a false positive rate of 5.3\% is still too high for wet lab experiments. Thus, we conclude that our classifier shows attractive properties, but would require further tuning before clinical use. 
 
 % todo (maybe): actually evaluate other decision thresholds here
 
@@ -281,53 +372,7 @@ We present the confusion matrix for the binary classifier based on RASC in Figur
 
 interpretation of attention mechanism etc follows here; some pretty graphics to follow
 
-\subsection{Evaluation of the additional attention modifications} \label{subsubsec:attn_hyperparams}
 
-We evaluated the three additional attention modifications described in \ref{subsec:alternative_attention} by testing them sequentially. The results of these tests are shown in Figure \ref{fig:attn_extension_barcharts}. 
-
-\begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/attn_extension_barcharts.png} 
-	\caption{Performance evaluation of the three extensions to the attention mechanism. We abbreviate the use of multiple attention heads as 'heads', the removal of the query matrix as 'no query' and the introduction of an additional convolution as 'conv'. }
-	\label{fig:attn_extension_barcharts}
-\end{figure}
-
-\subsubsection{Using multiple attention heads} \ref{subsubsec:result_heads}
-Using multiple attention heads lead to a significant performance gain and reduction of the variance. The additional representational subspaces and the ensemble model effect of multiple attention heads appear to lead to a consistently improve performance. No overfitting is observed even though the number of model weights are increased from roughly 36,000 to 67,000. Due to the uniformly improved performance, we decide to incorporate multiple attention heads into RASC. 
-
-%36361 -> 66861 
-
-\subsubsection{Removing the query matrix}  % 56465 parameters
-We observe slighlty diminished performance upon removing the query matrix. The extra representational capacity afforded to RASC by having query matrices seems to improve it's predictive power. Despite decreasing model size by roughly 10,000 parameters when removing the query matrices, we decide to not incorporate this adaption of the attention mechanism. 
-
-%However, in initial experiments, the attention** mechanism performed significantly worse than the attention* mechanism. The extra representational capacity by having a query matrix seems to be important for performance. 
-%In practice, this lead to a model about 10\% smaller. 
-%In practice, this lead to an about 10\% smaller model.
-
-%all 8 possible variations of combining them. Quantitative results are reported in Table \ref{table:attn_extensions}. 
-%The overall best performing model uses multiple attention heads, but no other extensions. Using multiple attention heads appears to make the model perform consistently better than the baseline, except when paired with the convolution extension. On a closer look, this seems to be the result of the model overfitting to the dataset as shown in Figure [...]. %TODO
-\subsubsection{Adding an extra convolution}
-Adding an additional convolution operation to the attention mechanism, surprisingly leads to decreased performance, even worse than the baseline with no extensions. This in contrast to \cite{ghentransformers} where this extension lead to very significant relative performance improvements. There are likely multiple factors affecting the different performance impacts:
-% Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences:
-
-\begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/training_curve_conv_heads.png} 
-	\caption{RASC overfits when the additional convolution operation is introduced into the attention heads. The baseline refers to RASC with multiple attention heads. }
-	\label{fig:training_curve}
-\end{figure}
-
-
-\begin{enumerate}
-	\item Although we process the input at single-nucleotide resolution, the use of a BiLSTM means that the encoder is aware of the nucleotides which precede and follow it. Therefore, information about the neighbouring nucleotides is likely already represented in the representation for a given nucleotide. This is in contrast to a Transformer model where the layers are non-recurrent and only work at single-symbol resolution. Thus, the convolutional layers likely don't give the model a lot more flexibility.
-	\item In \cite{ghentransformers}, the task is a full genome transcription start site annotation. Therefore, in a sense, their task occurs at the inter-gene level while our task occurs at the intra-gene level. This likely means that the motives the model has to consider generally span more nucleotides and giving the model more capacity to integrate over multiple nucleotides is more crucial. In contrast, the single-nucleotide resolution of our model may be necessary to help it identify the more fine-grained motifs which influence splicing. Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
-		%		they: 3000 nucleotides, convolution filter of 7
-	\item We observe overfitting when using this extension. The training curve in Figure \ref{fig:training_curve} %TODO add this and finish this section
-	showcases this behaviour. We observe overfitting despite using the same convolution across multiple heads, increasing the dropout probability in the attention heads, introducing additional batch normalization layers and limiting the convolution kernel size to 3 
-	%TODO(see Table \ref{app:conv_tests} in the appendix for further results)
-	. 
-\end{enumerate}
-
-
-In summary, we extend RASC with multiple attention heads. The results of RASC we report on the other datasets also use the model with multiple attention heads. 
 
 
 
@@ -363,7 +408,14 @@ In summary, we extend RASC with multiple attention heads. The results of RASC we
 %\end{table}
 
 
-\subsubsection{Interpreting RASC} \label{subsubsec:attn_interpretation}
+\subsection{Interpreting RASC} \label{subsubsec:attn_interpretation}
+
+
+\begin{figure}
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attention_heatmap_plswork.png} 
+	\caption{Development of attention during training. }
+	\label{fig:attn_heatmap}
+\end{figure}
 
 We visualize to what parts of the input sequence RASC pays attention to in \ref{fig:attn_distribution}. %TODO
 
@@ -372,10 +424,38 @@ graphics in this section:\\
 - 1 barchart of final mean attention over mean of all attention heads\\
 - 1+ barcharts for analyzing specific exons
 
-- in contrast to the single attention head case, with multiple attention heads they focus on solely on the start or end sequence\\
-- decision where an attention head focuses is made early on in training - within the first epoch even(?). similar as observation from, do you really need 16 attention heads paper, where attention heads become more or less important as time goes on\\
--> show attention distribution across one model\\
-- attention heads split that at least one head focuses on either sequence\\
+heatmap analysis:
+\begin{itemize}
+	\item Different attention heads focus on different things, although some overlap
+	\item attention rarely extremely focussed, but honestly can't really tell on this picture
+\end{itemize}
+
+\subsubsection{Heads focus on a single sequence} 
+When using a single attention, the attention head needs to split its conceptual 'focus' over the start and end input sequence. This is not the case for multiple attention heads: here single heads may focus on only one sequence as long as there is at least one attention head which also pays attention to the information in the other sequence. We observe exactly this behaviour: across the 9 cross-validation runs, single attention heads only split their 'focus' 7 out of 36 times. None of the trained models only ever pay attention to only a single sequence. This reassures us that the dataset isn't biased such that the model only needs to take information from one sequence into account. 
+
+The sequence which an attention head focusses on generally does not change after the first 5 epochs. Similar observation, that the role of attention heads is decided very early on in training, have also been made in the context of NLP \cite{sixteenheads}.
+%TODO: probably want to put into respective focus into table actually -- or by redoing heatmap such that you observe behavior there too (aka actual attention over sequence), might want to switch color tbh
+
+
+
+\begin{figure}
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attention_heatmap_plswork.png} 
+	\caption{Development of attention during training. }
+	\label{fig:attn_heatmap}
+\end{figure}
+
+
+
+\begin{figure}
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/mean_attention_w_std.png} 
+	\caption{Mean attention weights averaged over all test samples and all four attention heads. }
+	\label{fig:mean_attn}
+\end{figure}
+
+%- in contrast to the single attention head case, with multiple attention heads they focus on solely on the start or end sequence\\
+%- decision where an attention head focuses is made early on in training - within the first epoch even(?). similar as observation from, do you really need 16 attention heads paper, where attention heads become more or less important as time goes on\\
+%-> show attention distribution across one model\\
+%- attention heads split that at least one head focuses on either sequence\\
 %- worst run is where attention heads purely focus on end sequence (?) -> no, never happens
 
 
@@ -384,6 +464,7 @@ graphics in this section:\\
 - I want heatmaps at some points since prettier, but line graphs are probably clearer so important too
 - 
 --> perhaps most sensible thing would be to show
+
 
 %attention distribution, proper:
 %run id | distribution of heads
@@ -404,8 +485,6 @@ graphics in this section:\\
 
 
 
-
-%TODO attention difference beteween constitutive and non-constitutive samples
 
 %TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation
 

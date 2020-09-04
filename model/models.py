@@ -225,7 +225,7 @@ class BiLSTM(BaseModel):
         return y
 
 class AttnBiLSTM(BaseModel):
-    def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=100, conv_size=3, attn_dropout=0.2, n_heads=4, head_dim=50,
+    def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=100, conv_size=3, attn_dropout=0.4, n_heads=4, head_dim=50,
                  seq_length=140, fc_dropout=0.5, attn_mode='heads', use_lens=True):
         super().__init__()
         assert conv_size % 2 == 1, "Only uneven convolution sizes allowed because uneven conv same padding support implemented"

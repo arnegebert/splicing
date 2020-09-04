@@ -177,9 +177,9 @@ class VanillaTrainer(BaseTrainer):
             attn_ws_b = np.concatenate(attn_ws_b, axis=0)
             for attnw in sum(np.mean(attn_ws_b[:, :140], axis=0)):
                 print(f'{attnw:.2f}')
-            if epoch == 50:
-                np.save(f'test_all_data.npy', np.concatenate(datab, axis=0))
-            np.save(f'attn_ws_{epoch}.npy', attn_ws_b)
+            # if epoch == 50:
+            #     np.save(f'test_all_data.npy', np.concatenate(datab, axis=0))
+            # np.save(f'attn_ws_{epoch}.npy', attn_ws_b)
         del attn_ws_b
         predictions, targets = torch.cat(predictions, dim=0).cpu().numpy(), torch.cat(targets, dim=0).cpu().numpy()
         return predictions, targets

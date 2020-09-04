@@ -50,8 +50,8 @@ if __name__ == '__main__':
     load_and_plot_roc('suppa_cross_model_roc_auc_comparison', dirs, labels)
 
     # config for HipSci MAJIQ neurons
-    labels = ['DSC', 'D2V', 'RASC']
-    experiments = ['HIPSCI_MAJIQ_DSC', 'HIPSCI_MAJIQ_D2V_MLP', 'HIPSCI_MAJIQ_Attn']
+    labels = ['DSC', 'D2V', 'RASC', 'RSC']
+    experiments = ['HIPSCI_MAJIQ_DSC', 'HIPSCI_MAJIQ_D2V_MLP', 'HIPSCI_MAJIQ_Attn', 'HIPSCI_MAJIQ_BiLSTM']
     file_name = 'pred_and_target_all.npy'
     run_id = 'final'
     dirs = [f'../../saved/log/{exp}/{run_id}/{file_name}' for exp in experiments]

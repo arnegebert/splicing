@@ -2,3 +2,7 @@ name	test_all (mean)	test_all (std)	test_low (mean)	test_low (std)	test_high (me
 GTEx_Junc_Heart_Attn	0.782	0.032	0.791	0.033	0.739	0.025
 GTEx_Junc_Brain_Attn	0.810	0.012	0.823	0.010	0.760	0.010
 GTEx_Junc_Cerebellum_Attn	0.808	0.008	0.826	0.008	0.754	0.010
+GTEx_Junc_Cerebellum_D2V_MLP	0.673	0.004	0.683	0.004	0.645	0.008
+GTEx_Junc_Cerebellum_DSC	0.704	0.006	0.716	0.007	0.671	0.009
+GTEx_Junc_Brain_D2V_MLP	0.671	0.003	0.676	0.004	0.658	0.005
+GTEx_Junc_Heart_D2V_MLP	0.677	0.005	0.680	0.005	0.673	0.017

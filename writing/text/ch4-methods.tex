@@ -289,8 +289,7 @@ SUPPA \cite{suppa2} estimates the PSI value for each alternative splicing event 
 SUPPA requires a GTF annotation file and a file quantifying the abundance of each transcript. A GENCODE version 34 annotation file obtained from Ensembl was used as an annotation file. Salmon \cite{salmon} was used to quantify the relative abundance of each transcript in TPM. Salmon's quantification is based on the raw RNA-seq reads in FASTQ format, takes into account experimental attributes and corrects for biases commonly observed in RNA-seq data. After extracting the TPM values provided by Salmon into the format required by SUPPA (a tsv-file with one column for the transcript id and one column for the TPM value), SUPPA estimates the PSI for each alternative splicing event.
 %[https://github.com/comprna/SUPPA/releases/tag/v2.3 if I feel like it]
 
-SUPPA operates on at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Of the discussed issues in \ref{subsubsec:naivepsi}, it accounts for 2 of them: 
-
+%SUPPA operates on at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Of the discussed issues in \ref{subsubsec:naivepsi}, it only accounts for 2 of them: 
 SUPPA's main competitive advantage for PSI estimation lies in its speed and low memory overhead compared to other methods \cite{suppa} (which it achieves through leveraging fast transcript quantification methods such as Salmon), not necessarily that it achieves the best accuracy. This becomes apparent when judging how well SUPPA addresses the issues we laid out in \ref{subsubsec:naivepsi}: of these adresses it only (c) - the integration of evidence from multiple samples. SUPPA only focuses on alternatively spliced exons and thus we are not able to derive a list of constitutive exons from SUPPA. Since SUPPA operates at the transcript level, it implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Therefore, it remains to be seen whether the estimation of SUPPA is accurate enough for our purposes.
 
 
@@ -308,13 +307,13 @@ Vertices which have more than 3 incoming edges are denoted as local splicing var
 
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/visualizations-majiq.pdf} 
+	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch4-methods/visualizations-majiq.pdf} 
 	\caption{Data flow when using MAJIQ to create a training dataset. }
 	\label{fig:majiq_dataset_creation_process}
 \end{figure}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/splice_graph.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/splice_graph.png} 
 	\caption{An example splice graph as displayed in VOILA \cite{majiq2}. Exons, represented by grey rectangles, are connected with another exon via an edge, if a junction between the exons (or a variant of them) is observed. The number above an edge displays the number of observed raw reads spanning a particular exon-exon junction.}
 	\label{fig:splice_graph}
 \end{figure}
@@ -458,7 +457,8 @@ This model is a reimplementation of the Deep Splicing Code (DSC) from \cite{dsc}
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/dsc_architecture.png} 
 	\caption{
-		Architecture of DSC \cite{dsc}. The one-hot encoded sequences are fed into two convolutional blocks which generate features that are concatenated with the exon and intron lengths. The sequence and length features are then used by a fully-connected layer to obtain the classification output.
+		Architecture of DSC \cite{dsc}. 
+%		The one-hot encoded sequences are fed into two convolutional blocks which generate features that are concatenated with the exon and intron lengths. The sequence and length features are then used by a fully-connected layer to obtain the classification output.
 	}
 	\label{fig:dsc_architecture}
 \end{figure}
@@ -558,6 +558,7 @@ After pre-training, the embedding for a given word or document is then the value
 	\caption{
 		The 2-dimensional embeddings obtained by applying t-SNE to the 100-dimensional learned representations of all 64 possible 3-mers. Left shows the codons encoded by the 3-mers, right shows the actual 3-mers.
 		 }
+%	 TODO: make this one picture where codons are color-coded but still labelledw ith 3-mers
 	\label{fig:tsne}
 \end{figure}
 
@@ -570,6 +571,7 @@ Overall, we take these visualizations as an indication that Doc2Vec was able to 
 \subsubsection{Putting it all together} \label{subsubsec:d2vinference}
 The resulting model uses the pre-trained Doc2Vec network to obtain a 100-dimensional embedding of the extracted nucleotide sequences around the exon start and exon end. These two embeddings, along with the length features, are then given to a shallow MLP for classification. We refer to this model as the D2V model. 
 
+%TODO: graphic of D2V
 %During inference, the Doc2Vec model outputs 100-dimensional embeddings for each input sequence. These, along with the length features, are fed into the shallow MLP for classification. The shallow MLP consists of two layers with 16 and 8 neurons each respectively followed by a dropout layer with dropout probability of 0.2.
 
 
@@ -718,8 +720,8 @@ LSTM cells opposed to unmodified RNNs are used as encoder as LSTMs have been sho
 
 As this lead to empirically better results, we also introduce a 1D batch normalization layer before the attention layer. A dropout layer in the attention head is used for the same reason. 
 
-We pre-empt the results chapter by noting that we only use the extension of multiple attention heads of the three additional modifications of the attentin mechanisms we considered. 
-The architecture of our model is visualized in Figure \ref{fig:attnbilstm}. We refer to this new model as Recursive Attentive Splicing Code (RASC). 
+We pre-empt the results chapter by noting that we only use the extension of multiple attention heads of the three additional modifications of the attention mechanisms we considered. 
+The architecture of our model is visualized in Figure \ref{fig:attnbilstm}. We refer to this new model as Recursive Attentive Splicing Code (RASC). In the experiments section, we validate the choice of introducing the attention mechanism to RASC, by removing it and evaluating the model which only uses the hidden state of the BiLSTMs. We denote this model as Recursive Splicing Code (RSC).
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/visualizations-AttnBiLSTM.pdf} 
 	\caption{Architecture of RASC. }
@@ -739,7 +741,7 @@ The architecture of our model is visualized in Figure \ref{fig:attnbilstm}. We r
 For RASC, the hyperparameter space was a lot larger and model performance was very sensitive to the hyperparameter choice. The most crucial hyperparameters were the number of encoder dimensions and the number of dimensions of the attention layer. Hyperparameters were optimized via a grid search on the HipSci MAJIQ dataset.
 
 
-\section{Training and implementation details} \label{sec:implementation_details}
+\section{Implementation, training and evaluation} \label{sec:implementation_details}
 \subsection{Implementation} \label{subsec:implementation_details}
 All models, except the Doc2Vec network, were implemented using the PyTorch library (version 1.5.0) \cite{pytorch}. The Doc2Vec model was implemented using the gensim library (version 3.8.3) \cite{gensim}. PyTorch and gensim are both standard choices when implementing Deep Learning algorithms or text embedding models. The data processing was done using a mixture of Python and Bash scripts as well as the software tools MAJIQ and SUPPA described in section \ref{subsubsec:majiq} and \ref{subsubsec:suppa}. The latest versions of SUPPA (version 2.3) and MAJIQ (version 2.0) available as of July 2020 were used. The complexity induced by the use of a large number of different datasets and data processing methods was handled by standardizing the shape of the final training samples. Even though 10 different datasets and 3 different models are used, the codebase contains only 2 different data loader and trainer classes.
 %they all use the same data loading and training code. %
@@ -752,10 +754,10 @@ The code repository itself contains multiple README which give more details abou
 %total code base contained roughly ... lines of code. the majority of these were in preprocessing section [maybe exclude this]
 
 \subsection{Training} \label{subsec:training_details}
-The training was done using one NVIDIA GeForce GTX 1080 Ti GPU. This proved to be sufficient as initial exploratory experiments showed no advantage of using deep networks and the networks we evaluate are all relatively shallow. For training and testing, we randomly split each dataset into 10 folds; in a given run, 8 folds were used for training, 1 fold for validation and 1 fold for testing. Each model was trained with different folds 9 times and we compute the average test set performance.\\
+The training was done using one NVIDIA GeForce GTX 1080 Ti GPU. This proved to be sufficient as initial exploratory experiments showed no advantage of using deep networks and the networks we evaluate are all relatively shallow. For training and testing, we randomly split each dataset into 10 folds; in a given run, 8 folds were used for training, 1 fold for validation and 1 fold for testing. Each model was trained with different folds 9 times and we compute the mean test set performance.\\
 %The median training times for one complete training run were 1-5 minutes 
 The models were trained with early stopping on the validation fold until they stopped improving for 15 epochs. This typically occurred after 70 - 150 training epochs.
-Where we established in a base experiment that the variance for a given model was low between runs (lower than ~1\%), we only trained the model once in follow-up experiments for practical reasons.
+
 The pre-training of the Doc2Vec model on the human genome took 3 hours. 
 
 The DSC, D2V and BiLSTM + Attn models respectively contain 20,001, 6,801, and 66,861 trainable weights. In absolute terms, all of these model are still small compared to models known from Computer Vision and Natural Language Processing. The number of training weights is also reflected in the training times with the models respectively taking between 5 to 30 minutes, 1 to 5 minutes and 15 to 75 minutes to train once (depending on dataset). 
@@ -766,6 +768,15 @@ The hyperparameters used for training the models are given in table \ref{table:h
 All models were trained to minimize the binary cross-entropy loss:
 $$\mathbb{L} = - (y \log(\hat{y}) + (1 - y) \log (1 - \hat{y}))$$
 where the ground truth $y \in \{0, 1\}$ and the prediction of the model $\hat{y} \in [0, 1]$. The binary cross-entropy loss is the standard loss for training deep learning-based (binary) classifiers.
+
+\subsection{Evaluation}
+
+To evaluate the models, we report the mean test set performance along with standard deviation across (cross-validation) runs. 
+Where we established in a base experiment that the variance for a given model was low between runs (lower than ~1\%), we only trained the model once in follow-up experiments for practical reasons.
+
+Previous studies have shown that model performance varies significantly between lowly and highly included alternatively spliced exons \cite{dsc} \cite{buschhertel}. Thus, following previous work, we split our test set into a set of highly (PSI > 80\%) and a set of lowly to moderately included, alternatively spliced exons (PSI <=80\%). Both sets contain all constitutive exons. We denote the first set as high PSI dataset (hPSI), the second as low PSI dataset (lPSI) and the complete test as all PSI dataset (allPSI). We evaluate our models on all three datasets.
+
+
 \subsubsection{Metrics} \label{subsubsec:metrics}
 As in previous work \cite{dsc} \cite{buschhertel}, we use the Area under the receiver operating characteristic curve (AUC) as evaluation metric. The AUC provides an aggregate measure of the classification performance across all possible decision thresholds.\\
 However, the AUC doesn't provide information about model performance at a particular decision threshold. To evaluate whether a model is fit for clinical use, decision threshold-specific metrics like sensitivity and specificity are crucial to know.
@@ -785,6 +796,7 @@ To evaluate these, we analytically compute the decision threshold which maximize
 %This is not captured by the AUC. \\
 %Thus, we also evaluated the F1 of our models when working with an unbalanced dataset as in the case of the HipSci-based dataset processed with MAJIQ.
 %The output of our models is a single, continuous scalar $\hat{y} \in [0, 1]$. As the AUC itself is an aggregate measure across all decision thresholds, we don't need to set it to a certain value that translates the continuous prediction into a discrete positive or negative class prediction. To compute the F1 score, we do. Naively, this threshold may be set to 0.5; that is, all outputs above 0.5 will be interpreted as a prediction of the positive class and all other outputs as a prediction of the negative class. However, this threshold may not be optimal to maximize the F1 score, especially when working with unbalanced datasets. We choose the threshold which maximizes the F1 score on the test set.
+
 
 \begin{table}[h!]
 	\centering
