@@ -1,0 +1,2 @@
+Attention weights in this directory correspond the attention obtained by running cross-validation with MultiHeads.json amd saving the weights from the second run after completing the first
+The first run wasn't taken because it is uncharacteristically bad

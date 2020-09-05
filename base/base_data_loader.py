@@ -38,12 +38,12 @@ class BaseDataLoader(DataLoader):
                    # DataLoader(dataset=self.test_low, **self.init_kwargs),\
                    # DataLoader(dataset=self.test_high,  **self.init_kwargs)
         else:
-            # three test sets which are standard in CV
+            # three test and one val set which are always there
             regular_test_and_val_sets = [DataLoader(dataset=self.test_all,  **self.init_kwargs),
                    DataLoader(dataset=self.test_low, **self.init_kwargs),
                    DataLoader(dataset=self.test_high,  **self.init_kwargs),
                          DataLoader(dataset=self.val_all,  **self.init_kwargs)]
-            # 9 other test sets which I have added
+            # 9 other test sets which I have added for cross-condition performance
             if len(self.extra_test) != 9: raise Exception('Unexpected number of extra test sets')
             extra_test_sets = []
             for extra_test_set in self.extra_test:

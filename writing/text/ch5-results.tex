@@ -337,11 +337,11 @@ In summary, we extend RASC with multiple attention heads. The results of RASC we
 We present the confusion matrix for the binary classifier based on RASC in Figure \ref{fig:confusion_matrix}. The decision threshold which maximizes the F1 score was chosen resulting in a F1 score of 0.88 (for the negative class of constitutive exons). We observe comparatively few false positives, but many false negatives and correspondingly obtain a low sensitivity score of 0.56, but a high specificity score of 0.93. Thus, the classifier performs well at ruling in that an exon is alternatively spliced, but poorly at ruling that it isn't. This means the classifier is attractive for guiding the investigation of exons, where it wasn't previously known that they are alternatively spliced. This wouldn't be possible with a less specific classifier because further investigation relies on expensive wet-labs experiments for which the number of false positives need to be minimized. When employing RASC in practice, the decision threshold should be chosen such that the specificity is even higher (at the cost of further reduced sensitivity): a false positive rate of 5.3\% is still too high for wet lab experiments. Thus, we conclude that our classifier shows attractive properties, but would require further tuning before clinical use. 
 
 
-\subsection{Cross-tissue performance} \label{subsec:hipsci_ipsc_majiq}
+\subsection{Cross-condition performance} \label{subsec:hipsci_ipsc_majiq}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/majiq_comparison_barcharts.png} 
-	\caption{Performance when training models on one HipSci dataset and testing on the same dataset as well as three others. Within the bars of one model, going further right means using a dataset which is less similar to the dataset the model was trained on (the left-most bar display performance when testing the model on the dataset it was trained on). 'lib' refers to a library or biological sample from the same individual, 'indv' refers to the indivual the sample was taken from, 'diff' abbreviates different. 'iPSC cell' refers to a dataset based on RNA-seq data from undifferentiated iPSC cells while 'neuron cell' refers to iPSC cells differentiated to neuron cells. }
+	\caption{Performance when training models on one HipSci dataset and testing on the same dataset as well as three others. Within the bars of one model, going further right means using a dataset which is less similar to the dataset the model was trained on (the left-most bar display performance when testing the model on the dataset it was trained on). 'lib' refers to a library or biological sample from the same individual, 'indv' refers to the indivdiual the sample was taken from, 'diff' abbreviates different. 'iPSC cell' refers to a dataset based on RNA-seq data from undifferentiated iPSC cells while 'neuron cell' refers to iPSC cells differentiated to sensory neuron cells. }
 	\label{fig:majiq_comparison_barcharts}
 \end{figure}
 
@@ -376,12 +376,8 @@ interpretation of attention mechanism etc follows here; some pretty graphics to 
 
 
 
-%TODO attention visualization
 
 
-%- say that conv overfits a lot
-%
-%- ideally show training conv of conv + no query vs no query
 %compute average of conv training error: 0.9884710561726501 for conv + no query
 
 %
@@ -431,7 +427,7 @@ heatmap analysis:
 \end{itemize}
 
 \subsubsection{Heads focus on a single sequence} 
-When using a single attention, the attention head needs to split its conceptual 'focus' over the start and end input sequence. This is not the case for multiple attention heads: here single heads may focus on only one sequence as long as there is at least one attention head which also pays attention to the information in the other sequence. We observe exactly this behaviour: across the 9 cross-validation runs, single attention heads only split their 'focus' 7 out of 36 times. None of the trained models only ever pay attention to only a single sequence. This reassures us that the dataset isn't biased such that the model only needs to take information from one sequence into account. 
+When using a single attention head, the head needs to split its conceptual 'focus' over the start and end input sequences. This is not the case for multiple attention heads: here single heads may focus on only one sequence as long as there is at least one attention head which also pays attention to the information in the other sequence. We observe exactly this behaviour: across the 9 cross-validation runs, single attention heads only split their 'focus' 7 out of 36 times. None of the trained models only ever pay attention to only a single sequence. This reassures us that the dataset isn't biased such that the model only needs to take information from one sequence into account. 
 
 The sequence which an attention head focusses on generally does not change after the first 5 epochs. Similar observation, that the role of attention heads is decided very early on in training, have also been made in the context of NLP \cite{sixteenheads}.
 %TODO: probably want to put into respective focus into table actually -- or by redoing heatmap such that you observe behavior there too (aka actual attention over sequence), might want to switch color tbh
@@ -439,7 +435,7 @@ The sequence which an attention head focusses on generally does not change after
 
 
 \begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attention_heatmap_plswork.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attention_heatmap.png} 
 	\caption{Development of attention during training. }
 	\label{fig:attn_heatmap}
 \end{figure}
@@ -447,7 +443,7 @@ The sequence which an attention head focusses on generally does not change after
 
 
 \begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/mean_attention_w_std.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/mean_attention_barchart.png} 
 	\caption{Mean attention weights averaged over all test samples and all four attention heads. }
 	\label{fig:mean_attn}
 \end{figure}
@@ -483,9 +479,7 @@ The sequence which an attention head focusses on generally does not change after
 %- hopefully both runs are long (150 epochs+)
 
 
-
+\subsubsection{Regressing the PSI value} \label{subsubsec:psi_regression}
 
 
 %TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation
-
-%Similar to the extension of multiple attention heads, this extension makes the model more powerful, but also roughly doubles the number of learnable weights. It might be surprising that adding a single convolution layer, adds the same number of 

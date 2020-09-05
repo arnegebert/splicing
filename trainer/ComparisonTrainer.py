@@ -73,10 +73,10 @@ class ComparisonTrainer(BaseTrainer):
             self.train_metrics.update('loss', loss.item())
             for met in self.metric_ftns:
                 try:
-                    auc_val = met(pred, target)
-                    self.train_metrics.update(met.__name__, auc_val)
-                except ValueError:
-                    print('AUC bitching around for train metrics')
+                    met_val = met(pred, target)
+                    self.train_metrics.update(met.__name__, met_val)
+                except ValueError as e:
+                    self.logger.info(e)
                     continue
 
             if batch_idx % self.log_step == 0:
@@ -152,10 +152,10 @@ class ComparisonTrainer(BaseTrainer):
             targets.append(target.data)
             for met in self.metric_ftns:
                 try:
-                    auc_val = met(pred, target)
-                    metrics.update(met.__name__, auc_val)
-                except ValueError:
-                    print('AUC bitching around')
+                    met_val = met(pred, target)
+                    metrics.update(met.__name__, met_val)
+                except ValueError as e:
+                    self.logger.info(e)
                     continue
         predictions, targets = torch.cat(predictions, dim=0).cpu().numpy(), torch.cat(targets, dim=0).cpu().numpy()
         return predictions, targets

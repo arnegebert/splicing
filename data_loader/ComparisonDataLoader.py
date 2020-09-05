@@ -28,12 +28,12 @@ class ComparisonDataLoader(BaseDataLoader):
         else:
             prefix = "embedded_" if embedded else ""
             cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
-            low = np.load(f'data/iPSC/exon/{prefix}low_bezi1.npy')
-            high = np.load(f'data/iPSC/exon/{prefix}high_bezi1.npy')
+            low = np.load(f'data/iPSC/exon/{prefix}low_bezi2.npy')
+            high = np.load(f'data/iPSC/exon/{prefix}high_bezi2.npy')
 
             diff_lib_cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
-            diff_lib_low = np.load(f'data/iPSC/exon/{prefix}low_bezi2.npy')
-            diff_lib_high = np.load(f'data/iPSC/exon/{prefix}high_bezi2.npy')
+            diff_lib_low = np.load(f'data/iPSC/exon/{prefix}low_bezi1.npy')
+            diff_lib_high = np.load(f'data/iPSC/exon/{prefix}high_bezi1.npy')
 
             diff_indv_cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
             diff_indv_low = np.load(f'data/iPSC/exon/{prefix}low_lexy2.npy')

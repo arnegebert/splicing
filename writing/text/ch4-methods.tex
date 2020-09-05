@@ -553,12 +553,20 @@ After pre-training, the embedding for a given word or document is then the value
 
 \subsubsection{Analyzing the obtained embeddings}
 
+%\begin{figure}
+%	\includegraphics[width=0.5\textwidth]{../visualizations/ch4-methods/tSNE-d2v.png} 	\includegraphics[width=0.5\textwidth]{../visualizations/ch4-methods/tSNE-d2v_bases.png} 
+%	\caption{
+%		The 2-dimensional embeddings obtained by applying t-SNE to the 100-dimensional learned representations of all 64 possible 3-mers. Left shows the codons encoded by the 3-mers, right shows the actual 3-mers.
+%		 }
+%%	 TODO: make this one picture where codons are color-coded but still labelledw ith 3-mers
+%	\label{fig:tsne}
+%\end{figure}
+
 \begin{figure}
-	\includegraphics[width=0.5\textwidth]{../visualizations/ch4-methods/tSNE-d2v.png} 	\includegraphics[width=0.5\textwidth]{../visualizations/ch4-methods/tSNE-d2v_bases.png} 
+	\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/tsne_d2v_embeddings.png} 	
 	\caption{
-		The 2-dimensional embeddings obtained by applying t-SNE to the 100-dimensional learned representations of all 64 possible 3-mers. Left shows the codons encoded by the 3-mers, right shows the actual 3-mers.
-		 }
-%	 TODO: make this one picture where codons are color-coded but still labelledw ith 3-mers
+		The 2-dimensional embeddings obtained by applying t-SNE to the 100-dimensional learned representations of all 64 possible 3-mers. The corresponding amino acids are color-coded. 
+	} %TODO; although current color scale is very pretty, get a more diverse one
 	\label{fig:tsne}
 \end{figure}
 

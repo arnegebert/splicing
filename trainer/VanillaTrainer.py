@@ -65,11 +65,10 @@ class VanillaTrainer(BaseTrainer):
             self.train_metrics.update('loss', loss.item())
             for met in self.metric_ftns:
                 try:
-                    auc_val = met(pred, target)
-                    self.train_metrics.update(met.__name__, auc_val)
+                    met_val = met(pred, target)
+                    self.train_metrics.update(met.__name__, met_val)
                 except ValueError as e:
-                    print(e)
-                    # print('AUC bitching around for train metrics')
+                    self.logger.info(e)
                     continue
 
             if batch_idx % self.log_step == 0:
@@ -167,16 +166,15 @@ class VanillaTrainer(BaseTrainer):
             targets.append(target.data)
             for met in self.metric_ftns:
                 try:
-                    auc_val = met(pred, target)
-                    metrics.update(met.__name__, auc_val)
+                    met_val = met(pred, target)
+                    metrics.update(met.__name__, met_val)
                 except ValueError as e:
-                    print(e)
-                    # print('AUC bitching around')
+                    self.logger.info(e)
                     continue
         if self.attention and metrics == self.test_all_metrics:
             attn_ws_b = np.concatenate(attn_ws_b, axis=0)
             for attnw in sum(np.mean(attn_ws_b[:, :140], axis=0)):
-                print(f'{attnw:.2f}')
+                self.logger.info(f'{attnw:.2f}')
             # if epoch == 50:
             #     np.save(f'test_all_data.npy', np.concatenate(datab, axis=0))
             # np.save(f'attn_ws_{epoch}.npy', attn_ws_b)
