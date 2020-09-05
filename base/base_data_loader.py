@@ -114,7 +114,7 @@ class BaseDataLoader(DataLoader):
                                     cons[cons_fold_len * fold_test:cons_fold_len * (fold_test + 1)]), axis=0)
         test_low = np.concatenate((low[low_fold_len * fold_test:low_fold_len * (fold_test + 1)],
                                    cons[cons_fold_len * fold_test:cons_fold_len * (fold_test + 1)]), axis=0)
-        test_all = np.concatenate((val_high, low[low_fold_len * fold_test:low_fold_len * (fold_test + 1)]), axis=0)
+        test_all = np.concatenate((test_high, low[low_fold_len * fold_test:low_fold_len * (fold_test + 1)]), axis=0)
 
         print(f'Size training dataset: {len(train)}')
         print(f'Proportions (after balancing):')

@@ -28,12 +28,12 @@ class ComparisonDataLoader(BaseDataLoader):
         else:
             prefix = "embedded_" if embedded else ""
             cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
-            low = np.load(f'data/iPSC/exon/{prefix}low_bezi2.npy')
-            high = np.load(f'data/iPSC/exon/{prefix}high_bezi2.npy')
+            low = np.load(f'data/iPSC/exon/{prefix}low_bezi1.npy')
+            high = np.load(f'data/iPSC/exon/{prefix}high_bezi1.npy')
 
             diff_lib_cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
-            diff_lib_low = np.load(f'data/iPSC/exon/{prefix}low_bezi1.npy')
-            diff_lib_high = np.load(f'data/iPSC/exon/{prefix}high_bezi1.npy')
+            diff_lib_low = np.load(f'data/iPSC/exon/{prefix}low_bezi2.npy')
+            diff_lib_high = np.load(f'data/iPSC/exon/{prefix}high_bezi2.npy')
 
             diff_indv_cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
             diff_indv_low = np.load(f'data/iPSC/exon/{prefix}low_lexy2.npy')
@@ -56,9 +56,14 @@ class ComparisonDataLoader(BaseDataLoader):
                 self.apply_classification_threshold(diff_tissue_cons, diff_tissue_low, diff_tissue_high,
                                                 embedded=embedded, threshold=classification_threshold)
 
-        dataset_diff_lib = self.get_train_test_and_val_sets(diff_lib_cons, diff_lib_low, diff_lib_high)
-        dataset_diff_indv = self.get_train_test_and_val_sets(diff_indv_cons, diff_indv_low, diff_indv_high)
-        dataset_diff_tissue = self.get_train_test_and_val_sets(diff_tissue_cons, diff_tissue_low, diff_tissue_high)
+        meh = 1000000
+        dataset_diff_lib = self.get_train_test_and_val_sets(diff_lib_cons[:meh], diff_lib_low[:meh], diff_lib_high[:meh])
+        dataset_diff_indv = self.get_train_test_and_val_sets(diff_indv_cons[:meh], diff_indv_low[:meh], diff_indv_high[:meh])
+        dataset_diff_tissue = self.get_train_test_and_val_sets(diff_tissue_cons[:meh], diff_tissue_low[:meh], diff_tissue_high[:meh])
+
+        # dataset_diff_lib = self.get_train_test_and_val_sets(diff_lib_cons, diff_lib_low, diff_lib_high)
+        # dataset_diff_indv = self.get_train_test_and_val_sets(diff_indv_cons, diff_indv_low, diff_indv_high)
+        # dataset_diff_tissue = self.get_train_test_and_val_sets(diff_tissue_cons, diff_tissue_low, diff_tissue_high)
         # 1:4 contains test sets
         test_datasets_diff_lib = dataset_diff_lib[1:4]
         test_datasets_diff_indv = dataset_diff_indv[1:4]

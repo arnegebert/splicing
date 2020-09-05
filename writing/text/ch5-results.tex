@@ -249,7 +249,21 @@ Among these two, 2. is more likely due to SUPPA not addressing various challenge
 	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
 	\label{fig:majiq_rocs}
 \end{figure}
-%TODO: make this one figure with shared axes (finetuning)
+
+
+%TODO: one figure, post-poned for fine-tuning as it tilts me
+%\begin{figure}
+%	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/majiq_neuron_ipsc_cross_model_roc_auc_comparison.png} 
+%	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
+%	\label{fig:majiq_rocs}
+%\end{figure}
+%
+%\begin{figure}
+%	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/mpl_sucks.png} 
+%	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
+%	\label{fig:majiq_rocs}
+%\end{figure}
+
 All models perform significantly better than on previous datasets and we observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by RASC. Adding attention to RSC promotes it from the worst to the best performing model, validating our choice. 
 
 %The dataset based on undifferentiated iPSC cells seems to be less challenging: the AUCs are roughly 0.02 higher than on the dataset based on sensory neuron cells. At a closer look at the dataset distribution....
@@ -263,7 +277,7 @@ All models perform significantly better than on previous datasets and we observe
 
 %todo thought: it would be interesting to reevaluate all models without constitutive exons to see whether they actually perform better than in suppa dataset
 
-\subsubsection{Impact of architectural choices}
+\subsubsection{Impact of architectural choices} \label{subsubsec:majiq_architectural_choices}
 The poor performance of D2V is likely a result of its architecture: the 100-dimensional embeddings used for classification weren't optimizely jointly during training and likely don't contain fine-grained information, such as the specific positons of motifs, required for accurate splicing prediction. We conjecture that D2V would benefit from receiving further split input sequences, e.g. input sequences containing 35 nucleotides. The best solution, while keeping the word embeddings, would likely be to embed the overlapping 3-mers in the sequence via word2vec and combine this with an efficient convolutional architecture, as done in \cite{d2vsplicing}.
 
 
@@ -287,10 +301,10 @@ The poor performance of D2V is likely a result of its architecture: the 100-dime
 	\label{table:majiq_nolens}
 \end{table}
 
-As litmus test for dataset quality, we repeat the same experiment as on the HEXEvent dataset and remove the length features as model input. We document the results in Table \ref{table:majiq_nolens}.
-They reveal that a large part of D2V's performance relies on information contained in the length features. However, since removing the length features only marginally affects the performance of DSC and RASC, we conclude that D2V is unable to effectively incorporate information from the sequences and that the dataset is not biased in the same way as the HEXEvent dataset. 
+As litmus test for dataset quality, we repeat the experiment of removing the length features as model input. We document the results in Table \ref{table:majiq_nolens}.
+They reveal that a large part of D2V's performance relies on information contained in the length features. However, since removing the length features only marginally affects the performance of DSC and RASC, we conclude that the dataset is not biased in the same way as the HEXEvent dataset and that this observation is symptomatic of D2V being unable to effectively incorporate information from the sequences (see discussion in \ref{subsubsec:majiq_architectural_choices}). 
 
-Giving the strong model performance independent of the length features and the prior expectation for MAJIQ to produce the highest quality PSI estimates, we conclude that it does. This gives further weight to the conclusions that the poor performance on the exon-centric GTEx-based and HipSci SUPPA datasets is a result of poor data quality, and not due to the inherent hardness of the splicing classification task. Thus, using the HipSci MAJIQ datasets is preferable to using any of the other datasets we have evaluated. 
+Giving the strong model performance independent of the length features and the prior expectation for MAJIQ to produce the highest quality PSI estimates, we conclude that it does. This indicates that the comparatively poor performance on the GTEx-based and HipSci SUPPA datasets are due to poor data quality, and not due to the inherent difficulty of the splicing classification task. Thus, using the HipSci MAJIQ datasets is preferable to using any of the other datasets we have evaluated. 
 
 Motivated by this observation, we use the HipSci MAJIQ dataset to validate our architectural choices for RASC and to carry out further analysis omitted on the other datasets.
 
@@ -437,9 +451,10 @@ interpretation of attention mechanism etc follows here; some pretty graphics to 
 
 
 \begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attention_heatmap_plswork.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attention_heatmap.png} 
 	\caption{Development of attention during training. }
 	\label{fig:attn_heatmap}
+%	TODO: https://discourse.matplotlib.org/t/horizontal-and-vertical-lines-between-subplots/13540 or powerpoint, https://stackoverflow.com/questions/26084231/draw-a-separator-or-lines-between-subplots?rq=1
 \end{figure}
 
 We visualize to what parts of the input sequence RASC pays attention to in \ref{fig:attn_distribution}. %TODO
@@ -515,3 +530,4 @@ The sequence which an attention head focusses on generally does not change after
 
 
 %TODO: observation that best performing datasets contain the most samples
+%TODO: sentence about validation vs test loss
