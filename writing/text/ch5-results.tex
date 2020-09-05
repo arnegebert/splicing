@@ -109,13 +109,15 @@ These data quality issues, motivated us to construct alternative, better, datase
 	\label{fig:gtex_exon_roc}
 \end{figure}
 
-Results are given in Figure \ref{fig:gtex_exon_barcharts}. Across all models, performance is poor and the predictive power of the models is low. Surprisingly, performance is also very similar across tissues: the mean cross-tissue performance difference of 0.007 AUC is smaller than the mean cross-run difference of 0.014 AUC. This is surprising from a biological perspective as cross-tissue splicing differences are well-documented \cite{crosstissuesplicing}. Most likely, the models are already struggling to learn the baseline splicing behaviour invariant across tissues and don't learn finer cross-tissue differences. 
+Results are given in Figure \ref{fig:gtex_exon_barcharts}. Across all models, performance is poor and the predictive power of the models is low. Surprisingly, performance is also very similar across tissues: the mean cross-tissue performance difference of 0.007 AUC is smaller than the mean cross-run difference of 0.014 AUC. This is surprising from a biological perspective as cross-tissue splicing differences are well-documented \cite{crosstissuesplicing}. 
+This could indicate that, while splicing across tissues varies, the relative complexity of cassette exon splicing behaviour across tissues is similar. However, this would be overinterpreting models with low predictive power.
+Most likely, the models are already struggling to learn the baseline splicing behaviour invariant across tissues and don't learn finer cross-tissue differences. 
 % that Since our models perform so poorly they likely already struggle to learn the baseline splicing behaviour invariant across tissues. 
-This is also surprising from a machine learning perspective, as the cerebellum tissue-based dataset contains almost twice as many training samples as the heart tissue-based dataset. This indicates that either 1) the models have already hit a point of diminishing returns for adding more data or 2) the models generally require significantly more training samples. All models perform best on the dataset based on a brain cortex sample. %TODO: not happy with the wording of this section yet; could be more dense.
+The low cross-tissue performance differences also surprising from a machine learning perspective, as the cerebellum-based dataset contains almost twice as many training samples as the heart-based dataset. This indicates that either 1) the models have already hit a point of diminishing returns for adding more data or 2) the models generally require significantly more training samples. All models perform best on the dataset based on a brain cortex sample. %TODO: not happy with the wording of this section yet; could be more dense.
 %even if splicing varies across tissues, performance as measured by AUC could be the same if roughly same level of complexity -- avoid this issue by referrering to it as most likely explanation
 
 Relative model performance stays the same between tissues: DSC tends to perform best, followed by RASC and the D2V model. The variance of RASC between runs is on average twice as twice as high as the respective variance of DSC and D2V. As a result, RASC is the best performing model, as measured by the maximum rather than mean AUC value, on the brain cortex tissue-based and cerebellum tissue-based datasets. This indicates that RASC needed more regularization on this dataset and dataset specific fine-tuning could've lead to it performing the best across cross-validation runs.
-
+%TODO: rerun RASC so it becomes the king again
 
 Figure \ref{fig:gtex_exon_roc} gives more insight into model performance. 
 %TODO: mention in methods section the dataset split
@@ -142,7 +144,7 @@ The performance on highly included, alternatively spliced exons (80\% <= PSI < 9
 \subsection{Intron-centric datasets} \label{subsec:gtex_junc}
 
 \begin{figure}[h]
-	\centering\includegraphics[width=0.9\textwidth]{../visualizations/ch5-results/gtex_junc_barcharts.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/gtex_junc_barcharts.png} 
 	\caption{Performance on the GTEx-based junction datasets across different tissues. }
 	\label{fig:gtex_junc_barcharts}
 %	TODO: should these bars move closer together?
@@ -150,39 +152,66 @@ The performance on highly included, alternatively spliced exons (80\% <= PSI < 9
 
 
 \begin{figure}[h]
-	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_DSC/final/ROC.png} 
-	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_Attn/junc_cv_final/ROC.png}
-	\caption{ROC curves when training GTEx-based intron-centric heart tissue dataset. Left: ROC curve of DSC. Right: ROC curve of RASC. }
+%	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_DSC/final/ROC.png} 
+	\includegraphics[width=0.85\textwidth]{../saved/log/GTEx_Junc_Heart_Attn/junc_cv_final/ROC.png}
+	\caption{ROC curve from training RASC on the GTEx-based intron-centric heart-tissue-based dataset. }
 %	TODO: make figure share y-axis; fix t=plot titles
+%	TODO: only one of these has a title
 	\label{fig:gtex_junc_rocs}
 \end{figure}
 
 %TODO: motivation for using junction-centric datasets
-%TODO: rerun these with cross-validation (will take ~30 hours of trainig time though)
+\subsubsection{Main analysis}
+Figure \ref{fig:gtex_junc_barcharts} shows that junction classification is seemingly an easier task: the AUC of all models increases by at least 0.05 to 0.06 compared to the exon classification task. However, this is likely a result of the intron-centric datasets containing on average four times more training samples rather than due to different inherent task difficulties. RASC significantly outperforms DSC and D2V. 
 
-Figure \ref{fig:gtex_junc_barcharts} shows that junction classification is seemingly an easier task: the AUC of all models increases by at least 0.05 to 0.06. This is likely a result of the intron-centric datasets containing on four times more training samples. RASC significantly outperforms DSC and D2V. The performance differences between tissues vary per model, however, all models tend to perform the best on the cerebellum tissue which also contains the most training samples. 
+Similar to the exon-centric datasets \ref{subsec:gtex_exon}, we observe very low cross-tissue performance differences. We again believe that model performance is generally too poor to warrant speculation about the underlying biological realities. However, we come to a different conclusion regarding the observation that the different dataset sizes between tissues don't affect model performance:
+for the GTEx-based exon-centric datasets we hypothesized that the models have hit diminishing returns for adding more data or that they need significantly more data. As the number of training samples has quadrupled in the move from exon- to intron-centric datasets, we now believe that the models have hit a point of diminishing returns for adding more data. 
 
-Surprisingly, the performance across rarely and highly included junctions is no longer very disparate (see Figure \ref{fig:gtex_junc_rocs}). This indicates that the models learn to recognize motifs which separate constitutive and alternatively spliced junctions, but can't do so for exons. However, this observation may also be  as only 15\%
+
+%TODO: rerun heart tissue experiments with proper 0.4 dropout so that fucking variance disappears
+
+
+The performance across rarely and highly included junctions is less disparate than on the exon-centric datasets (see Figure \ref{fig:gtex_junc_rocs}). This indicates that the models are better able to learn to recognize motifs which separate constitutive and highly alternatively spliced junctions than for exons.
+%However, this observation may not be very epistemiologically certain as only 15\%
+%TODO explanation for this
+
+\subsubsection{Assessing model performance without length features}
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{| l | c | c | c| c} 
+		\hline
+		Model name & Only sequences & Sequences + lengths & Relative performance improvement\\
+		\hline
+		DSC & 0.661 & 0.704 & 0.211\\
+		D2V & 0.629 & 0.673 & 0.254\\
+		RASC & \textbf{0.776} & \textbf{0.808} & 0.104\\
+		\hline
+	\end{tabular}
+	\caption{Performance on the dataset based on the GTEx-based intron-centric dataset with and without length features. 
+		%		Note that the relative performance drop was computed with reference to the baseline AUC value of 0.5.
+	}
+	\label{table:gtex_junc_nolens}
+\end{table}
+
+As model performance is more promising than on the GTEx-based exon-centric datasets, we validate that this isn't due to an overreliance on the length features as on the HEXEvent dataset. Table \ref{table:gtex_junc_nolens} shows that the length features still make up a large part of model performance, but that the models don't rely on them completely. However, the performance proportion the length features account for is still biologically implausible. %TODO: citation needed?
+Thus we conclude that the dataset is an improvement over the HEXEvent dataset, but generating a dataset where model performance is less dependent on the length features is still desirable. 
+
 
 %15 \% of alternatively spliced exons are highly included 
-%
-%TODO: no lens experiments (done on cerebellum): DSC + RASC missing
-%TODO: run cross-validation runs of this: DSC Heart + DSC Brain missing
-%- performance across the board a lot better; seemingly an easier task\\
-%- fairly clear correlation with more training samples -> more performance (cerebellum has most, heart has fewest)\\
-%- high / low difficulty trend doesn't really hold. 
-
 
 %\subsection{Reconstructing HEXEvent-dataset with GTEx data}
 %- dataset where I only took exons which were also in GTEx data\\
 %- seriously considering not showing these results as I basically already debunked HEXEvent at this point -- so from a narrative perspective, why spend effort on replicating it?
 
+\subsubsection{Evaluation of the GTEx-based datasets}
+Overall, we observe poor to promising model performance, biologically surprising low cross-tissue performance differences and biologically implausible reliance on the length features. 
+In \ref{subsubsec:naivepsi}, we mentioned issues when trying to estimate PSI naively. Although we alleviated these in pre-processing, we don't account for the information contained in non-junction reads and don't integrate information from multiple samples. As a result, data quality is likely still an issue distorting the results in this section. 
+Thus we conclude that the GTEx-based datasets improve upon the HEXEvent dataset, but using datasets based on more accurate PSI estimation methods is desirable and would lead to more meaningful results. %would lead to more meaningful results.
 
+%Alleviating these issues, we next evaluate the models based on a primary data source which gives access to raw RNA-seq reads. This enables us to use methods from the literature which leverage information from non-junction reads and multiple samples.
 
-%TODO overall conclusion here
-In \ref{subsubsec:naivepsi}, we mentioned issues when trying to estimate PSI naively. Although we tried to alleviate these as far as possible in pre-processing, we don't account for the information contained in non-junction reads and that from multiple samples. As a result, data quality is likely still an issue distoring the results in this section. Alleviating these issues, we next evaluate our models based on a primary data source which gives access to raw RNA-seq reads. This enables us to use methods from the literature which leverage information from non-junction reads and multiple samples.
-
-Overall, we observe poor model performance and biologically surprising low cross-tissue performance differences. This indicates that the GTEx-based exon-centric dataset is not fit for training neural-network based splicing codes and conclude that evaluating the models on other datasets is desirable.
+%Overall, we observe poor model performance and biologically surprising low cross-tissue performance differences. This indicates that the GTEx-based exon-centric dataset is not fit for training neural-network based splicing codes and conclude that evaluating the models on other datasets is desirable.
 
 
 \section{HipSci-based datasets} \label{sec:hipsci} 
@@ -483,3 +512,6 @@ The sequence which an attention head focusses on generally does not change after
 
 
 %TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation
+
+
+%TODO: observation that best performing datasets contain the most samples

@@ -13,3 +13,20 @@ x = np.array([
 0.9873637183134901, 0.9597310119907871, 0.9922904605341837, 0.9654297499738087,
 0.9784849844502715])
 print(np.mean(x))
+
+
+
+def compute_relative_performance_change(performance_bef, performance_after):
+    return (performance_after - performance_bef)/(performance_after-0.5)
+
+dsc_bef, dsc_after = 0.661, 0.704
+d2v_bef, d2v_after = 0.629, 0.673
+rasc_bef, rasc_after = 0.776, 0.808
+
+dsc_change = compute_relative_performance_change(dsc_bef, dsc_after)
+d2v_change = compute_relative_performance_change(d2v_bef, d2v_after)
+rasc_change = compute_relative_performance_change(rasc_bef, rasc_after)
+
+print(f'DSC Performance change: {dsc_change:.3f}')
+print(f'D2v Performance change: {d2v_change:.3f}')
+print(f'RASC Performance change: {rasc_change:.3f}')

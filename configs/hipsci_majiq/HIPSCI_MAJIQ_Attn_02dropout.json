@@ -1,12 +1,14 @@
 {
-    "name": "HIPSCI_MAJIQ_Attn",
+    "name": "HIPSCI_MAJIQ_Attn_02dropout",
 
     "n_gpu": 1,
     "run_id": "",
 
     "arch": {
         "type": "AttnBiLSTM",
-        "args": {}
+        "args": {
+            "attn_dropout": 0.2
+        }
     },
     "data_loader": {
         "type": "VanillaDataLoader",

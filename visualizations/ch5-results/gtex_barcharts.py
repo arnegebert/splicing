@@ -69,13 +69,13 @@ def bar_charts_juncs():
     with_extra_random_guessing_plot = False
     # can be further fine-tuned; either 0.5 from start or I include baseline model
     labels = ['DSC', 'D2V', 'RASC']
-    brain_means = [0.689, 0.670, 0.798]
-    cerebellum_means = [0.715, 0.675, 0.803]
-    heart_means = [0.685, 0.671, 0.768]
+    brain_means = [0.699, 0.671, 0.810]
+    cerebellum_means = [0.704, 0.673, 0.808]
+    heart_means = [0.699, 0.677, 0.782]
 
-    brain_stds = [0, 0, 0]
-    cerebellum_stds = [0, 0, 0]
-    heart_stds = [0, 0, 0]
+    brain_stds = [0.006, 0.003, 0.012]
+    cerebellum_stds = [0.006, 0.004, 0.008]
+    heart_stds = [0.008, 0.005, 0.032]
 
     x = np.arange(len(brain_means))  # the label locations
     width = 0.2  # the width of the bars
@@ -104,9 +104,9 @@ def bar_charts_juncs():
                         xytext=(0, 3),  # 3 points vertical offset
                         textcoords="offset points",
                         ha='center', va='bottom')
-    autolabel(rects1)
-    autolabel(rects2)
-    autolabel(rects3)
+    autolabel(rects1, stds=brain_stds)
+    autolabel(rects2, stds=cerebellum_stds)
+    autolabel(rects3, stds=heart_stds)
 
     if with_extra_random_guessing_plot:
         labels.append('Random guessing')
