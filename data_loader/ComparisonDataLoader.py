@@ -14,7 +14,7 @@ class ComparisonDataLoader(BaseDataLoader):
     4. Train on lib1, test on lib from other individual other tissue
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.1, num_workers=1,
-                 classification=True, classification_threshold=0.95, cross_validation_seed=0, embedded=False):
+                 classification=True, classification_threshold=0.99, cross_validation_seed=0, embedded=False):
         self.data_dir = data_dir
         self.classification = classification
         self.class_threshold = classification_threshold
@@ -24,7 +24,7 @@ class ComparisonDataLoader(BaseDataLoader):
         print(f'starting loading of data')
 
         if data_dir:
-            raise Exception('reeeeeeeeeeeeeeeeeeeee')
+            raise Exception('Data directories for this data loader are preset and can\'t be overwritten.')
         else:
             prefix = "embedded_" if embedded else ""
             cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
@@ -56,10 +56,11 @@ class ComparisonDataLoader(BaseDataLoader):
                 self.apply_classification_threshold(diff_tissue_cons, diff_tissue_low, diff_tissue_high,
                                                 embedded=embedded, threshold=classification_threshold)
 
-        meh = 1000000
-        dataset_diff_lib = self.get_train_test_and_val_sets(diff_lib_cons[:meh], diff_lib_low[:meh], diff_lib_high[:meh])
-        dataset_diff_indv = self.get_train_test_and_val_sets(diff_indv_cons[:meh], diff_indv_low[:meh], diff_indv_high[:meh])
-        dataset_diff_tissue = self.get_train_test_and_val_sets(diff_tissue_cons[:meh], diff_tissue_low[:meh], diff_tissue_high[:meh])
+        meh = 100000
+        meh2 = 10
+        dataset_diff_lib = self.get_train_test_and_val_sets(diff_lib_cons[:meh], diff_lib_low[:meh2], diff_lib_high[:meh2])
+        dataset_diff_indv = self.get_train_test_and_val_sets(diff_indv_cons[:meh], diff_indv_low[:meh2], diff_indv_high[:meh2])
+        dataset_diff_tissue = self.get_train_test_and_val_sets(diff_tissue_cons[:meh], diff_tissue_low[:meh2], diff_tissue_high[:meh2])
 
         # dataset_diff_lib = self.get_train_test_and_val_sets(diff_lib_cons, diff_lib_low, diff_lib_high)
         # dataset_diff_indv = self.get_train_test_and_val_sets(diff_indv_cons, diff_indv_low, diff_indv_high)

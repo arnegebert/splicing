@@ -1,21 +1,18 @@
 {
-    "name": "SingleHead",
+    "name": "GTEx_Junc_Heart_NoLens_DSC",
 
     "n_gpu": 1,
-    "run_id": "",
 
     "arch": {
-        "type": "AttnBiLSTM",
+        "type": "DSC",
         "args": {
-            "LSTM_dim": 50,
-            "attn_dim": 100,
-            "attn_mode": "single_head"
+          "use_lens": false
         }
     },
     "data_loader": {
         "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "data/hipsci_majiq/exon",
+            "data_dir": "data/gtex_processed/junc/heart",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -25,7 +22,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 1e-3,
+            "lr": 5e-4,
             "weight_decay": 0.0,
             "amsgrad": true
         }
@@ -43,9 +40,7 @@
     },
     "trainer": {
         "type": "VanillaTrainer",
-        "args": {
-            "attention": true
-        },
+        "args": {},
         "epochs": 500,
 
         "save_dir": "saved/",
@@ -56,8 +51,8 @@
         "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc"],
         "early_stop": 15,
 
-        "tensorboard": false
+        "tensorboard": true
     },
     "comment": "",
-    "cross_validation": true
+    "cross_validation": false
 }

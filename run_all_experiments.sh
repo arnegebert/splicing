@@ -2,7 +2,7 @@
 RUNID='final'
 #
 #for configname in configs/*.json; do
-for configname in $(find configs/ -name '*.json' ! -wholename 'configs/config.json'); do
+for configname in $(find aovernight/ -name '*.json' ! -wholename 'configs/config.json'); do
   echo "--------------------------------------------------------"
   echo "Executing experiment $configname" ;
   trap 'kill -TERM $PID' TERM INT

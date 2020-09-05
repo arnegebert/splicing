@@ -1,5 +1,5 @@
 {
-    "name": "GTEx_Junc_Cerebellum_NoLens_Attn",
+    "name": "SingleHead",
 
     "n_gpu": 1,
     "run_id": "",
@@ -7,13 +7,16 @@
     "arch": {
         "type": "AttnBiLSTM",
         "args": {
-          "use_lens": false
+            "LSTM_dim": 50,
+            "attn_dim": 100,
+            "attn_mode": "single_head",
+            "attn_dropout": 0.2
         }
     },
     "data_loader": {
         "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/junc/cerebellum",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
@@ -57,5 +60,5 @@
         "tensorboard": true
     },
     "comment": "",
-    "cross_validation": false
+    "cross_validation": true
 }

@@ -1,22 +1,23 @@
 {
-    "name": "HIPSCI_MAJIQ_DSC",
+    "name": "GTEx_Junc_Heart_NoLens_D2V_MLP",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "DSC",
-        "args": {}
+        "type": "MLP2",
+        "args": {
+          "use_lens": false
+        }
     },
     "data_loader": {
         "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "data/hipsci_majiq/exon",
+            "data_dir": "data/gtex_processed/junc/heart",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 0,
-            "classification": true,
-            "classification_threshold": 0.99
+            "embedded": true
         }
     },
     "optimizer": {
@@ -40,18 +41,20 @@
     },
     "trainer": {
         "type": "VanillaTrainer",
-        "args": {},
+        "args": {
+            "embedded": true
+        },
         "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 251,
+        "save_period": 101,
         "verbosity": 1,
 
         "monitor": "max val_auc",
         "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc"],
         "early_stop": 15,
 
-        "tensorboard": false
+        "tensorboard": true
     },
     "comment": "",
     "cross_validation": false

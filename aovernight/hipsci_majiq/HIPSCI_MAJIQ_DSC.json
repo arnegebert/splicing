@@ -1,29 +1,29 @@
 {
-    "name": "GTEx_Junc_Cerebellum_NoLens_DSC",
+    "name": "HIPSCI_MAJIQ_DSC",
 
     "n_gpu": 1,
 
     "arch": {
         "type": "DSC",
-        "args": {
-          "use_lens": false
-        }
+        "args": {}
     },
     "data_loader": {
         "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "data/gtex_processed/junc/cerebellum",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0
+            "num_workers": 0,
+            "classification": true,
+            "classification_threshold": 0.99
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
             "lr": 5e-4,
-            "weight_decay": 0.0,
+            "weight_decay": 0,
             "amsgrad": true
         }
     },
@@ -34,7 +34,7 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 200,
+            "step_size": 10000,
             "gamma": 0.1
         }
     },
@@ -54,5 +54,5 @@
         "tensorboard": true
     },
     "comment": "",
-    "cross_validation": false
+    "cross_validation": true
 }
