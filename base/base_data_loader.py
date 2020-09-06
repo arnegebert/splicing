@@ -7,7 +7,7 @@ class BaseDataLoader(DataLoader):
     Base class for all data loaders
     """
     def __init__(self, train, test, val, batch_size, shuffle, validation_split, num_workers,
-                 extra_test_datasets=None, drop_last=False, classification_treshold=0.99,
+                 extra_test_datasets=None, drop_last=False,
                  data_split=True, cross_validation_seed=0):
         assert data_split, "Handling when data is not split into cons/low/high data currently not implemented"
         self.train, self.val = train, val
@@ -16,7 +16,6 @@ class BaseDataLoader(DataLoader):
         self.validation_split = validation_split
         self.cross_validation_seed = cross_validation_seed
         self.extra_test = extra_test_datasets
-        self.threshold = classification_treshold
 
         self.init_kwargs = {
             'batch_size': batch_size,
@@ -134,7 +133,8 @@ class BaseDataLoader(DataLoader):
         return train_dataset, test_all_dataset, test_low_dataset, test_high_dataset, \
                val_all_dataset  # , val_low_dataset, val_high_dataset
 
-    def construct_dataset(self, data):
+    @staticmethod
+    def construct_dataset(data):
         return VanillaDataset(data)
 
 class VanillaDataset(Dataset):

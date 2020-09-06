@@ -28,7 +28,7 @@
     },
     "loss": "binary_cross_entropy",
     "metrics": [
-        "auc"
+        "r2"
     ],
     "lr_scheduler": {
         "type": "StepLR",

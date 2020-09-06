@@ -1,5 +1,5 @@
 {
-    "name": "iPSC_DSC",
+    "name": "HIPSCI_MAJIQ_Regression_DSC",
 
     "n_gpu": 1,
 
@@ -8,13 +8,14 @@
         "args": {}
     },
     "data_loader": {
-        "type": "ComparisonDataLoader",
+        "type": "VanillaDataLoader",
         "args":{
-            "data_dir": "",
+            "data_dir": "data/hipsci_majiq/exon",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 1
+            "num_workers": 0,
+            "classification": false
         }
     },
     "optimizer": {
@@ -27,7 +28,7 @@
     },
     "loss": "binary_cross_entropy",
     "metrics": [
-        "auc"
+        "r2"
     ],
     "lr_scheduler": {
         "type": "StepLR",
@@ -37,20 +38,20 @@
         }
     },
     "trainer": {
-        "type": "ComparisonTrainer",
+        "type": "VanillaTrainer",
         "args": {},
         "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 101,
+        "save_period": 251,
         "verbosity": 1,
 
-        "monitor": "max val_auc",
-        "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc", "diff_lib_auc",
-        "diff_indv_auc", "diff_tissue_auc"],
+        "monitor": "max val_r2",
+        "logged_metrics": ["r2", "test_r2", "test_low_r2", "test_high_r2", "val_r2"],
         "early_stop": 15,
 
-        "tensorboard": false
+        "tensorboard": true
     },
-    "cross_validation": false
+    "comment": "",
+    "cross_validation": true
 }

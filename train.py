@@ -56,9 +56,14 @@ def main(config):
         # Some custom logging code follows
         # todo: put this into base trainer
         # todo: make this work for r2, e.g. by checking config['classification']
-        test_all.append(trainer.logged_metrics["test_auc"])
-        test_low.append(trainer.logged_metrics["test_low_auc"])
-        test_high.append(trainer.logged_metrics["test_high_auc"])
+        try:
+            test_all.append(trainer.logged_metrics["test_auc"])
+            test_low.append(trainer.logged_metrics["test_low_auc"])
+            test_high.append(trainer.logged_metrics["test_high_auc"])
+        except KeyError:
+            test_all.append(trainer.logged_metrics["test_r2"])
+            test_low.append(trainer.logged_metrics["test_low_r2"])
+            test_high.append(trainer.logged_metrics["test_high_r2"])
 
     test_all, test_low, test_high = np.array(test_all), np.array(test_low), np.array(test_high)
     logger.info(f'Average test_all: {np.mean(test_all):.3f} +- {np.std(test_all):.3f}')

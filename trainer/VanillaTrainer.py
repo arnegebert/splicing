@@ -153,10 +153,10 @@ class VanillaTrainer(BaseTrainer):
             pred = self.model(seqs, lens)
             if self.attention:
                 pred, attn_ws = pred
-                attn_ws = attn_ws.data.cpu().numpy()
-                attn_ws_b.append(attn_ws)
-                databs = data.data.cpu().numpy()
-                datab.append(databs)
+            #     attn_ws = attn_ws.data.cpu().numpy()
+            #     attn_ws_b.append(attn_ws)
+            #     databs = data.data.cpu().numpy()
+            #     datab.append(databs)
 
             loss = self.criterion(pred, target)
 
@@ -171,14 +171,14 @@ class VanillaTrainer(BaseTrainer):
                 except ValueError as e:
                     self.logger.info(e)
                     continue
-        if self.attention and metrics == self.test_all_metrics:
-            attn_ws_b = np.concatenate(attn_ws_b, axis=0)
-            for attnw in sum(np.mean(attn_ws_b[:, :140], axis=0)):
-                self.logger.info(f'{attnw:.2f}')
+        # if self.attention and metrics == self.test_all_metrics:
+        #     attn_ws_b = np.concatenate(attn_ws_b, axis=0)
+        #     for attnw in sum(np.mean(attn_ws_b[:, :140], axis=0)):
+        #         self.logger.info(f'{attnw:.2f}')
             # if epoch == 50:
             #     np.save(f'test_all_data.npy', np.concatenate(datab, axis=0))
             # np.save(f'attn_ws_{epoch}.npy', attn_ws_b)
-        del attn_ws_b
+        # del attn_ws_b
         predictions, targets = torch.cat(predictions, dim=0).cpu().numpy(), torch.cat(targets, dim=0).cpu().numpy()
         return predictions, targets
 

@@ -28,5 +28,9 @@ d2v_change = compute_relative_performance_change(d2v_bef, d2v_after)
 rasc_change = compute_relative_performance_change(rasc_bef, rasc_after)
 
 print(f'DSC Performance change: {dsc_change:.3f}')
-print(f'D2v Performance change: {d2v_change:.3f}')
+print(f'D2V Performance change: {d2v_change:.3f}')
 print(f'RASC Performance change: {rasc_change:.3f}')
+
+dsc_perf, rasc_perf = 0.822, 0.875
+rasc_improv = compute_relative_performance_change(dsc_perf, rasc_perf)
+print(f'RASC improves upon DSC by {rasc_improv:.3f}')

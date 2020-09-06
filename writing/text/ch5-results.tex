@@ -411,7 +411,7 @@ We present the confusion matrix for the binary classifier based on RASC in Figur
 \end{figure}
 
 
-We evaluate how well the models generalize when trained on a dataset derived from one individual and then tested on a dataset derived\footenote{When choosing the samples to evaluate on from the different datasets, care needs to be taken to avoid a subtle data leak: due to the specifics of MAJIQ, the original dataset and the dataset from the same individual but a different library share the consecutive exon training samples. This initially lead to the surprising observation that  it is better to train on a dataset different from the one the model is evaluated on. This issue is avoided by efficiently filtering all samples that are in the original training dataset from the three additional datasets through the use of a hash set.}
+We evaluate how well the models generalize when trained on a dataset derived from one individual and then tested on a dataset derived\footnote{When choosing the samples to evaluate on from the different datasets, care needs to be taken to avoid a subtle data leak: due to the specifics of MAJIQ, the original dataset and the dataset from the same individual but a different library share the consecutive exon training samples. This initially lead to the surprising observation that  it is better to train on a dataset different from the one the model is evaluated on. This issue is avoided by efficiently filtering all samples that are in the original training dataset from the three additional datasets through the use of a hash set.}
 \begin{itemize}
 	\item from the same individual, but a different library
 	\item from a different individual, but the same cell type

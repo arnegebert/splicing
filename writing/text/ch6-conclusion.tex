@@ -1,20 +1,32 @@
 \chapter{\label{ch:6-conclusion}Discussion / Conclusion}
 
 
-- across all datasets, the newly introduced splicing code RASC generally performs best.
+We discussed challenges which should be addressed when estimating PSI, implemented our own method for PSI estimation and constructed splicing quantification datasets based on three different processing methods. We also proposed a novel splicing code which introduces the attention mechanism to the field of splicing quantification and reimplemented two baselines models from the literature.
 
-say that data processing was actually the most time consuming task due to the novelty of the task and no standard datasets available
+Evaluating the models on a dataset from the literature, we showed that the dataset was systematically biased and that the performance of previous models can be matched by an extremely simple model with two to three order of magnitudes fewer parameters. 
+Moving to the datasets we constructed, we found that only one out of three processing methods provides data of appropriate quality. On this dataset, our newly introduced model outperforms the previous state-of-the-art model by 15\%. In further experiments, we analyze the generalization performance of our model to different conditions and discuss its sensitivity and specificity. Finally, we investigate what parts of the most input sequences are most attented to by our model.
 
-- proper dataset construction very challenging with varying quality of available tools and datasets; only one of the four datasets proved sufficient
+Our work further corroborates the importance and difficulty of constructing datasets of appropriate quality to train deep learning models. We also observe that there is a wide variability between the quality of published data processing methods and datasets. We showed that there are still large improvements to be made in the domain of splicing models by applying promising methods from the other application areas of Deep Learning. 
 
+While our newly introduced model is able to improve upon previous models by a wide margin, its prediction accuracy is still perfectible. Incorporating further information sources known to affect splicing like sample tissue or chromatin states \cite{chromatin} would likely further improve performance. 
+Even additional hyperparameter tuning may lead to further improvements since our hyperparameter tuning was limited due to computational constraints. Experiments maxing out the batch size (and stabilizing training) or exploring whether a context window larger than 140 nucleotides benefits performance would be particularly interesting. 
+%TODO: interpretability like all deep learning models
 
-future work: differential splicing, link other datasets
-future work could also be using gtex data directly perhaps? 
-differential splicing for sure
- 
-future work: data augmentation as performance dropped 2-3\% once i removed 10%
-easy extension would be check whether more context than 140 nucleotides help
-continuous splicing prediction; more than 140 nt probably desirable 
+Towards the end of practical applicability, adapting our model for differential splicing prediction is a promising avenue of future research. Here the already used tool MAJIQ could be exploited to generate a dataset for splicing changes between conditions. 
 
 
-We make our dataset publicly available; related to talking about publishing this research in general 
+%say that data processing was actually the most time consuming task due to the novelty of the task and no standard datasets available
+%
+%- proper dataset construction very challenging with varying quality of available tools and datasets; only one of the four datasets proved sufficient
+%- across all datasets, the newly introduced splicing code RASC generally performs best.
+%
+%future work: differential splicing, link other datasets
+%future work could also be using gtex data directly perhaps? 
+%differential splicing for sure
+% 
+%future work: data augmentation as performance dropped 2-3\% once i removed 10%
+%easy extension would be check whether more context than 140 nucleotides help
+%continuous splicing prediction; more than 140 nt probably desirable 
+%
+%
+%We make our dataset publicly available; related to talking about publishing this research in general 
