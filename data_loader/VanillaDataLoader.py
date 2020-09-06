@@ -29,10 +29,14 @@ class VanillaDataLoader(BaseDataLoader):
             cons, low, high = self.apply_classification_threshold(cons, low, high, embedded=embedded,
                                                 threshold=classification_threshold)
 
+        folds = 1/validation_split
+        if not folds.is_integer(): print(f'Warning: rounded down to {folds} cross-validation folds')
+        train, test_all, test_low, test_high, val = self.get_train_test_and_val_sets(cons, low, high, folds)
+
         # maybe todo: make class know about cross-validation (do this later though and ideally only the derived class knows)
         # but maybe baseloader can know about it too since it would be kinda silly otherwise and I do need the functionality i nbtoh
         self.current_cv_seed = cross_validation_seed
-        super().__init__((cons, low, high),
+        super().__init__(train, (test_all, test_low, test_high), val,
                          batch_size, shuffle, validation_split, num_workers, cross_validation_seed=cross_validation_seed)
         end = time.time()
         print('total time to load data: {} secs'.format(end - start))

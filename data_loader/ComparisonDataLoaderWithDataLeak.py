@@ -5,7 +5,7 @@ import numpy as np
 from base import BaseDataLoader
 
 
-class ComparisonDataLoader(BaseDataLoader):
+class ComparisonDataLoaderWithDataLeak(BaseDataLoader):
     """
     Implements all three use cases for HIPSCI NotNeuron:
     1. Train on lib1, test on lib1
@@ -58,28 +58,15 @@ class ComparisonDataLoader(BaseDataLoader):
                 self.apply_classification_threshold(diff_tissue_cons, diff_tissue_low, diff_tissue_high,
                                                 embedded=embedded, threshold=classification_threshold)
 
-        train, test_all, test_low, test_high, val = self.get_train_test_and_val_sets(cons, low, high)
-
-        filter_hashset = self.construct_hashset(train, val)
-        diff_lib_cons, diff_lib_low, diff_lib_high = self.filter_for_data_leak(filter_hashset, diff_lib_cons,
-                                                                              diff_lib_low, diff_lib_high)
-        diff_indv_cons, diff_indv_low, diff_indv_high = self.filter_for_data_leak(filter_hashset, diff_indv_cons,
-                                                                              diff_indv_low, diff_indv_high)
-        diff_tissue_cons, diff_tissue_low, diff_tissue_high = self.filter_for_data_leak(filter_hashset, diff_tissue_cons,
-                                                                              diff_tissue_low, diff_tissue_high)
-        test_datasets_diff_lib = self.construct_all_low_and_high_datasets(diff_lib_cons, diff_lib_low, diff_lib_high)
-        test_datasets_diff_indv = self.construct_all_low_and_high_datasets(diff_indv_cons, diff_indv_low, diff_indv_high)
-        test_datasets_diff_tissue = self.construct_all_low_and_high_datasets(diff_tissue_cons, diff_tissue_low, diff_tissue_high)
-
-
-        # dataset_diff_lib = self.get_train_test_and_val_sets(diff_lib_cons, diff_lib_low, diff_lib_high)
-        # dataset_diff_indv = self.get_train_test_and_val_sets(diff_indv_cons, diff_indv_low, diff_indv_high)
-        # dataset_diff_tissue = self.get_train_test_and_val_sets(diff_tissue_cons, diff_tissue_low, diff_tissue_high)
+        train, test_all, test_low, test_high, val_all = self.get_train_test_and_val_sets(cons, low, high)
+        dataset_diff_lib = self.get_train_test_and_val_sets(diff_lib_cons, diff_lib_low, diff_lib_high)
+        dataset_diff_indv = self.get_train_test_and_val_sets(diff_indv_cons, diff_indv_low, diff_indv_high)
+        dataset_diff_tissue = self.get_train_test_and_val_sets(diff_tissue_cons, diff_tissue_low, diff_tissue_high)
 
         # 1:4 contains test sets
-        # test_datasets_diff_lib = dataset_diff_lib[1:4]
-        # test_datasets_diff_indv = dataset_diff_indv[1:4]
-        # test_datasets_diff_tissue = dataset_diff_tissue[1:4]
+        test_datasets_diff_lib = dataset_diff_lib[1:4]
+        test_datasets_diff_indv = dataset_diff_indv[1:4]
+        test_datasets_diff_tissue = dataset_diff_tissue[1:4]
 
         # flatten dataset elements
         extra_test_datasets = [sample for dataset in
@@ -87,7 +74,7 @@ class ComparisonDataLoader(BaseDataLoader):
                               for sample in dataset]
 
 
-        super().__init__(train, (test_all, test_low, test_high), val, batch_size, shuffle, validation_split, num_workers,
+        super().__init__(train, (test_all, test_low, test_high), val_all, batch_size, shuffle, validation_split, num_workers,
                          cross_validation_seed=cross_validation_seed,
                          extra_test_datasets=extra_test_datasets)
         end = time.time()
@@ -97,42 +84,5 @@ class ComparisonDataLoader(BaseDataLoader):
     # would be cleaner since it means that base dataloader no longer needs to know about this class
     # def get_valid_and_test_loaders(self):
     #     pass
-
-
-    def construct_all_low_and_high_datasets(self, cons, low, high):
-        np.random.seed(0)
-        np.random.shuffle(cons)
-        np.random.shuffle(low)
-        np.random.shuffle(high)
-
-        all_d = np.concatenate((cons, low, high), axis=0)
-        low_d = np.concatenate((cons, low), axis=0)
-        high_d = np.concatenate((cons, high), axis=0)
-        all_set, low_set, high_set = self.construct_dataset(all_d), self.construct_dataset(low_d), \
-                                     self.construct_dataset(high_d)
-        return all_set, low_set, high_set
-
-    def construct_hashset(self, train, val):
-        train_np, val_np =  train.samples.numpy(), val.samples.numpy()
-        train_and_val_samples = set()
-        for sample in list(train_np[:, :281]):
-            train_and_val_samples.add(sample.tostring())
-        return train_and_val_samples
-
-    def filter_for_data_leak(self, hashset, possibilities_cons, possibilities_low, possibilities_high):
-        cons_filtered = self.apply_filter_for_data_leak(hashset, possibilities_cons)
-        low_filtered = self.apply_filter_for_data_leak(hashset, possibilities_low)
-        high_filtered = self.apply_filter_for_data_leak(hashset, possibilities_high)
-        return cons_filtered, low_filtered, high_filtered
-
-    def apply_filter_for_data_leak(self, hashset, possibilities):
-
-        poss_filtered = []
-        for sample in list(possibilities[:, :281]):
-            if sample.tostring() not in hashset:
-                poss_filtered.append(sample)
-        # 35954 / 5827 w/ only sequence information
-        # 36179 / 6413 w/ length information too
-        return poss_filtered
 
 

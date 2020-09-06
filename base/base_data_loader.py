@@ -6,21 +6,17 @@ class BaseDataLoader(DataLoader):
     """
     Base class for all data loaders
     """
-    def __init__(self, data, batch_size, shuffle, validation_split, num_workers,
+    def __init__(self, train, test, val, batch_size, shuffle, validation_split, num_workers,
                  extra_test_datasets=None, drop_last=False, classification_treshold=0.99,
                  data_split=True, cross_validation_seed=0):
         assert data_split, "Handling when data is not split into cons/low/high data currently not implemented"
+        self.train, self.val = train, val
         if data_split:
-            cons, low, high = data
+            self.test_all, self.test_low, self.test_high = test
         self.validation_split = validation_split
         self.cross_validation_seed = cross_validation_seed
         self.extra_test = extra_test_datasets
         self.threshold = classification_treshold
-
-        folds = 1/validation_split
-        if not folds.is_integer(): print(f'Warning: rounded down to {folds} cross-validation folds')
-        self.train, self.test_all, self.test_low, self.test_high, \
-            self.val_all = self.get_train_test_and_val_sets(cons, low, high)
 
         self.init_kwargs = {
             'batch_size': batch_size,
@@ -36,7 +32,7 @@ class BaseDataLoader(DataLoader):
             return DataLoader(dataset=self.test_all,  **self.init_kwargs),\
                    DataLoader(dataset=self.test_low, **self.init_kwargs),\
                    DataLoader(dataset=self.test_high,  **self.init_kwargs),\
-                   DataLoader(dataset=self.val_all,  **self.init_kwargs)#,\
+                   DataLoader(dataset=self.val,  **self.init_kwargs)#,\
                    # DataLoader(dataset=self.test_low, **self.init_kwargs),\
                    # DataLoader(dataset=self.test_high,  **self.init_kwargs)
         else:
@@ -44,7 +40,7 @@ class BaseDataLoader(DataLoader):
             regular_test_and_val_sets = [DataLoader(dataset=self.test_all,  **self.init_kwargs),
                                          DataLoader(dataset=self.test_low, **self.init_kwargs),
                                          DataLoader(dataset=self.test_high,  **self.init_kwargs),
-                                         DataLoader(dataset=self.val_all,  **self.init_kwargs)]
+                                         DataLoader(dataset=self.val,  **self.init_kwargs)]
             # 9 other test sets which I have added for cross-condition performance
             if len(self.extra_test) != 9: raise Exception('Unexpected number of extra test sets')
             extra_test_sets = []
@@ -138,6 +134,8 @@ class BaseDataLoader(DataLoader):
         return train_dataset, test_all_dataset, test_low_dataset, test_high_dataset, \
                val_all_dataset  # , val_low_dataset, val_high_dataset
 
+    def construct_dataset(self, data):
+        return VanillaDataset(data)
 
 class VanillaDataset(Dataset):
     """ Simple Implementation of Dataset class. """

@@ -34,7 +34,7 @@ class ComparisonTrainer(BaseTrainer):
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.val_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.test_all_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.test_all_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.test_low_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.test_high_metrics = MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer)
 
@@ -42,7 +42,7 @@ class ComparisonTrainer(BaseTrainer):
                                      'diff_indv', 'diff_indv_low', 'diff_indv_high',
                                      'diff_tissue', 'diff_tissue_low', 'diff_tissue_high']
         self.extra_test_set_metrics = [
-            MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer) for _ in self.extra_test_set_names
+            MetricTracker(*[m.__name__ for m in self.metric_ftns], writer=self.writer) for _ in self.extra_test_set_names
         ]
 
     def _train_epoch(self, epoch):
