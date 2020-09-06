@@ -101,3 +101,4 @@ if __name__ == '__main__':
     main(config)
     end = time.time()
     print(f'Training took {(end-start)/60:.0f} min')
+    print('REMINDER: comment auc_single and error printing back in comparisondataloader\n'*3)

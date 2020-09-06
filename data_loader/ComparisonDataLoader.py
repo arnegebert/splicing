@@ -27,9 +27,14 @@ class ComparisonDataLoader(BaseDataLoader):
             raise Exception('Data directories for this data loader are preset and can\'t be overwritten.')
         else:
             prefix = "embedded_" if embedded else ""
+            diff_tissue_cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
+            diff_tissue_low = np.load(f'data/iPSC/exon/{prefix}low_bezi1.npy')
+            diff_tissue_high = np.load(f'data/iPSC/exon/{prefix}high_bezi1.npy')
+
             cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
             low = np.load(f'data/iPSC/exon/{prefix}low_bezi1.npy')
             high = np.load(f'data/iPSC/exon/{prefix}high_bezi1.npy')
+
 
             diff_lib_cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
             diff_lib_low = np.load(f'data/iPSC/exon/{prefix}low_bezi2.npy')
@@ -38,6 +43,10 @@ class ComparisonDataLoader(BaseDataLoader):
             diff_indv_cons = np.load(f'data/iPSC/exon/{prefix}cons.npy')
             diff_indv_low = np.load(f'data/iPSC/exon/{prefix}low_lexy2.npy')
             diff_indv_high = np.load(f'data/iPSC/exon/{prefix}high_lexy2.npy')
+
+            # cons = np.load(f'data/hipsci_majiq/exon/{prefix}cons.npy')
+            # low = np.load(f'data/hipsci_majiq/exon/{prefix}low.npy')
+            # high = np.load(f'data/hipsci_majiq/exon/{prefix}high.npy')
 
             diff_tissue_cons = np.load(f'data/hipsci_majiq/exon/{prefix}cons.npy')
             diff_tissue_low = np.load(f'data/hipsci_majiq/exon/{prefix}low.npy')
@@ -56,7 +65,7 @@ class ComparisonDataLoader(BaseDataLoader):
                 self.apply_classification_threshold(diff_tissue_cons, diff_tissue_low, diff_tissue_high,
                                                 embedded=embedded, threshold=classification_threshold)
 
-        meh = 100000
+        meh = 10
         meh2 = 10
         dataset_diff_lib = self.get_train_test_and_val_sets(diff_lib_cons[:meh], diff_lib_low[:meh2], diff_lib_high[:meh2])
         dataset_diff_indv = self.get_train_test_and_val_sets(diff_indv_cons[:meh], diff_indv_low[:meh2], diff_indv_high[:meh2])

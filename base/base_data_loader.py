@@ -10,12 +10,13 @@ class BaseDataLoader(DataLoader):
                  extra_test_datasets=None, drop_last=False, classification_treshold=0.99,
                  data_split=True, cross_validation_seed=0):
         assert data_split, "Handling when data is not split into cons/low/high data currently not implemented"
+        if data_split:
+            cons, low, high = data
         self.validation_split = validation_split
         self.cross_validation_seed = cross_validation_seed
         self.extra_test = extra_test_datasets
         self.threshold = classification_treshold
-        if data_split:
-            cons, low, high = data
+
         folds = 1/validation_split
         if not folds.is_integer(): print(f'Warning: rounded down to {folds} cross-validation folds')
         self.train, self.test_all, self.test_low, self.test_high, \
@@ -41,9 +42,9 @@ class BaseDataLoader(DataLoader):
         else:
             # three test and one val set which are always there
             regular_test_and_val_sets = [DataLoader(dataset=self.test_all,  **self.init_kwargs),
-                   DataLoader(dataset=self.test_low, **self.init_kwargs),
-                   DataLoader(dataset=self.test_high,  **self.init_kwargs),
-                         DataLoader(dataset=self.val_all,  **self.init_kwargs)]
+                                         DataLoader(dataset=self.test_low, **self.init_kwargs),
+                                         DataLoader(dataset=self.test_high,  **self.init_kwargs),
+                                         DataLoader(dataset=self.val_all,  **self.init_kwargs)]
             # 9 other test sets which I have added for cross-condition performance
             if len(self.extra_test) != 9: raise Exception('Unexpected number of extra test sets')
             extra_test_sets = []
@@ -98,19 +99,24 @@ class BaseDataLoader(DataLoader):
         train = cons[:cons_fold_len * fold_val]
         train = np.concatenate((train, cons[cons_fold_len * (fold_test + 1):]), axis=0)
         # rebalancing of dataset
-        if cons_to_alternative_ratio < 1000:
-            for _ in range(cons_to_alternative_ratio):
-                train = np.concatenate((train, high[:high_fold_len * fold_val]), axis=0)
-                train = np.concatenate((train, high[high_fold_len * (fold_test + 1):]), axis=0)
+        for _ in range(cons_to_alternative_ratio):
+            train = np.concatenate((train, high[:high_fold_len * fold_val]), axis=0)
+            train = np.concatenate((train, high[high_fold_len * (fold_test + 1):]), axis=0)
 
-                train = np.concatenate((train, low[:low_fold_len * fold_val]), axis=0)
-                train = np.concatenate((train, low[low_fold_len * (fold_test + 1):]), axis=0)
+            train = np.concatenate((train, low[:low_fold_len * fold_val]), axis=0)
+            train = np.concatenate((train, low[low_fold_len * (fold_test + 1):]), axis=0)
+
 
         val_high = np.concatenate((high[high_fold_len * fold_val:high_fold_len * (fold_val + 1)],
                                    cons[cons_fold_len * fold_val:cons_fold_len * (fold_val + 1)]), axis=0)
         val_low = np.concatenate((low[low_fold_len * fold_val:low_fold_len * (fold_val + 1)],
                                   cons[cons_fold_len * fold_val:cons_fold_len * (fold_val + 1)]), axis=0)
         val_all = np.concatenate((val_high, low[low_fold_len * fold_val:low_fold_len * (fold_val + 1)]), axis=0)
+
+
+        # test_high = test_low = test_all = cons[:1]
+
+        # test_high = test_low = test_all = cons[cons_fold_len * fold_test:cons_fold_len * (fold_test + 1)]
 
         test_high = np.concatenate((high[high_fold_len * fold_test:high_fold_len * (fold_test + 1)],
                                     cons[cons_fold_len * fold_test:cons_fold_len * (fold_test + 1)]), axis=0)

@@ -46,7 +46,7 @@
 
         "save_dir": "saved/",
         "save_period": 101,
-        "verbosity": 1,
+        "verbosity": 2,
 
         "monitor": "max val_auc",
         "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc", "diff_lib_auc",

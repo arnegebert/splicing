@@ -76,7 +76,7 @@ class ComparisonTrainer(BaseTrainer):
                     met_val = met(pred, target)
                     self.train_metrics.update(met.__name__, met_val)
                 except ValueError as e:
-                    # self.logger.info(e)
+                    self.logger.info(e)
                     continue
 
             if batch_idx % self.log_step == 0:
@@ -121,8 +121,8 @@ class ComparisonTrainer(BaseTrainer):
             pred_target_high = self._single_val_epoch(self.test_high, epoch, self.test_high_metrics)
             self._single_val_epoch(self.val_all, epoch, self.val_metrics)
             # todo: make this cleaner; assumes that mnt_best tracks auc
-            if auc_single(pred_target_all) >= self.mnt_best:
-                self.auc_f1_metric_evaluation_and_visualization(pred_target_all, pred_target_low, pred_target_high)
+            # if auc_single(pred_target_all) >= self.mnt_best:
+            #     self.auc_f1_metric_evaluation_and_visualization(pred_target_all, pred_target_low, pred_target_high)
 
             for loader, metric in zip(self.extra_test_set_loaders, self.extra_test_set_metrics):
                 self._single_val_epoch(loader, epoch, metric)
@@ -155,7 +155,7 @@ class ComparisonTrainer(BaseTrainer):
                     met_val = met(pred, target)
                     metrics.update(met.__name__, met_val)
                 except ValueError as e:
-                    # self.logger.info(e)
+                    self.logger.info(e)
                     continue
         predictions, targets = torch.cat(predictions, dim=0).cpu().numpy(), torch.cat(targets, dim=0).cpu().numpy()
         return predictions, targets

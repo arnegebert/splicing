@@ -15,8 +15,7 @@
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 0,
-            "classification": false,
-            "classification_threshold": 0.99
+            "classification": false
         }
     },
     "optimizer": {
