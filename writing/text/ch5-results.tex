@@ -2,6 +2,7 @@
 
 This section presents and discusses the results of our experiments based on the three models and the datasets introduced in Chapter \ref{ch:4-methods}. It also describes the rationale behind deciding which experiments should be run.
 
+Results are given as obtained on the test set. Across all datasets and experiments, validation and test set metrics differ by less than 1\% on average. We observe no undue overfitting and unless explicitly mentioned, AUCs on the training set are generally higher by 0.02 to 0.06. 
 \section{HEXEvent dataset} \label{sec:hexevent_results}
 To obtain a baseline, we evaluate all three models on the HEXEvent dataset as used in \cite{dsc} and introduced in \ref{subsec:hexevent}. The results of these experiments are shown in Figure \ref{fig:hexevent_auc}.
 
@@ -12,8 +13,6 @@ Generally all models perform extremely well with AUCs nearing 90\%. While differ
 Assessing our reimplementation, we observe a small difference between the AUC value reported in \cite{dsc} (mean 0.899, standard deviation of 0.18) and the ones we observe (mean 0.873, standard deviation of 0.06). This is likely the result of random statistical noise influenced by different random seeds between runs and differences between TensorFlow/Keras (their implementation) and PyTorch (our implementation). Notably, when reevaluating the publically available original implementation in a single run, we also obtain results (0.872 AUC) closer to the results of our reimplementation. 
 %There is a small (~2\%) difference in the AUC values in the AUC values for the DSC model reported in \cite{dsc} (89.9 AUC) and the ones we observe (87.1 AUC original). 
 Thus, we conclude that, albeit with minor caveats, the reimplementation and replication of \cite{dsc} was successful.
-%TODO say somewhere that validation and test error are always the same
-%TOOO also talk about training error
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/hexevent_cross_model_roc_auc_comparison.png} 
@@ -216,14 +215,14 @@ Thus we conclude that the GTEx-based datasets improve upon the HEXEvent dataset,
 
 
 \section{HipSci SUPPA datasets} \label{subsec:hipsci_suppa}
-\subsubsection{Dataset based on sensory neuron cell lines}
+\subsection{Dataset based on sensory neuron cell lines}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/suppa_cross_model_roc_auc_comparison.png} 
 	\caption{Comparison of the ROC curves of the three models on the HipSci SUPPA dataset. The dataset is based on iPSC cell lines differentiated to sensory neuron cell lines. }
 	\label{fig:suppa_auc_roc}
 \end{figure}
-
+\subsubsection{Main analysis}
 Figure \ref{fig:suppa_auc_roc} shows how the model perform very poorly on the HipSci SUPPA dataset. The performance is worse than on the GTEx-based exon-centric dataset and roughly equal to the performance on the HEXEvent dataset without length features. This indicates that 
 \begin{enumerate}
 	\item either we arrive at a strong dataset here and that constitutive exon classification is more challenging than so far anticipated,
@@ -238,9 +237,9 @@ Among these two, 2. is more likely due to SUPPA not addressing various challenge
 % TODO thought: what if AUC here is only worse because the model doesn't have easy to classify constitutive exons which boost the AUC? 
 
 
-\subsection{HipSci MAJIQ datasets} \label{subsec:majiq}
+\section{HipSci MAJIQ datasets} \label{subsec:majiq}
 
-\subsubsection{Dataset based on sensory neuron and iPSC cell lines}\label{sec:hipsci_neuron_majiq}
+\subsection{Dataset based on sensory neuron and iPSC cell lines}\label{sec:hipsci_neuron_majiq}
 
 \begin{figure}
 	\centering\includegraphics[width=0.49\textwidth]{../visualizations/ch5-results/majiq_neuron_cross_model_roc_auc_comparison.png} 
@@ -262,7 +261,7 @@ Among these two, 2. is more likely due to SUPPA not addressing various challenge
 %	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
 %	\label{fig:majiq_rocs}
 %\end{figure}
-
+\subsubsection{Main analysis}
 All models perform significantly better than on previous datasets and we observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by RASC. Adding attention to RSC promotes it from the worst to the best performing model, validating our choice. 
 
 %The dataset based on undifferentiated iPSC cells seems to be less challenging: the AUCs are roughly 0.02 higher than on the dataset based on sensory neuron cells. At a closer look at the dataset distribution....
@@ -321,6 +320,31 @@ We evaluate the three additional attention modifications described in \ref{subse
 	\label{fig:attn_extension_barcharts}
 \end{figure}
 
+
+%compute average of conv training error: 0.9884710561726501 for conv + no query
+
+%
+%\begin{table}[h!]
+%	\centering
+%	\begin{tabular}{| c c c | c c | c} 
+%		\hline
+%		%   & configuration & & performance & \\
+%		heads & no query & conv & $\mu$ & $\sigma$ \\
+%		\hline
+%		0 & 0 & 0 & 0.832 & 0.025 \\
+%		0 & 0 & 1 & 0.860 & 0.021 \\
+%		0 & 1 & 0 & 0.851 & 0.013 \\
+%		0 & 1 & 1 & 0.818 & 0.019 \\
+%		1 & 0 & 0 & \textbf{0.865} & 0.011 \\
+%		1 & 0 & 1 & 0.824 & \textbf{0.010} \\
+%		1 & 1 & 0 & 0.852 & 0.017 \\
+%		1 & 1 & 1 & 0.846 & 0.017 \\
+%		\hline
+%	\end{tabular}
+%	\caption{Results of evaluating the three additional attention extensions. $\mu$ denotes the average AUC across 9 experiments and $\sigma$ the respective standard deviation. 0 codes for the extension not being used, 1 codes for the extension being used. The extensions were abbreviated as follows: heads = multiple attention heads were used, no query = no conceptual query matrix was used, conv = an additional convolution operation was applied to the key and value matrices.
+%	}
+%	\label{table:attn_extensions}
+%\end{table}
 \subsubsection{Using multiple attention heads} \label{subsubsec:result_heads}
 Using multiple attention heads leads to significantly improved performance and to significantly reduced variance between runs. Thus, the additional representational subspaces appear to improve performance and the ensemble model effect of multiple attention heads appear to reduce variance. No overfitting is observed, despite the number of model weights increasing from roughly 36,000 to 67,000 compared to the single attention head model. Due to the uniformly improved performance, we elect to incorporate multiple attention heads into RASC. 
 
@@ -368,8 +392,7 @@ In summary, we extend RASC with multiple attention heads. The results of RASC we
 %haven't run experiments yet, not sure if results are interesting (but probably yes)\\
 %due to training times, probably don't want to run these with cross-validation as that would take 15 hours+
 
-\subsection{Further analysis on }
-\subsubsection{Sensitivity and specificity analysis}
+\subsection{Sensitivity and specificity analysis}
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/confusion_matrix.png} 
 	\caption{Confusion matrix from RASC on the neuron HipSci MAJIQ dataset. 'cons' and 'non-cons' respectively abbreviate constitutive and non-constitutive exons. }
@@ -388,15 +411,18 @@ We present the confusion matrix for the binary classifier based on RASC in Figur
 \end{figure}
 
 
-We evaluate how well the models generalize when trained on a dataset derived from one individual and then tested on a dataset derived
-from the same individual, but a different library
-from a different individual, but the same cell type
-from a different individual from a different cell type
-*When choosing the samples to evaluate on from the different datasets, care needs to be taken to avoid a subtle data leak: due to the specifics of MAJIQ, the original dataset and the dataset from the same individual but a different library share the consecutive exon training samples. This initially lead to the surprising observation that  it is better to train on a dataset different from the one the model is evaluated on. This issue is avoided by efficiently filtering all samples that are in the original training dataset from the three additional datasets through the use of a hash set.
-We visualize the results in Figure ...
+We evaluate how well the models generalize when trained on a dataset derived from one individual and then tested on a dataset derived\footenote{When choosing the samples to evaluate on from the different datasets, care needs to be taken to avoid a subtle data leak: due to the specifics of MAJIQ, the original dataset and the dataset from the same individual but a different library share the consecutive exon training samples. This initially lead to the surprising observation that  it is better to train on a dataset different from the one the model is evaluated on. This issue is avoided by efficiently filtering all samples that are in the original training dataset from the three additional datasets through the use of a hash set.}
+\begin{itemize}
+	\item from the same individual, but a different library
+	\item from a different individual, but the same cell type
+	\item from a different individual from a different cell type
+\end{itemize}
+
+
+We visualize the results in Figure \ref{fig:majiq_comparison_barcharts}.
 Unsurprisingly, performance drops slightly when a model is evaluated on a dataset different from the one it was trained on. Surprisingly, this performance drop does not directly correlate with the similarity to the original dataset: the least similar dataset from the different individual and different cell type performs best. 
 
-However, to more seriously investigate how splicing differs between conditions, the capability of MAJIQ to quantify differential splicing should be taken advantage of. The best performing model, RASC, could be adapted such that it takes in an exon as well as two different conditions (e.g. one-hot encoded tissues) and then predicts the differential splicing change. 
+However, to more seriously investigate how splicing differs between conditions, the capability of MAJIQ to quantify differential splicing should be taken advantage of. The best performing model, RASC, could be adapted such that it takes in an exon as well as two different conditions (e.g. via one-hot encoded tissues) and then predicts the change in splicing behaviour between the two conditions. 
 
 
 %- constitutive exons are shared across all datasets
@@ -429,30 +455,7 @@ However, to more seriously investigate how splicing differs between conditions, 
 
 
 
-%compute average of conv training error: 0.9884710561726501 for conv + no query
 
-%
-%\begin{table}[h!]
-%	\centering
-%	\begin{tabular}{| c c c | c c | c} 
-%		\hline
-%		%   & configuration & & performance & \\
-%		heads & no query & conv & $\mu$ & $\sigma$ \\
-%		\hline
-%		0 & 0 & 0 & 0.832 & 0.025 \\
-%		0 & 0 & 1 & 0.860 & 0.021 \\
-%		0 & 1 & 0 & 0.851 & 0.013 \\
-%		0 & 1 & 1 & 0.818 & 0.019 \\
-%		1 & 0 & 0 & \textbf{0.865} & 0.011 \\
-%		1 & 0 & 1 & 0.824 & \textbf{0.010} \\
-%		1 & 1 & 0 & 0.852 & 0.017 \\
-%		1 & 1 & 1 & 0.846 & 0.017 \\
-%		\hline
-%	\end{tabular}
-%	\caption{Results of evaluating the three additional attention extensions. $\mu$ denotes the average AUC across 9 experiments and $\sigma$ the respective standard deviation. 0 codes for the extension not being used, 1 codes for the extension being used. The extensions were abbreviated as follows: heads = multiple attention heads were used, no query = no conceptual query matrix was used, conv = an additional convolution operation was applied to the key and value matrices.
-%	}
-%	\label{table:attn_extensions}
-%\end{table}
 
 
 \subsection{Interpreting RASC} \label{subsubsec:attn_interpretation}
@@ -465,40 +468,45 @@ However, to more seriously investigate how splicing differs between conditions, 
 %	TODO: https://discourse.matplotlib.org/t/horizontal-and-vertical-lines-between-subplots/13540 or powerpoint, https://stackoverflow.com/questions/26084231/draw-a-separator-or-lines-between-subplots?rq=1
 \end{figure}
 
-We visualize to what parts of the input sequence RASC pays attention to in \ref{fig:attn_distribution}. %TODO
+We visualize to what parts of the input sequence RASC pays attention to in \ref{fig:attn_distribution}. 
 
-graphics in this section:\\
-- 4x2 heatmaps of mean attention over epochs of all four attention heads\\
-- 1 barchart of final mean attention over mean of all attention heads\\
-- 1+ barcharts for analyzing specific exons
+%graphics in this section:\\
+%- 4x2 heatmaps of mean attention over epochs of all four attention heads\\
+%- 1 barchart of final mean attention over mean of all attention heads\\
+%- 1+ barcharts for analyzing specific exons
 
-heatmap analysis:
-\begin{itemize}
-	\item Different attention heads focus on different things, although some overlap
-	\item attention rarely extremely focussed, but honestly can't really tell on this picture
-\end{itemize}
+%heatmap analysis:
+%\begin{itemize}
+%	\item Different attention heads focus on different things, although some overlap
+%	\item attention rarely extremely focussed, but honestly can't really tell on this picture
+%\end{itemize}
 
 \subsubsection{Heads focus on a single sequence} 
-When using a single attention head, the head needs to split its conceptual 'focus' over the start and end input sequences. This is not the case for multiple attention heads: here single heads may focus on only one sequence as long as there is at least one attention head which also pays attention to the information in the other sequence. We observe exactly this behaviour: across the 9 cross-validation runs, single attention heads only split their 'focus' 7 out of 36 times. None of the trained models only ever pay attention to only a single sequence. This reassures us that the dataset isn't biased such that the model only needs to take information from one sequence into account. 
+When using a single attention head, the head needs to split its conceptual 'focus' over the start and end input sequences. This is not the case for multiple attention heads: here single heads may focus on only one sequence as long as there is at least one attention head which also pays attention to the information in the other sequence. We observe exactly this behaviour in Figure \ref{fig:attention_heatmap}: one of the attention head attends purely to the start sequence and all other attention heads attend purely to the end sequence. Across the 9 cross-validation runs, single attention heads only split their 'focus' 7 out of 36 times. None of the trained models only ever pay attention to only a single sequence. This reassures us that the dataset isn't biased such that the model only needs to take information from one sequence into account. 
 
 The sequence which an attention head focusses on generally does not change after the first 5 epochs. Similar observation, that the role of attention heads is decided very early on in training, have also been made in the context of NLP \cite{sixteenheads}.
-%TODO: probably want to put into respective focus into table actually -- or by redoing heatmap such that you observe behavior there too (aka actual attention over sequence), might want to switch color tbh
 
-
-
-\begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attention_heatmap.png} 
-	\caption{Development of attention during training. }
-	\label{fig:attn_heatmap}
-\end{figure}
-
-
+\subsubsection{What does the model pay attention to?}
 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/mean_attention_barchart.png} 
 	\caption{Mean attention weights averaged over all test samples and all four attention heads. }
 	\label{fig:mean_attn}
 \end{figure}
+
+Figure \ref{fig:mean_attn} shows what part of the input sequence RASC commonly attends to. Clearly, motifs directly around the exon start and exon end are the most attended to. 
+%TODO now this is a job for Liz and Wil
+The bar chart suggests that more total attention is paid to the end, rather than the start sequence. However, this pattern is reversed for other runs of the models and likely just a sequence of three attention focusing on the end sequence in this particular training run. Additionally, note that the weighting of the outputs of the different attention heads by the unifying matrix $W^O$ is not displayed. 
+
+
+%\begin{figure}
+%	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attention_heatmap.png} 
+%	\caption{Development of attention during training. }
+%	\label{fig:attn_heatmap}
+%\end{figure}
+
+
+
 
 %- in contrast to the single attention head case, with multiple attention heads they focus on solely on the start or end sequence\\
 %- decision where an attention head focuses is made early on in training - within the first epoch even(?). similar as observation from, do you really need 16 attention heads paper, where attention heads become more or less important as time goes on\\
@@ -531,6 +539,16 @@ The sequence which an attention head focusses on generally does not change after
 
 %TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation
 
+%TODO: perhaps mention how older psi regression methods used mouse data but we want human data and that is why we can't use their datasets
+
+
+%TODO: motivation for why classification task was chose and not regression:
+older methods used mouse data
+we reimplement models from regression
+we start off with classification and then move on to regression once we get good enough perforamnce as regression is more challenging
+reasonable to assume that progress in one will also lead to progress in the other
 
 %TODO: observation that best performing datasets contain the most samples
-%TODO: sentence about validation vs test loss
+
+
+

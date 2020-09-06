@@ -29,7 +29,7 @@ In this chapter, we give more details about the exact task we are trying to solv
 
 \section{Task formulation} \label{sec:task_formulation}
 The output of our models will be the classification of a given exon or junction as constitutive or non-constitutive. To obtain the training label of an exon or junction as constitutive or non-constitutive, we need its respective PSI value. 
-Strictly speaking, all exons and junctions with a PSI of less than 100\% are non-constitutive. However, due to spurious reads, we classify all exons with a PSI $\leq 99\%$ as constitutive. 
+Strictly speaking, all exons and junctions with a PSI of less than 100\% are non-constitutive. However, due to spurious reads, we classify all exons with a PSI $\geq 99\%$ as constitutive. 
 
 Previous work indicates that advances in predicting one type of alternative splicing behaviour (e.g. cassette exons) via Machine Learning methods also translates to advances in prediction for other types (e.g. exons with an alternative 3' splice site) \cite{dsc} \cite{buschhertel}. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryote and thus we choose cassette exons as the type of alternative splicing we will focus on.
 
@@ -231,7 +231,7 @@ We obtain six datasets in total.
 
 Fundamentally, our PSI estimation relies on the formula $PSI = \frac{\#IR}{(\#IR+\#ER)}$. However, before computing PSI, we also apply the following filtering and normalization steps:
 \begin{itemize}
-	\item Cassette exons which are shorter than 25 nt and introns which are shorter than 80 nt are excluded. Exons and introns of these lengths constitute less than 1\% of exons and introns in total and are usually an artifact of sequencing errors \cite{dsc}.
+	\item Cassette exons which are shorter than 25 nt and introns which are shorter than 80 nt are excluded. Exons and introns of these lengths constitute less than 1\% of exons and introns in total and are usually an artifact of sequencing errors \cite{dsc} \cite{shortintrons}.
 	\item GTEx provides access to TPM values for each gene from a sample. Adressing point (a) from \ref{subsubsec:naivepsi}, we obtain the TPM-adjusted read counts via $\#IR^{TPM} = \frac{\#IR}{TPM}$ and $\#ER^{TPM} = \frac{\#ER}{TPM}$. To address spurious reads from lowly-transcribed genes having a disproportionate impact, we only count reads from genes whose TPM is larger than 10. This filters around 84\% of genes which in turn filters around 56\% of the junctions. This is the most stringent filtering step we apply. 
 	
 %	This is by far the most stringent filtering method we apply, leading to about two-thirds of genes being filtered. This cut-off was chosen so aggressively as data quality is paramount. More details are given in Figure %\ref{fig:tpm_distribution}.
@@ -353,7 +353,8 @@ At this point, the datasets have been preprocessed such that we have the followi
 Using this information, now either exon-centric or intron-centric training samples are created. Exon-centric training samples are created when the task of the network is to classify an exon as constitutive or not. Intron-centric training samples are created when the task of the network is to classify whether a junction is constitutive or not.
 
 
-Using the chromosome information and the start and end coordinates, two 140 nucleotide window around the start and end coordinates were extracted from the human reference genome GRCh38 (see Figure \ref{fig:inputschematic}). Furthermore, if an exon or junction is taken from a negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed and each extracted nucleotide is converted to its reverse complement. This mirrors biology, as the spliceosome also observes the exon start and end sites as switched and reverse complemented between the + and - strand.\\ 
+Using the chromosome information and the start and end coordinates, two 140 nucleotide window around the start and end coordinates were extracted from the human reference genome GRCh38 (see Figure \ref{fig:inputschematic}). The size of the nucleotide window was motivated by previous work \cite{dsc}.\\
+Furthermore, if an exon or junction is taken from a negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed and each extracted nucleotide is converted to its reverse complement. This mirrors biology, as the spliceosome also observes the exon start and end sites as switched and reverse complemented between the + and - strand.\\ 
 %Presumably, this means the models the models don't have to learn different features for exons or junctions on the + and - strand. \\
 Samples from the chromosomes X, Y and M were excluded due to the fundamental functional differences between them and the autosomes (e.g. there only exists one functional copy of the sex chromosomes).
 
@@ -466,7 +467,7 @@ DSC uses CNNs for feature extraction.
 CNNs are useful when the input data contains spatially invariant patterns.  Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
 CNNs are also promising for the application to genomic data, that is, nucleotide sequences: 
 \begin{itemize}
-	\item Nucleotide sequences contain motifs (nucleotide sequence patterns conjectured to be biologically significant). Motifs can be represented as matrixes and indeed, they are frequently represented as position weight matrixes (PWMs) with particular weights. The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs. % TODO; don't learn this wording
+	\item Nucleotide sequences contain motifs (nucleotide sequence patterns conjectured to be biologically significant). Motifs can be represented as matrixes and indeed, they are frequently represented as position weight matrixes (PWMs) with particular weights. The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs. % TODO; don't like this wording
 	\item Motifs are found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence.
 \end{itemize}
 
@@ -566,7 +567,7 @@ After pre-training, the embedding for a given word or document is then the value
 	\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/tsne_d2v_embeddings.png} 	
 	\caption{
 		The 2-dimensional embeddings obtained by applying t-SNE to the 100-dimensional learned representations of all 64 possible 3-mers. The corresponding amino acids are color-coded. 
-	} %TODO; although current color scale is very pretty, get a more diverse one
+	}
 	\label{fig:tsne}
 \end{figure}
 
@@ -577,9 +578,19 @@ Doc2Vec is trained to map words (3-mers) which occur in a similar context to sim
 Overall, we take these visualizations as an indication that Doc2Vec was able to learn biologically useful embeddings for the overlapping 3-mers.
 %[maybe] Making use of these pre-trained embeddings, each 140 nucleotide input sequence is split into overlapping 3-mers and mapped to a 100-dimensional vector. Like in the other models, a shallow MLP using these sequence features in conjunction with length features for classification.
 \subsubsection{Putting it all together} \label{subsubsec:d2vinference}
-The resulting model uses the pre-trained Doc2Vec network to obtain a 100-dimensional embedding of the extracted nucleotide sequences around the exon start and exon end. These two embeddings, along with the length features, are then given to a shallow MLP for classification. We refer to this model as the D2V model. 
 
-%TODO: graphic of D2V
+\begin{figure}
+	\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/d2v.pdf} 	
+	\caption{
+		Architecture of D2V. 
+	}
+	\label{fig:d2v_arch}
+\end{figure}
+
+The resulting model uses the pre-trained Doc2Vec network to obtain a 100-dimensional embedding of the extracted nucleotide sequences around the exon start and exon end. These two embeddings, along with the length features, are then concatenated and given to a shallow MLP for classification. We refer to this model as D2V and visualize it in Figure \ref{fig:d2v_arch}. 
+
+
+
 %During inference, the Doc2Vec model outputs 100-dimensional embeddings for each input sequence. These, along with the length features, are fed into the shallow MLP for classification. The shallow MLP consists of two layers with 16 and 8 neurons each respectively followed by a dropout layer with dropout probability of 0.2.
 
 
@@ -643,7 +654,7 @@ Despite these successes, not many attention-based models have been applied to ge
 
 \subsubsection{Why LSTM-based models were chosen over Transformers} \label{lstmvstransformer}
 Perhaps surprisingly, we chose to not evaluate Transformer models for this task:
-The main advantage of Transformers over LSTMs is their parallelizable nature enabling them to scale to enormous datasets and hundreds of millions (or billions \cite{gpt3}) of parameters. This is because Transformers can process all inputs in a sequence concurrently, in contrast to LSTMs who need to process them sequentially. However, there are no huge datasets to scale to: our largest exon dataset contains roughly 50,000 training samples and this already includes all the known cassette exon in the human genome. Creative use of data augmentation might increase dataset size by two or three factors, but even 150,000 training samples is still far smaller than the millions of training samples used in NLP. Scaling down Transformers models would mean they lose their main advantage over LSTMs: on small NLP datasets LSTMs and small (not-distilled \cite{distilbert}) Transformers perform similarly \cite{mogrifier}\cite{smalltransformerwin} and there is no clear consensus which approach is superior. 
+The main advantage of Transformers over LSTMs is their parallelizable nature enabling them to scale to enormous datasets and hundreds of millions (or billions \cite{gpt3}) of parameters \cite{allyouneed}. This is because Transformers can process all inputs in a sequence concurrently, in contrast to LSTMs who need to process them sequentially. However, there are no huge datasets to scale to: our largest exon dataset contains roughly 50,000 training samples and this already includes all the known cassette exon in the human genome. Creative use of data augmentation might increase dataset size by two or three factors, but even 150,000 training samples is still far smaller than the millions of training samples used in NLP. Scaling down Transformers models would mean they lose their main advantage over LSTMs: on small NLP datasets LSTMs and small (not-distilled \cite{distilbert}) Transformers perform similarly \cite{mogrifier}\cite{smalltransformerwin} and there is no clear consensus which approach is superior. 
 
 %LSTM win: https://arxiv.org/abs/1909.01792
 %Transformer win: https://arxiv.org/abs/1912.09713
@@ -742,7 +753,7 @@ The input to the encoder blocks is a dense 4-dimensional embedding of the one-ho
 
 LSTM cells opposed to unmodified RNNs are used as encoder as LSTMs have been shown to be better at retaining information over long sequences and avoiding the vanishing and exploding gradient problems \cite{lstm}. In particular, we use Bidirectional LSTM (BiLSTM) \cite{bidirection} to model that the splicing of an exon likely depends on bidirectionally interacting factors. A separate BiLSTM is used for finding for encoding the exon start and exon end sequence. 
 
-As this lead to empirically better results, we also introduce a 1D batch normalization layer before the attention layer. A dropout layer in the attention head is used for the same reason. 
+As this lead to empirically better results, we also introduce a 1D batch normalization layer \cite{batchnormalization} before the attention layer. A dropout layer in the attention head is used for the same reason. 
 
 We pre-empt the results chapter by noting that we only use the extension of multiple attention heads of the three additional modifications of the attention mechanisms we considered. 
 The architecture of our model is visualized in Figure \ref{fig:attnbilstm}. We refer to this new model as Recursive Attentive Splicing Code (RASC). In the experiments section, we validate the choice of introducing the attention mechanism to RASC, by removing it and evaluating the model which only uses the hidden state of the BiLSTMs. We denote this model as Recursive Splicing Code (RSC).
@@ -784,8 +795,9 @@ The models were trained with early stopping on the validation fold until they st
 
 The pre-training of the Doc2Vec model on the human genome took 3 hours. 
 
-The DSC, D2V and BiLSTM + Attn models respectively contain 20,001, 6,801, and 66,861 trainable weights. In absolute terms, all of these model are still small compared to models known from Computer Vision and Natural Language Processing. The number of training weights is also reflected in the training times with the models respectively taking between 5 to 30 minutes, 1 to 5 minutes and 15 to 75 minutes to train once (depending on dataset). 
+DSC, D2V and RASC respectively contain 20,001, 6,801, and 66,861 trainable weights. In absolute terms, all of these model are still small compared to models known from Computer Vision and Natural Language Processing. The number of training weights is also reflected in the training times with the models respectively taking between 5 to 30 minutes, 1 to 5 minutes and 15 to 75 minutes to train once (depending on dataset). The increased training time of RASC is likely also influenced by LSTMs processing the input sequentially.
 
+%An advantage of convolutional neural networks is that they are more parallelizable than RNNs, as the state at every timestep only depends on the local context (via the convolution operation) rather than all past states as in the RNN.
 The hyperparameters used for training the models are given in table \ref{table:hyperparameters}. More details on the Doc2Vec pre-training procedure and hyperparameters values are given in the appendix \ref{app:d2v}.
 
 \subsubsection{Loss}  \label{subsubsec:loss}
