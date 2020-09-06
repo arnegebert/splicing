@@ -214,9 +214,8 @@ Thus we conclude that the GTEx-based datasets improve upon the HEXEvent dataset,
 %Overall, we observe poor model performance and biologically surprising low cross-tissue performance differences. This indicates that the GTEx-based exon-centric dataset is not fit for training neural-network based splicing codes and conclude that evaluating the models on other datasets is desirable.
 
 
-\section{HipSci-based datasets} \label{sec:hipsci} 
 
-\subsection{HipSci SUPPA datasets} \label{subsec:hipsci_suppa}
+\section{HipSci SUPPA datasets} \label{subsec:hipsci_suppa}
 \subsubsection{Dataset based on sensory neuron cell lines}
 
 \begin{figure}
@@ -369,7 +368,7 @@ In summary, we extend RASC with multiple attention heads. The results of RASC we
 %haven't run experiments yet, not sure if results are interesting (but probably yes)\\
 %due to training times, probably don't want to run these with cross-validation as that would take 15 hours+
 
-
+\subsection{Further analysis on }
 \subsubsection{Sensitivity and specificity analysis}
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/confusion_matrix.png} 
@@ -388,16 +387,26 @@ We present the confusion matrix for the binary classifier based on RASC in Figur
 	\label{fig:majiq_comparison_barcharts}
 \end{figure}
 
-- Extremely surprising results; it is better to train a dataset on undifferentiated tissue than training it on differentiated tissue --> def check data processing for this again lol, make sure that I actually shuffle data. this is too weird to be true
 
-- constitutive exons are shared across all datasets
-- majiq builder builds up initial splice graph using all samples -- some confounding there for sure
-- for this sort of analysis, prediting differential splicing itself would be more apt
+We evaluate how well the models generalize when trained on a dataset derived from one individual and then tested on a dataset derived
+from the same individual, but a different library
+from a different individual, but the same cell type
+from a different individual from a different cell type
+*When choosing the samples to evaluate on from the different datasets, care needs to be taken to avoid a subtle data leak: due to the specifics of MAJIQ, the original dataset and the dataset from the same individual but a different library share the consecutive exon training samples. This initially lead to the surprising observation that  it is better to train on a dataset different from the one the model is evaluated on. This issue is avoided by efficiently filtering all samples that are in the original training dataset from the three additional datasets through the use of a hash set.
+We visualize the results in Figure ...
+Unsurprisingly, performance drops slightly when a model is evaluated on a dataset different from the one it was trained on. Surprisingly, this performance drop does not directly correlate with the similarity to the original dataset: the least similar dataset from the different individual and different cell type performs best. 
 
-cross-tissue comparison here with very low variance across tissues;\\
-seems like learned features are tissue-invariant\\
+However, to more seriously investigate how splicing differs between conditions, the capability of MAJIQ to quantify differential splicing should be taken advantage of. The best performing model, RASC, could be adapted such that it takes in an exon as well as two different conditions (e.g. one-hot encoded tissues) and then predicts the differential splicing change. 
 
-continuous psi prediction too
+
+%- constitutive exons are shared across all datasets
+%- majiq builder builds up initial splice graph using all samples -- some confounding there for sure
+%- for this sort of analysis, prediting differential splicing itself would be more apt
+%
+%cross-tissue comparison here with very low variance across tissues;\\
+%seems like learned features are mostly tissue-invariant\\
+
+
 
 
 
@@ -413,7 +422,6 @@ continuous psi prediction too
 % specificity: 0.93 -- ruling in alternative spliced
 % f1 score: 0.88, precision: 0.845 (cons), recall (cons): 0.927
 
-interpretation of attention mechanism etc follows here; some pretty graphics to follow
 
 
 
@@ -499,11 +507,6 @@ The sequence which an attention head focusses on generally does not change after
 %- worst run is where attention heads purely focus on end sequence (?) -> no, never happens
 
 
-% how do I best visualize my findings?
-% - I want to showcase all attention heads at some point
-- I want heatmaps at some points since prettier, but line graphs are probably clearer so important too
-- 
---> perhaps most sensible thing would be to show
 
 
 %attention distribution, proper:
