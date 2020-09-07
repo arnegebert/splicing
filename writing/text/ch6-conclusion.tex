@@ -6,7 +6,7 @@
 	}
 \end{savequote}
 
-\chapter{\label{ch:6-conclusion}Discussion / Conclusion}
+\chapter{\label{ch:6-conclusion}Discussion / Conclusion} % 360
 
 
 We discussed challenges which should be addressed when estimating PSI, implemented our own method for PSI estimation and constructed splicing quantification datasets based on three different processing methods. We also proposed a novel splicing code which introduces the attention mechanism to the field of splicing quantification and reimplemented two baselines models from the literature.
@@ -19,6 +19,7 @@ Our work further corroborates the importance and difficulty of constructing data
 While our newly introduced model is able to improve upon previous models by a wide margin, its prediction accuracy is still perfectible. Incorporating further information sources known to affect splicing like sample tissue or chromatin states \cite{chromatin} would likely further improve performance. 
 Even additional hyperparameter tuning may lead to further improvements since our hyperparameter tuning was limited due to computational constraints. Experiments maxing out the batch size (and stabilizing training) or exploring whether a context window larger than 140 nucleotides benefits performance would be particularly interesting. 
 %TODO: interpretability like all deep learning models
+%TODO: more sequence context as in other windows
 
 Towards the end of practical applicability, adapting our model for differential splicing prediction is a promising avenue of future research. Here the already used tool MAJIQ could be exploited to generate a dataset for splicing changes between conditions. 
 

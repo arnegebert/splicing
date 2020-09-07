@@ -1,21 +1,21 @@
 {
-    "name": "HIPSCI_MAJIQ_Regression_DSC",
+    "name": "iPSC_D2V_MLP",
 
     "n_gpu": 1,
 
     "arch": {
-        "type": "DSC",
+        "type": "MLP2",
         "args": {}
     },
     "data_loader": {
-        "type": "VanillaDataLoader",
+        "type": "ComparisonDataLoader",
         "args":{
-            "data_dir": "data/hipsci_majiq/exon",
+            "data_dir": "",
             "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 0,
-            "classification": false
+            "num_workers": 1,
+            "embedded": true
         }
     },
     "optimizer": {
@@ -28,7 +28,7 @@
     },
     "loss": "binary_cross_entropy",
     "metrics": [
-        "r2"
+        "auc"
     ],
     "lr_scheduler": {
         "type": "StepLR",
@@ -38,20 +38,22 @@
         }
     },
     "trainer": {
-        "type": "VanillaTrainer",
-        "args": {},
+        "type": "ComparisonTrainer",
+        "args": {
+            "embedded": true
+        },
         "epochs": 500,
 
         "save_dir": "saved/",
-        "save_period": 251,
+        "save_period": 101,
         "verbosity": 1,
 
-        "monitor": "max val_r2",
-        "logged_metrics": ["r2", "test_r2", "test_low_r2", "test_high_r2", "val_r2"],
+        "monitor": "max val_auc",
+        "logged_metrics": ["auc", "test_auc", "test_low_auc", "test_high_auc", "val_auc", "diff_lib_auc",
+        "diff_indv_auc", "diff_tissue_auc"],
         "early_stop": 15,
 
-        "tensorboard": true
+        "tensorboard": false
     },
-    "comment": "",
-    "cross_validation": true
+    "cross_validation": false
 }

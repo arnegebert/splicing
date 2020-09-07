@@ -1,5 +1,5 @@
 \chapter{\label{ch:ch5-results}Results}
-
+%3146 words
 This section presents and discusses the results of our experiments based on the three models and the datasets introduced in Chapter \ref{ch:4-methods}. It also describes the rationale behind deciding which experiments should be run.
 
 Results are given as obtained on the test set. Across all datasets and experiments, validation and test set metrics differ by less than 1\% on average. We observe no undue overfitting and unless explicitly mentioned, AUCs on the training set are generally higher by 0.02 to 0.06. 
@@ -50,7 +50,7 @@ Reimplementation was completed piece-wise, that is, first the sequence features 
 \end{table}
 
 \subsubsection{Further investigations}
-To further investigate, we also test three other models: MLP100, MLP20 and MLPLinear which respectively contain 100, 20 and 20 trainable parameters. The models are Multi Layer Perceptrons (MLPs) with one hidden layer which only take the length features as inputs. MLPLinear doesn't contain a non-linear activation function after its hidden layer.
+To further investigate, we also test three other models: MLP100, MLP20 and MLPLinear which respectively contain 100, 20 and 20 trainable parameters. The models are MLPs with one hidden layer which only take the length features as inputs. MLPLinear doesn't contain a non-linear activation function after its hidden layer.
 
 \begin{figure}
 	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch5-results/dsc_funeral_barchart.png} 
@@ -158,7 +158,7 @@ The performance on highly included, alternatively spliced exons (80\% <= PSI < 9
 \begin{figure}[h]
 %	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_DSC/final/ROC.png} 
 %	\includegraphics[width=0.7\textwidth]{../saved/log/GTEx_Junc_Heart_Attn/junc_cv_final/ROC.png}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_intron_brain_roc.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_junc_brain_roc.png} 
 	\caption{ROC curve from training RASC on the GTEx-based intron-centric heart-tissue-based dataset. }
 	\label{fig:gtex_junc_rocs}
 \end{figure}
@@ -462,10 +462,15 @@ However, to more seriously investigate how splicing differs between conditions, 
 
 
 \begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attention_heatmap.png} 
-	\caption{Development of attention during training. }
-	\label{fig:attn_heatmap}
-%	TODO: https://discourse.matplotlib.org/t/horizontal-and-vertical-lines-between-subplots/13540 or powerpoint, https://stackoverflow.com/questions/26084231/draw-a-separator-or-lines-between-subplots?rq=1
+	\centering
+	\makebox[0pt]{
+		\includegraphics[width=1.2\textwidth]{../visualizations/ch5-results/attention_heatmap.png} 	}
+	
+		\caption{Each of the four quadrants shows the distribution of the attention weights for a single attention head. The distribution of attention weights is visualized via one heatmap for the start and one heatmap for end sequence, showing how the distribution of attention weights develops during training. The mean distribution of the attention weights over the test set is displayed.}
+		\label{fig:attn_heatmap}
+
+	
+%	lines idea taken from https://discourse.matplotlib.org/t/horizontal-and-vertical-lines-between-subplots/13540 or powerpoint, https://stackoverflow.com/questions/26084231/draw-a-separator-or-lines-between-subplots?rq=1
 \end{figure}
 
 We visualize to what parts of the input sequence RASC pays attention to in \ref{fig:attn_distribution}. 
@@ -536,22 +541,48 @@ The bar chart suggests that more total attention is paid to the end, rather than
 
 \subsection{PSI Regression} \label{subsubsec:psi_regression}
 
+To further compare our model to other work, we run an additional 
+Taking a departure from our previous methology, 
 \begin{table}
 	\centering
 	\begin{tabular}{ c c c c c c c} 
 		\hline
-		%   & configuration & & performance & \\
-		
 		Model & AllPSI &  LowPSI &  HighPSI \\
 		\hline
-		DSC	&	\textbf{0.244}   $\pm$	0.036	&	\textbf{0.340}	$\pm$	0.039	&	\textbf{-77.980}	$\pm$	13.631\\
+		DSC	&	0.244   $\pm$	0.036	&	0.340	$\pm$	0.039	&	-77.980	$\pm$	13.631\\
 		D2V	&	0.120	$\pm$	0.009	&	0.155	$\pm$	0.010	&	-57.523	$\pm$	2.771\\
-		Attn	&	0.486	$\pm$	0.067	&	0.595	$\pm$	0.074	&	-25.470	$\pm$	5.717\\
+		RASC	&	\textbf{0.486}	$\pm$	0.067	&	\textbf{0.595}	$\pm$	0.074	&	\textbf{-25.470}	$\pm$	5.717\\
+		\hline
 	\end{tabular}
-	\caption{Mean $R^2$ upon regressing PSI values.  $\pm$ denotes standard deviation. 
+	\caption{Mean $R^2$ for PSI regression task on sensory neuron cell HipSci MAJIQ dataset.  $\pm$ denotes standard deviation. 
 	}
 	\label{table:psi_regression}
 \end{table}
+
+\begin{table}
+	\centering
+	\begin{tabular}{ l c c c c c c} 
+		\hline
+		Model & Performance \\
+		\hline
+		BNN-UDC \cite{jha} & .022\\
+		BNN-LMH \cite{jha}& 0.368\\
+		DNN-PSI \cite{jha} & 0.434\\
+		D2V \cite{d2vsplicing} & 0.594\\
+		W2V \cite{d2vsplicing} & \textbf{0.680}\\
+		\hline
+	\end{tabular}
+	\caption{Mean $R^2$ over 5 tissues for PSI regression task on mouse dataset as reported by \cite{d2vsplicing}. 
+	}
+	\label{table:ieee_regression}
+\end{table}
+% TODO: say how we do exon classification predominantly / mainly concern ourselves with it
+We give the results in Table \ref{table:psi_regression}. We generally observe poor to middling performance: DSC and D2V don't beat the baseline model with . Again, RASC outperforms the other models by a wide margin. 
+Like in the exon classification task, all models perform significantly worse on highly than on rarely to moderately included non-constitutive exons. 
+
+%what perfentage are non highly included ones? 
+To further compare our model to other work, we give the main results from \cite{d2vsplicing} in Table \ref{table:ieee_regression}. \cite{d2vsplicing} used a dataset derived from mouse dataset, originally from \cite{jha}. On this dataset, D2V is the second-best performing model, only moderately outperformed by a more finer-grained word2vec model (denoted W2V). In addition, it significantly outperforms several other methods from the literature. However, D2V is significantly outperformed by DSC and RASC on our dataset. This indicates that in particular RASC would compare very favorably against all methods also evaluated in \cite{d2vsplicing}. 
+
 
 %TODO: means I might need to change all the times where I say we do classification
 

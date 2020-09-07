@@ -38,10 +38,12 @@ fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
 
 """
 ATTENTION
-COMMENTED OUT THE FIRST TWO RUNS FOR BOTH OF THESE DIRECTORIES
+COMMENTED OUT THE FIRST TWO RUNS FOR BOTH OF THESE DIRECTORIES 
+(As it's uncharacteristically poor for Baseline and few epochs for Baseline with conv leading to
+a different x-axis scaling
 """
-dir_heads = '../../saved/log/MultiHeads/final'
-dir_conv = '../../saved/log/MultiHeadsConv/final'
+dir_heads = '../../saved/log/MultiHeads/final2'
+dir_conv = '../../saved/log/MultiHeadsConv/final2'
 
 
 auc, test_auc = get_values_from_log(dir_heads, 'auc')

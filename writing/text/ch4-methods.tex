@@ -1,4 +1,4 @@
-\chapter{\label{ch:4-methods}Methods}
+\chapter{\label{ch:4-methods}Methods} % 9049 words
 
 %short name for attention model  -- PRALINE current favorite of the cheesy ones, but DRASC overall preferred
 %Attentive recurrent splicing code
@@ -28,8 +28,12 @@ In this chapter, we give more details about the exact task we are trying to solv
 
 
 \section{Task formulation} \label{sec:task_formulation}
-The output of our models will be the classification of a given exon or junction as constitutive or non-constitutive. To obtain the training label of an exon or junction as constitutive or non-constitutive, we need its respective PSI value. 
-Strictly speaking, all exons and junctions with a PSI of less than 100\% are non-constitutive. However, due to spurious reads, we classify all exons with a PSI $\geq 99\%$ as constitutive. 
+We consider a classification and regression task. For the classification task the models classify an exon or junction as constitutive or not. For the regression task the models regress the PSI value of an exon or junction. The training samples comprise of exon or junction features helpful for classification or regression and the corresponding PSI value. \\
+For the classification task, we classify all exons and junctions based on their PSI value before training on them. Strictly speaking, all exons and junctions with a PSI of less than 100\% are non-constitutive. However, due to spurious reads, we classify all exons with a PSI $\geq 99\%$ as constitutive. For the regression we use the PSI values as training labels. 
+For either task, the output of our models is a prediction $\hat{y} \in [0, 1]$. 
+
+We focus on the easier classification task at first and only evaluate the models on the more challenging regression task once we have achieved a good predictive power for the classification task. 
+
 
 Previous work indicates that advances in predicting one type of alternative splicing behaviour (e.g. cassette exons) via Machine Learning methods also translates to advances in prediction for other types (e.g. exons with an alternative 3' splice site) \cite{dsc} \cite{buschhertel}. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryote and thus we choose cassette exons as the type of alternative splicing we will focus on.
 
@@ -231,7 +235,7 @@ We obtain six datasets in total.
 
 Fundamentally, our PSI estimation relies on the formula $PSI = \frac{\#IR}{(\#IR+\#ER)}$. However, before computing PSI, we also apply the following filtering and normalization steps:
 \begin{itemize}
-	\item Cassette exons which are shorter than 25 nt and introns which are shorter than 80 nt are excluded. Exons and introns of these lengths constitute less than 1\% of exons and introns in total and are usually an artifact of sequencing errors \cite{dsc} \cite{shortintrons}.
+	\item Cassette exons which are shorter than 25 nt and introns which are shorter than 80 nt are excluded. Exons and introns of these lengths constitute less than 1\% of exons and introns in the genome and are usually an artifact of sequencing errors \cite{dsc} \cite{shortintrons}.
 	\item GTEx provides access to TPM values for each gene from a sample. Adressing point (a) from \ref{subsubsec:naivepsi}, we obtain the TPM-adjusted read counts via $\#IR^{TPM} = \frac{\#IR}{TPM}$ and $\#ER^{TPM} = \frac{\#ER}{TPM}$. To address spurious reads from lowly-transcribed genes having a disproportionate impact, we only count reads from genes whose TPM is larger than 10. This filters around 84\% of genes which in turn filters around 56\% of the junctions. This is the most stringent filtering step we apply. 
 	
 %	This is by far the most stringent filtering method we apply, leading to about two-thirds of genes being filtered. This cut-off was chosen so aggressively as data quality is paramount. More details are given in Figure %\ref{fig:tpm_distribution}.
@@ -345,12 +349,19 @@ Our implementation of PSI estimation was applied to the GTEx dataset. SUPPA and 
 
 At this point, the datasets have been preprocessed such that we have the following information for each training sample that we want to create: 
 \begin{itemize}
-	\item chromosome and strand information of the to-be-classified exon or junction,
+	\item chromosome and strand information of the to-be-used exon or junction,
 	\item start and end coordinates of the exon or junction within a chromosome,
 	\item the lengths of neighbouring introns or exons*\footnote{Due to data limitations, we don't know the length of neighbouring exons when creating intron-centric training samples from GTEx data. In this case, the length of neighbouring exons is set to 0. }.
 \end{itemize}
 
-Using this information, now either exon-centric or intron-centric training samples are created. Exon-centric training samples are created when the task of the network is to classify an exon as constitutive or not. Intron-centric training samples are created when the task of the network is to classify whether a junction is constitutive or not.
+Using this information, now either exon-centric or intron-centric training samples are created. Exon-centric training samples are created when the task of the network is to classify an exon or regress its PSI. Intron-centric training samples are created when the task of the network is to classify a junction or regress its PSI. 
+
+
+Note that for intron-centric training samples we do not classify the intron or regress its PSI because the respective PSI is estimated with respect to the inclusion or exclusion of a particular junction. To estimate the PSI of an intron it would be necessary to also account for all other junctions which correspond to a particular intronic region being spliced in or not. 
+
+%It wouldn't be accurate to say that 
+%because a particular intronic sequence may be spliced out when 
+%Note that it is not technically correct to say that we classify an intron or regress its PSI because the inclusion or exlusion of an intronic sequence may occur when 
 
 
 Using the chromosome information and the start and end coordinates, two 140 nucleotide window around the start and end coordinates were extracted from the human reference genome GRCh38 (see Figure \ref{fig:inputschematic}). The size of the nucleotide window was motivated by previous work \cite{dsc}.\\
@@ -372,45 +383,74 @@ In some of the datasets there are significantly more constitutive, than non-cons
 
 %This leads to the issues with models getting stuck in local minima where they just predict the majority class. This was alleviated by including each alternatively spliced sample multiple times until the classes were balanced.
 
-The end results is that a single training sample for the model contains two 140x4 one-hot encoded matrixes and three normalized length values. This is the model input. The associated ground truth with each sample is the scalar 1 if the respective exon or junction is constitutive, and 0 if not.
+The end results is that a single training sample for the model contains two 140x4 one-hot encoded matrixes and three normalized length values. This is the model input.
+The associated training label for the classification task is the scalar 1 if the respective exon or junction is constitutive, and 0 if not. The associated training label for the regression task is the PSI estimate. 
 \subsection{Dataset statistics} \label{subsec:datasetstatistics}
 
-%: Table [in overleaf atm] shows the absolutes number of obtained training samples for all datasets which were used.
-% add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
-
-Table \ref{table:datasets} shows the number of obtained training samples in each datasets. Among the exon-centric datasets, the HEXEvent dataset contains the most samples, followed by the HipSci MAJIQ, GTEx and HIPSCI MAJIQ dataset. The HEXEvent and HipSci MAJIQ datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. Unlike between samples from neuron and iPSC cell lines, there are significant cross-tissue differences between the number of training samples in GTEx-based datasets: the cerebellum tissue datasets contain roughly twice as many training samples as the heart tissue datasets. This is a result of the cerebellum tissue containing 10,000 genes whereas the heart sample contains only 5,000. Surprisingly, there are 17 million exon-exon junction reads from the heart sample compared to the cerebellum's 8 million exon-exon junction reads. The additional reads from the heart sample are concentrated in a few extremely highly expressed genes (e.g. gene ENSG00000198886 is expressed 1000-times as often as the median highly expressed gene) and while this concentration of reads also appear in the cerebellum tissue, it is less extreme.
-
-The same cross-tissue observations also holds for the intron-centric datasets. The intron-centric datasets contains significantly more training samples than the exon-centric datasets because they are not constrained to cassette exons (which would lead to the expectation that the intron-centric datasets contain roughly twice as many samples as the exon-centric datasets), but contain all non-filtered junctions. 
-% ENSG00000198886 - MT-ND4 - https://www.proteinatlas.org/ENSG00000198886-MT-ND4
-%
-%ENSG00000198899 - MT-ATP6 - https://www.proteinatlas.org/ENSG00000198899-MT-ATP6/tissue - very highly expressed in blood
-%ENSG00000198712 - MT-CO2 - https://www.proteinatlas.org/ENSG00000198712-MT-CO2/tissue - very highly expressed in blood / muscle tissues
-%ENSG00000198804 - MT-CO1 - https://www.proteinatlas.org/ENSG00000198804-MT-CO1/tissue - very high muscle yep
+%\begin{table}[h!]
+%	\centering
+%	\begin{tabular}{l | c c | c c c} 
+%		%   \hline
+%		\toprule
+%		Name & Tissue & Type & Number of samples\\
+%		%   \hline
+%		\toprule
+%		HEXEvent & mixed & exon & 50,918 \\
+%		\hline
+%		GTEx & brain cortex & exon & 30,466\\
+%		GTEx & cerebellum & exon & 37,095\\
+%		GTEx & heart & exon & 19,257\\
+%		\hline
+%		GTEx & brain cortex & intron & 127,908\\
+%		GTEx & cerebellum & intron & 161,310\\
+%		GTEx & heart & intron & 81,659\\
+%		%   \hline
+%		\hline
+%		%   GTEx HEXEvent Reconstruction & brain & exon & 28,952\\
+%		%   \hline
+%		HipSci SUPPA & neuron & exon & 17,863 \\
+%		HipSci MAJIQ & neuron & exon & 44,746 \\
+%		HipSci MAJIQ & iPSC & exon & 48,652 \\
+%		%   \hline
+%		\hline
+%		
+%		%   GTEx HEXEvent Reconstruction & brain & junction & 57,201\\
+%		%   HipSci MAJIQ & neuron & junction & 90,627 \\
+%		%   \hline
+%	\end{tabular}
+%	\caption{Type, tissue and number of training samples per dataset. Type refers to whether the dataset is intron- or exon-centric.
+%	}
+%	\label{table:datasets}
+%\end{table}
 
 \begin{table}[h!]
 	\centering
-	\begin{tabular}{l | c c | c c c} 
+	\begin{tabular}{l | c c c | c c} 
 		%   \hline
 		\toprule
-		Name & Tissue & Type & Number of samples\\
+		Name & Tissue & Type & Misc & Number of samples\\
 		%   \hline
 		\toprule
-		HEXEvent & mixed & exon & 50,918 \\
+		HEXEvent & mixed & exon & / & 50,918 \\
 		\hline
-		GTEx & brain cortex & exon & 30,466\\
-		GTEx & cerebellum & exon & 37,095\\
-		GTEx & heart & exon & 19,257\\
+		GTEx & brain cortex & exon & / & 30,466\\
+		GTEx & cerebellum & exon & / & 37,095\\
+		GTEx & heart & exon & / & 19,257\\
 		\hline
-		GTEx & brain cortex & intron & 127,908\\
-		GTEx & cerebellum & intron & 161,310\\
-		GTEx & heart & intron & 81,659\\
+		GTEx & brain cortex & intron & / & 127,908\\
+		GTEx & cerebellum & intron & / & 161,310\\
+		GTEx & heart & intron & / & 81,659\\
 		%   \hline
 		\hline
 		%   GTEx HEXEvent Reconstruction & brain & exon & 28,952\\
 		%   \hline
-		HipSci SUPPA & neuron & exon & 17,863 \\
-		HipSci MAJIQ & neuron & exon & 44,746 \\
-		HipSci MAJIQ & iPSC & exon & 48,489 \\
+		HipSci SUPPA & neuron & exon & / & 17,863 \\
+		\hline
+		HipSci MAJIQ & neuron & exon & / & 44,746 \\
+		HipSci MAJIQ & iPSC & exon & / & 48,652 \\
+		HipSci MAJIQ & iPSC & exon & diff lib & 49,275 \\
+		HipSci MAJIQ & iPSC & exon & diff indv & 48,489 \\
+		
 		%   \hline
 		\hline
 		
@@ -418,10 +458,25 @@ The same cross-tissue observations also holds for the intron-centric datasets. T
 		%   HipSci MAJIQ & neuron & junction & 90,627 \\
 		%   \hline
 	\end{tabular}
-	\caption{Type, tissue and number of training samples per dataset. Type refers to whether the dataset is intron- or exon-centric.
+	\caption{Type, tissue and number of training samples per dataset. Type refers to whether the dataset is intron- or exon-centric. 'diff lib' abbreviates that the dataset was taken from the same individual, but a different library and 'diff indv' abbreviates that the dataset was taken from a different individual than the first shown HipSci MAJIQ iPSC cell-based dataset. 
 	}
 	\label{table:datasets}
 \end{table}
+% add more statistics now; decision to show the junction results (as majiq also does modelling predominatly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
+
+Table \ref{table:datasets} shows the number of training samples in each dataset.%\footnote{We omit the HipSci MAJIQ iPSC cell-based datasets from a different library, but the same individual and from a different individual. We give the complete table in the appendix \ref{app:datasets} } 
+%Among the exon-centric datasets, the HEXEvent dataset contains the most samples, followed by the HipSci MAJIQ, GTEx and HIPSCI MAJIQ datasets. 
+Among the exon-centric datasets, the HEXEvent and HipSci MAJIQ datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. In contrast to the sensory neuron and iPSC cell-based HipSci datasets, the magnitudes of the GTEx-based datasets vary a lot between tissues: the cerebellum tissue dataset contains roughly twice as many training samples as the heart tissue dataset. 
+On closer investigation, this is because the cerebellum tissue contains 10,000 genes whereas the heart sample only contains 5,000. Surprisingly, the heart tissue is based on 17 million exon-exon junction reads compared to 8 million exon-exon junction reads from the cerebellum tissue sample. The additional reads from the heart sample are concentrated in a few extremely highly expressed genes (e.g. gene ENSG00000198886 is expressed 1000-times as often as the median highly expressed gene) and while this concentration of reads also appear in the cerebellum tissue, it is less extreme.
+
+The same cross-tissue observations also hold for the intron-centric GTEx-based datasets. In general, the intron-centric datasets contain roughly four times more training samples than the exon-centric datasets. This is because they do not only contain junctions of cassette exons (in which case they would contain roughly twice as many training samples as the exon-centric datasets), but contain all non-filtered junctions. 
+% ENSG00000198886 - MT-ND4 - https://www.proteinatlas.org/ENSG00000198886-MT-ND4
+%
+%ENSG00000198899 - MT-ATP6 - https://www.proteinatlas.org/ENSG00000198899-MT-ATP6/tissue - very highly expressed in blood
+%ENSG00000198712 - MT-CO2 - https://www.proteinatlas.org/ENSG00000198712-MT-CO2/tissue - very highly expressed in blood / muscle tissues
+%ENSG00000198804 - MT-CO1 - https://www.proteinatlas.org/ENSG00000198804-MT-CO1/tissue - very high muscle yep
+
+
 
 %gtex number of reads:
 %The initial dataset contained roughly 10 million total exon-exon junction read count for each tissue distributed over roughly 330,000 unique junctions.
@@ -434,12 +489,12 @@ The same cross-tissue observations also holds for the intron-centric datasets. T
 	\label{fig:datahistograms}
 \end{figure}
 
-Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that in each dataset the distribution of PSI values is bi-modal with the modes being around very rarely included (< 5\%) and very frequently included exons (>95\%). This aligns well with previous observations that alternatively spliced junctions and exons tend to be very frequently or very rarely included \cite{buschhertel} \cite{bimodalpsivalues1} \cite{bimodalpsivalues2}.\\
-The lack of non-cassette constitutive exons is visible in the GTEx and HipSci SUPPA datasets containing significantly constitutive samples; the other two primary datasets contain roughly three times as many constitutive as non-constitutive samples. \\
+Figure \ref{fig:datahistograms} shows histograms for the exon-centric version of the four primary datasets versions. The histograms show that in each dataset the distribution of PSI values is bi-modal with modes around very rarely included (< 5\%) and very frequently included exons (>95\%). This aligns well with previous observations that alternatively spliced junctions and exons tend to be very frequently or very rarely included \cite{buschhertel} \cite{bimodalpsivalues1} \cite{bimodalpsivalues2}.\\
+The lack of non-cassette constitutive exons is visible in the GTEx and HipSci SUPPA datasets containing significantly fewer constitutive samples; the other two primary datasets contain roughly three times as many constitutive as non-constitutive samples. \\
 % However, there are also some dissimilarities between the datasets: the GTEx and HipSci SUPPA dataset contain the fewest samples and, in particular, they contain significantly fewer constitutive samples.\\
 %Due to their respective processing methods the GTEx and HipSci SUPPA datasets only contain known cassette exons as constitutive exons, but not non-cassette constitutive exons. 
 % liekly false for suppa Another factor is that they only estimate PSI based on one biological sample in contrast to the other datasets. 
-In particular, the HipSci SUPPA dataset contains an extremely low number of non-rarely or frequently included exons (only ~1\%) which is likely an artefact of its coarse, transcription-level estimation method.
+In particular, the HipSci SUPPA dataset contains an extremely low number of non-rarely or frequently included exons (only $\sim$1\%) which is likely an artefact of its coarse, transcription-level estimation method.
 %The relatively low number of non-constitutive exon samples in the HEXEvent dataset is likely influenced by the ESTs coming from a mix of biological samples from different tissues. Among many tissues, there are likely few tissues that contain some exons
 %should also hold for constitutive exons; so rarely exons constitutive, so more with middle psi values
 %SCEPTICAL -- unlikely to include
@@ -449,11 +504,11 @@ All three models are fundamentally split into two components:
 \begin{enumerate}
 	\item The first component extracts the most relevant features of the two input sequences of nucleotides.  Depending on the exact model, the feature extraction is based either on CNNs, word embeddings or BiLSTMs and an attention layer. The extracted features are concatenated along with the length features and fed as input to the second component. 
 	
-	\item The second component uses the extracted features and length features to perform binary classification. This component is implemented as a shallow MLP for all models. It consists of one or two fully connected layers followed by dropout and activation layers. A sigmoid activation function is used after the last layer to obtain an output from [0, 1].
+	\item The second component uses the extracted features and length features to perform binary classification or regression. This component is implemented as a shallow multilayer perceptron (MLP) for all models. It consists of one or two fully connected layers followed by dropout and activation layers. A sigmoid activation function is used after the last layer to obtain an output between 0 and 1.
 \end{enumerate}
 
 \subsection{DSC: CNN-based} \label{subsec:dsc}
-This model is a reimplementation of the Deep Splicing Code (DSC) from \cite{dsc} and the state-of-the-art model for alternative splicing classification. 
+This model is a reimplementation of the Deep Splicing Code (DSC) from \cite{dsc} and the current state-of-the-art model for alternative splicing classification. 
 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/dsc_architecture.png} 
@@ -463,6 +518,8 @@ This model is a reimplementation of the Deep Splicing Code (DSC) from \cite{dsc}
 	}
 	\label{fig:dsc_architecture}
 \end{figure}
+
+\subsubsection{The motivation behind using CNNs}
 DSC uses CNNs for feature extraction. 
 CNNs are useful when the input data contains spatially invariant patterns.  Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
 CNNs are also promising for the application to genomic data, that is, nucleotide sequences: 
@@ -471,8 +528,9 @@ CNNs are also promising for the application to genomic data, that is, nucleotide
 	\item Motifs are found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence.
 \end{itemize}
 
-Keeping this motivation in mind, DSC extracts features from the two input sequences using CNN-based blocks. A CNN feature extraction block with the same architecture but independently learned weights is used for each input sequence. This is to accommodate the model learning to extract different features from the exon start and exon end sequence.
-% The extracted features are used by a shallow MLP to obtain the final classification. 
+
+\subsubsection{Model architecture}
+Keeping this motivation in mind, DSC extracts features from the two input sequences using CNN-based blocks. A CNN feature extraction block with the same architecture but independently learned weights is used for each input sequence. This is to accommodate the model learning to extract different features from the exon start and exon end sequence. The extracted features are concatenated with the lengths and used by a shallow MLP for predicting the output. The architecture of DSC is visualized in \ref{fig:dsc_architecture}.
 
 Concretely, each CNN block consists of three convolutional layers. The first convolutional layer has a window size of 7 units and 32 filters, the second has a window size of 4 units and 8 filters and the third has a window size of 3 units and 8 filters. Each convolutional layer is followed by a dropout layer with dropout probability 0.2 to reduce overfitting \cite{dropout}, a ReLU activation layer \cite{relu} and a max-pooling layer with stride and window size 2 to extract the most salient features. The hyperparameters for this model were chosen with grid search by \cite{dsc}. 1D convolution layers are used. 
 %In contrast to images from Computer Vision, sequences from genomics are 1-dimensional, and  
@@ -489,11 +547,11 @@ Concretely, each CNN block consists of three convolutional layers. The first con
 Like text, genomic data is fundamentally a sequence of characters.
 This makes it possible to apply techniques known from Natural Language Processing (NLP) to genomic data. This is an especially promising area of cross-pollination because of the large strides NLP has been able to make in recent years using deep learning.
 Some of the most important milestones in NLP have been efficient embeddings via Word2Vec \cite{w2v1} \cite{w2v2}, applying Recurrent Neural Networkss (RNNs) to text as in Sequence-to-Sequence (seq2seq) learning \cite{seq2seq} and leveraging attention as in the extremely powerful and deep Transformer models \cite{allyouneed} \cite{bert}.\\
-In this work, we evaluate the application of Doc2Vec (a derivative of Word2Vec), Seq2Seq models and the attention mechanism to the task of alternative splicing classification. We don't evaluate the current state-of-the-art Transformer models. Albeit very potent, they usually require huge datasets in the order of millions of samples which aren't available for this task. Nonetheless, we do adapt the attention mechanism as known from Transformers for our task. In this way, we feel the evaluated models make use of the most important milestones using deep learning in NLP.
+In this work, we evaluate the application of Doc2Vec (a derivative of Word2Vec), Seq2Seq models and the attention mechanism to the task of alternative splicing classification. We don't evaluate the current state-of-the-art Transformer models. Albeit very potent, they usually require huge datasets in the order of millions of samples which aren't available for this task (this decision is discussed in more detail in Section \ref{lstmvstransformers}). Nonetheless, we do adapt the attention mechanism as known from Transformers for our task. In this way, we feel the evaluated models make use of the most important Deep Learning innovations originating from NLP.
 
 %While scaling down Transformers and then applying is an interesting avenue of research, even heavily scaled-down models might still be over parametrized for the task as it has frequently been shown that very shallow networks (with less than 5 layers) perform best on genomic data \cite{}. Additionally, our input sequences are very long; generally 140 tokens or more. Initial tests showed that this also leads to memory problems when training on only one GPU, as the memory requirements of Transformers grows quadratically with respect to the length of the input sequence, further complicating their application. Due to these considerations, we chose to forego the evaluation of Transformer-based models in this study.
 \subsection{D2V: MLP-based} \label{subsec:d2v}
-This model is a reimplementation of the model used for PSI regression on the mouse genome in \cite{d2vsplicing}. The only architectural difference is that we possibly use a differently-sized MLP for classification, as no details on the MLP size and no publicly available implementation were given. 
+This model is a reimplementation of the model used for PSI regression on the mouse genome in \cite{d2vsplicing}. The only architectural difference is that we possibly use a differently-sized MLP in the second part of the network, as architectural details on the MLP aren't given and no public implementation is available. 
 %If I want to expand this section:
 %Asgari, E., & Mofrad, M. R. (2015). Continuous distributed representation of biological sequences for deep proteomics and genomics. PloS one, 10(11), e0141287.
 %Contains very good explanations / phrasings
@@ -514,22 +572,24 @@ Doc2Vec is an extension of Word2Vec which uses the same principles, but can also
 
 \subsubsection{Training}
 To train Word2Vec or Doc2Vec, a large corpus of unlabelled data is needed. As we are training on genomic data, the largest corpus is the complete genome itself. To this end, we obtained the complete human reference genome GRCh38 from UCSC \cite{ucsc}.\\ %http://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/
-During training on text data, the corpus is split into documents which are ideally semantically meaningful (like paragraphs). Due to memory limitations and due to corresponding to the average gene size \cite{bionumbers}, we split the genome into sequences of 28,000 nucleotide sequences. Tests with splitting the genome into sequences of length 10,000 that effect of this choice on model performance is negligible. 
+During training on text data, the corpus is split into documents which are ideally semantically meaningful (like paragraphs). Due to memory limitations and due to corresponding to the average gene size \cite{bionumbers}, we split the genome into sequences of 28,000 nucleotide sequences. Tests with splitting the genome into sequences of length 10,000 showed that the effect of this choice on model performance is imperceptible. 
 %showed that the effect of this document length parameter on performance is negligible. 
 %does not seem to affect model performance in a meaningful way.
 \subsubsection{Using k-mers}\label{subsubsec:kmers}
-Naively applying Word2Vec or Doc2Vec to genomic data would mean treating each nucleotide as a word. Drawing the parallel to natural language, this would mean wanting to embed each character in a word. However, a single character or nucleotide (which on top comes from an alphabet of only four characters) is not unique enough and occurs in too many contexts to obtain meaningful representations. Therefore, it is desirable to embed multiple characters or multiple sequences, that is a word or a k-mer. While a sentence can easily be split into words, the split of a nucleotide sequence into k-mers is not as clear-cut: we don't know the functionality of most nucleotides and therefore can't split a sequence into semantically meaningful units.
-Previous studies have explored this issue \cite{kmerlength1} \cite{kmerlength2}, and found that the compromise of splitting each nucleotide sequence into overlapping 3-mers is a good solution. 
+Naively applying Word2Vec or Doc2Vec to genomic data would mean treating each nucleotide as a word. Drawing the parallel to natural language, this would mean wanting to embed each character in a word. However, a single character or nucleotide (which comes from an alphabet of only four characters) is not unique enough and occurs in too many contexts to obtain meaningful representations. Therefore, it is desirable to embed multiple characters or multiple sequences, that is a word or a k-mer. While a sentence can easily be split into words, the split of a nucleotide sequence into k-mers is not as clear-cut: we don't know the functionality of most nucleotides and therefore can't split a sequence into semantically meaningful units.
 
-%Following this recommendation, we split each sequence of nucleotides into overlapping 3-mers. 
-Overlapping means that in the case of the sequence 'AACGAT' the resulting overlapping 3-mer sequence is 'AAC', 'ACG', 'CGA' and 'GAT'. Following this recommendation, we split the 28,000 nucleotides long pre-training sequences into 27,998 overlapping 3-mers.
+Previous studies have explored this issue \cite{kmerlength1} \cite{kmerlength2}, and found that the compromise of splitting each nucleotide sequence into overlapping 3-mers is a performant choice. Overlapping means that in the case of the sequence 'AACGAT' the resulting overlapping 3-mer sequence is 'AAC', 'ACG', 'CGA' and 'GAT'. Based on these findings, we split each sequence of nucleotides into overlapping 3-mers and obtain 27,998 overlapping 3-mers from the 28,000 nucleotides long pre-training sequences. 
+
+% Following this recommendation, we split the 28,000 nucleotides long pre-training sequences into 27,998 overlapping 3-mers.
 \subsubsection{Pre-training of word embeddings}
-The pre-training for Word2Vec and Doc2Vec uses a shallow neural network with one hidden layer. During a pre-training epoch, each word is once in the center of a sliding window or context window. One of two techniques is typically used for pre-training: either continuous bag-of-words (CBOW) or skip-gram. If CBOW is used, all words in a window except the current word are given as input and the target output is the current word. % [WHAT DOES THE HIDDEN LAYER LOOK LIKE? -- could honestly skip this]
-If the skip-gram technique is used, only the current word is given as input and the task is to predict the surrounding words in the window. A typical window size is 5 words, meaning 5 words behind and ahead the current word will be used. 
+The pre-training for Word2Vec and Doc2Vec uses a shallow neural network with one hidden layer. %During a pre-training epoch, each word is once in the center of a sliding window or context window. 
+One of two techniques is typically used for pre-training: either continuous bag-of-words (CBOW) or skip-gram. If CBOW is used, all words in a context window except the current word are given as input and the target output is the current word.  % [WHAT DOES THE HIDDEN LAYER LOOK LIKE? -- could honestly skip this]
+If the skip-gram technique is used, only the current word is given as input and the task is to predict the surrounding words in the window. The context or sliding window around a word contains the words immediately adjacent to it. A typical window size is 5 words, meaning 5 words behind and after the current word will be used. 
 
-Doc2Vec works similarly. In the CBOW equivalent called distributed memory (DM), a document identifier (usually just an integer enumerating all documents) is given as additional input. In the skip-gram equivalent distributed bag of words (DBOW), the current word is replaced by the document identifier and the task is to predict all words in the window. All four different training methods are visualized in Figure \ref{fig:w2vd2vtrainingvariants}.\\
-There is no clear choice for when which training method should be used for Word2Vec or Doc2Vec as they tend to perform similarly. However, DM (and also CBOW) preserve the order of words and as the order of words (3-mers) is likely significant, we chose DM as pre-training method.
-Pre-processing the human genome like above and using the DM training method, we trained a Doc2Vec model to output a 100-dimensional embedding for each document.
+Doc2Vec works similarly. In the CBOW equivalent called distributed memory (DM), a document identifier (commonly simply an integer enumerating all documents) is given as additional input. In the skip-gram equivalent distributed bag of words (DBOW), the current word is replaced by the document identifier and the task is to predict all words in the window. All four different training methods are visualized in Figure \ref{fig:w2vd2vtrainingvariants}.
+
+There is no clear guideline for when which training method should be used for Word2Vec or Doc2Vec as they tend to perform similarly. However, DM (and also CBOW) preserve the order of words and as the order of words (3-mers) is likely significant, we chose DM as pre-training method.\\
+Pre-processing the human genome like described above and using the DM training method, we trained a Doc2Vec model to output a 100-dimensional embedding for each document.
 %\begin{figure}
 %	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/d2v_training_cropped.png} 
 %	\caption{
@@ -548,7 +608,7 @@ Pre-processing the human genome like above and using the DM training method, we 
 \end{figure}
 
 \subsubsection{Obtaing the embeddings}
-After pre-training, the embedding for a given word or document is then the value of the hidden cells of the shallow pre-training MLP\footnote{In practice, the words in a corpus are one-hot encoded and the value of the hidden layers doesn't need to be computed. Recalling that the weights of the hidden layer of a MLP are represented as a $N\times d$ matrix, only the the d-dimensional column which belongs to the respective one-hot encoded word needs to be retrieved. All other columns will be multipled by 0. $N$ represents the size of the vocabulary (64 for us) and $d$ the number of embedding dimensions (100 for us).}. In the case of 100-dimensional embeddings, this means that the hidden layer contains 100 neurons. The intuition behind this is that the models learned a representation which is helpful for the prediction task the model was trained on. Since the prediction task was either to reconstruct a word or document given its context or vice-versa, the representation for a given word or document should encode its context. Thus, the main idea behind Word2Vec and Doc2Vec, that a word or document is defined by the context in which it occurs and its representation should encode this context, is achieved.
+After pre-training, the embedding for a given word or document is then the value of the hidden cells of the shallow pre-training MLP\footnote{In practice, the words in a corpus are one-hot encoded and the value of the hidden layers doesn't need to be computed. Recalling that the weights of the hidden layer of a MLP are represented as a $N\times d$ matrix, only the the d-dimensional column which belongs to the respective one-hot encoded word needs to be retrieved. All other columns will be multipled by 0. $N$ represents the size of the vocabulary (64 for us) and $d$ the number of embedding dimensions (100 for us).}. In the case of 100-dimensional embeddings, this means that the hidden layer contains 100 neurons. The intuition behind this is that the models learned a representation which is helpful for the prediction task the model was trained on. Since the prediction task was either to reconstruct a word or document given its context or vice-versa, the representation for a given word or document should encode its context. Thus, the main idea behind Word2Vec and Doc2Vec, that a word or document is defined by the context in which it occurs (and its representation should encode this context), is achieved.
 
 
 
@@ -573,7 +633,7 @@ After pre-training, the embedding for a given word or document is then the value
 
 We visualize the embeddings for all 64 possible 3-mers using Stochastic Neighbor Embedding (t-SNE) \cite{tsne} in Figure \ref{fig:tsne}.
 
-Doc2Vec is trained to map words (3-mers) which occur in a similar context to similar representations. We observe that this often translates to mapping the same amino acids to similar representations (Figure \ref{fig:tsne}, left). There are some instances when different amino acids are mapped together like the quartet Ala, Thr, Pro and Ser in the top-left corner. Why are exactly these different amino acids mapped together? Displaying the 3-mers associated with the 3-mers (Figure \ref{fig:tsne}, right) reveals that these different amino acids share two nucleotides at the same position. This probably leads to these amino acids appearing in similar contexts.
+Doc2Vec is trained to map words (3-mers) which occur in a similar context to similar representations. We observe that this often translates to mapping the same amino acids to similar representations. There are some instances when different amino acids are mapped together like the quartet Alanine (Ala), Threonine (Thr), Proline (Pro) and Serine (Ser) in the top-left corner. Why are exactly these different amino acids mapped together? The associated 3-mers reveal that these different amino acids share two nucleotides at the same position. This probably leads to these amino acids appearing in similar contexts.
 %Displaying the 3-mers associated with the amino acids, shows that this likely occurs because these different amino acids share two out of three nucleotides at the same positions. 
 Overall, we take these visualizations as an indication that Doc2Vec was able to learn biologically useful embeddings for the overlapping 3-mers.
 %[maybe] Making use of these pre-trained embeddings, each 140 nucleotide input sequence is split into overlapping 3-mers and mapped to a 100-dimensional vector. Like in the other models, a shallow MLP using these sequence features in conjunction with length features for classification.
@@ -587,7 +647,7 @@ Overall, we take these visualizations as an indication that Doc2Vec was able to 
 	\label{fig:d2v_arch}
 \end{figure}
 
-The resulting model uses the pre-trained Doc2Vec network to obtain a 100-dimensional embedding of the extracted nucleotide sequences around the exon start and exon end. These two embeddings, along with the length features, are then concatenated and given to a shallow MLP for classification. We refer to this model as D2V and visualize it in Figure \ref{fig:d2v_arch}. 
+The resulting model uses the pre-trained Doc2Vec network to obtain a 100-dimensional embedding of the extracted nucleotide sequences around the exon start and exon end. These two embeddings, along with the length features, are then concatenated and given to a shallow MLP to obtain the final prediction. We refer to this model as Doc2Vec (D2V) and visualize it in Figure \ref{fig:d2v_arch}. 
 
 
 
@@ -661,12 +721,12 @@ The main advantage of Transformers over LSTMs is their parallelizable nature ena
 Additionally, the autoregressive bias inherent to LSTMs is likely important for interpreting genomic sequences: . Transformers are stateless and only add information about the relative positions of the input through the use of positional encodings. This would mean that the learning task of the Transformers is harder. 
 Thus, we base the encoder part of our model on the simpler LSTMs. 
 
-We now describe the modifications we made to the Seq2Seq and attention set-up known from MT for alternative splicing classification. In particular, we describe the attention mechanism in more detail as necessary for our second modification.
+We now describe the modifications we made to the Seq2Seq and attention set-up known from MT for alternative splicing classification and regression. In particular, we describe the attention mechanism in more detail as necessary for our second modification.
 
 
 
 \subsubsection{Modification 1: MLP instead of a recurrent decoder}
-As the name implies, models based on the Seq2seq framework take a sequence as input and give a sequence as output. This is achieved via using a recurrent decoder which outputs symbols until it outputs an <EOS> (end-of-sentence, e.g. a '.') token (in the case for MT, similar for other domains). However, in our case, the output will always be a single scalar: the classification of the exon as constitutive or alternatively spliced. Thus, we don't require a recurrent decoder and instead use a shallow MLP for classification of the encoder features.
+As the name implies, models based on the Seq2seq framework take a sequence as input and give a sequence as output. This is achieved via using a recurrent decoder which outputs symbols until it outputs an <EOS> (end-of-sentence, e.g. a '.') token (in the case for MT, similar for other domains). However, in our case, the output will always be a single scalar. Thus, we don't require a recurrent decoder and instead use a shallow MLP in its place.
 \subsubsection{Modification 2: Attention with a learned query vector}
 The most common form of attention (multiplicative or dot-product self-attention \cite{allyouneed}), makes uses of conceptual queries and key-value pairs. A query, key and value matrix is assigned to each symbol in the input sequence. A given query is compared to all keys by computing a similarity score between the query and each key via the dot-product. The similarity scores are normalized through the use of a softmax layer. The normalized similarity scores are also commonly called the attention weights; keys similar to the query are weighted more. The output of the attention layer for a given query and input sequence is then the weighted vector sum obtained by multiplying each value by the attention weight of its respective key.
 Putting the above intuition into formulas, the (dot-product self-) attention mechanism can be described more formally:
@@ -747,7 +807,8 @@ $$Z^* = {attention}^*(I) = softmax(({Q}^*K^T)+B^{Q^*})V$$
 where the query, key and value bias matrices $B^{Q^*}, B^K$ and $B^V \in \mathbb{R}^{1 \times out}$.
 
 \subsubsection{Putting it all together:} 
-Like in a Seq2Seq model, an RNN-based Encoder is used to capture a representation of the input sequence. We select the most important representations of the encoded input using the modified attention mechanism we introduced. Instead of a recursive decoder, we use a shallow MLP for classification based on the selected features. 
+Like in a Seq2Seq model, an RNN-based Encoder is used to capture a representation of the input sequence. We attend to the most important representations of the encoded input using the modified attention mechanism we introduced. The resulting feature vector is concatenated with the lengths and given to a shallow MLP. 
+%selecte Instead of a recursive decoder, we use a shallow MLP in its place. 
 
 The input to the encoder blocks is a dense 4-dimensional embedding of the one-hot encoded sequences. This dense embedding is the same for each sequence and jointly learned during training. The extra embedding layer is included as previous work \cite{embeddingneeded} has shown that otherwise the model might suffer from limited generalization performance, caused by the sparsity of the one-hot encoded representations. 
 
@@ -817,6 +878,8 @@ Previous studies have shown that model performance varies significantly between 
 As in previous work \cite{dsc} \cite{buschhertel}, we use the Area under the receiver operating characteristic curve (AUC) as evaluation metric. The AUC provides an aggregate measure of the classification performance across all possible decision thresholds.\\
 However, the AUC doesn't provide information about model performance at a particular decision threshold. To evaluate whether a model is fit for clinical use, decision threshold-specific metrics like sensitivity and specificity are crucial to know.
 To evaluate these, we analytically compute the decision threshold which maximizes the F1 score. The F1 score provides an aggregate measure which treats precision and recall equally and is defined as the harmonic mean of precision and recall. It is a common measure to evaluate the performance of classifiers and we use it as starting point for our further analysis. 
+
+Again following previous work \cite{d2vsplicing} \cite{jha}, we use the explained variance $R^2$ to evaluate model performance on the regression task. 
 %To evaluate these, a decision threshold above which all outputs are counted as positive and below which all outputs are counted as negative. For our further analysis, we use the decision threshold which maximizes the F1 score and also evaluate the sensitivity and specificity. 
 
 %For our analysis, we analytically compute and use the decision threshold which maximizes the harmonic mean of the precision and recall, that is, the F1 score. 
