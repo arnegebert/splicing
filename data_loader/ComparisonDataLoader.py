@@ -59,13 +59,14 @@ class ComparisonDataLoader(BaseDataLoader):
 
         train, test_all, test_low, test_high, val = self.get_train_test_and_val_sets(cons, low, high)
 
-        filter_hashset = self.construct_hashset(train, val)
-        diff_lib_cons, diff_lib_low, diff_lib_high = self.filter_for_data_leak(filter_hashset, diff_lib_cons,
-                                                                              diff_lib_low, diff_lib_high)
-        diff_indv_cons, diff_indv_low, diff_indv_high = self.filter_for_data_leak(filter_hashset, diff_indv_cons,
-                                                                              diff_indv_low, diff_indv_high)
-        diff_tissue_cons, diff_tissue_low, diff_tissue_high = self.filter_for_data_leak(filter_hashset, diff_tissue_cons,
-                                                                              diff_tissue_low, diff_tissue_high)
+        already_used_samples = self._construct_hashset(train, val)
+        diff_lib_cons, diff_lib_low, diff_lib_high = \
+            self._filter_already_used_samples(already_used_samples, diff_lib_cons, diff_lib_low, diff_lib_high)
+        diff_indv_cons, diff_indv_low, diff_indv_high = \
+            self._filter_already_used_samples(already_used_samples, diff_indv_cons, diff_indv_low, diff_indv_high)
+        diff_tissue_cons, diff_tissue_low, diff_tissue_high = \
+            self._filter_already_used_samples(already_used_samples, diff_tissue_cons, diff_tissue_low, diff_tissue_high)
+
         test_datasets_diff_lib = self._construct_all_low_and_high_datasets(diff_lib_cons, diff_lib_low, diff_lib_high)
         test_datasets_diff_indv = self._construct_all_low_and_high_datasets(diff_indv_cons, diff_indv_low, diff_indv_high)
         test_datasets_diff_tissue = self._construct_all_low_and_high_datasets(diff_tissue_cons, diff_tissue_low, diff_tissue_high)
@@ -102,7 +103,7 @@ class ComparisonDataLoader(BaseDataLoader):
         return all_set, low_set, high_set
 
     @staticmethod
-    def construct_hashset(train, val):
+    def _construct_hashset(train, val):
         train_np, val_np =  train.samples.numpy(), val.samples.numpy()
         train_and_val_samples = set()
         for sample in list(train_np[:, :281]):
@@ -110,14 +111,14 @@ class ComparisonDataLoader(BaseDataLoader):
         return train_and_val_samples
 
     @staticmethod
-    def filter_for_data_leak(hashset, possibilities_cons, possibilities_low, possibilities_high):
-        cons_filtered = ComparisonDataLoader.apply_filter_for_data_leak(hashset, possibilities_cons)
-        low_filtered = ComparisonDataLoader.apply_filter_for_data_leak(hashset, possibilities_low)
-        high_filtered = ComparisonDataLoader.apply_filter_for_data_leak(hashset, possibilities_high)
+    def _filter_already_used_samples(hashset, possibilities_cons, possibilities_low, possibilities_high):
+        cons_filtered = ComparisonDataLoader._return_non_duplicates(hashset, possibilities_cons)
+        low_filtered = ComparisonDataLoader._return_non_duplicates(hashset, possibilities_low)
+        high_filtered = ComparisonDataLoader._return_non_duplicates(hashset, possibilities_high)
         return cons_filtered, low_filtered, high_filtered
 
     @staticmethod
-    def apply_filter_for_data_leak(hashset, possibilities):
+    def _return_non_duplicates(hashset, possibilities):
         poss_filtered = []
         for sample in list(possibilities[:, :281]):
             if sample.tostring() not in hashset:

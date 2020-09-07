@@ -69,6 +69,7 @@ ax1.set_title('Baseline')
 ax2.set_title('Baseline with additional convolution')
 # even have to save this picture by copying and pasting itionto Pinta ....
 
+plt.tight_layout()
 plt.savefig('training_curve_conv_heads2.png', dpi=300, bbox='tight')
 
 plt.show(dpi=300)

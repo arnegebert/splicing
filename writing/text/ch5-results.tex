@@ -29,7 +29,7 @@ Thus, we conclude that, albeit with minor caveats, the reimplementation and repl
 % Observation: Performance heavily drops when no lengths feature is used
 
 \subsubsection{Length features are necessary}
-Reimplementation was completed piece-wise, that is, first the sequence features were added as input, then the networks were trained to make sure that this was done correctly and then the length features were added. This lead to an interesting observation: model performance is significantly worse when no length features are given to the models. Quantitative results for this observation are given in table \ref{table:results_hexevent}. This observation is true across models and leads to an average relative performance drop of over 66\%. The information about the secondary structure obtained in the lengths seems to be necessary for the models to obtain good predictive power.
+Reimplementation was completed piece-wise, that is, first the sequence features were added as input, then the networks were trained to ensure that this was done correctly and then the length features were added. This lead to an interesting observation: model performance is significantly worse when no length features are given to the models. Quantitative results for this observation are given in table \ref{table:results_hexevent}. This observation is true across models and leads to an average relative performance drop of over 66\%. The information about the secondary structure obtained in the lengths seems to be necessary for the models to obtain good predictive power.
 
 % 0.684, 0.737, 0.663
 %0.255, 0.282, 0.268
@@ -37,7 +37,7 @@ Reimplementation was completed piece-wise, that is, first the sequence features 
 	\centering
 	\begin{tabular}{| l | c | c | c| c} 
 		\hline
-		Model name & Only sequences & Sequences + lengths & Relative performance difference\\
+		Model name & Only sequences & Sequences + lengths & Relative performance improvement\\
 		\hline
 		DSC & 0.618 & 0.873 & 0.684\\
 		D2V & 0.614 & 0.896 & 0.737\\
@@ -50,20 +50,28 @@ Reimplementation was completed piece-wise, that is, first the sequence features 
 \end{table}
 
 \subsubsection{Further investigations}
-To further investigate, we also test three other models: MLP100, MLP20 and MLPLinear which respectively contain 100, 20 and 20 trainable parameters. The models are MLPs with one hidden layer that only take the length features as inputs. MLPLinear doesn't contain a non-linear activation function after its hidden layer.
+To further investigate, we also test three other models: MLP100, MLP20 and MLPLinear which respectively contain 100, 20 and 20 trainable parameters. The models are Multi Layer Perceptrons (MLPs) with one hidden layer which only take the length features as inputs. MLPLinear doesn't contain a non-linear activation function after its hidden layer.
 
-Surprisingly, the results in Figure \ref{fig:dsc_funeral} show that it is possible to replicate the results of \cite{dsc} with these very simple models using two to three orders of magnitude fewer parameters. Model performance is improved by adding further parameters and breaks down when no non-linearities are used in the network. This indicates that the models capture a relatively simple, but non-linear relationship between the lengths and the classification of an exon in the dataset. 
+\begin{figure}
+	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch5-results/dsc_funeral_barchart.png} 
+	\caption{Stress testing the HEXEvent dataset used in \cite{dsc}. The graph shows the performance as well as the inverse of the respective model sizes used.}
+	\label{fig:dsc_funeral}
+\end{figure}
+
+Surprisingly, the results in Figure \ref{fig:dsc_funeral} show that it is possible to replicate the results of \cite{dsc} with these very simple models using two to three orders of magnitude fewer parameters (note that DSC has 20,001 parameters). Model performance is improved by adding further parameters and breaks down when no non-linearities are used in the network. This indicates that the models capture a relatively simple, but non-linear relationship between the lengths and the classification of an exon in the dataset. 
 There are multiple possible explanations for why this is:
 \begin{enumerate}
-	\item There are confounders in the dataset learned by the model. As discussed in Section \ref{subsec:hexevent}, EST-based data is inherently biased. The biases inherent in EST-based data could be captured by the exon and intron structure and the model is learning to make its prediction based on this bias. This explanation is made more likely, if the findings on the HEXEvent dataset don't replicate on the other datasets we evaluate.
-	\item Exon splicing is extremely well predictable based on the lengths of neighbouring introns and exons. This is very unlikely given that research into splicing has been going on for over 40 years. This explanation, albeit unlikely already, can be disproven if this observation fails to replicate on other datasets.
+	\item There are confounders in the dataset learned by the model. As discussed in Section \ref{subsec:hexevent}, EST-based data is inherently biased. The biases inherent in EST-based data could be captured by the exon and intron structure and the model is learning to make its prediction based on this bias. 
+%	This explanation is made more likely, if the findings on the HEXEvent dataset don't replicate on the other datasets we evaluate.
+	\item Exon splicing is extremely well predictable based on the lengths of neighbouring introns and exons. This is very unlikely given that research into splicing has been ongoing for over 40 years. 
+%	This explanation, albeit unlikely already, can be disproven if this observation fails to replicate on other datasets.
 	\item There are bugs (e.g. mixing of testing and validation data) in our reimplementation. In the first instance, this is unlikely given that we were able to replicate the original results of \cite{dsc}. To reduce complexity and further reduce the likelihood of a bug leading to these observations, we extracted the complete code for replicating the results of the simple MLP models from \ref{fig:dsc_funeral} into a single file. Additionally, in case of a data leakage bug, the performance of the linear model likely wouldn't break down either. Therefore, we judge bugs in our reimplementation unlikely.
 \end{enumerate}
 
 Overall, we conclude that the HEXEvent-based dataset is most likely fundamentally flawed and suffers from confounders.
-These findings have strong implications. It calls into questions the meaningfulness of \cite{dsc}'s results, showing the competitiveness of their model. These findings likely also warrant a critical investigation of any other conclusions drawn from papers based on the HEXEvent database. At the time of writing, the HEXEvent paper is cited 34 times. While most of these citations are just in passing, there are also multiple papers which use a HEXEvent-derived dataset for the training of Machine Learning models such as SVMs \cite{buschhertel}, Random Forests \cite{flawed4} \cite{flawed1}, Decision Trees \cite{flawed2} or AdaBoost-based algorithms \cite{flawed3}. The validity of these papers results are questioned by these findings.
+These findings have strong implications. It calls into questions the meaningfulness of \cite{dsc}'s results, showing the competitiveness of their model. These findings likely also warrant a critical investigation of any other conclusions drawn from papers based on the HEXEvent database. At the time of writing, the HEXEvent paper is cited 34 times. While most of these citations are in passing, multiple papers use a HEXEvent-derived dataset for the training of Machine Learning models such as SVMs \cite{buschhertel}, Random Forests \cite{flawed4} \cite{flawed1}, Decision Trees \cite{flawed2} or AdaBoost-based algorithms \cite{flawed3}. The validity of these papers results' are called into question by these findings.
 
-These data quality issues, motivated us to construct alternative, better, datasets. We now give their results.
+These data quality issues motivated us to construct alternative, better, datasets. We now give their results.
 
 
 % many of them, even correlational studies, say that this is a feature, rather than a bug
@@ -82,11 +90,7 @@ These data quality issues, motivated us to construct alternative, better, datase
 %We showed that the EST-based HEXEvent dataset is likely too flawed to serve as a basis for our methods. Thus, we try to construct an alternative dataset.
 
 
-\begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/dsc_funeral_barchart.png} 
-	\caption{Stress testing the HEXEvent dataset used in \cite{dsc}. The graph shows the performance as well as the inverse of the respective model sizes used.}
-	\label{fig:dsc_funeral}
-\end{figure}
+
 
 %TODO: tSNE of MLP embeddings?
 
@@ -95,13 +99,14 @@ These data quality issues, motivated us to construct alternative, better, datase
 \subsection{Exon-centric datasets} \label{subsec:gtex_exon}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_exon_barcharts.png} 
+	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch5-results/gtex_exon_barcharts.png} 
 	\caption{Performance on the GTEx-based exon-centric datasets across different tissues. The error bars give the standard deviation across all cross-validation runs. }
 	\label{fig:gtex_exon_barcharts}
 \end{figure}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../saved/log/GTEx_Exon_Brain_Attn/final/ROC.png} 
+%	\centering\includegraphics[width=0.7\textwidth]{../saved/log/GTEx_Exon_Brain_Attn/final/ROC.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_exon_brain_roc.png} 
 	\caption{
 	ROC curve of RASC on GTEx-based exon-centric brain cortex dataset. 
   }
@@ -152,12 +157,12 @@ The performance on highly included, alternatively spliced exons (80\% <= PSI < 9
 
 \begin{figure}[h]
 %	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_DSC/final/ROC.png} 
-	\includegraphics[width=0.85\textwidth]{../saved/log/GTEx_Junc_Heart_Attn/junc_cv_final/ROC.png}
+%	\includegraphics[width=0.7\textwidth]{../saved/log/GTEx_Junc_Heart_Attn/junc_cv_final/ROC.png}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_intron_brain_roc.png} 
 	\caption{ROC curve from training RASC on the GTEx-based intron-centric heart-tissue-based dataset. }
-%	TODO: make figure share y-axis; fix t=plot titles
-%	TODO: only one of these has a title
 	\label{fig:gtex_junc_rocs}
 \end{figure}
+
 
 %TODO: motivation for using junction-centric datasets
 \subsubsection{Main analysis}
@@ -241,26 +246,21 @@ Among these two, 2. is more likely due to SUPPA not addressing various challenge
 
 \subsection{Dataset based on sensory neuron and iPSC cell lines}\label{sec:hipsci_neuron_majiq}
 
+%\begin{figure}
+%	\centering\includegraphics[width=0.49\textwidth]{../visualizations/ch5-results/majiq_neuron_cross_model_roc_auc_comparison.png} 
+%	\centering\includegraphics[width=0.5\textwidth]{../visualizations/ch5-results/majiq_ipsc_cross_model_roc_auc_comparison.png} 
+%	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
+%	\label{fig:majiq_rocs}
+%\end{figure}
+
+
+%TODO: replot after iPSC runs redone
 \begin{figure}
-	\centering\includegraphics[width=0.49\textwidth]{../visualizations/ch5-results/majiq_neuron_cross_model_roc_auc_comparison.png} 
-	\centering\includegraphics[width=0.5\textwidth]{../visualizations/ch5-results/majiq_ipsc_cross_model_roc_auc_comparison.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/majiq_neuron_ipsc_cross_model_roc_auc_comparison.png} 
 	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
 	\label{fig:majiq_rocs}
 \end{figure}
 
-
-%TODO: one figure, post-poned for fine-tuning as it tilts me
-%\begin{figure}
-%	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/majiq_neuron_ipsc_cross_model_roc_auc_comparison.png} 
-%	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
-%	\label{fig:majiq_rocs}
-%\end{figure}
-%
-%\begin{figure}
-%	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/mpl_sucks.png} 
-%	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
-%	\label{fig:majiq_rocs}
-%\end{figure}
 \subsubsection{Main analysis}
 All models perform significantly better than on previous datasets and we observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by RASC. Adding attention to RSC promotes it from the worst to the best performing model, validating our choice. 
 
@@ -364,7 +364,7 @@ Adding an additional convolution operation to the attention mechanism, surprisin
 % Reasons for why this extension did not work might be related to the use of a recurrent encoder as well as task differences:
 
 \begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/training_curve_conv_heads.png} 
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/training_curve_conv_heads2.png} 
 	\caption{RASC overfits when the additional convolution operation is introduced into the attention heads. The baseline refers to RASC with multiple attention heads. }
 	\label{fig:training_curve}
 \end{figure}
@@ -534,7 +534,26 @@ The bar chart suggests that more total attention is paid to the end, rather than
 %- hopefully both runs are long (150 epochs+)
 
 
-\subsubsection{Regressing the PSI value} \label{subsubsec:psi_regression}
+\subsection{PSI Regression} \label{subsubsec:psi_regression}
+
+\begin{table}
+	\centering
+	\begin{tabular}{ c c c c c c c} 
+		\hline
+		%   & configuration & & performance & \\
+		
+		Model & AllPSI &  LowPSI &  HighPSI \\
+		\hline
+		DSC	&	\textbf{0.244}   $\pm$	0.036	&	\textbf{0.340}	$\pm$	0.039	&	\textbf{-77.980}	$\pm$	13.631\\
+		D2V	&	0.120	$\pm$	0.009	&	0.155	$\pm$	0.010	&	-57.523	$\pm$	2.771\\
+		Attn	&	0.486	$\pm$	0.067	&	0.595	$\pm$	0.074	&	-25.470	$\pm$	5.717\\
+	\end{tabular}
+	\caption{Mean $R^2$ upon regressing PSI values.  $\pm$ denotes standard deviation. 
+	}
+	\label{table:psi_regression}
+\end{table}
+
+%TODO: means I might need to change all the times where I say we do classification
 
 
 %TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation

@@ -810,7 +810,7 @@ where the ground truth $y \in \{0, 1\}$ and the prediction of the model $\hat{y}
 To evaluate the models, we report the mean test set performance along with standard deviation across (cross-validation) runs. 
 Where we established in a base experiment that the variance for a given model was low between runs (lower than ~1\%), we only trained the model once in follow-up experiments for practical reasons.
 
-Previous studies have shown that model performance varies significantly between lowly and highly included alternatively spliced exons \cite{dsc} \cite{buschhertel}. Thus, following previous work, we split our test set into a set of highly (PSI > 80\%) and a set of lowly to moderately included, alternatively spliced exons (PSI <=80\%). Both sets contain all constitutive exons. We denote the first set as high PSI dataset (hPSI), the second as low PSI dataset (lPSI) and the complete test as all PSI dataset (allPSI). We evaluate our models on all three datasets.
+Previous studies have shown that model performance varies significantly between lowly and highly included alternatively spliced exons \cite{dsc} \cite{buschhertel}. Thus, following previous work, we split our test set into a set of highly (PSI > 80\%) and a set of lowly to moderately included, alternatively spliced exons (PSI <=80\%). Both sets contain all constitutive exons. We denote the first set as high PSI dataset (HighPSI), the second as low PSI dataset (LowPSI) and the complete test as all PSI dataset (AllPSI). We evaluate our models on all three datasets.
 
 
 \subsubsection{Metrics} \label{subsubsec:metrics}

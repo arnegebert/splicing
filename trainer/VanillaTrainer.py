@@ -124,8 +124,8 @@ class VanillaTrainer(BaseTrainer):
 
     def auc_f1_metric_evaluation_and_visualization(self, pred_target_all, pred_target_low, pred_target_high):
         save_pred_and_target(self.log_dir, pred_target_all, pred_target_low, pred_target_high)
-        plot_and_save_roc(self.log_dir, (pred_target_low, 'low'), (pred_target_all, 'all'),
-                          (pred_target_high, 'high'))
+        plot_and_save_roc(self.log_dir, (pred_target_low, 'LowPSI'), (pred_target_all, 'AllPSI'),
+                          (pred_target_high, 'HighPSI'))
         pred_all, target_all = pred_target_all
         # taken from https://machinelearningmastery.com/threshold-moving-for-imbalanced-classification/
         precision, recall, thresholds = precision_recall_curve(target_all, pred_all)

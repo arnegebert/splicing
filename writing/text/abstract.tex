@@ -8,8 +8,9 @@
 
 Alternative Splicing (AS) is a fundamental part of gene expression and its misregulation has been associated with up to 20\% of all diseases, yet the regulatory mechanisms influencing it are still poorly understood. Better understanding of AS is in part driven by computational models which predict AS behaviour based on sequence information. 
 
-Here, we show that a dataset which was previously widely used for the quantification of AS is systematically biased, calling the meaningfulness of results using this dataset into question. To this end, we construct three new datasets, each based on a different processing method, and show that only of them provides high enough data quality for our task. We develop a new Deep Learning model which is the first to introduce the Attention mechanism to AS prediction. Evaluating our newly proposed model, we reimplement two models from the literature and find that it outperforms the previous state-of-the-art by 15\%. Finally, we interpret our model and show that it attends to biologically plausible motifs. 
-Thus, our work shows that previous results have been based on systematically biased data,
+Here, we show that a dataset which was previously widely used for the quantification of AS is confounded such that 100 parameters models can match the performance of 20,000 parameter models, calling the meaningfulness of results using this dataset into question. To this end, we construct three new datasets, each based on a different processing method, and show that only one of them provides high enough data quality for our task. We develop a new Deep Learning model which is the first to introduce the Attention mechanism to AS prediction. Evaluating our newly proposed model, we reimplement two models from the literature and find that it outperforms the previous state-of-the-art model by 15\%. Finally, we interpret our model and show that it attends to biologically plausible motifs. 
+
+Thus, our work shows that previous results have been based on critically confounded data,
 % may not be as meaningful
 provides better datasets upon which future work can build and introduces a new state-of-the-art model. 
 
