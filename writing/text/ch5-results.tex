@@ -257,7 +257,7 @@ Among these two, 2. is more likely due to SUPPA not addressing various challenge
 %TODO: replot after iPSC runs redone
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/majiq_neuron_ipsc_cross_model_roc_auc_comparison.png} 
-	\caption{Left: ROC curves on dataset based on processing with MAJIQ and iPSC cells differentiated to neurons. Right: ROC curves on dataset based on processing with MAJIQ and undifferentiated iPSC cells. }
+	\caption{Left: ROC curves on HipSCi MAJIQ dataset derived from iPSC cells differentiated to neurons. Right: ROC curves on HipSCi MAJIQ dataset derived from undifferentiated iPSC cells. }
 	\label{fig:majiq_rocs}
 \end{figure}
 
@@ -540,9 +540,11 @@ The bar chart suggests that more total attention is paid to the end, rather than
 
 
 \subsection{PSI Regression} \label{subsubsec:psi_regression}
+After having achieved a good level of performance on the classification task, we turn to regression. 
 
-To further compare our model to other work, we run an additional 
-Taking a departure from our previous methology, 
+
+%To further compare our model to other work, we run an additional 
+%Taking a departure from our previous methology, 
 \begin{table}
 	\centering
 	\begin{tabular}{ c c c c c c c} 
@@ -558,6 +560,10 @@ Taking a departure from our previous methology,
 	}
 	\label{table:psi_regression}
 \end{table}
+
+
+We give the results in Table \ref{table:psi_regression}. We generally observe poor to middling performance: DSC and D2V don't beat the baseline model with . Again, RASC outperforms the other models by a wide margin. 
+Like in the exon classification task, all models perform significantly worse on highly than on rarely to moderately included non-constitutive exons. 
 
 \begin{table}
 	\centering
@@ -576,15 +582,19 @@ Taking a departure from our previous methology,
 	}
 	\label{table:ieee_regression}
 \end{table}
-% TODO: say how we do exon classification predominantly / mainly concern ourselves with it
-We give the results in Table \ref{table:psi_regression}. We generally observe poor to middling performance: DSC and D2V don't beat the baseline model with . Again, RASC outperforms the other models by a wide margin. 
-Like in the exon classification task, all models perform significantly worse on highly than on rarely to moderately included non-constitutive exons. 
 
-%what perfentage are non highly included ones? 
+%what percentage are non highly included ones? 
 To further compare our model to other work, we give the main results from \cite{d2vsplicing} in Table \ref{table:ieee_regression}. \cite{d2vsplicing} used a dataset derived from mouse dataset, originally from \cite{jha}. On this dataset, D2V is the second-best performing model, only moderately outperformed by a more finer-grained word2vec model (denoted W2V). In addition, it significantly outperforms several other methods from the literature. However, D2V is significantly outperformed by DSC and RASC on our dataset. This indicates that in particular RASC would compare very favorably against all methods also evaluated in \cite{d2vsplicing}. 
 
 
-%TODO: means I might need to change all the times where I say we do classification
+
+
+
+
+
+
+
+
 
 
 %TODO; for destruction of EST the following may be interesting: Quantitative comparison of EST libraries requires compensation for systematic biases in cDNA generation
