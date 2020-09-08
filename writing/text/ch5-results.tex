@@ -261,11 +261,13 @@ Among these two, 2. is more likely because SUPPA does not address various challe
 \end{figure}
 
 \subsubsection{Main analysis}
-All models perform significantly better than on previous datasets and we observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by RASC. Adding attention to RSC promotes it from the worst to the best performing model, validating our choice. Performance on the sensory neuron cell dataset is generally higher by 2\%, indicating that the captured splicing behaviour is easier to predict for the models. %TODO: biologically is this surprising or unsurprising - brain or stem cell splicing more complex?
+All models perform significantly better than on previous datasets and we observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by RASC. Adding attention to RSC promotes it from the worst to the best performing model, validating our choice. Performance on the sensory neuron cell dataset is generally higher by 2\%, indicating that the captured splicing behaviour is easier to predict for the models. To explain this, we observe that the models are again worse at classifying non-constitutive exons (see Figure \ref{fig:majiq_rocs_low_high}) and that these constitute a roughly 2\% larger proportion in the iPSC-based dataset. 
 
-%TODO: low vs high class graphs
-The performance on the LowPSI test set is better than on the HighPSI test set: on LowPSI even AUC larger than 0.90 are consistently achieved (see Figure \ref{fig:majiq_rocs_low_high}). something from DSV  
-As in previous datasets, the AUC for LowPSI is higher 
+
+%As on the previously evaluated datasets, the performance on the LowPSI test set is better than on the HighPSI test set: on LowPSI even AUC larger than 0.90 are consistently achieved (see Figure \ref{fig:majiq_rocs_low_high}). 
+
+%something from DSV  
+%As in previous datasets, the AUC for LowPSI is higher 
 
 
 \begin{figure}
@@ -275,14 +277,13 @@ As in previous datasets, the AUC for LowPSI is higher
 \end{figure}
 %The dataset based on undifferentiated iPSC cells seems to be less challenging: the AUCs are roughly 0.02 higher than on the dataset based on sensory neuron cells. At a closer look at the dataset distribution....
 
-% TODO: investigate whether this is just a result of dataset composition --> not at first look
+% dataset composition:
 % neuron: 26394 / 8201 / 10151 = 44746
 % ipsc: 27371 / 9299 / 11819 = 48489
 % --> look at relative numbers, once you have analyzed across tissue-performance
 
-% TODO: change roc curves such that I give AUC values explicitly (better than alternative of redoing)
+% change roc curves such that I give AUC values explicitly (better than alternative of redoing)
 
-%todo thought: it would be interesting to reevaluate all models without constitutive exons to see whether they actually perform better than in suppa dataset
 
 \subsubsection{Impact of architectural choices} \label{subsubsec:majiq_architectural_choices}
 The poor performance of D2V is likely a result of its architecture: the 100-dimensional embeddings used for classification weren't optimizely jointly during training and likely don't contain fine-grained information, such as the specific positons of motifs, required for accurate splicing prediction. We conjecture that D2V would benefit from receiving further split input sequences, e.g. input sequences containing 35 nucleotides. The best solution, while keeping the word embeddings, would likely be to embed the overlapping 3-mers in the sequence via word2vec and combine this with an efficient convolutional architecture, as done in \cite{d2vsplicing}.
@@ -390,8 +391,8 @@ Adding an additional convolution operation to the attention mechanism, surprisin
 %	Thus, these differences likely also influenced the performance differences when using the convolutional attention layer extension in the different models.
 	%		they: 3000 nucleotides, convolution filter of 7
 	\item Furthermore, we observe overfitting when using this extension. The training curve in Figure \ref{fig:training_curve}
-	showcases this behaviour. We observe overfitting despite using the same convolution across multiple heads, increasing the dropout probability in the attention heads, introducing additional batch normalization layers and limiting the convolution kernel size to 3 
-	%TODO(see Table \ref{app:conv_tests} in the appendix for further results)
+	showcases this behaviour. We observe overfitting despite using the same convolution across multiple heads, increasing the dropout probability in the attention heads, introducing additional batch normalization layers and limiting the convolution kernel size to 3.
+	%(see Table \ref{app:conv_tests} in the appendix for further results)
 	. 
 \end{enumerate}
 
@@ -542,9 +543,11 @@ As on the classification tasks, RASC outperforms the other models by a wide marg
 \end{table}
 
 %what percentage are non highly included ones? 
-To further compare our model to other work, we repeat the main results from \cite{d2vsplicing} in Table \ref{table:ieee_regression}. \cite{d2vsplicing} used a dataset derived from mouse sequencing data, originally from \cite{jha}. On this dataset, D2V is the second-best performing model, only moderately outperformed by a more finer-grained word2vec model (denoted W2V). Nonetheless, D2V significantly outperforms all other models from the literature it was compared to. Note that the models evaluated by \cite{d2vsplicing} comprise all of splicing codes from the last 5 years which we are aware of. However, D2V is significantly outperformed by RASC on our dataset. This indicates that RASC would compare very favorably against all models also evaluated in \cite{d2vsplicing}. 
+To further compare our model to other work, we repeat the main results from \cite{d2vsplicing} in Table \ref{table:ieee_regression}. \cite{d2vsplicing} used a dataset derived from mouse sequencing data, originally from \cite{jha}. On this dataset, D2V is the second-best performing model, only moderately outperformed by a more finer-grained word2vec model (denoted W2V). Nonetheless, D2V significantly outperforms all other models from the literature it was compared to. 
+%Note that the models evaluated by \cite{d2vsplicing} comprise all of splicing codes from the last 5 years which we are aware of. 
+However, D2V is significantly outperformed by RASC on our dataset. This indicates that RASC would compare very favorably against all five models also evaluated in \cite{d2vsplicing}. 
 
-%TODO: indirect evaluaton -> 5 models
+
 %https://blog.minitab.com/blog/adventures-in-statistics-2/regression-analysis-how-do-i-interpret-r-squared-and-assess-the-goodness-of-fit
 
 We also observe that the $R^2$ values reported by \cite{d2vsplicing} are significantly higher: the best performing model W2V is able to explain nearly 70\% of the variance. We consider multiple possible explanations for this: 

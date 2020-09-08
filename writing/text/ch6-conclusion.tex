@@ -2,46 +2,54 @@
 	
 	Oooooh, the weary traveller draws close to the end of the path.
 	\qauthor{--- Izaro, Emperor of the Eternal Empire
-%		Cicero's \textit{de Finibus Bonorum et Malorum}
+		%		Cicero's \textit{de Finibus Bonorum et Malorum}
 	}
 \end{savequote}
 
 \chapter{\label{ch:6-conclusion}Conclusion} % 360
 \section{Summary}
 This work approached the task of predicting alternative splicing behaviour from a Deep Learning perspective.
-We discussed key challenges which should be addressed when estimating PSI, implemented our own method for PSI estimation and coRnstructed splicing quantification datasets based on processing with our own PSI estmation method, SUPPA and MAJIQ. We proposed RASC: a novel splicing code which is the first application of an attention mechanism to splicing quantification and reimplemented the two baselines models DSC and D2V. %from the literature.
+We discussed key challenges which should be addressed when estimating PSI, implemented our method for PSI estimation and constructed splicing quantification datasets based on processing with our PSI estimation method, SUPPA and MAJIQ. We proposed RASC: a novel splicing code which is the first application of an attention mechanism to splicing quantification and reimplemented the two baselines models DSC and D2V. %from the literature.
 
-Evaluating the models on HEXEvent, we showed that HEXEvent is confounded and that the performance of DSC can be matched by extremely simple MLPs with two to three order of magnitudes fewer parameters which use no sequence information. 
-Moving to the datasets we constructed, we found that only the HipSci MAJIQ dataset provides data of appropriate quality and quantity. Evaluating RASC on HipSci MAJIQ, RASC outperforms DSC and D2V by at least 15\% each. In further experiments, we showed that RASC generalizes extremelly well to different conditions, demonstrated that it has high specificity and gave evidence that RASC also compares favorably to previous methods when regressing PSI. Finally, we investigated what parts of the input sequences are most attended to by RASC.
-
-\section*{Discussion and Future Work}
-Our work further corroborates the importance and difficulty of constructing datasets of appropriate quality to train Deep Learning models. We observe that there is a wide variability between the quality of published data processing methods and datasets. The lack of standardized datasets suitable for the training of Machine Learning-based splicing codes was already lamented during the introduction of HEXEvent in 2013 \cite{hexevent}.
+Evaluating the models on HEXEvent, we showed that HEXEvent is confounded and that the performance of DSC can be matched by extremely simple MLPs with two to three orders of magnitudes fewer parameters which use no sequence information. 
+Moving to the datasets we constructed, we found that only the HipSci MAJIQ dataset provides data of appropriate quality and quantity. Evaluating RASC on HipSci MAJIQ, RASC outperforms DSC and D2V by at least 15\% each. In further experiments, we showed that RASC generalizes extremely well to different conditions, demonstrated that it has high specificity and gave evidence that RASC also compares favourably to previous methods when regressing PSI. Finally, we investigated what parts of the input sequences are most attended to by RASC.
+%TODO: make this more specific
+\section{Discussion and Future Work}
+Our work further corroborates 
+%the importance and difficulty of constructing datasets of appropriate quality to train Deep Learning models.  
+the lack of publically, available standardized datasets suitable for the training of Machine Learning-based splicing codes that was already lamented during the introduction of HEXEvent in 2013 \cite{hexevent}. We find that there is wide variability between the quality of published data processing methods and datasets.
 %As already lamented during the introduction of HEXEvent \cite{hexevent}, 
 %There is a dearth of standardized datasets suitable for the training of Machine Learning-based splicing codes. 
-The most commonly used dataset is based on mouse instead of human data and not publically made available in an accessive format \cite{jha}. As a result, many papers introducing new splicing codes attempt to reconstruct this dataset \cite{d2vsplicing}, use HEXEvent \cite{dsc} or construct their own dataset ad hoc \cite{cossmo}. This results in progress being slowed, due to authors each having to construct a new dataset and makes comparisons only indirectly possible or flawed due to implementation differences when reconstructing a dataset. %\cite{leung2014} and there is no modern RNA-seq dataset available. 
-In contrast, the wide use of standardized, publically available datasets could allow a quick iteration of ideas and a fair comparison between them. Such datasets have for instance lead to a rapid succession of breakthroughs in Computer Vision and NLP \cite{deeplearning}.
+The dataset most commonly used to train splicing codes is based on mouse instead of human data and not publically made available in an accessive format \cite{jha}. As a result, many papers introducing new splicing codes attempt to reconstruct this dataset \cite{d2vsplicing}, use HEXEvent \cite{dsc} or construct their own dataset ad hoc \cite{cossmo}. This places the additional burden of dataset construction on each author and makes comparisons only indirectly possible or flawed when to implementation differences lead to different versions of the same dataset. %\cite{leung2014} and there is no modern RNA-seq dataset available. 
+In contrast, the wide use of standardized, publically available datasets could allow a quick iteration of ideas and a fair comparison between them. 
+%Such datasets have for instance lead to a rapid succession of breakthroughs in Computer Vision and NLP \cite{deeplearning}.
 %In contrast, the rapid succession of breakthroughs in Computer Vision and NLP was only possible through the wide use of standardized datasets which allowed a quick iteration of ideas and a fair comparison between them. 
-For all these reasons, we believe that an effort to construct high-quality, standardized datasets for the training of Machine Learning, and particular Deep Learning, splicing codes should be undertaken. We plan to make our HipSci MAJIQ datasets, as well as our code base, publically available as a stepping stone towards this goal.
-%We showed that there are still large improvements to be made in the domain of splicing models by applying promising methods from the other application areas of Deep Learning. %TODO: wording
+For these reasons, we believe that a concerted effort to construct high-quality, standardized datasets for the training of Machine Learning, and particular Deep Learning, splicing codes should be undertaken. We plan to make our HipSci MAJIQ datasets, as well as our code base, publically available as a stepping stone towards this goal.
+%We showed that there are still large improvements to be made in the domain of splicing models by applying promising methods from the other application areas of Deep Learning. 
 
 
+While RASC improves upon previous models by a wide margin, its prediction accuracy is still perfectible and there are many avenues for future work. 
 
-
-While RASC is able to improve upon previous models by a wide margin, its prediction accuracy is still perfectible and there are lot of avenues for future work. 
-Incorporating further information sources known to affect splicing, like sample tissue or chromatin states \cite{chromatin} would likely further improve performance. As discussed, increasing the amount of sequence information given to RASC is a simple, yet promising idea. 
+RASC predictive power could further be improved by incorporating further information sources known to affect splicing, like sample tissue or chromatin states \cite{chromatin}. As discussed, increasing the amount of sequence information given to RASC is a simple, yet promising idea. 
 Even additional hyperparameter tuning may lead to further improvements since our hyperparameter tuning was limited due to computational constraints. Experiments maxing out the batch size (and stabilizing training) or trying different learning rate schedules would be particularly interesting. 
 %TODO: interpretability like all deep learning models
 %TODO: more sequence context as in other windows
 
-Like all Deep Learning models, RASC suffers from poor interpretability. While we have taken some first steps towards interpreting RASC by analyzing what parts of a sequence it attends to, a lot more work still needs to be done. Inspiration could be taken from methods exploring the inner workings of Transformer models in NLP \cite{interpretingbert} or general techniques to highlight important features for Deep Learning models could be applied \cite{deeplift}. 
+Like all Deep Learning models, RASC suffers from poor interpretability. While we have taken some first steps towards interpreting RASC by analyzing what parts of a sequence it attends to, a lot more work remains to be done. 
+Inspiration could be taken from methods exploring the inner workings of Transformer models in NLP \cite{interpretingbert}. The application of methods visualizing the most important input features for a specific prediction is another interesting research direction \cite{deeplift}. 
+% what input features are the most important for a specific training sample 
+%Additionally, methods which visualize what input features are the most important for a specific training sample 
+%
+%the research efforts that have gone into developing algorithms 
+%Alternatively, methods like DeepLIFT \cite{deeplift} which visualize which important features the general techniques to highlight important features for Deep Learning models could be applied \cite{deeplift}. 
 
-Towards the end of practical applicability, adapting our model for differential splicing prediction is a promising avenue of future research. Here the already used tool MAJIQ could be exploited to generate a dataset for splicing changes between conditions. A model being able to accurately predict the variants of splicing would be extremely valuabe for the emerging field of personalized medicine.
+Towards the end of practical application, adapting RASC for differential splicing prediction is a promising avenue of future research. Here the already used tool MAJIQ could be exploited to generate a dataset for splicing changes between conditions. A model being able to accurately predict the variants of splicing would be extremely valuable for the emerging field of personalized medicine.
 
 
 
 %In conclusion, we showed 
 
-%say that data processing was actually the most time consuming task due to the novelty of the task and no standard datasets available
+%say that data processing was the most time-consuming task due to the novelty of the task and no standard datasets available
 %
 %- proper dataset construction very challenging with varying quality of available tools and datasets; only one of the four datasets proved sufficient
 %- across all datasets, the newly introduced splicing code RASC generally performs best.
@@ -50,8 +58,8 @@ Towards the end of practical applicability, adapting our model for differential 
 %future work could also be using gtex data directly perhaps? 
 %differential splicing for sure
 % 
-%future work: data augmentation as performance dropped 2-3\% once i removed 10%
-%easy extension would be check whether more context than 140 nucleotides help
+%future work: data augmentation as performance dropped 2-3\% once I removed 10%
+%easy extension would check whether more context than 140 nucleotides help
 %continuous splicing prediction; more than 140 nt probably desirable 
 %
 %

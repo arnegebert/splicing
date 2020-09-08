@@ -1,7 +1,16 @@
-# PyTorch Template Project
-PyTorch deep learning project made easy.
+# RASC code base
+The code base of this project is a heavily-adapted version of the [PyTorch Project Template](https://github.com/victoresque/pytorch-template). 
+It contains the code for the MSc thesis 'New Datasets and Improved Performance: Predicting Alternative Splicing Behaviour using Deep Learning'.  
+ 
+Some naming conventions used in the code:  
+cons = constitutive cassette exons (or junctions)  
+low / high = lowly / highly included non-constitutive cassette exons (or junctions)  
 
-standard: cons, low, high naming & order
+Config files for the experiments are named as ```<dataset>_<datatype>_<other-special-conditons>_<model>.config``` and be found in the ```\config```-folder.
+
+
+The README below is copied from the PyTorch Project Template and will go into more detail about the repo structure. 
+
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
@@ -26,10 +35,7 @@ standard: cons, low, high naming & order
 		* [Validation data](#validation-data)
 		* [Checkpoints](#checkpoints)
     * [Tensorboard Visualization](#tensorboard-visualization)
-	* [Contribution](#contribution)
-	* [TODOs](#todos)
 	* [License](#license)
-	* [Acknowledgements](#acknowledgements)
 
 <!-- /code_chunk_output -->
 
@@ -40,7 +46,6 @@ standard: cons, low, high naming & order
 * tensorboard >= 1.14 (see [Tensorboard Visualization](#tensorboard-visualization))
 
 ## Features
-* Clear folder structure which is suitable for many deep learning projects.
 * `.json` config file support for convenient parameter tuning.
 * Customizable command line options for more convenient parameter tuning.
 * Checkpoint saving and resuming.
@@ -256,9 +261,6 @@ which is increased to 256 by command line options.
 
     You need to implement `_train_epoch()` for your training process, if you need validation then you can implement `_valid_epoch()` as in `trainer/trainer.py`
 
-* **Example**
-
-  Please refer to `trainer/trainer.py` for MNIST training.
 
 * **Iteration-based training**
 
@@ -277,9 +279,6 @@ which is increased to 256 by command line options.
 
     Implement the foward pass method `forward()`
 
-* **Example**
-
-  Please refer to `model/model.py` for a LeNet example.
 
 ### Loss
 Custom loss functions can be implemented in 'model/loss.py'. Use them by changing the name given in "loss" in config file, to corresponding name.
@@ -302,14 +301,9 @@ If you have additional information to be logged, in `_train_epoch()` of your tra
   ```
 
 ### Testing
-You can test trained model by running `test.py` passing path to the trained checkpoint by `--resume` argument.
-
+The test error is automatically displayed. 
 ### Validation data
-To split validation data from a data loader, call `BaseDataLoader.get_valid_and_test_loaders()`, then it will return a data loader for validation of size specified in your config file.
 The `validation_split` can be a ratio of validation set per total data(0.0 <= float < 1.0), or the number of samples (0 <= int < `n_total_samples`).
-
-**Note**: the `get_valid_and_test_loaders()` method will modify the original data loader
-**Note**: `get_valid_and_test_loaders()` will return `None` if `"validation_split"` is set to `0`
 
 ### Checkpoints
 You can specify the name of the training session in config files:
@@ -364,24 +358,5 @@ If you need more visualizations, use `add_scalar('tag', data)`, `add_image('tag'
 
 **Note**: You don't have to specify current steps, since `WriterTensorboard` class defined at `logger/visualization.py` will track current steps.
 
-## Contribution
-Feel free to contribute any kind of function or enhancement, here the coding style follows PEP8
-
-Code should pass the [Flake8](http://flake8.pycqa.org/en/latest/) check before committing.
-
-## TODOs
-
-- [ ] Multiple optimizers
-- [ ] Support more tensorboard functions
-- [x] Using fixed random seed
-- [x] Support pytorch native tensorboard
-- [x] `tensorboardX` logger support
-- [x] Configurable logging layout, checkpoint naming
-- [x] Iteration-based training (instead of epoch-based)
-- [x] Adding command line option for fine-tuning
-
 ## License
 This project is licensed under the MIT License. See  LICENSE for more details
-
-## Acknowledgements
-This project is inspired by the project [Tensorflow-Project-Template](https://github.com/MrGemy95/Tensorflow-Project-Template) by [Mahmoud Gemy](https://github.com/MrGemy95)

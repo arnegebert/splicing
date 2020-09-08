@@ -120,7 +120,7 @@
 \usepackage{textcomp}
 
 \usepackage{longtable} 
-	% Allows tables to span multiple pages (this package must be called before hyperref)
+	% Allows tables to span multiple pages (this package must be called before )
 
 \usepackage[font=small,labelfont=bf]{caption} 
 	% Nicer captions

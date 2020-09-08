@@ -10,15 +10,25 @@ Why genes in pieces?
 %
 %Since the discovery of genes[TODO], it was believed that the entire sequence is dedicated to encoding functional gene products \cite{onegeneoneprotein}. The dogma was one gene, one protein. Yet this belief was turned upside down by a stunning finding in 1977 that genes contain long non-coding sequences \cite{discoveryofsplicing} [figure]. Instead, these non-coding sequences must be removed and only the coding sequences are joined together to make the blueprint of a gene product. Splicing was discovered. 
 
+\begin{figure}
+	\centering
+%	\frame{
+		\includegraphics[width=0.49\textwidth]{../visualizations/ch1-introduction/original_electron_microscopy.jpg}
+%	} 
+	\frame{ \includegraphics[width=0.49\textwidth]{../visualizations/ch1-introduction/schematic_electron_microscopy.jpg}
+	}
+	\caption{Original electron microspy leading to the discovery of splicing (left) and schematic (right) \cite{discoveryofsplicing}. The long non-coding sequences form loops in this image.  }
+	\label{fig:discovery}
+	%TODO border around box
+\end{figure}
 
-
-But "Why genes in pieces?". This question was posed by Walter Gilbert one year later \cite{whygenesinpieces}. Gilbert answered his own question and proposed that splicing in essence provides a multiplier which speeds up the rate of evolutionary adaption: a single nucleotide mutation influencing splicing may now lead to the inclusion or exclusion of whole genomic regions and thus the generation of a novel gene product. Was Gilbert correct? 42 years later we are still uncertain, but some support for his ideas have been found \cite{whyrevisited}. %perhaps introduction of alternative splicing
+But "Why genes in pieces?". This question was posed by Walter Gilbert one year later \cite{whygenesinpieces}. Gilbert answered his own question and proposed that splicing, in essence, provides a multiplier which speeds up the rate of evolutionary adaption: a single nucleotide mutation influencing splicing may now lead to the inclusion or exclusion of whole genomic regions and thus the generation of a novel gene product. Was Gilbert correct? 42 years later we are still uncertain, but some support for his ideas have been found \cite{whyrevisited}. %perhaps introduction of alternative splicing
 
 What we have gained in the past four decades of research, is a greater appreciation of the importance and the complexity of splicing. 
-Misregulated alternative splicing has been shown to be a biomarkers for several forms of cancer \cite{cancer} \cite{splicingcausescancer} and up to 50\% of known disease-causing mutations in humans have been shown to affect splicing \cite{50diseasessplicing}. 
-Yet, our understanding of splicing is still limited: the core splicing signals which we have found are estimated to only account for approximately 50\% of splicing behaviour even in limited circumstances. The remaining behaviour is likely accounted for by the complex interactions of numerous cis-regulatory elements. 
+Misregulated alternative splicing is a biomarker for several forms of cancer \cite{cancer} \cite{splicingcausescancer} and up to 50\% of known disease-causing mutations in humans have been shown to affect splicing \cite{50diseasessplicing}. 
+Yet, our understanding of splicing is still limited: the core splicing signals which we have found are estimated to only account for approximately 50\% of splicing behaviour even in limited circumstances \cite{coresplicingsignals50percentexplainit}. The remaining 50\% are likely accounted for by the complex interactions of numerous cis-regulatory elements. 
 
-An important long-term goal is the development of a splicing code which describes the regulatory mechanisms governing splicing \cite{longtermcall} and unifies them into a predictive model. Due to splicing's complexity, attempts at these splicing codes have been increasingly computational \cite{barash2010a} and although many have been proposed, they still fail to explain a lot of the splicing behaviour we observe. %TODO ask liz/will whether this is true 
+An important long-term goal is the development of a splicing code which describes the regulatory mechanisms governing splicing and unifies them into a predictive model \cite{longtermcall}. Due to splicing's complexity, attempts at these splicing codes have been increasingly computational \cite{barash2010a} and although many have been proposed, they still fail to explain a lot of the splicing behaviour we observe. %TODO ask liz/will whether this is true 
 
 %attempts at formulating a splicing code have been increasingly computational. 
 
@@ -55,8 +65,8 @@ An important long-term goal is the development of a splicing code which describe
 % dogma of one gene, one polypeptide chain disappears
 
 
-A parallel development has been the rise of Deep Learning enabled by the increasingly large available datasets and computing power \cite{deeplearning}. 
-Originating from Computer Vision , Deep Learning has brought about breakthroughs in tasks as disparate as the early detection of Alzheimer's disease \cite{alzheimerdeeplearning} or estimating the demographic makeup of the US \cite{demographic}. 
+A parallel development has been the rise of Deep Learning fuelled by increasing data availability and the development of powerful GPUs \cite{deeplearning}. 
+Originating from Computer Vision \cite{alexnet}, Deep Learning has brought about breakthroughs in tasks as disparate as the early detection of Alzheimer's disease \cite{alzheimerdeeplearning} or estimating the demographic makeup of the US \cite{demographic}. 
 %Deep Learning also hasn't missed biology and, in particular, genomics. 
 %It has been applied to the prediction of protein structure [alphafold]
 With the advent of next-generation sequencing, the amount of genomic data available has increased by a multi-fold making it a prime application domain for Deep Learning. 
@@ -64,16 +74,18 @@ With the advent of next-generation sequencing, the amount of genomic data availa
 %Deep learning has produced breakthroughs in the ability of machines to interpret images, text and audio. 
 
 
-Our work lies at the intersection between the desire for better splicing codes and the revolution of many fields by Deep Learning. We develop a Recurrent Attentive Splicing Code (RASC) inspired by Deep Learning techniques known from Natural Language Processing (NLP). During evaluation, we find that we can replicate the performance of a 20,000 parameter splicing model using a 100 parameter model which takes no sequence information as input. Motivated by this finding, we set out to develop better datasets and construct three classes of datasets based on three different processing methods. We show that only one of them provides appropriate data quality and quantity for the training of Deep Learning-based splicing codes. Comparing RASC against two reimplemented splicing codes, we show that RASC outperforms the previous state-of-the-art splicing code for alternative splicing exon classification by 15\%. 
+Our work lies at the intersection between the desire for better splicing codes and the revolution of many fields by Deep Learning. We develop a Recurrent Attentive Splicing Code (RASC) inspired by Deep Learning techniques known from Natural Language Processing (NLP). During evaluation, we find that we can replicate the performance of a 20,000 parameter splicing model using a 100 parameter model which takes no sequence information as input when reusing a dataset by the literature. Motivated by this finding, we set out to develop better datasets and construct three classes of datasets based on three different processing methods. We show that only one of them provides appropriate data quality and quantity for the training of Deep Learning-based splicing codes. Comparing RASC against two reimplemented splicing codes, we show that it outperforms the previous state-of-the-art splicing code for alternative splicing exon classification by 15\%. 
 
 
-In summary, we make the following contributions:
-\begin{itemize}
-	\item we show that a dataset used in previous research is critically confounded.
-	\item we construct a new dataset to train Machine Learning-based splicing codes.
-	\item we develop a new state-of-the-art splicing code.
-\end{itemize}
+%In summary, we our main contributions are as follows:
+%\begin{itemize}
+%	\item we show that a dataset used in previous research is critically confounded.
+%	\item we construct a new dataset to train Machine Learning-based splicing codes.
+%	\item we develop a new state-of-the-art splicing code.
+%\end{itemize}
 
+
+%\section{Document structure}
 The rest of the text is organized as follows:
 \begin{itemize}
 	\item Chapter 2 succinctly introduces the required biological background required to follow the rest of this work. It also gives more detail about the importance of splicing.

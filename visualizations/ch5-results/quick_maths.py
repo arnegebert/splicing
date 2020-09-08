@@ -60,3 +60,13 @@ dsc_perf, rasc_perf = 0.822, 0.875
 rasc_improv = compute_relative_performance_change(dsc_perf, rasc_perf)
 print(f'RASC improves upon DSC by {rasc_improv:.3f}')
 
+# cons: 0.590%, low: 0.183%, high: 0.227%
+# cons: 0.564%, low: 0.192%, high: 0.244% or 44 vs 56
+cons, low, high = 26394,  8201 , 10151
+# cons, low, high = 27371, 9299, 11819
+
+
+total = cons + low + high
+print(f'cons: {cons / total:.3f}%')
+print(f'low: {low / total:.3f}%')
+print(f'high: {high / total:.3f}%')
