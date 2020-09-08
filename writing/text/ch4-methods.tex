@@ -133,7 +133,7 @@ Figure \ref{fig:psiestimation} illustrates the process of estimating PSI based o
 The advantage of this estimate lies in its simplicity and flexibility. It is quick and easy to implement (hopefully bug-free). It is independent of library size. It can easily be adapted to estimate the PSI of a junction by redefining \#IR and \#ER to count the inclusion and exclusion read for that junction.
 
 \begin{figure}[h]
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/psi_estimation.png} 
+	\centering\includegraphics[width=0.8\textwidth]{../visualizations/ch4-methods/psi_estimation.png} 
 	\caption{
 		Process of estimating PSI based off RNA-seq reads \cite{berlinpsi}. First, the reads are mapped to the transcript. Based on annotation files, the reads overlapping exon/intron junctions are classfied as including or excluding reads for a particular exon. Based on the observed IR and ER, the PSI for a given exon is then estimated.
 		}
@@ -187,7 +187,7 @@ However, this estimate also has various issues:
 
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/read_length_normalization.jpg} 
+	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch4-methods/read_length_normalization.jpg} 
 	\caption{
 		This graphic showcases the need for read length normalization when estimating PSI \cite{berlinpsi}. An IR (left) can be located anywhere over the exon and around the junction. An ER (right) can only be located where it crosses the exon-exon junction. Thus, any PSI estimation which does not account for this will be biased towards estimating higher PSI values than accurate. 
 }
@@ -333,7 +333,7 @@ Finally, the obtained LSVs can be visualized using VOILA. See Figure \ref{fig:vo
 
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/voila_example.png} 
+	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch4-methods/voila_example.png} 
 	\caption[Four-chamber illustration of the human heart.]{Example output of VOILA while filtering for LSV which only experience exon skipping and no other alternative splicing event. }
 	\label{fig:voilaexample}
 \end{figure}
@@ -343,7 +343,7 @@ Our implementation of PSI estimation was applied to the GTEx dataset. SUPPA and 
 \subsection{Final sample processing} \label{subsec:finalsampleprocessing}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/input_schematic.png} 
+	\centering\includegraphics[width=0.9\textwidth]{../visualizations/ch4-methods/input_schematic.png} 
 	\caption{Schematic of model input for an exon-centric training sample \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. The input for intron-centric training samples is analogue.}
 	\label{fig:inputschematic}
 \end{figure}
@@ -601,7 +601,7 @@ Pre-processing the human genome like described above and using the DM training m
 %\end{figure}
 
 \begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/w2v_d2v_training_variants.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/w2v_d2v_training_variants.png} 
 	\caption{
 		The four possible training algorithms for w2v and d2v models \cite{d2vsplicing}: (a) CBOW, and (b) skip-gram for w2v, and (c) DM and (d) DBOW for d2v. 
 	}
@@ -641,7 +641,7 @@ Overall, we take these visualizations as an indication that Doc2Vec was able to 
 \subsubsection{Putting it all together} \label{subsubsec:d2vinference}
 
 \begin{figure}
-	\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/d2v.pdf} 	
+	\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/d2v.pdf} 	
 	\caption{
 		Architecture of D2V. 
 	}
@@ -686,7 +686,7 @@ The attention mechanism also adds interpretability to the model because it indic
 %However, as justified earlier, we won't focus on these models due to issues of scaling and the sufficiency of shallow networks for genomic prediction tasks.
 
 \begin{figure}
-	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/attention_heatmap.png} 
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/attention_heatmap.png} 
 	\caption{Attention heatmap when translating a sentence from French to English. A brighter color indicates that the model pays more attention to a particular word. The order of the constituent words in `zone \'economique europ\'een' and `European Economic Area' is different between French and English, but the model learned to pay attention to the semantically corresponding word during translation. }
 	\label{fig:attention_heatmap}
 \end{figure}
