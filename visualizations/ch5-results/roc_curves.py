@@ -126,7 +126,7 @@ if __name__ == '__main__':
     labels1 = ['DSC', 'D2V', 'RASC', 'RSC']
     labels2 = ['DSC', 'D2V', 'RASC']
     experiments1 = ['HIPSCI_MAJIQ_DSC', 'HIPSCI_MAJIQ_D2V_MLP', 'HIPSCI_MAJIQ_Attn', 'HIPSCI_MAJIQ_BiLSTM']
-    experiments2 = ['iPSC_DSC_WithDataLeak', 'iPSC_D2V_MLP_WithDataLeak', 'iPSC_Attn_WithDataLeak']
+    experiments2 = ['iPSC_DSC', 'iPSC_D2V_MLP', 'iPSC_Attn']
     file_name = 'pred_and_target_all.npy'
     run_id = 'final'
     dirs1 = [f'../../saved/log/{exp}/{run_id}/{file_name}' for exp in experiments1]

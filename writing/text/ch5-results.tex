@@ -262,7 +262,7 @@ Among these two, 2. is more likely due to SUPPA not addressing various challenge
 \end{figure}
 
 \subsubsection{Main analysis}
-All models perform significantly better than on previous datasets and we observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by RASC. Adding attention to RSC promotes it from the worst to the best performing model, validating our choice. 
+All models perform significantly better than on previous datasets and we observe stark disparities between the models (see Figure \ref{fig:majiq_rocs}). While DSC outperforms D2V by a significant margin, it is outperformed by a similar margin by RASC. Adding attention to RSC promotes it from the worst to the best performing model, validating our choice. Performance on the sensory neuron cell dataset is generally higher by 2\%, indicating that the captured splicing behaviour is easier to predict for the models. %TODO: biologically is this surprising or unsurprising - brain or stem cell splicing more complex?
 
 %The dataset based on undifferentiated iPSC cells seems to be less challenging: the AUCs are roughly 0.02 higher than on the dataset based on sensory neuron cells. At a closer look at the dataset distribution....
 
@@ -300,7 +300,7 @@ The poor performance of D2V is likely a result of its architecture: the 100-dime
 \end{table}
 %TODO: overlaps again
 As litmus test for dataset quality, we repeat the experiment of removing the length features as model input. We document the results in Table \ref{table:majiq_nolens}.
-They reveal that a large part of D2V's performance relies on information contained in the length features. However, since removing the length features only marginally affects the performance of DSC and RASC, we conclude that the dataset is not biased in the same way as the HEXEvent dataset and that this observation is symptomatic of D2V being unable to effectively incorporate information from the sequences (see discussion in \ref{subsubsec:majiq_architectural_choices}). 
+They reveal that a large part of D2V's performance relies on information contained in the length features. However, since removing the length features only marginally affects the performance of DSC and RASC, we conclude that this observation is symptomatic of D2V being unable to effectively incorporate information from the sequences (see discussion in \ref{subsubsec:majiq_architectural_choices}). rather than that the dataset is not biased in the same way as the HEXEvent dataset.  
 
 Giving the strong model performance independent of the length features and the prior expectation for MAJIQ to produce the highest quality PSI estimates, we conclude that it does. This indicates that the comparatively poor performance on the GTEx-based and HipSci SUPPA datasets are due to poor data quality, and not due to the inherent difficulty of the splicing classification task. Thus, using the HipSci MAJIQ datasets is preferable to using any of the other datasets we have evaluated. 
 
@@ -405,24 +405,48 @@ We present the confusion matrix for the binary classifier based on RASC in Figur
 \subsection{Cross-condition performance} \label{subsec:hipsci_ipsc_majiq}
 
 \begin{figure}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/majiq_comparison_barcharts.png} 
+	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch5-results/majiq_comparison_barcharts.png} 
 	\caption{Performance when training models on one HipSci dataset and testing on the same dataset as well as three others. Within the bars of one model, going further right means using a dataset which is less similar to the dataset the model was trained on (the left-most bar display performance when testing the model on the dataset it was trained on). `lib' refers to a library or biological sample from the same individual, `indv' refers to the indivdiual the sample was taken from, `diff' abbreviates different. `iPSC cell' refers to a dataset based on RNA-seq data from undifferentiated iPSC cells while `neuron cell' refers to iPSC cells differentiated to sensory neuron cells. }
 	\label{fig:majiq_comparison_barcharts}
 \end{figure}
 
 
-We evaluate how well the models generalize when trained on a dataset derived from one individual and then tested on a dataset derived\footnote{When choosing the samples to evaluate on from the different datasets, care needs to be taken to avoid a subtle data leak: due to the specifics of MAJIQ, the original dataset and the dataset from the same individual but a different library share the consecutive exon training samples. This initially lead to the surprising observation that  it is better to train on a dataset different from the one the model is evaluated on. This issue is avoided by efficiently filtering all samples that are in the original training dataset from the three additional datasets through the use of a hash set.}
+We evaluate how well the models generalize when trained on a dataset derived from one individual and then tested on a dataset derived\footnote{When choosing the samples to evaluate on from the different datasets, care needs to be taken to avoid a subtle data leak: despite the different primary data sources, many of the cassette exons appear as training samples in multipe datasets. %are duplicated of the same exons occur in final training samples.
+%	 are 
+%	many training samples are shared betwee
+%	due to the specifics of MAJIQ, the original dataset and the dataset from the same individual but a different library share the consecutive exon training samples. 
+	This initially lead to the surprising observation that it is better to train on a dataset different from the one the model is evaluated on. We avoid this issue by efficiently filtering all samples that are in the original training dataset from the three additional datasets via a hash set.}
 \begin{itemize}
-	\item from the same individual, but a different library
-	\item from a different individual, but the same cell type
-	\item from a different individual from a different cell type
+	\item from the same individual, but a different library.
+	\item from a different individual, but the same cell type.
+	\item from a different individual from a different cell type.
 \end{itemize}
 
 
 We visualize the results in Figure \ref{fig:majiq_comparison_barcharts}.
-Unsurprisingly, performance drops slightly when a model is evaluated on a dataset different from the one it was trained on. Surprisingly, this performance drop does not directly correlate with the similarity to the original dataset: the least similar dataset from the different individual and different cell type performs best. 
+Unsurprisingly, performance generally drops when a model is evaluated on a dataset different from the one it was trained on. Surprisingly, this performance drop does not directly correlate with the similarity to the original dataset: the least similar dataset from a different tissue performs best. 
+This is because the baseline performance on the sensory neuron dataset is roughly 2\% higher and it experiences only a roughly 1\% higher performance drop when training was done on a different dataset. The models generalize extremely well across tissues and conditions. As previously suggested, this is biologically surprising due to known splicing differences between tissues \cite{crosstissuesplicing}. Possibly the datasets don't capture the splicing behaviour which is different across tissues.
 
-However, to more seriously investigate how splicing differs between conditions, the capability of MAJIQ to quantify differential splicing should be taken advantage of. The best performing model, RASC, could be adapted such that it takes in an exon as well as two different conditions (e.g. via one-hot encoded tissues) and then predicts the change in splicing behaviour between the two conditions. 
+
+%This means that the splicing behaviour learned on one tissue generalizes extremely shows that the splicing behaviour 
+
+%iPSC_D2V_MLP	0.711	0.007	0.756	0.010	0.675	0.006
+%iPSC_Attn	0.846	0.007	0.933	0.006	0.765	0.009
+%iPSC_DSC	0.785	0.010	0.856	0.010	0.720	0.012
+%MultiHeads	0.865	0.011	0.919	0.018	0.768	0.018
+%HIPSCI_MAJIQ_DSC	0.808	0.010	0.850	0.011	0.721	0.010
+%HIPSCI_MAJIQ_D2V_MLP	0.715	0.007	0.741	0.007	0.672	0.014
+
+% 865 - 846 = 019
+% 2, 2, 
+%Coupled with \ref{fig:majiq_rocs} showing that performance when training and evaluating on the sensory neuron cells dataset is higher than that of the iPSC cell dataset too, we conclude that the splicing behaviour derived from sensory neuron cell data is easier to predict. 
+%idea: substract performance from sensory too -- what do we get? 
+
+
+%The performance drop when evaluating on a dataset from a different library or a different individual is the same and bewteen 2\% to 4\% for all models. In this instance, such a moderate performance drop is not surprising due to the similaritie
+
+
+However, to more seriously investigate how splicing differs between conditions and tissues, the capability of MAJIQ to quantify differential splicing should be taken advantage of. The best performing model, RASC, could be adapted such that it takes in an exon as well as two different conditions (e.g. via one-hot encoded tissues) and then predicts the change in splicing behaviour between the two conditions. 
 
 
 %- constitutive exons are shared across all datasets
