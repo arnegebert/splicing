@@ -270,7 +270,8 @@ Reads may also be misattributed in our cassette exon PSI estimation as described
 
 \subsubsection{More sophisticated PSI estimation approaches}
 
-Several approaches have been developed which try to address the issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose two fast methods, representing different approaches to PSI estimation: SUPPA and MAJIQ. SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. %Figure \ref{fig:dataset_creation_process} shows the high-level steps taken when using SUPPA and MAJIQ to create datasets for training.
+Several approaches have been developed which try to address the issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of delta PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose two fast methods, representing different approaches to PSI estimation: SUPPA and MAJIQ. SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. MAJIQ has also already been used for the construction of similar datasets before \cite{jha}.
+%\ref{fig:dataset_creation_process} shows the high-level steps taken when using SUPPA and MAJIQ to create datasets for training.
 
 
 % inaccurate as I don't think SUPPA directly takes BAM / kinda unnessessary either way
@@ -369,7 +370,7 @@ Furthermore, if an exon or junction is taken from a negative strand, the extract
 %Presumably, this means the models the models don't have to learn different features for exons or junctions on the + and - strand. \\
 Samples from the chromosomes X, Y and M were excluded due to the fundamental functional differences between them and the autosomes (e.g. there only exists one functional copy of the sex chromosomes).
 
-The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine 'A' is encoded as [1 0 0 0], cytosine 'C' as [0 1 0 0], guanine 'G' as [0 0 1 0] and thymine 'T' as [0 0 0 1]. Thus, each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encoded nucleotides.
+The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine `A' is encoded as [1 0 0 0], cytosine `C' as [0 1 0 0], guanine `G' as [0 0 1 0] and thymine `T' as [0 0 0 1]. Thus, each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encoded nucleotides.
 
 It is commonplace that repetitive sequences are soft-masked as lower case letters in the reference genome. As this has no known bearing on alternative splicing, this information was ignored during one-hot encoding.
 
@@ -458,7 +459,7 @@ The associated training label for the classification task is the scalar 1 if the
 		%   HipSci MAJIQ & neuron & junction & 90,627 \\
 		%   \hline
 	\end{tabular}
-	\caption{Type, tissue and number of training samples per dataset. Type refers to whether the dataset is intron- or exon-centric. 'diff lib' abbreviates that the dataset was taken from the same individual, but a different library and 'diff indv' abbreviates that the dataset was taken from a different individual than the first shown HipSci MAJIQ iPSC cell-based dataset. 
+	\caption{Type, tissue and number of training samples per dataset. Type refers to whether the dataset is intron- or exon-centric. `diff lib' abbreviates that the dataset was taken from the same individual, but a different library and `diff indv' abbreviates that the dataset was taken from a different individual than the first shown HipSci MAJIQ iPSC cell-based dataset. 
 	}
 	\label{table:datasets}
 \end{table}
@@ -545,7 +546,7 @@ Concretely, each CNN block consists of three convolutional layers. The first con
 
 \subsubsection{Applying NLP techniques to genomic data}
 Like text, genomic data is fundamentally a sequence of characters.
-This makes it possible to apply techniques known from Natural Language Processing (NLP) to genomic data. This is an especially promising area of cross-pollination because of the large strides NLP has been able to make in recent years using deep learning.
+This makes it possible to apply techniques known from Natural Language Processing (NLP) to genomic data. This is an especially promising area of cross-pollination because of the large strides NLP has been able to make in recent years using Deep Learning.
 Some of the most important milestones in NLP have been efficient embeddings via Word2Vec \cite{w2v1} \cite{w2v2}, applying Recurrent Neural Networkss (RNNs) to text as in Sequence-to-Sequence (seq2seq) learning \cite{seq2seq} and leveraging attention as in the extremely powerful and deep Transformer models \cite{allyouneed} \cite{bert}.\\
 In this work, we evaluate the application of Doc2Vec (a derivative of Word2Vec), Seq2Seq models and the attention mechanism to the task of alternative splicing classification. We don't evaluate the current state-of-the-art Transformer models. Albeit very potent, they usually require huge datasets in the order of millions of samples which aren't available for this task (this decision is discussed in more detail in Section \ref{lstmvstransformers}). Nonetheless, we do adapt the attention mechanism as known from Transformers for our task. In this way, we feel the evaluated models make use of the most important Deep Learning innovations originating from NLP.
 
@@ -578,7 +579,7 @@ During training on text data, the corpus is split into documents which are ideal
 \subsubsection{Using k-mers}\label{subsubsec:kmers}
 Naively applying Word2Vec or Doc2Vec to genomic data would mean treating each nucleotide as a word. Drawing the parallel to natural language, this would mean wanting to embed each character in a word. However, a single character or nucleotide (which comes from an alphabet of only four characters) is not unique enough and occurs in too many contexts to obtain meaningful representations. Therefore, it is desirable to embed multiple characters or multiple sequences, that is a word or a k-mer. While a sentence can easily be split into words, the split of a nucleotide sequence into k-mers is not as clear-cut: we don't know the functionality of most nucleotides and therefore can't split a sequence into semantically meaningful units.
 
-Previous studies have explored this issue \cite{kmerlength1} \cite{kmerlength2}, and found that the compromise of splitting each nucleotide sequence into overlapping 3-mers is a performant choice. Overlapping means that in the case of the sequence 'AACGAT' the resulting overlapping 3-mer sequence is 'AAC', 'ACG', 'CGA' and 'GAT'. Based on these findings, we split each sequence of nucleotides into overlapping 3-mers and obtain 27,998 overlapping 3-mers from the 28,000 nucleotides long pre-training sequences. 
+Previous studies have explored this issue \cite{kmerlength1} \cite{kmerlength2}, and found that the compromise of splitting each nucleotide sequence into overlapping 3-mers is a performant choice. Overlapping means that in the case of the sequence `AACGAT' the resulting overlapping 3-mer sequence is `AAC', `ACG', `CGA' and `GAT'. Based on these findings, we split each sequence of nucleotides into overlapping 3-mers and obtain 27,998 overlapping 3-mers from the 28,000 nucleotides long pre-training sequences. 
 
 % Following this recommendation, we split the 28,000 nucleotides long pre-training sequences into 27,998 overlapping 3-mers.
 \subsubsection{Pre-training of word embeddings}
@@ -666,11 +667,11 @@ The resulting model uses the pre-trained Doc2Vec network to obtain a 100-dimensi
 \subsection{RASC: BiLSTM and Attention-based} \label{subsec:bilstm}
 
 \subsubsection{Seq2Seq} \label{subsubsec:seq2seq}
-Sequence-to-sequence learning (Seq2seq) \cite{seq2seq} is a general deep learning-based framework for mapping one sequence to another. The first part of the framework is an encoder which processes the input symbol-by-symbol and produces a vector representation for each input symbol. The second part is a decoder which predicts the output sequence symbol-by-symbol based on the representation computed by the decoder. In the first timestep, the decoder uses the last output of the encoder and in all other timesteps, it uses its own output from the previous time step as input. The encoder and decoder are typically RNN-based networks such as LSTMs \cite{lstm} or GRUs \cite{gru}. Encoder and decoder are jointly trained to maximize the probability of a correct output. This framework has been particularly successful in machine translation (MT): for instance, Google announced in 2016 that it started using them for their MT \cite{googlemt2016}. Figure \ref{fig:encdec} visualizes an encoder-decoder model.
+Sequence-to-sequence learning (Seq2seq) \cite{seq2seq} is a general Deep Learning-based framework for mapping one sequence to another. The first part of the framework is an encoder which processes the input symbol-by-symbol and produces a vector representation for each input symbol. The second part is a decoder which predicts the output sequence symbol-by-symbol based on the representation computed by the decoder. In the first timestep, the decoder uses the last output of the encoder and in all other timesteps, it uses its own output from the previous time step as input. The encoder and decoder are typically RNN-based networks such as LSTMs \cite{lstm} or GRUs \cite{gru}. Encoder and decoder are jointly trained to maximize the probability of a correct output. This framework has been particularly successful in machine translation (MT): for instance, Google announced in 2016 that it started using them for their MT \cite{googlemt2016}. Figure \ref{fig:encdec} visualizes an encoder-decoder model.
 
 \begin{figure}
 	\centering\includegraphics[width=0.9\textwidth]{../visualizations/ch4-methods/enc_dec.pdf} 
-	\caption{An encoder-decoder model \cite{ruderencdecgraphic} translates the English sentence 'He loved to eat' to the German sentence 'Er liebte zu essen'. The decoder takes the last hidden cell state of the encoder as initial input and generates the output token-by-token. The decoder takes its own previous output as prompt for the next output and stops generating output token when it generates a '.'-token. }
+	\caption{An encoder-decoder model \cite{ruderencdecgraphic} translates the English sentence `He loved to eat' to the German sentence `Er liebte zu essen'. The decoder takes the last hidden cell state of the encoder as initial input and generates the output token-by-token. The decoder takes its own previous output as prompt for the next output and stops generating output token when it generates a `.'-token. }
 	\label{fig:encdec}
 \end{figure}
 
@@ -678,15 +679,15 @@ Sequence-to-sequence learning (Seq2seq) \cite{seq2seq} is a general deep learnin
 %https://smerity.com/articles/2016/google_nmt_arch.html
 %https://ruder.io/a-review-of-the-recent-history-of-nlp/index.html#2013wordembeddings
 \subsubsection{Are you paying attention?}
-In the original Seq2seq framework, only the last state of the encoder is passed to the decoder. This means that the encoder needs to encode all the information observed in the input sequence into its last state. While theoretically possible, \cite{attention} hypothesized that this informational bottleneck hampers performance in practice. They proposed removing this bottleneck via introducing the attention mechanism. Attention is a mechanism whereby the decoder can look at all the representation generated by the encoder at once and can 'choose' to focus on the most important ones. Introducing attention lead to large performance gains across Seq2seq-based models and quickly became standard practice \cite{attentionforms}. \\
-The attention mechanism also adds interpretability to the model because it indicates which parts of the input sequence are most crucial for the model's prediction. Figure \ref{fig:attention_heatmap} visualizes what parts of an input sequence a model is paying attention to during a MT task. Attention is one of the most important innovations in deep learning research in recent years. It can theoretically be useful for any task where a model needs to make a decision based on certain parts of an input. For instance, the current state-of-the-art Transformer models \cite{allyouneed} \cite{bert} \cite{gpt3} forego recurrent networks completely and solely use attention within the encoder and decoder components. It has also been successfully used in other domains such as recommender systems \cite{attention_recommender_systems} or speech recognition \cite{attention_speech_recognition}. 
+In the original Seq2seq framework, only the last state of the encoder is passed to the decoder. This means that the encoder needs to encode all the information observed in the input sequence into its last state. While theoretically possible, \cite{attention} hypothesized that this informational bottleneck hampers performance in practice. They proposed removing this bottleneck via introducing the attention mechanism. Attention is a mechanism whereby the decoder can access all the representation generated by the encoder at once and can `choose' to focus on (attend to) the most important ones. Introducing attention lead to large performance gains across Seq2seq-based models and quickly became standard practice \cite{attentionforms}. \\
+The attention mechanism also adds interpretability to the model because it indicates which parts of the input sequence are most crucial for the model's prediction. Figure \ref{fig:attention_heatmap} visualizes what parts of an input sequence a model is paying attention to during a MT task. Attention is one of the most important innovations in Deep Learning research in recent years. It can theoretically be useful for any task where a model needs to make a decision based on certain parts of an input. For instance, the current state-of-the-art Transformer models \cite{allyouneed} \cite{bert} \cite{gpt3} forego recurrent networks completely and solely use attention within the encoder and decoder components. It has also been successfully used in other domains such as recommender systems \cite{attention_recommender_systems} or speech recognition \cite{attention_speech_recognition}. 
  
 
 %However, as justified earlier, we won't focus on these models due to issues of scaling and the sufficiency of shallow networks for genomic prediction tasks.
 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/attention_heatmap.png} 
-	\caption{Attention heatmap when translating a sentence from French to English. A brighter color indicates that the model pays more attention to a particular word. The order of the constituent words in 'zone \'economique europ\'een' and 'European Economic Area' is different between French and English, but the model learned to pay attention to the semantically corresponding word during translation. }
+	\caption{Attention heatmap when translating a sentence from French to English. A brighter color indicates that the model pays more attention to a particular word. The order of the constituent words in `zone \'economique europ\'een' and `European Economic Area' is different between French and English, but the model learned to pay attention to the semantically corresponding word during translation. }
 	\label{fig:attention_heatmap}
 \end{figure}
 
@@ -726,7 +727,7 @@ We now describe the modifications we made to the Seq2Seq and attention set-up kn
 
 
 \subsubsection{Modification 1: MLP instead of a recurrent decoder}
-As the name implies, models based on the Seq2seq framework take a sequence as input and give a sequence as output. This is achieved via using a recurrent decoder which outputs symbols until it outputs an <EOS> (end-of-sentence, e.g. a '.') token (in the case for MT, similar for other domains). However, in our case, the output will always be a single scalar. Thus, we don't require a recurrent decoder and instead use a shallow MLP in its place.
+As the name implies, models based on the Seq2seq framework take a sequence as input and give a sequence as output. This is achieved via using a recurrent decoder which outputs symbols until it outputs an <EOS> (end-of-sentence, e.g. a `.') token (in the case for MT, similar for other domains). However, in our case, the output will always be a single scalar. Thus, we don't require a recurrent decoder and instead use a shallow MLP in its place.
 \subsubsection{Modification 2: Attention with a learned query vector}
 The most common form of attention (multiplicative or dot-product self-attention \cite{allyouneed}), makes uses of conceptual queries and key-value pairs. A query, key and value matrix is assigned to each symbol in the input sequence. A given query is compared to all keys by computing a similarity score between the query and each key via the dot-product. The similarity scores are normalized through the use of a softmax layer. The normalized similarity scores are also commonly called the attention weights; keys similar to the query are weighted more. The output of the attention layer for a given query and input sequence is then the weighted vector sum obtained by multiplying each value by the attention weight of its respective key.
 Putting the above intuition into formulas, the (dot-product self-) attention mechanism can be described more formally:
@@ -745,7 +746,7 @@ Note that this makes use of the fact that $Q\cdotp K = QK^T$ where $\cdotp$ deno
 %remove this division by square-root -- maybe ask Kuba how to photoshop this away
 
 
-As shown, multiplicative self-attention computes a separate query for each input token. It is called self-attention because it allows a sequence to pay attention to 'itself'. (Unmasked) self-attention is mainly used in the encoder part of Transformer architectures to improve the representation for each word.\\
+As shown, multiplicative self-attention computes a separate query for each input token. It is called self-attention because it allows a sequence to pay attention to `itself'. (Unmasked) self-attention is mainly used in the encoder part of Transformer architectures to improve the representation for each word.\\
 However, our objective in using attention is not to improve the representation for each symbol in a sequence (finding a good representation is the task of the encoder), but to select the most important features from an input sequence. The conceptual query for our task is also always the same independent of input: is this exon constitutively spliced or not?
 %thought: this also naturally happens in seq2seq models when they use attention -- how is what I am doing differently?
 Thus, we adapt the attention mechanism so that we learn a single, input-independent query ${Q}^* \in \mathcal{R}^{1 \times out}$. The output of the attention layer is now computed as:
@@ -773,7 +774,7 @@ where $K_{no\_query} \in \mathbb{R}^{l \times 1}$ and $Z_{no\_query} \in \mathbb
 
 
 \subsubsection{Multiple attention heads} \label{subsubsec:heads}
-Having one set of query, key and value matrices limits the model to one representational subspace (one way of 'interpreting' the input). It might be useful for the model to have multiple representational subspaces. This is usually achieved \cite{allyouneed} via $h$ different sets of query, key and weight matrices $W^{Q^*_1}, W^{K_1}, W^{V_1}, \dots W^{Q^*_{h}}, W^{K_{h}},W^{V_{h}}$ producing $h$  outputs $Z_1, \dots, Z_{h}$. Applying this extension in our context engenders the following formulas:
+Having one set of query, key and value matrices limits the model to one representational subspace (one way of `interpreting' the input). It might be useful for the model to have multiple representational subspaces. This is usually achieved \cite{allyouneed} via $h$ different sets of query, key and weight matrices $W^{Q^*_1}, W^{K_1}, W^{V_1}, \dots W^{Q^*_{h}}, W^{K_{h}},W^{V_{h}}$ producing $h$  outputs $Z_1, \dots, Z_{h}$. Applying this extension in our context engenders the following formulas:
 $$K_i, V_i = IW^K_i, IW^V_i$$
 $$Z^*_i = {attention}^*_i(I) = softmax({Q}^*_iK^T_i)V_i$$
 Note that the query weight matrices $W^{Q^*_1}, \dots, W^{Q^*_h}$ are again directly learned, like in the single head case. 
@@ -859,12 +860,12 @@ The pre-training of the Doc2Vec model on the human genome took 3 hours.
 DSC, D2V and RASC respectively contain 20,001, 6,801, and 66,861 trainable weights. In absolute terms, all of these model are still small compared to models known from Computer Vision and Natural Language Processing. The number of training weights is also reflected in the training times with the models respectively taking between 5 to 30 minutes, 1 to 5 minutes and 15 to 75 minutes to train once (depending on dataset). The increased training time of RASC is likely also influenced by LSTMs processing the input sequentially.
 
 %An advantage of convolutional neural networks is that they are more parallelizable than RNNs, as the state at every timestep only depends on the local context (via the convolution operation) rather than all past states as in the RNN.
-The hyperparameters used for training the models are given in table \ref{table:hyperparameters}. More details on the Doc2Vec pre-training procedure and hyperparameters values are given in the appendix \ref{app:d2v}.
+The hyperparameters used for training the models are given in Table \ref{table:hyperparameters}. More details on the Doc2Vec pre-training procedure and hyperparameters values are given in the appendix \ref{app:d2v}.
 
 \subsubsection{Loss}  \label{subsubsec:loss}
 All models were trained to minimize the binary cross-entropy loss:
 $$\mathbb{L} = - (y \log(\hat{y}) + (1 - y) \log (1 - \hat{y}))$$
-where the ground truth $y \in \{0, 1\}$ and the prediction of the model $\hat{y} \in [0, 1]$. The binary cross-entropy loss is the standard loss for training deep learning-based (binary) classifiers.
+where the ground truth $y \in \{0, 1\}$ and the prediction of the model $\hat{y} \in [0, 1]$. The binary cross-entropy loss is the standard loss for training Deep Learning-based (binary) classifiers.
 
 \subsection{Evaluation}
 

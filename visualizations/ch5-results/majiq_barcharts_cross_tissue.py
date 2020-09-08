@@ -5,15 +5,15 @@ import numpy as np
 def bar_charts():
     plt.style.use('seaborn')
     labels = ['DSC', 'D2V', 'RASC']
-    same_means = [0.822, 0.720, 0.875]
-    diff_lib_means = [0.856, 0.728, 0.903]
-    diff_indv_means = [0.854, 0.728, 0.900]
-    diff_tissue_means = [0.857, 0.732, 0.904]
+    same_means = [0.785, 0.710, 0.846]
+    diff_lib_means = [0.762, 0.672, 0.819]
+    diff_indv_means = [0.763, 0.674, 0.819]
+    diff_tissue_means = [0.766, 0.714, 0.828]
 
-    same_stds = [0.013, 0.007, 0.014]
-    diff_lib_stds = [0.012, 0.010, 0.009]
-    diff_indv_stds = [0.013, 0.010, 0.012]
-    diff_tissue_stds = [0.008, 0.003, 0.011]
+    same_stds = [0.010, 0.007, 0.007]
+    diff_lib_stds = [0.007, 0.002, 0.008]
+    diff_indv_stds = [0.007, 0.002, 0.008]
+    diff_tissue_stds = [0.004, 0.003, 0.011]
 
     x = np.arange(len(labels))  # the label locations
     width = 0.2  # the width of the bars
@@ -36,7 +36,7 @@ def bar_charts():
         for i, rect in enumerate(rects):
             label = labels[i] if labels else rect.get_height()
             height = rect.get_height()
-            y_label = height + 0.0075 if not stds else height + stds[i]*0.7 + 0.0075
+            y_label = height + 0.0075 if not stds else height + stds[i]*0.7 #+ 0.005
             ax.annotate(f'{label}',
                         xy=(rect.get_x() + rect.get_width() / 2, y_label),
                         xytext=(0, 3),  # 3 points vertical offset

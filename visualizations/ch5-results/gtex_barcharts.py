@@ -71,11 +71,11 @@ def bar_charts_juncs():
     labels = ['DSC', 'D2V', 'RASC']
     brain_means = [0.699, 0.671, 0.810]
     cerebellum_means = [0.704, 0.673, 0.808]
-    heart_means = [0.699, 0.677, 0.782]
+    heart_means = [0.699, 0.677, 0.807]
 
     brain_stds = [0.006, 0.003, 0.012]
     cerebellum_stds = [0.006, 0.004, 0.008]
-    heart_stds = [0.008, 0.005, 0.032]
+    heart_stds = [0.008, 0.005, 0.013]
 
     x = np.arange(len(brain_means))  # the label locations
     width = 0.2  # the width of the bars
