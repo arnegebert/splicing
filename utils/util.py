@@ -52,7 +52,7 @@ def plot_and_save_roc(save_dir, *args):
     for (((pred, target), label), color) in zip(args, colors):
         fpr, tpr, _ = roc_curve(target, pred)
         auc_val = auc(fpr, tpr)
-        plt.plot(fpr, tpr, linestyle='--', color=color, label=f'{label} PSI events (AUC={auc_val:0.2f})')
+        plt.plot(fpr, tpr, linestyle='--', color=color, label=f'{label} (AUC={auc_val:0.2f})')
     plt.plot([0, 1], [0, 1], 'k--', lw=2)
     # plt.title('ROC curve')
     plt.xlabel('False Positive Rate')

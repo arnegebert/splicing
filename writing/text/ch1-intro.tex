@@ -15,14 +15,14 @@ Why genes in pieces?
 But "Why genes in pieces?". This question was posed by Walter Gilbert one year later \cite{whygenesinpieces}. Gilbert answered his own question and proposed that splicing in essence provides a multiplier which speeds up the rate of evolutionary adaption: a single nucleotide mutation influencing splicing may now lead to the inclusion or exclusion of whole genomic regions and thus the generation of a novel gene product. Was Gilbert correct? 42 years later we are still uncertain, but some support for his ideas have been found \cite{whyrevisited}. %perhaps introduction of alternative splicing
 
 What we have gained in the past four decades of research, is a greater appreciation of the importance and the complexity of splicing. 
-Misregulated alternative splicing has been shown to be a biomarkers for several forms of cancer \cite{cancer} \cite{splicingcausescancer} and about 50\% of known disease-causing mutations have been shown to affect splicing \cite{50diseasessplicing}. 
+Misregulated alternative splicing has been shown to be a biomarkers for several forms of cancer \cite{cancer} \cite{splicingcausescancer} and up to 50\% of known disease-causing mutations in humans have been shown to affect splicing \cite{50diseasessplicing}. 
 Yet, our understanding of splicing is still limited: the core splicing signals which we have found are estimated to only account for approximately 50\% of splicing behaviour even in limited circumstances. The remaining behaviour is likely accounted for by the complex interactions of numerous cis-regulatory elements. 
 
 An important long-term goal is the development of a splicing code which describes the regulatory mechanisms governing splicing \cite{longtermcall} and unifies them into a predictive model. Due to splicing's complexity, attempts at these splicing codes have been increasingly computational \cite{barash2010a} and although many have been proposed, they still fail to explain a lot of the splicing behaviour we observe. %TODO ask liz/will whether this is true 
 
 %attempts at formulating a splicing code have been increasingly computational. 
 
-
+%TODO subsections?
 
 %What we search for is a splicing code .. which describes the regulatory mechanisms underlying splicing 
 %
@@ -61,31 +61,10 @@ Originating from Computer Vision , Deep Learning has brought about breakthroughs
 %It has been applied to the prediction of protein structure [alphafold]
 With the advent of next-generation sequencing, the amount of genomic data available has increased by a multi-fold making it a prime application domain for Deep Learning. 
 
-%and this has lead to the application of deep learning models for  development of deep learning which ... or .... 
-
-%
 %Deep learning has produced breakthroughs in the ability of machines to interpret images, text and audio. 
-%
-%
-%a parallel development has been the rise of deep learning... \cite{deeplearning}
-
 
 
 Our work lies at the intersection between the desire for better splicing codes and the revolution of many fields by Deep Learning. We develop a Recurrent Attentive Splicing Code (RASC) inspired by Deep Learning techniques known from Natural Language Processing (NLP). During evaluation, we find that we can replicate the performance of a 20,000 parameter splicing model using a 100 parameter model which takes no sequence information as input. Motivated by this finding, we set out to develop better datasets and construct three classes of datasets based on three different processing methods. We show that only one of them provides appropriate data quality and quantity for the training of Deep Learning-based splicing codes. Comparing RASC against two reimplemented splicing codes, we show that RASC outperforms the previous state-of-the-art splicing code for alternative splicing exon classification by 15\%. 
-
-% dataset which was previously widely used for the training of computational splicing codes can 
-%
-%our work lies at the intersection of these two fields... deep learning + splicing codes
-%	we develop a new .... taking inspiration from transformers / NLP
-%	During evaluation , we observe that a previously used dataset 
-%
-%We develop new datasets....
-%
-%Finally, our newly proposed splicing code outperforms all 
-
-
-%TODO: uniform claims about how many diseases are caused by alternative splicing
-
 
 
 In summary, we make the following contributions:
@@ -99,17 +78,8 @@ The rest of the text is organized as follows:
 \begin{itemize}
 	\item Chapter 2 succinctly introduces the required biological background required to follow the rest of this work. It also gives more detail about the importance of splicing.
 	\item Chapter 3 reviews the splicing codes which have already been developed.
-	\item Chapter 4 describes the dataset construction and the evaluated models in detail. It is by far the longest and most theoretical chapter due to us developing datasets and due to us modifying the Attention mechanism known from Transformer models.
+	\item Chapter 4 describes the dataset construction and the evaluated models in detail. It is by far the longest and most theoretical chapter due to us developing datasets and due to us modifying the attention mechanism known from Transformer models.
 	\item Chapter 5 presents the results of evaluating the models on a total of 16 different datasets. This includes the dataset whom we show to be critically confounded and the datasets for whose future us we advocate.
 	\item Chapter 6 summarizes our findings and draws more general conclusions. We also give suggestions for future work.
 \end{itemize}
 %\minitoc
-
-%"Why genes in pieces?" -- can put this citation at the top and start with related story
-%\section{Motivation}
-%
-%
-%\section{Contribution}
-
-
-%TODO: remove NLP abbreviation from 

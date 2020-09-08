@@ -50,17 +50,15 @@ def plot_confusion_matrix(cm, target_names, title='', cmap=None, normalize=True,
 tp, fp, fn, tn = 688, 551, 237, 2997
 cf_matrix = np.array([688, 551, 237, 2997]).reshape(2,2)
 
-plot_confusion_matrix(cm=cf_matrix/np.sum(cf_matrix), normalize=False, target_names =['non-cons', 'cons'],
-                      title="", cmap=plt.get_cmap('rocket_r'), save_name='confusion_matrix.png')
-
-# sns.heatmap(cf_matrix/np.sum(cf_matrix), annot=True,
-#             fmt='.2%', cmap='rocket_r') #cmap='Blues')
-#
-# plt.show()
+# plot_confusion_matrix(cm=cf_matrix/np.sum(cf_matrix), normalize=False, target_names =['non-cons', 'cons'],
+#                       title="", cmap=plt.get_cmap('rocket_r'), save_name='confusion_matrix.png')
 
 
 # Outputting all stats
-dir = '../../saved/log/HIPSCI_MAJIQ_Attn/final/'
+dir = '../../saved/log/GTEx_Junc_Brain_Attn/junc_cv_final/'
+
+
+# dir = '../../saved/log/HIPSCI_MAJIQ_Attn/final/'
 file = 'pred_and_target_all.npy'
 pred_n_target = np.load(f'{dir}/{file}')
 pred, target = pred_n_target[:len(pred_n_target)//2], pred_n_target[len(pred_n_target)//2:]

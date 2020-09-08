@@ -120,9 +120,10 @@ class ComparisonTrainer(BaseTrainer):
             pred_target_low = self._single_val_epoch(self.test_low, epoch, self.test_low_metrics)
             pred_target_high = self._single_val_epoch(self.test_high, epoch, self.test_high_metrics)
             self._single_val_epoch(self.val_all, epoch, self.val_metrics)
-            # todo: make this cleaner; assumes that mnt_best tracks auc
-            if auc_single(pred_target_all) >= self.mnt_best:
-                self.auc_f1_metric_evaluation_and_visualization(pred_target_all, pred_target_low, pred_target_high)
+            # todo: seem bugged at the moment :( does not appear to enter the if-case towards the end of training
+            # leading to the visualized performance being significantly worse than the actual performance
+            # if auc_single(pred_target_all) >= self.mnt_best:
+            self.auc_f1_metric_evaluation_and_visualization(pred_target_all, pred_target_low, pred_target_high)
 
             for loader, metric in zip(self.extra_test_set_loaders, self.extra_test_set_metrics):
                 self._single_val_epoch(loader, epoch, metric)

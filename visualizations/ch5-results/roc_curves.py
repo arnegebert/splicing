@@ -36,7 +36,7 @@ def load_and_plot_roc_shared_fig(name, dirs1, labels1, dirs2, labels2, title1, t
 
     assert len(dirs1) == len(labels1) <= len(colors)
     assert len(dirs2) == len(labels2) <= len(colors)
-    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(8, 4))
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(9, 4))
     for (dir, label, color) in zip(dirs1, labels1, colors):
         pred_and_target = np.load(dir)
         pred, target = pred_and_target[:len(pred_and_target)//2], pred_and_target[len(pred_and_target)//2:]
@@ -97,6 +97,7 @@ if __name__ == '__main__':
     title = 'Brain cortex'
     load_and_plot_roc('gtex_junc_brain_roc', dirs, labels, title=title)
 
+
     # config for HipSci SUPPA
     labels = ['DSC', 'D2V', 'RASC']
     experiments = ['HIPSCI_SUPPA_DSC', 'HIPSCI_SUPPA_D2V_MLP', 'HIPSCI_SUPPA_Attn']
@@ -106,23 +107,7 @@ if __name__ == '__main__':
     title = 'Sensory neuron cells'
     load_and_plot_roc('suppa_cross_model_roc_auc_comparison', dirs, labels, title=title)
 
-    # # config for HipSci MAJIQ neurons
-    # labels = ['DSC', 'D2V', 'RASC', 'RSC']
-    # experiments = ['HIPSCI_MAJIQ_DSC', 'HIPSCI_MAJIQ_D2V_MLP', 'HIPSCI_MAJIQ_Attn', 'HIPSCI_MAJIQ_BiLSTM']
-    # file_name = 'pred_and_target_all.npy'
-    # run_id = 'final'
-    # dirs = [f'../../saved/log/{exp}/{run_id}/{file_name}' for exp in experiments]
-    # load_and_plot_roc('majiq_neuron_cross_model_roc_auc_comparison', dirs, labels)
-    #
-    # # config for MAJIQ iPSC
-    # labels = ['DSC', 'D2V', 'RASC']
-    # experiments = ['iPSC_DSC', 'iPSC_D2V_MLP', 'iPSC_Attn']
-    # file_name = 'pred_and_target_all.npy'
-    # run_id = 'final'
-    # dirs = [f'../../saved/log/{exp}/{run_id}/{file_name}' for exp in experiments]
-    # load_and_plot_roc('majiq_ipsc_cross_model_roc_auc_comparison', dirs, labels)
-
-    # config for MAJIQ neurons + iPSC
+    # config for MAJIQ neurons + iPSC (cross-model)
     labels1 = ['DSC', 'D2V', 'RASC', 'RSC']
     labels2 = ['DSC', 'D2V', 'RASC']
     experiments1 = ['HIPSCI_MAJIQ_DSC', 'HIPSCI_MAJIQ_D2V_MLP', 'HIPSCI_MAJIQ_Attn', 'HIPSCI_MAJIQ_BiLSTM']
@@ -133,4 +118,16 @@ if __name__ == '__main__':
     dirs2 = [f'../../saved/log/{exp}/{run_id}/{file_name}' for exp in experiments2]
     title1, title2 = 'Sensory neuron cells', 'iPSC cells'
     load_and_plot_roc_shared_fig('majiq_neuron_ipsc_cross_model_roc_auc_comparison', dirs1, labels1, dirs2, labels2,
+                                 title1, title2)
+
+    # config for MAJIQ neurons + iPSC (cross-PSI)
+    labels = ['LowPSI', 'AllPSI', 'HighPSI']
+    experiment1 = 'HIPSCI_MAJIQ_Attn'
+    experiment2 = 'iPSC_Attn'
+    file_names = ['pred_and_target_low.npy', 'pred_and_target_all.npy', 'pred_and_target_high.npy']
+    run_id = 'final'
+    dirs1 = [f'../../saved/log/{experiment1}/{run_id}/{file_name}' for file_name in file_names]
+    dirs2 = [f'../../saved/log/{experiment2}/{run_id}/{file_name}' for file_name in file_names]
+    title1, title2 = 'Sensory neuron cells', 'iPSC cells'
+    load_and_plot_roc_shared_fig('majiq_neuron_ipsc_cross_psi_roc_auc_comparison', dirs1, labels, dirs2, labels,
                                  title1, title2)

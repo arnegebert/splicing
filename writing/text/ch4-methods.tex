@@ -28,6 +28,8 @@ In this chapter, we give more details about the exact task we are trying to solv
 
 
 \section{Task formulation} \label{sec:task_formulation}
+
+
 We consider a classification and regression task. For the classification task the models classify an exon or junction as constitutive or not. For the regression task the models regress the PSI value of an exon or junction. The training samples comprise of exon or junction features helpful for classification or regression and the corresponding PSI value. \\
 For the classification task, we classify all exons and junctions based on their PSI value before training on them. Strictly speaking, all exons and junctions with a PSI of less than 100\% are non-constitutive. However, due to spurious reads, we classify all exons with a PSI $\geq 99\%$ as constitutive. For the regression we use the PSI values as training labels. 
 For either task, the output of our models is a prediction $\hat{y} \in [0, 1]$. 
@@ -37,6 +39,11 @@ We focus on the easier classification task at first and only evaluate the models
 
 Previous work indicates that advances in predicting one type of alternative splicing behaviour (e.g. cassette exons) via Machine Learning methods also translates to advances in prediction for other types (e.g. exons with an alternative 3' splice site) \cite{dsc} \cite{buschhertel}. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryote and thus we choose cassette exons as the type of alternative splicing we will focus on.
 
+
+
+Due to a similar argument, advances in predicting alternative splicing behaviour of junctions also translate to the same advances for exons, we also evaluate the models on one class of junction datasets. Junctions datasets have the additional advantage that they contain a lot more training samples (at least twice as many per definition). Deep learning algorithms are notorious for requiring large datasets to train and this enables us to test whether increasing data quantity improves model performance. 
+
+ 
 \section{Datasets}\label{sec:datasets}
 Three primary sources for genomic data were used in this study: the Human Exon splicing events (HEXEvent) database \cite{hexevent}, data from the Genotype-Tissue Expression (GTEx) project \cite{gtex} and data from the Human Induced Pluripotent Stem Cell Initiative (HipSci) \cite{hipsci}. Except for the HEXEvent database, none of these primary sources directly report the PSI values of exons or junctions. However, we will use the PSI value as our prediction target and thus apply further processing steps to obtain PSI estimates \ref{subsec:psiestimation}. All of the data sources required further processing (e.g. extraction of corresponding nucleotide sequences) to obtain the final samples which are the input for the models. These further processing steps are described in section \ref{subsec:finalsampleprocessing}.
 
@@ -139,7 +146,7 @@ The advantage of this estimate lies in its simplicity and flexibility. It is qui
 		}
 	\label{fig:psiestimation}
 \end{figure}
-%TODO: lix says make sure this figure precedes list below; added [h]
+%lix says make sure this figure precedes list below; added [h]
 %'deceptively simple'?
 
 However, this estimate also has various issues:
@@ -365,12 +372,12 @@ Note that for intron-centric training samples we do not classify the intron or r
 %Note that it is not technically correct to say that we classify an intron or regress its PSI because the inclusion or exlusion of an intronic sequence may occur when 
 
 
-Using the chromosome information and the start and end coordinates, two 140 nucleotide window around the start and end coordinates were extracted from the human reference genome GRCh38 (see Figure \ref{fig:inputschematic}). The size of the nucleotide window was motivated by previous work \cite{dsc}.\\
+Using the chromosome information and the start and end coordinates, two 140 nucleotide window around the start and end coordinates were extracted from the human reference genome GRCh38 (see Figure \ref{fig:inputschematic}). The size of the nucleotide window was motivated by previous work \cite{dsc}. We refer to this input as the sequence features and abbreviate the sequence around the exon or junction start (end) as start (end) sequence. \\
 Furthermore, if an exon or junction is taken from a negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed and each extracted nucleotide is converted to its reverse complement. This mirrors biology, as the spliceosome also observes the exon start and end sites as switched and reverse complemented between the + and - strand.\\ 
 %Presumably, this means the models the models don't have to learn different features for exons or junctions on the + and - strand. \\
 Samples from the chromosomes X, Y and M were excluded due to the fundamental functional differences between them and the autosomes (e.g. there only exists one functional copy of the sex chromosomes).
 
-The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine `A' is encoded as [1 0 0 0], cytosine `C' as [0 1 0 0], guanine `G' as [0 0 1 0] and thymine `T' as [0 0 0 1]. Thus, each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encoded nucleotides.
+The extracted nucleotides were one-hot encoded as four dimensional vectors. Specifically, adenine `A' is encoded as [1 0 0 0], cytosine `C' as [0 1 0 0], guanine `G' as [0 0 1 0] and thymine `T' as [0 0 0 1]. Thus, each 140 nucleotide long window was converted into an 140x4 matrix containing one-hot encoded nucleotides. 
 
 It is commonplace that repetitive sequences are soft-masked as lower case letters in the reference genome. As this has no known bearing on alternative splicing, this information was ignored during one-hot encoding.
 
@@ -503,13 +510,13 @@ In particular, the HipSci SUPPA dataset contains an extremely low number of non-
 \section{Models} \label{sec:models}
 All three models are fundamentally split into two components: 
 \begin{enumerate}
-	\item The first component extracts the most relevant features of the two input sequences of nucleotides.  Depending on the exact model, the feature extraction is based either on CNNs, word embeddings or BiLSTMs and an attention layer. The extracted features are concatenated along with the length features and fed as input to the second component. 
+	\item The first component extracts the most relevant features of the two input sequences of nucleotides.  Depending on the exact model, the feature extraction is based either on Convolutional Neural Networks (CNNs), word embeddings or Bidirectional Long-Short Term Memory Units (BiLSTMs) and an attention layer. The extracted features are concatenated along with the length features and fed as input to the second component. 
 	
 	\item The second component uses the extracted features and length features to perform binary classification or regression. This component is implemented as a shallow multilayer perceptron (MLP) for all models. It consists of one or two fully connected layers followed by dropout and activation layers. A sigmoid activation function is used after the last layer to obtain an output between 0 and 1.
 \end{enumerate}
 
 \subsection{DSC: CNN-based} \label{subsec:dsc}
-This model is a reimplementation of the Deep Splicing Code (DSC) from \cite{dsc} and the current state-of-the-art model for alternative splicing classification. 
+This model is a reimplementation of the Deep Splicing Code (DSC) from \cite{dsc} and the current state-of-the-art model for the classification of alternative splicing events. 
 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/dsc_architecture.png} 
@@ -522,11 +529,11 @@ This model is a reimplementation of the Deep Splicing Code (DSC) from \cite{dsc}
 
 \subsubsection{The motivation behind using CNNs}
 DSC uses CNNs for feature extraction. 
-CNNs are useful when the input data contains spatially invariant patterns.  Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.\\
-CNNs are also promising for the application to genomic data, that is, nucleotide sequences: 
+CNNs are useful when the input data contains spatially invariant patterns.  Since images are fundamentally made up of small, spatially invariant patterns which can be combined into more complex patterns, CNNs have been extremely successful in Computer Vision.
+CNNs are also promising for the application to genomic data: 
 \begin{itemize}
-	\item Nucleotide sequences contain motifs (nucleotide sequence patterns conjectured to be biologically significant). Motifs can be represented as matrixes and indeed, they are frequently represented as position weight matrixes (PWMs) with particular weights. The kernels used in CNNs can be interpreted as PWMs with learnable weights, i.e., the model can automatically learn to recognize important motifs. % TODO; don't like this wording
-	\item Motifs are found at different positions in the input sequence. Due to CNNs being spatially invariant they will be able to detect motifs at any position in the input sequence.
+	\item Nucleotide sequences contain motifs (nucleotide sequence patterns conjectured to be biologically significant). Motifs are frequently represented as position weight matrixes (PWMs) which encode information about the significance of the occurance of a particular nucleotide at a particular position. The kernels used in CNNs can be interpreted as PWMs with learnable weights. Thus, the inductive bias of CNNs, that the learning task can be solved via optimizing matrix weights, aligns well with our initial knowledge about the task. %  are promising because they can automatically optimize these weights and learn to recognize important motifs.
+	\item Motifs are found at different positions in the input sequence. This isn't a natural problem setting for some Machine Learning algorithms since they would need to learn to recognize the same motif at different positions. However, CNNs are inherently spatially invariant and thus are again well-suited to detecting motifs within a sequence.
 \end{itemize}
 
 
@@ -546,9 +553,9 @@ Concretely, each CNN block consists of three convolutional layers. The first con
 
 \subsubsection{Applying NLP techniques to genomic data}
 Like text, genomic data is fundamentally a sequence of characters.
-This makes it possible to apply techniques known from Natural Language Processing (NLP) to genomic data. This is an especially promising area of cross-pollination because of the large strides NLP has been able to make in recent years using Deep Learning.
+This makes it possible to apply techniques known from NLP to genomic data. This is an especially promising area of cross-pollination because of the large strides NLP has been able to make in recent years using Deep Learning.
 Some of the most important milestones in NLP have been efficient embeddings via Word2Vec \cite{w2v1} \cite{w2v2}, applying Recurrent Neural Networkss (RNNs) to text as in Sequence-to-Sequence (seq2seq) learning \cite{seq2seq} and leveraging attention as in the extremely powerful and deep Transformer models \cite{allyouneed} \cite{bert}.\\
-In this work, we evaluate the application of Doc2Vec (a derivative of Word2Vec), Seq2Seq models and the attention mechanism to the task of alternative splicing classification. We don't evaluate the current state-of-the-art Transformer models. Albeit very potent, they usually require huge datasets in the order of millions of samples which aren't available for this task (this decision is discussed in more detail in Section \ref{lstmvstransformer}). Nonetheless, we do adapt the attention mechanism as known from Transformers for our task. In this way, we feel the evaluated models make use of the most important Deep Learning innovations originating from NLP.
+In this work, we evaluate the application of Doc2Vec (a derivative of Word2Vec), Seq2Seq models and the attention mechanism for the classification of alternative splicing events and the regressing of their frequency. We don't evaluate the current state-of-the-art Transformer models. Albeit very potent, they usually require huge datasets in the order of millions of samples which aren't available for this task (this decision is discussed in more detail in Section \ref{lstmvstransformer}). Nonetheless, we do adapt the attention mechanism as known from Transformers for our task. In this way, we feel the evaluated models make use of the most important Deep Learning innovations originating from NLP.
 
 %While scaling down Transformers and then applying is an interesting avenue of research, even heavily scaled-down models might still be over parametrized for the task as it has frequently been shown that very shallow networks (with less than 5 layers) perform best on genomic data \cite{}. Additionally, our input sequences are very long; generally 140 tokens or more. Initial tests showed that this also leads to memory problems when training on only one GPU, as the memory requirements of Transformers grows quadratically with respect to the length of the input sequence, further complicating their application. Due to these considerations, we chose to forego the evaluation of Transformer-based models in this study.
 \subsection{D2V: MLP-based} \label{subsec:d2v}
@@ -714,20 +721,30 @@ The attention mechanism also adds interpretability to the model because it indic
 Despite these successes, not many attention-based models have been applied to genomic data yet and in particular, none have been applied to the prediction of splicing behaviour. 
 
 \subsubsection{Why LSTM-based models were chosen over Transformers} \label{lstmvstransformer}
-Perhaps surprisingly, we chose to not evaluate Transformer models for this task:
-The main advantage of Transformers over LSTMs is their parallelizable nature enabling them to scale to enormous datasets and hundreds of millions (or billions \cite{gpt3}) of parameters \cite{allyouneed}. This is because Transformers can process all inputs in a sequence concurrently, in contrast to LSTMs who need to process them sequentially. However, there are no huge datasets to scale to: our largest exon dataset contains roughly 50,000 training samples and this already includes all the known cassette exon in the human genome. Creative use of data augmentation might increase dataset size by two or three factors, but even 150,000 training samples is still far smaller than the millions of training samples used in NLP. Scaling down Transformers models would mean they lose their main advantage over LSTMs: on small NLP datasets LSTMs and small (not-distilled \cite{distilbert}) Transformers perform similarly \cite{mogrifier}\cite{smalltransformerwin} and there is no clear consensus which approach is superior. 
+Perhaps surprisingly, we chose to not base our model on the Transformer network architecture:
+
+In contrast to LSTMs who need to process all symbols in their input sequentially, Transformers can process them concurrently. This is the main advantage of Transformers over LSTMs and enables them to scale to enormous datasets and hundreds of millions (or billions \cite{gpt3}) of parameters \cite{allyouneed}.
+
+However, we have no huge datasets to scale to: our largest exon dataset contains roughly 50,000 training samples and this already includes all the known cassette exon in the human genome. Creative use of data augmentation might increase dataset size by two or three factors, but even 150,000 training samples is still far smaller than the millions of training samples used in NLP. Scaling down Transformers models would mean they lose their main advantage over LSTMs: on small NLP datasets LSTMs and small (not-distilled \cite{distilbert}) Transformers perform similarly \cite{mogrifier}\cite{smalltransformerwin} and there is no clear consensus which approach is superior. 
 
 %LSTM win: https://arxiv.org/abs/1909.01792
 %Transformer win: https://arxiv.org/abs/1912.09713
-Additionally, the autoregressive bias inherent to LSTMs is likely important for interpreting genomic sequences: . Transformers are stateless and only add information about the relative positions of the input through the use of positional encodings. This would mean that the learning task of the Transformers is harder. 
+Additionally, the autoregressive bias inherent to LSTMs aligns well with our knowledge about the biological reality: the spliceoseome also processes information in the sequences piecewise. Opposed to LSTMs and the spliceosome, Transformers process their complete input concurrently.
+%Transformers are stateless 
+%and only add information about the relative positions of the input through the use of positional encodings. This would mean that the learning task of the Transformers is harder. bullshit because same argument for language really
+
+
 Thus, we base the encoder part of our model on the simpler LSTMs. 
 
+\subsubsection{Modifying Seq2Seq}
 We now describe the modifications we made to the Seq2Seq and attention set-up known from MT for alternative splicing classification and regression. In particular, we describe the attention mechanism in more detail as necessary for our second modification.
 
 
 
 \subsubsection{Modification 1: MLP instead of a recurrent decoder}
-As the name implies, models based on the Seq2seq framework take a sequence as input and give a sequence as output. This is achieved via using a recurrent decoder which outputs symbols until it outputs an <EOS> (end-of-sentence, e.g. a `.') token (in the case for MT, similar for other domains). However, in our case, the output will always be a single scalar. Thus, we don't require a recurrent decoder and instead use a shallow MLP in its place.
+As the name implies, models based on the Seq2seq framework take a sequence as input and give a sequence as output. This is achieved via using a recurrent decoder which outputs symbols until it outputs an <EOS> (end-of-sequence, e.g. a `.') token.
+However, we only expect a single output: a scalar signifying the classification or frequency of the alternative splicing behaviour of an exon or junction. 
+% However, in our case, the output will always be a single scalar. Thus, we don't require a recurrent decoder and instead use a shallow MLP in its place.
 \subsubsection{Modification 2: Attention with a learned query vector}
 The most common form of attention (multiplicative or dot-product self-attention \cite{allyouneed}), makes uses of conceptual queries and key-value pairs. A query, key and value matrix is assigned to each symbol in the input sequence. A given query is compared to all keys by computing a similarity score between the query and each key via the dot-product. The similarity scores are normalized through the use of a softmax layer. The normalized similarity scores are also commonly called the attention weights; keys similar to the query are weighted more. The output of the attention layer for a given query and input sequence is then the weighted vector sum obtained by multiplying each value by the attention weight of its respective key.
 Putting the above intuition into formulas, the (dot-product self-) attention mechanism can be described more formally:
