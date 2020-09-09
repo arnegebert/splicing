@@ -41,106 +41,123 @@ def bar_chart(attn_ws):
     fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
     # xticks = np.linspace(0, 140, 5)
     # xs= ['-70', '-35', 'start', '+35', '+70']
-    xs2 = np.arange(-70, 70)
+    xs = np.arange(-70, 70)
     ax1.set_xlim(-70, 70)
-    ax1.set_xlabel('Position relative to exon start')
-    ax2.set_xlabel('Position relative to exon end')
+    ax2.set_xlim(-70, 70)
+
+    # ax1.set_xlabel('Position relative to exon start')
+    # ax2.set_xlabel('Position relative to exon end')
     ax1.set_ylabel('Attention weight')
 
-    ax2.set_xlim(-70, 70)
+
     # xticks2 = np.linspace(-70, 70, 5)
     # ax1.set_xticks(xticks2, xs)
     # plt.xticks(xticks2, xs)
-    ax1.bar(xs2, mean[:140])#, yerr=stderr[:140])
-    ax2.bar(xs2, mean[140:])#, yerr=stderr[140:])
+    ax1.bar(xs, mean[:140])#, yerr=stderr[:140])
+    ax2.bar(xs, mean[140:])#, yerr=stderr[140:])
+    ax1.bar(xs, mean[60:80])#, yerr=stderr[:140])
+    ax2.bar(xs, mean[200:220])#, yerr=stderr[140:])
+
+
+    # ax1.set_xticks([])
+    ax1.xaxis.set_major_formatter(plt.NullFormatter())
+    ax2.xaxis.set_major_formatter(plt.NullFormatter())
+    no_ticks = 140
+    exon_start, exon_end = 68/140, 70/140
+    intron_end, intron_start = 67/140, 71/140
+    ax1.annotate('intron', xy=(0, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    ax1.annotate('intron', xy=(intron_end+1.5/140, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax1.annotate('exon', xy=(exon_start-1.5/140, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax1.annotate('exon', xy=(1, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+
+    ax2.annotate('exon', xy=(0, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    ax2.annotate('exon', xy=(exon_end+1.5/140, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax2.annotate('intron', xy=(intron_start-1.5/140, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax2.annotate('intron', xy=(1, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    # ax.grid(True)
+    # fig.canvas.draw()
+
+    exon_start, exon_end = 8/20, 10/20
+    intron_end, intron_start = 7/20, 11/20
+    y = -0.02
+    ax1.annotate('intron', xy=(0, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    ax1.annotate('intron', xy=(intron_end+0.0175, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax1.annotate('exon', xy=(exon_start-0.045, y), xycoords='axes fraction', xytext=(0.75, y),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax1.annotate('exon', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+
+    ax2.annotate('exon', xy=(0, y), xycoords='axes fraction', xytext=(0.25, y),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    ax2.annotate('exon', xy=(exon_end+1.5/140, y), xycoords='axes fraction', xytext=(0.25, y),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax2.annotate('intron', xy=(intron_start-0.055, y), xycoords='axes fraction', xytext=(0.75, y),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax2.annotate('intron', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+
+    plt.tight_layout()
 
     plt.savefig('mean_attention_barchart.png', dpi=300, bbox='tight')
 
     plt.show(dpi=300)
     # print(attn_ws.shape)
 
-def heatmap3():
-    # plt.style.use('seaborn')
+def bar_chart2(attn_ws):
+    plt.style.use('seaborn')
+    mean, std = np.mean(attn_ws, axis=0), np.std(attn_ws, axis=0)
 
-
-    mean_attn_ws_epochs = []
-    epochs = 109
+    # print(f'Mean std dev: {np.mean(np.std(attn_ws, axis=0))}')
     fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
-    for i in range(epochs):
-        attn_ws = np.load(f'attn_ws_multi_distributed/attn_ws_{i+1}.npy')#[:,:140]
-        # averaging across the attention heads
-        attn_ws = np.mean(attn_ws, axis=-1)
+    xs = np.arange(0, 20)
+    # ax1.set_xlabel('Position relative to exon start')
+    # ax2.set_xlabel('Position relative to exon end')
+    ax1.set_ylabel('Attention weight')
 
-        mean = np.mean(attn_ws, axis=0)
-        mean_attn_ws_epochs.append(mean)
-    mean_attn_ws_epochs = np.concatenate(mean_attn_ws_epochs, axis=0).reshape(epochs, 280)
+    ax1.bar(xs, mean[60:80])#, yerr=stderr[:140])
+    ax2.bar(xs, mean[200:220])#, yerr=stderr[140:])
 
-    ax1.imshow(mean_attn_ws_epochs[:, :140], cmap='viridis')
-    ax2.imshow(mean_attn_ws_epochs[:, 140:], cmap='viridis')
-    plt.savefig('attention_heatmap.png', dpi=300, bbox='tight')
+    # ax1.set_xticks([])
+    ax1.xaxis.set_major_formatter(plt.NullFormatter())
+    ax2.xaxis.set_major_formatter(plt.NullFormatter())
+    no_ticks = 140
+    exon_start, exon_end = 8/20, 10/20
+    intron_end, intron_start = 7/20, 11/20
+    y = -0.02
+    ax1.annotate('intron', xy=(0, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    ax1.annotate('intron', xy=(intron_end+0.0175, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax1.annotate('exon', xy=(exon_start-0.045, y), xycoords='axes fraction', xytext=(0.75, y),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax1.annotate('exon', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+
+    ax2.annotate('exon', xy=(0, y), xycoords='axes fraction', xytext=(0.25, y),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    ax2.annotate('exon', xy=(exon_end+1.5/140, y), xycoords='axes fraction', xytext=(0.25, y),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax2.annotate('intron', xy=(intron_start-0.055, y), xycoords='axes fraction', xytext=(0.75, y),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax2.annotate('intron', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    # ax.grid(True)
+    # fig.canvas.draw()
+
     plt.tight_layout()
+    plt.savefig('mean_attention_barchart_zoomed.png', dpi=300, bbox='tight')
+
     plt.show(dpi=300)
-
-def heatmap2(target=None):
-    # observation: no difference between constitutive and non-constitutive exons attention
-    # plt.style.use('seaborn')
-
-    attn_ws_epochs = []
-    epochs = 109
-
-    if target is not None:
-        test_set = np.load('attn_ws_multi_distributed/test_all_data.npy')
-
-    for i in range(epochs):
-        attn_ws = np.load(f'attn_ws_multi_distributed/attn_ws_{i+1}.npy')#[:,:140]
-        # averaging across the attention heads
-        attn_ws = np.mean(attn_ws, axis=-1)
-        if target is not None:
-            attn_ws = attn_ws[test_set[:,280,3]==target]
-        # mean = np.mean(attn_ws, axis=0)
-        # attn_ws_epochs.append(mean)
-        attn_ws_epochs.append(attn_ws[7])
-    attn_ws_epochs = np.concatenate(attn_ws_epochs, axis=0).reshape(epochs, 280)
-
-    plt.imshow(attn_ws_epochs[:, :140], cmap='viridis', interpolation='nearest')
-    # plt.xlim(0, 139)
-    plt.title('First 140 nucleotides')
-    plt.savefig('attention_heatmap_start.png', dpi=300, bbox='tight')
-    plt.show(dpi=300)
-
-    plt.imshow(attn_ws_epochs[:, 140:], cmap='viridis', interpolation='nearest')
-    # plt.xlim(140)
-    plt.title('Last 140 nucleotides')
-    plt.savefig('attention_heatmap_end.png', dpi=300, bbox='tight')
-    plt.show(dpi=300)
-
-
-def heatmap4():
-    # plt.style.use('seaborn')
-
-
-    mean_attn_ws_epochs = []
-    epochs = 109
-    fig, ax = plt.subplots(2, 4, sharey=True, sharex=True)
-    for i in range(epochs):
-        attn_ws = np.load(f'attn_ws_multi_distributed/attn_ws_{i+1}.npy')#[:,:140]
-
-        mean = np.mean(attn_ws, axis=0)
-        mean_attn_ws_epochs.append(mean)
-    mean_attn_ws_epochs = np.concatenate(mean_attn_ws_epochs, axis=0).reshape(epochs, 280, 4)
-
-    ax[0, 0].imshow(mean_attn_ws_epochs[:, :140, 0], cmap='viridis')
-    ax[0, 1].imshow(mean_attn_ws_epochs[:, 140:, 0], cmap='viridis')
-    ax[0, 2].imshow(mean_attn_ws_epochs[:, :140, 1], cmap='viridis')
-    ax[0, 3].imshow(mean_attn_ws_epochs[:, 140:, 1], cmap='viridis')
-    ax[1, 0].imshow(mean_attn_ws_epochs[:, :140, 2], cmap='viridis')
-    ax[1, 1].imshow(mean_attn_ws_epochs[:, 140:, 2], cmap='viridis')
-    ax[1, 2].imshow(mean_attn_ws_epochs[:, :140, 2], cmap='viridis')
-    ax[1, 3].imshow(mean_attn_ws_epochs[:, 140:, 2], cmap='viridis')
-    plt.savefig('attention_heatmap.png', dpi=300, bbox='tight')
-    plt.tight_layout()
-    plt.show(dpi=300)
-
 
 def heatmap():
     # plt.style.use('seaborn')
@@ -205,6 +222,7 @@ def heatmap():
     grid[5].set_xlabel('Position relative to exon end')
     grid[6].set_xlabel('Position relative to exon start')
     grid[7].set_xlabel('Position relative to exon end')
+
     grid[0].patch.set_facecolor('black')
     # grid[0].patch.set_alpha(0.7)
     grid[0].set_facecolor('black')
@@ -215,11 +233,11 @@ def heatmap():
     plt.savefig('attention_heatmap.png', dpi=300, bbox='tight')
     plt.show(dpi=300)
 
-heatmap()
+# heatmap()
 
 def heatmap_rectangle(attn_ws):
     h = 10
-    mean, std = np.mean(attn_ws[:, :140], axis=0), np.std(attn_ws, axis=0)
+    mean, std = np.mean(attn_ws[:, 200:220], axis=0), np.std(attn_ws, axis=0)
     N = mean.shape[0]
 
     cmap = plt.get_cmap(name='viridis')
@@ -240,8 +258,9 @@ def heatmap_rectangle(attn_ws):
 
 
 
-# attn_ws_multi_heads = np.load(f'attn_ws_multi_distributed/attn_ws_110.npy')
-# mean_attn_ws_multi_heads = np.mean(attn_ws_multi_heads, axis=-1)
-# bar_chart(mean_attn_ws_multi_heads)
+attn_ws_multi_heads = np.load(f'attn_ws_multi_distributed/attn_ws_110.npy')
+mean_attn_ws_multi_heads = np.mean(attn_ws_multi_heads, axis=-1)
+bar_chart(mean_attn_ws_multi_heads)
 
+bar_chart2(mean_attn_ws_multi_heads)
 # heatmap_rectangle(mean_attn_ws_multi_heads)

@@ -319,6 +319,11 @@ SUPPA's main competitive advantage for PSI estimation lies in its speed and low 
 
 
 \subsubsection{MAJIQ}\label{subsubsec:majiq}
+\begin{figure}
+	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch4-methods/visualizations-majiq.pdf} 
+	\caption{Data flow when using MAJIQ to create a training dataset. }
+	\label{fig:majiq_dataset_creation_process}
+\end{figure}
 Modeling Alternative Junction Inclusion Quantification (MAJIQ) builds up a splice graph \cite{majiq2} which contains exon as vertices and junctions as edges. An edge is added between two vertices if a transcript isoform is found in which they share a junction (that is if the exons are neighbours and everything between them has been spliced out).
 Constitutive exons are vertices with two incoming edges.
 Vertices which have more than 3 incoming edges are denoted as local splicing variations (LSV). This problem formulation allows MAJIQ to model more complex splicing events (rather than the ones from \ref{fig:altsplicingforms}), although we won't leverage this extra capability here. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\Delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping. The only issue from \ref{subsubsec:naivepsi} MAJIQ doesn't account for is (b): the integration of the information from non-junction reads. Thus, we expect MAJIQ's PSI estimates to be the most accurate of all methods we are testing.
@@ -326,11 +331,7 @@ Vertices which have more than 3 incoming edges are denoted as local splicing var
 % hadnles eg point 5. by only looking at junctions until the very end and modelling eg cassette exons as two distinct LSVs --- ie each junction will have its own PSI
 
 
-\begin{figure}
-	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch4-methods/visualizations-majiq.pdf} 
-	\caption{Data flow when using MAJIQ to create a training dataset. }
-	\label{fig:majiq_dataset_creation_process}
-\end{figure}
+
 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/splice_graph.png} 
@@ -357,11 +358,7 @@ Finally, the obtained LSVs can be visualized using VOILA. See Figure \ref{fig:vo
 Our implementation of PSI estimation was applied to the GTEx dataset. SUPPA and MAJIQ were applied to the data from the HipSci repository. We refer to the GTEx-based and with our own PSI estimation method processed dataset, to the HipSci-based and with SUPPA processed dataset and to the HipSci-based and with MAJIQ processed dataset as GTEx dataset, HipSci SUPPA dataset and HipSci MAJIQ dataset for brevity. 
 \subsection{Final sample processing} \label{subsec:finalsampleprocessing}
 
-\begin{figure}
-	\centering\includegraphics[width=0.9\textwidth]{../visualizations/ch4-methods/input_schematic.png} 
-	\caption{Schematic of model input for an exon-centric training sample \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. The input for intron-centric training samples is analogue.}
-	\label{fig:inputschematic}
-\end{figure}
+
 
 At this point, the datasets have been preprocessed such that we have the following information for each training sample that we want to create: 
 \begin{itemize}
@@ -378,7 +375,11 @@ Note that for intron-centric training samples we do not classify the intron or r
 %It wouldn't be accurate to say that 
 %because a particular intronic sequence may be spliced out when 
 %Note that it is not technically correct to say that we classify an intron or regress its PSI because the inclusion or exlusion of an intronic sequence may occur when 
-
+\begin{figure}
+	\centering\includegraphics[width=0.9\textwidth]{../visualizations/ch4-methods/input_schematic.png} 
+	\caption{Schematic of model input for an exon-centric training sample \cite{dsc}. The input are the 140 nucleotide region extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. The input for intron-centric training samples is analogue.}
+	\label{fig:inputschematic}
+\end{figure}
 
 Using the chromosome information, and the start and end coordinates, two 140 nucleotide window around the start and end coordinates were extracted from the human reference genome GRCh38 (see Figure \ref{fig:inputschematic}). The size of the nucleotide window was motivated by previous work \cite{dsc}. We refer to this input as the sequence input or sequence features. We abbreviate the sequence around the exon (or junction) start as start sequence. We define the end sequence analogue. 
 
