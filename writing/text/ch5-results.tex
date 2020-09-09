@@ -11,7 +11,7 @@ Generally all models perform extremely well with AUCs nearing 90\%. While differ
 %They also perform very similarly, making it hard to differentiate them based on their ROC curves. The Attn model seems to perform slightly better than the other models. 
 
 Assessing our reimplementation, we observe a small difference between the AUC value reported in \cite{dsc} (mean 0.899, standard deviation of 0.18) and the ones we observe (mean 0.873, standard deviation of 0.06). This is likely the result of random statistical noise influenced by different random seeds between runs and differences between TensorFlow/Keras (their implementation) and PyTorch (our implementation). Notably, when reevaluating the publically available original implementation in a single run, we also obtain results (0.872 AUC) closer to the results of our reimplementation. 
-%There is a small (~2\%) difference in the AUC values in the AUC values for the DSC model reported in \cite{dsc} (89.9 AUC) and the ones we observe (87.1 AUC original). 
+%There is a small ($\sim$2\%) difference in the AUC values in the AUC values for the DSC model reported in \cite{dsc} (89.9 AUC) and the ones we observe (87.1 AUC original). 
 Thus, we conclude that, albeit with minor caveats, the reimplementation and replication of \cite{dsc} was successful.
 
 \begin{figure}
@@ -125,7 +125,7 @@ Cross-model performance differences are small (mostly between 0.02-0.03 AUC), ye
 
 \subsubsection{Differences between highly and rarely included exons}
 Figure \ref{fig:gtex_exon_roc} gives more insight into model performance. 
-The performance on highly included, alternatively spliced exons (80\% <= PSI < 99\%) is significantly worse than on more rarely included, alternatively spliced exons (PSI < 80\%). Per definition of the AUC, the AUC on the allPSI dataset lies in-between these two extremes. In this case, only ~28\% of alternatively spliced exons belong to the exons with a high PSI and therefore the combined AUC is heavily weighted towards the AUC on the exons with low PSI. These observations mirror analogue observations made on the HEXEvent dataset \cite{dsc}.
+The performance on highly included, alternatively spliced exons (80\% <= PSI < 99\%) is significantly worse than on more rarely included, alternatively spliced exons (PSI < 80\%). Per definition of the AUC, the AUC on the allPSI dataset lies in-between these two extremes. In this case, only $\sim$28\% of alternatively spliced exons belong to the exons with a high PSI and therefore the combined AUC is heavily weighted towards the AUC on the exons with low PSI. These observations mirror analogue observations made on the HEXEvent dataset \cite{dsc}.
 
 %---- removing length feature would be interesting; doing it on brain as best performance and sort of lowest combined variance\\
 
