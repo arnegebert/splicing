@@ -575,7 +575,7 @@ While most of these possible explanations are difficult to falsify, increasing t
 	\makebox[0pt]{
 		\includegraphics[width=1.3\textwidth]{../visualizations/ch5-results/attention_heatmap.png} 	}
 	
-	\caption{Each of the four quadrants shows the distribution of the attention weights for a single attention head. The distribution of attention weights is visualized via one heatmap for the start and one heatmap for end sequence, showing how the distribution of attention weights develops during training. The mean distribution of the attention weights over the test set is displayed.}
+	\caption{Each of the four quadrants (marked by the red grid) shows the distribution of the attention weights for a single attention head. The distribution of attention weights is visualized via one heatmap for the start and one heatmap for end sequence, showing how the distribution of attention weights develops during training. The mean distribution of the attention weights over the test set is displayed.}
 	\label{fig:attn_heatmap}
 	
 	
@@ -603,17 +603,22 @@ The sequence which an attention head focusses on generally does not change after
 \subsubsection{What does the model pay attention to?}
 
 \begin{figure}
-	\centering\includegraphics[width=0.495\textwidth]{../visualizations/ch5-results/mean_attention_barchart.png} 
-	\centering\includegraphics[width=0.495\textwidth]{../visualizations/ch5-results/mean_attention_barchart_zoomed.png}
+	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/mean_attention_barchart_zoomed.png}
 	\caption{Mean attention weights averaged over all test samples and all four attention heads. }
 	\label{fig:mean_attn}
 \end{figure}
+
+%\begin{figure}
+%	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/mean_attention_barchart.png} 
+%	\caption{Mean attention weights averaged over all test samples and all four attention heads. }
+%	\label{fig:mean_attn}
+%\end{figure}
 Averaging the attention weights over all heads at the end of training, we visualized the most attended to parts of the input sequence in \ref{fig:mean_attn}.
 %Figure \ref{fig:mean_attn} shows what part of the input sequence RASC commonly attends to. 
 Clearly, motifs directly around the exon start and exon end are the most attended to. 
 
 %TODO now this is a job for Liz and Wil
-The bar chart suggests that more total attention is paid to the end, rather than the start sequence. However, this pattern is reversed for other runs of the models and likely just a sequence of three attention focusing on the end sequence in this particular training run. Additionally, note that the weighting of the outputs of the different attention heads by the unifying matrix $W^O$ is not displayed. 
+The bar chart suggests that more total attention is paid to the end, rather than the start sequence. However, this pattern is reversed for other runs of the models and likely just a consequence of three heads focusing on the end sequence in the particular training run which is shown. Additionally, note that the different attention heads might be weighted differently by the unifying matrix $W^O$. 
 
 
 %\begin{figure}

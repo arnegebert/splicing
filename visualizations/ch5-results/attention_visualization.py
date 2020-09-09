@@ -32,37 +32,28 @@ def line_plot(attn_ws):
     plt.show(dpi=300)
     # print(attn_ws.shape)
 
-
-def bar_chart(attn_ws):
+def bar_chart_all(attn_ws):
     plt.style.use('seaborn')
     mean, std = np.mean(attn_ws, axis=0), np.std(attn_ws, axis=0)
-
-    # print(f'Mean std dev: {np.mean(np.std(attn_ws, axis=0))}')
-    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
-    # xticks = np.linspace(0, 140, 5)
-    # xs= ['-70', '-35', 'start', '+35', '+70']
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, sharey=True, figsize=(16, 4))
     xs = np.arange(-70, 70)
+    xs2 = np.arange(0, 20)
     ax1.set_xlim(-70, 70)
     ax2.set_xlim(-70, 70)
-
-    # ax1.set_xlabel('Position relative to exon start')
-    # ax2.set_xlabel('Position relative to exon end')
+    ax3.set_xlim(0, 20)
+    ax4.set_xlim(0, 20)
     ax1.set_ylabel('Attention weight')
 
-
-    # xticks2 = np.linspace(-70, 70, 5)
-    # ax1.set_xticks(xticks2, xs)
-    # plt.xticks(xticks2, xs)
     ax1.bar(xs, mean[:140])#, yerr=stderr[:140])
     ax2.bar(xs, mean[140:])#, yerr=stderr[140:])
-    ax1.bar(xs, mean[60:80])#, yerr=stderr[:140])
-    ax2.bar(xs, mean[200:220])#, yerr=stderr[140:])
+    ax3.bar(xs2, mean[60:80])#, yerr=stderr[:140])
+    ax4.bar(xs2, mean[200:220])#, yerr=stderr[140:])
 
-
-    # ax1.set_xticks([])
     ax1.xaxis.set_major_formatter(plt.NullFormatter())
     ax2.xaxis.set_major_formatter(plt.NullFormatter())
-    no_ticks = 140
+    ax3.xaxis.set_major_formatter(plt.NullFormatter())
+    ax4.xaxis.set_major_formatter(plt.NullFormatter())
+
     exon_start, exon_end = 68/140, 70/140
     intron_end, intron_start = 67/140, 71/140
     ax1.annotate('intron', xy=(0, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
@@ -88,66 +79,109 @@ def bar_chart(attn_ws):
     exon_start, exon_end = 8/20, 10/20
     intron_end, intron_start = 7/20, 11/20
     y = -0.02
-    ax1.annotate('intron', xy=(0, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
+    ax3.annotate('intron', xy=(0, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
-    ax1.annotate('intron', xy=(intron_end+0.0175, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
+    ax3.annotate('intron', xy=(intron_end+0.0175, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
-    ax1.annotate('exon', xy=(exon_start-0.045, y), xycoords='axes fraction', xytext=(0.75, y),
+    ax3.annotate('exon', xy=(exon_start-0.045, y), xycoords='axes fraction', xytext=(0.75, y),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
-    ax1.annotate('exon', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
+    ax3.annotate('exon', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
 
-    ax2.annotate('exon', xy=(0, y), xycoords='axes fraction', xytext=(0.25, y),
+    ax4.annotate('exon', xy=(0, y), xycoords='axes fraction', xytext=(0.25, y),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
-    ax2.annotate('exon', xy=(exon_end+1.5/140, y), xycoords='axes fraction', xytext=(0.25, y),
+    ax4.annotate('exon', xy=(exon_end+1.5/140, y), xycoords='axes fraction', xytext=(0.25, y),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
-    ax2.annotate('intron', xy=(intron_start-0.055, y), xycoords='axes fraction', xytext=(0.75, y),
+    ax4.annotate('intron', xy=(intron_start-0.055, y), xycoords='axes fraction', xytext=(0.75, y),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
-    ax2.annotate('intron', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
+    ax4.annotate('intron', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
 
     plt.tight_layout()
 
-    plt.savefig('mean_attention_barchart.png', dpi=300, bbox='tight')
+    plt.savefig('mean_attention_barchart_all.png', dpi=300, bbox='tight')
 
     plt.show(dpi=300)
     # print(attn_ws.shape)
 
-def bar_chart2(attn_ws):
+def bar_chart_not_zoomed(attn_ws):
+    plt.style.use('seaborn')
+    mean, std = np.mean(attn_ws, axis=0), np.std(attn_ws, axis=0)
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+    xs = np.arange(-70, 70)
+    ax1.set_xlim(-70, 70)
+    ax2.set_xlim(-70, 70)
+    ax1.set_ylabel('Attention weight')
+
+    ax1.bar(xs, mean[:140])#, yerr=stderr[:140])
+    ax2.bar(xs, mean[140:])#, yerr=stderr[140:])
+
+    ax1.xaxis.set_major_formatter(plt.NullFormatter())
+    ax2.xaxis.set_major_formatter(plt.NullFormatter())
+
+    exon_start, exon_end = 68/140, 70/140
+    intron_end, intron_start = 67/140, 71/140
+    ax1.annotate('intron', xy=(0, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    ax1.annotate('intron', xy=(intron_end+1.5/140, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax1.annotate('exon', xy=(exon_start-1.5/140, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax1.annotate('exon', xy=(1, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+
+    ax2.annotate('exon', xy=(0, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    ax2.annotate('exon', xy=(exon_end+1.5/140, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax2.annotate('intron', xy=(intron_start-1.5/140, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+                arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
+    ax2.annotate('intron', xy=(1, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+                arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
+    plt.tight_layout()
+
+    plt.savefig('mean_attention_barchart_not_zoomed.png', dpi=300, bbox='tight')
+
+    plt.show(dpi=300)
+    # print(attn_ws.shape)
+
+def bar_chart_zoomed(attn_ws):
     plt.style.use('seaborn')
     mean, std = np.mean(attn_ws, axis=0), np.std(attn_ws, axis=0)
 
     # print(f'Mean std dev: {np.mean(np.std(attn_ws, axis=0))}')
-    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(10,5.0))
     xs = np.arange(0, 20)
     # ax1.set_xlabel('Position relative to exon start')
     # ax2.set_xlabel('Position relative to exon end')
     ax1.set_ylabel('Attention weight')
+    ax1.set_xlim(-0.5, 19.5)
+    ax2.set_xlim(-0.5, 19.5)
 
-    ax1.bar(xs, mean[60:80])#, yerr=stderr[:140])
-    ax2.bar(xs, mean[200:220])#, yerr=stderr[140:])
+    ax1.bar(xs, mean[67-10:67+10])#, yerr=stderr[:140])
+    ax2.bar(xs, mean[211-10:211+10])#, yerr=stderr[140:])
 
     # ax1.set_xticks([])
     ax1.xaxis.set_major_formatter(plt.NullFormatter())
     ax2.xaxis.set_major_formatter(plt.NullFormatter())
     no_ticks = 140
-    exon_start, exon_end = 8/20, 10/20
-    intron_end, intron_start = 7/20, 11/20
+    # exon_start, exon_end = 8/20, 10/20
+    # intron_end, intron_start = 7/20, 11/20
     y = -0.02
-    ax1.annotate('intron', xy=(0, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
+    ax1.annotate('intron', xy=(0, y), xycoords='axes fraction', xytext=(0.25, y),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
-    ax1.annotate('intron', xy=(intron_end+0.0175, y), xycoords='axes fraction', xytext=((intron_end+0.0175)/2, y),
+    ax1.annotate('intron', xy=(0.5+0.005, y), xycoords='axes fraction', xytext=(0.25, y),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
-    ax1.annotate('exon', xy=(exon_start-0.045, y), xycoords='axes fraction', xytext=(0.75, y),
+    ax1.annotate('exon', xy=(0.5-0.005, y), xycoords='axes fraction', xytext=(0.75, y),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
     ax1.annotate('exon', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
 
     ax2.annotate('exon', xy=(0, y), xycoords='axes fraction', xytext=(0.25, y),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
-    ax2.annotate('exon', xy=(exon_end+1.5/140, y), xycoords='axes fraction', xytext=(0.25, y),
+    ax2.annotate('exon', xy=(0.5+0.005, y), xycoords='axes fraction', xytext=(0.25, y),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
-    ax2.annotate('intron', xy=(intron_start-0.055, y), xycoords='axes fraction', xytext=(0.75, y),
+    ax2.annotate('intron', xy=(0.5-0.005, y), xycoords='axes fraction', xytext=(0.75, y),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
     ax2.annotate('intron', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
@@ -211,18 +245,37 @@ def heatmap():
     xs = np.arange(-70, 70)
     xticks = np.linspace(-70, 70, 5)
     # grid[4].set_xticks(xs, xticks)
-    line_color = 'red'
-    grid[0].plot([0.5171, 0.5171], [0.05, 0.95], color=line_color, lw=4.5,
+    line_color = 'darkred'
+    grid[0].plot([0.5171, 0.5171], [0.05, 0.95], color=line_color, lw=3.5,
              transform=gcf().transFigure, clip_on=False)
     # grid[0].plot([0., 0.], [0, 1], color=line_color, lw=3.5,
     #          transform=gcf().transFigure, clip_on=False)
-    grid[0].plot([0.025, 0.993], [0.51, 0.51], color=line_color, lw=4.5,
+    grid[0].plot([0.025, 0.993], [0.4975, 0.4975], color=line_color, lw=3.5,
              transform=gcf().transFigure, clip_on=False)
-    grid[4].set_xlabel('Position relative to exon start')
-    grid[5].set_xlabel('Position relative to exon end')
-    grid[6].set_xlabel('Position relative to exon start')
-    grid[7].set_xlabel('Position relative to exon end')
 
+    exon_start, exon_end = 69/140, 71/140
+    intron_end, intron_start = 68/140, 72/140
+
+    for i in range(8): grid[i].set_xticks([])
+    y = -0.0325
+    for i in range(0, 8, 2):
+        grid[i].annotate('intron', xy=(0, y), xycoords='axes fraction', xytext=(0.25, y),
+                    arrowprops=dict(arrowstyle="-", color='black'), ha='center', va='center')
+        grid[i].annotate('intron', xy=(intron_end+1.5/140, y), xycoords='axes fraction', xytext=(0.25, y),
+                    arrowprops=dict(arrowstyle="->", color='black'), ha='center', va='center')
+        grid[i].annotate('exon', xy=(exon_start-1.5/140, y), xycoords='axes fraction', xytext=(0.75, y),
+                    arrowprops=dict(arrowstyle="->", color='black'), ha='center', va='center')
+        grid[i].annotate('exon', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
+                    arrowprops=dict(arrowstyle="-", color='black'), ha='center', va='center')
+    for i in range(1, 8, 2):
+        grid[i].annotate('exon', xy=(0, y), xycoords='axes fraction', xytext=(0.25, y),
+                     arrowprops=dict(arrowstyle="-", color='black'), ha='center', va='center')
+        grid[i].annotate('exon', xy=(exon_end + 1.5 / 140, y), xycoords='axes fraction', xytext=(0.25, y),
+                     arrowprops=dict(arrowstyle="->", color='black'), ha='center', va='center')
+        grid[i].annotate('intron', xy=(intron_start - 1.5 / 140, y), xycoords='axes fraction', xytext=(0.75, y),
+                     arrowprops=dict(arrowstyle="->", color='black'), ha='center', va='center')
+        grid[i].annotate('intron', xy=(1, y), xycoords='axes fraction', xytext=(0.75, y),
+                     arrowprops=dict(arrowstyle="-", color='black'), ha='center', va='center')
     grid[0].patch.set_facecolor('black')
     # grid[0].patch.set_alpha(0.7)
     grid[0].set_facecolor('black')
@@ -233,7 +286,7 @@ def heatmap():
     plt.savefig('attention_heatmap.png', dpi=300, bbox='tight')
     plt.show(dpi=300)
 
-# heatmap()
+heatmap()
 
 def heatmap_rectangle(attn_ws):
     h = 10
@@ -260,7 +313,9 @@ def heatmap_rectangle(attn_ws):
 
 attn_ws_multi_heads = np.load(f'attn_ws_multi_distributed/attn_ws_110.npy')
 mean_attn_ws_multi_heads = np.mean(attn_ws_multi_heads, axis=-1)
-bar_chart(mean_attn_ws_multi_heads)
+# bar_chart(mean_attn_ws_multi_heads)
 
-bar_chart2(mean_attn_ws_multi_heads)
+# bar_chart_not_zoomed(mean_attn_ws_multi_heads)
+#
+# bar_chart_zoomed(mean_attn_ws_multi_heads)
 # heatmap_rectangle(mean_attn_ws_multi_heads)
