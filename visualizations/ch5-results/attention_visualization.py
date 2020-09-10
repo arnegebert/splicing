@@ -148,7 +148,7 @@ def bar_chart_not_zoomed(attn_ws):
     plt.show(dpi=300)
     # print(attn_ws.shape)
 
-def bar_chart_zoomed(attn_ws):
+def bar_chart_zoomed(attn_ws, std=None):
     plt.style.use('seaborn')
     mean, std = np.mean(attn_ws, axis=0), np.std(attn_ws, axis=0)
 
@@ -164,9 +164,14 @@ def bar_chart_zoomed(attn_ws):
     # when nucleotide extraction was still biased
     # ax1.bar(xs, mean[67-10:67+10])
     # ax2.bar(xs, mean[211-10:211+10])
-    ax1.bar(xs, mean[60:80])
-    ax2.bar(xs, mean[200:220])
-
+    if std is not None:
+        ax1.bar(xs, mean[60:80], yerr=std[60:80])
+        ax2.bar(xs, mean[200:220], yerr=std[200:220])
+    else:
+        ax1.bar(xs, mean[60:80],)
+        ax2.bar(xs, mean[200:220],)
+    ax1.set_ylim(0)
+    ax2.set_ylim(0)
     ax1.xaxis.set_major_formatter(plt.NullFormatter())
     ax2.xaxis.set_major_formatter(plt.NullFormatter())
     # exon_start, exon_end = 8/20, 10/20
@@ -316,21 +321,21 @@ def heatmap_rectangle(attn_ws):
     ax.set_yticks([])
     plt.show()
 
-def average_over_runs():
-    ws = []
-    for i in range(9):
-        w = np.load(f'attn_ws_multi_heads/attn_ws_cv_run_id={i}.npy')
-        ws.append(w)
-    ws = np.array(ws)
-    mean = np.mean(ws, axis=0)
-    return mean
+def load_all_runs():
+    ws = [np.load(f'attn_ws_multi_heads/attn_ws_cv_run_id={i}.npy') for i in range(9)]
+    return np.array(ws)
+
+def average_over_runs(ws):
+    return np.mean(ws, axis=0), np.std(ws, axis=0)
 
 def average_over_heads(attn_ws):
     return np.mean(attn_ws, axis=-1)
 attn_ws_multi_heads = np.load(f'attn_ws_multi_heads/attn_ws_cv_run_id=2.npy')
 
-mean_attn = average_over_runs()
-mean_attn = average_over_heads(mean_attn)
+attn = load_all_runs()
+mean_attn = average_over_heads(attn)
+mean_attn, std_attn = average_over_runs(mean_attn)
+
 # attn_ws_multi_heads = np.load(f'attn_ws_multi_heads/attn_ws_cv_run_id=1_epoch=152.npy')
 
 # mean_attn_ws_multi_heads = np.mean(attn_ws_multi_heads, axis=-1)
@@ -338,8 +343,8 @@ mean_attn = average_over_heads(mean_attn)
 
 # bar_chart(mean_attn_ws_multi_heads)
 
-bar_chart_not_zoomed(mean_attn)
+# bar_chart_not_zoomed(mean_attn)
 
-# bar_chart_zoomed(mean_attn)
+bar_chart_zoomed(mean_attn, std_attn)
 # bar_chart_zoomed(mean_attn_ws_multi_heads)
 # heatmap_rectangle(mean_attn_ws_multi_heads)

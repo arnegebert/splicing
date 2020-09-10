@@ -78,25 +78,25 @@ Since the approval process would've taken too long, we can only use the publicly
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/ipscprocess.png} 
 	\caption[test.]{
-		The four high-level steps taken to obtain iPSC cells \cite{img:ipscprocess}:
-		(1) Grow a cell culture of donor cells, (2) transduce the genes associated with reprogramming into the cells via viral vectors, (3) isolate the cells expressing the transduced genes (in red) and culture them according to embryonic stem cell culture and, finally, (4) a small subset of the transfected cells become iPSC cells.
+		The four high-level steps taken to obtain iPSCs \cite{img:ipscprocess}:
+		(1) Grow a cell culture of donor cells, (2) transduce the genes associated with reprogramming into the cells via viral vectors, (3) isolate the cells expressing the transduced genes (in red) and culture them according to embryonic stem cell culture and, finally, (4) a small subset of the transfected cells become iPSCs.
 	}
 	\label{fig:ipscprocess}
 \end{figure}
 
-HipSci provides a large repository of human induced pluripotent stem cell (iPSC) lines. iPSC cells are mature cells which have been reprogrammed to again become immature pluripotent (undetermined) cells. This process is visualized in Figure \ref{fig:ipscprocess}. As iPSC cell lines are not directly obtained from human donors, but rather from building a cell culture based on some initial donor cells, accessing raw RNA-seq reads is not constrained by the same data privacy regulations which prevented access to the raw RNA-seq reads from the GTEx project.
+HipSci provides a large repository of human induced pluripotent stem cell (iPSC) lines. iPSCs are mature cells which have been reprogrammed to again become immature pluripotent (undetermined) cells. This process is visualized in Figure \ref{fig:ipscprocess}. As iPSC lines are not directly obtained from human donors, but rather from building a cell culture based on some initial donor cells, accessing raw RNA-seq reads is not constrained by the same data privacy regulations which prevented access to the raw RNA-seq reads from the GTEx project.
 
 
 Concretely, over 300 cell lines from over 300 donors along with sequencing information based on RNA-seq is publicly available from the HipSci portal. From these we selected two different groups of cell lines:
 \begin{itemize}
 	
-	\item the first group contains 25 biological replicates (that is, samples from different cell lines developed under the same conditions) of sensory neuron cell lines \cite{ipscneurons}. These cell lines were obtained by differentiating iPSC cells to sensory neuron cells.
-	\item the second group contains 20 biological replicates of iPSC cell lines which weren't differentiated to any other cell type. Here care was taken to choose donors from whom at least two different iPSC cell lines were developed.
+	\item the first group contains 25 biological replicates (that is, samples from different cell lines developed under the same conditions) of sensory neuron cell lines \cite{ipscneurons}. These cell lines were obtained by differentiating iPSCs to sensory neuron cells.
+	\item the second group contains 20 biological replicates of iPSC lines which weren't differentiated to any other cell type. Here care was taken to choose donors from whom at least two different iPSC lines were developed.
 	
-	%	iPSC cell lines: the second group of 20 biological replicates were taken from skin-tissue based iPSC cells which weren't differentiated to any other tissue. Here care was taken to choose donors from whom at least two different iPSC cell lines were developed. This allows us to test how well the learned features of the model generalize when applied to another library of the same tissue type from the same individual.
+	%	iPSC lines: the second group of 20 biological replicates were taken from skin-tissue based iPSCs which weren't differentiated to any other tissue. Here care was taken to choose donors from whom at least two different iPSC lines were developed. This allows us to test how well the learned features of the model generalize when applied to another library of the same tissue type from the same individual.
 \end{itemize}
 
-All used iPSC cells were originally obtained from skin cells. 
+All used iPSCs were originally obtained from skin cells. 
 
 Selecting the samples in this way enables us to test cross-condition performance in three ways:
 \begin{itemize}
@@ -116,7 +116,7 @@ The appendix contains the ENA Accession Numbers of the chosen samples in Section
 
 
 %iPSC background probably here:
-%some section about iPSC cells as relevant later on -- might skip all of this:
+%some section about iPSCs as relevant later on -- might skip all of this:
 %The Nobel Prize in Physiology or Medicine of 2012 was awarded to Shinya Yamanaka and Sir John Gurdon "for the discovery that mature cells can be reprogrammed to become pluripotent". Pluripotent cells are cells which can differentiate into other cell types.
 %process: take cell samples, then grow cell culture, make them pluripotent and use the pluripotent cells to differentiate into other ones
 \section{Data processing}\label{sec:dataprocessing}
@@ -251,7 +251,7 @@ Fundamentally, our PSI estimation relies on the formula $PSI = \frac{\#IR}{(\#IR
 	\item GTEx provides access to TPM values for each gene from a sample. Addressing point (a) from \ref{subsubsec:naivepsi}, we obtain the TPM-adjusted read counts via $\#IR^{TPM} = \frac{\#IR}{TPM}$ and $\#ER^{TPM} = \frac{\#ER}{TPM}$. To address spurious reads from lowly-transcribed genes having a disproportionate impact, we only count reads from genes whose TPM is larger than 10. This filters around 84\% of genes which in turn filters around 56\% of the junctions. This is the most stringent filtering step we apply. 
 	
 	%	This is by far the most stringent filtering method we apply, leading to about two-thirds of genes being filtered. This cut-off was chosen so aggressively as data quality is paramount. More details are given in Figure %\ref{fig:tpm_distribution}.
-	\item Adressing point (d) about IRs naturally being more common than ER, we estimate the read length of the RNA-seq reads to be 150 on average \cite{gtex_read_length} and apply the proposed normalization method: $\#IR^{TPM}_{norm} = \frac{\#IR^{TPM}}{(exon length + 149)}$ and $\#ER^{TPM}_{norm} = \frac{\#ER^{TPM}}{149}$.
+	\item Addressing point (d) about IRs naturally being more common than ER, we estimate the read length of the RNA-seq reads to be 150 on average \cite{gtex_read_length} and apply the proposed normalization method: $\#IR^{TPM}_{norm} = \frac{\#IR^{TPM}}{(exon length + 149)}$ and $\#ER^{TPM}_{norm} = \frac{\#ER^{TPM}}{149}$.
 \end{itemize}
 
 Using the normalized \#IR and \#ER of all exons and junctions remaining after filtering, we then compute PSI: $PSI = \frac{\#IR^{TPM}_{norm}}{(\#IR^{TPM}_{norm}+\#ER^{TPM}_{norm})}$. 
@@ -350,7 +350,7 @@ Finally, the obtained LSVs can be visualized using VOILA. See Figure \ref{fig:vo
 
 \begin{figure}
 	\centering\includegraphics[width=0.85\textwidth]{../visualizations/ch4-methods/voila_example.png} 
-	\caption[Four-chamber illustration of the human heart.]{Example output of VOILA while filtering for LSV which only experience exon skipping and no other alternative splicing event. }
+	\caption{Example output of VOILA while filtering for LSV which only experience exon skipping and no other alternative splicing event. }
 	\label{fig:voilaexample}
 \end{figure}
 
@@ -477,15 +477,15 @@ The associated training label for the classification task is the scalar 1 if the
 		%   HipSci MAJIQ & neuron & junction & 90,627 \\
 		%   \hline
 	\end{tabular}
-	\caption{Type, tissue and number of training samples per dataset. Type refers to whether the dataset is intron- or exon-centric. `diff lib' abbreviates that the dataset was taken from the same individual, but a different library and `diff indv' abbreviates that the dataset was taken from a different individual than the first shown HipSci MAJIQ iPSC cell-based dataset. 
+	\caption{Type, tissue and number of training samples per dataset. Type refers to whether the dataset is intron- or exon-centric. `diff lib' abbreviates that the dataset was taken from the same individual, but a different library and `diff indv' abbreviates that the dataset was taken from a different individual than the first shown HipSci MAJIQ iPSC-based dataset. 
 	}
 	\label{table:datasets}
 \end{table}
 % add more statistics now; decision to show the junction results (as majiq also does modelling predominantly on junctions), as i can say that my gtex dataset will have constitutive junctions and no issue with misattributed reads; number of reads
 
-Table \ref{table:datasets} shows the number of training samples in each dataset.%\footnote{We omit the HipSci MAJIQ iPSC cell-based datasets from a different library, but the same individual and from a different individual. We give the complete table in the appendix \ref{app:datasets} } 
+Table \ref{table:datasets} shows the number of training samples in each dataset.%\footnote{We omit the HipSci MAJIQ -based datasets from a different library, but the same individual and from a different individual. We give the complete table in the appendix \ref{app:datasets} } 
 %Among the exon-centric datasets, the HEXEvent dataset contains the most samples, followed by the HipSci MAJIQ, GTEx and HIPSCI MAJIQ datasets. 
-Among the exon-centric datasets, the HEXEvent and HipSci MAJIQ datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. In contrast to the sensory neuron and iPSC cell-based HipSci datasets, the magnitudes of the GTEx-based datasets vary a lot between tissues: the cerebellum tissue dataset contains roughly twice as many training samples as the heart tissue dataset. 
+Among the exon-centric datasets, the HEXEvent and HipSci MAJIQ datasets contain comparatively more training samples because they also contain constitutive non-cassette exons, whereas the other datasets don't. In contrast to the sensory neuron and iPSC-based HipSci datasets, the magnitudes of the GTEx-based datasets vary a lot between tissues: the cerebellum tissue dataset contains roughly twice as many training samples as the heart tissue dataset. 
 On closer investigation, this is because the cerebellum tissue contains 10,000 genes whereas the heart sample only contains 5,000. Surprisingly, the heart tissue is based on 17 million exon-exon junction reads compared to 8 million exon-exon junction reads from the cerebellum tissue sample. The additional reads from the heart sample are concentrated in a few extremely highly expressed genes (e.g. gene ENSG00000198886 is expressed 1000-times as often as the median highly expressed gene) and while this concentration of reads also appear in the cerebellum tissue, it is less extreme.
 
 The same cross-tissue observations also hold for the intron-centric GTEx-based datasets. In general, the intron-centric datasets contain roughly four times more training samples than the exon-centric datasets. This is because they do not only contain junctions of cassette exons (in which case they would contain roughly twice as many training samples as the exon-centric datasets) but contain all non-filtered junctions. 
@@ -503,7 +503,7 @@ The same cross-tissue observations also hold for the intron-centric GTEx-based d
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/dataset_histograms_seaborn.png} 
 	\caption[test.]{
-		Histograms comparing the exon-centric versions of the four fundamentally different training datasets used. The shown GTEx dataset is based on samples from brain cortex tissue and the shown HipSci datasets are based on samples from iPSC cells differentiated to neurons. 
+		Histograms comparing the exon-centric versions of the four fundamentally different training datasets used. The shown GTEx dataset is based on samples from brain cortex tissue and the shown HipSci datasets are based on samples from iPSCs differentiated to neurons. 
 	}
 	\label{fig:datahistograms}
 \end{figure}
@@ -841,12 +841,12 @@ Like in a Seq2Seq model, an RNN-based Encoder is used to capture a representatio
 
 The input to the encoder blocks is a dense 4-dimensional embedding of the one-hot encoded sequences. This dense embedding is the same for each sequence and jointly learned during training. The extra embedding layer is included as previous work \cite{embeddingneeded} has shown that otherwise, the model might suffer from limited generalization performance, caused by the sparsity of the one-hot encoded representations. 
 
-LSTM cells opposed to unmodified RNNs are used as encoder as LSTMs have been shown to be better at retaining information over long sequences and avoiding the vanishing and exploding gradient problems \cite{lstm}. In particular, we use Bidirectional LSTM (BiLSTM) \cite{bidirection} to model that the splicing of an exon likely depends on bi-directionally interacting factors. A separate BiLSTM is used for finding for encoding the exon start and exon end sequence. 
+LSTM cells opposed to unmodified RNNs are used as encoder as LSTMs have been shown to be better at retaining information over long sequences and avoiding the vanishing and exploding gradient problems \cite{lstm}. In particular, we use Bidirectional LSTM (BiLSTM) units \cite{bidirection} to model that the splicing of an exon likely depends on bi-directionally interacting factors. A separate BiLSTM unit is used for finding for encoding the exon start and exon end sequence. 
 
 As this lead to empirically better results, we also introduce a 1D batch normalization layer \cite{batchnormalization} before the attention layer. A dropout layer in the attention head is used for the same reason. 
 
 We pre-empt the results chapter by noting that we only use the extension of multiple attention heads of the three additional modifications of the attention mechanisms we considered. 
-The architecture of our model is visualized in Figure \ref{fig:attnbilstm}. We refer to this new model as Recursive Attentive Splicing Code (RASC). In the experiments section, we validate the choice of introducing the attention mechanism to RASC, by removing it and evaluating the model which only uses the hidden state of the BiLSTMs. We denote this model as Recursive Splicing Code (RSC).
+The architecture of our model is visualized in Figure \ref{fig:attnbilstm}. We refer to this new model as Recursive Attentive Splicing Code (RASC). In the experiments section, we validate the choice of introducing the attention mechanism to RASC, by removing it and evaluating the model which only uses the hidden state of the BiLSTM units. We denote this model as Recursive Splicing Code (RSC).
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/visualizations-AttnBiLSTM.pdf} 
 	\caption{Architecture of RASC. }
