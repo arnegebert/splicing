@@ -25,15 +25,15 @@ def main(config):
     trainer = config.init_obj('trainer', module_trainer)
     folds = 9 if config['cross_validation'] else 1
     test_all, test_low, test_high = [], [], []
-    for i in range(folds):
+    for cv_run_id in range(folds):
         # setup data_loader instances
-        config['data_loader']['args']['cross_validation_seed'] = i
+        config['data_loader']['args']['cross_validation_seed'] = cv_run_id
         data_loader = config.init_obj('data_loader', module_loader)
         valid_data_loader = data_loader.get_valid_and_test_loaders()
 
         # build model architecture, then print to console
         model = config.init_obj('arch', module_arch)
-        if i == 0: logger.info(model)
+        if cv_run_id == 0: logger.info(model)
 
         # get function handles of loss and metrics
         criterion = getattr(module_loss, config['loss'])
@@ -49,7 +49,8 @@ def main(config):
                           config=config,
                           data_loader=data_loader,
                           valid_data_loader=valid_data_loader,
-                          lr_scheduler=lr_scheduler)
+                          lr_scheduler=lr_scheduler,
+                          cv_run_id=cv_run_id)
 
         trainer.train()
 

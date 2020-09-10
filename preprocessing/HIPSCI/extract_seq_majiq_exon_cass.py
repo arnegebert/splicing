@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 import time
 import numpy as np
 from utils import reverse_complement, one_hot_encode_seq, intron_mean, exon_mean, intron_std, exon_std
@@ -36,122 +36,124 @@ d = defaultdict(lambda: 0)
 prev_start1 = 0
 denovo = 0
 
-for ttt in range(-6, 6):
-    counts1, counts2 = defaultdict(lambda: 0), defaultdict(lambda: 0)
-    counter = 10000
-    with open(f'../../majiq/voila/filtered_{sample_name}.tsv') as f:
-        loaded_chrom = 1
-        chrom_seq = load_chrom_seq(loaded_chrom)
+for ttt in range(-4, 4):
+    counts_start, counts_end = defaultdict(lambda: 0), defaultdict(lambda: 0)
+with open(f'../../majiq/voila/filtered_{sample_name}.tsv') as f:
+    loaded_chrom = 1
+    chrom_seq = load_chrom_seq(loaded_chrom)
 
-        for i, line in enumerate(f):
-            if i == 0: continue
-            if i % 1000 == 0: print(f'Line {i}')
-            genename, geneid, lsvid, epsi, stdev, lsvtype, njunc, nexon, denovojunc, \
-            chrom, strand, juncoord, excoords, ircoord, ucsc = line.replace('\n', '').split('\t')
-            denovo += denovojunc.count('1')
+    for i, line in enumerate(f):
+        if i == 0: continue
+        if i % 1000 == 0: print(f'Line {i}')
+        genename, geneid, lsvid, epsi, stdev, lsvtype, njunc, nexon, denovojunc, \
+        chrom, strand, juncoord, excoords, ircoord, ucsc = line.replace('\n', '').split('\t')
+        denovo += denovojunc.count('1')
 
-            coord1, coord2 = juncoord.split(';')
-            idx1, idx2 = coord1.find('-'), coord2.find('-')
-            s1, e1 = int(coord1[:idx1]), int(coord1[idx1 + 1:])
-            s2, e2 = int(coord2[:idx2]), int(coord2[idx2 + 1:])
+        coord1, coord2 = juncoord.split(';')
+        idx1, idx2 = coord1.find('-'), coord2.find('-')
+        s1, e1 = int(coord1[:idx1]), int(coord1[idx1 + 1:])
+        s2, e2 = int(coord2[:idx2]), int(coord2[idx2 + 1:])
 
-            excoord1, excoord2, excoord3 = excoords.split(';')
-            exidx1, exidx2, exidx3 = excoord1.find('-'), excoord2.find('-'), excoord2.find('-')
-            try:
-                ex1start, ex1end = int(excoord1[:exidx1]), int(excoord1[exidx1 + 1:])
-                ex2start, ex2end = int(excoord2[:exidx2]), int(excoord2[exidx2 + 1:])
-                ex3start, ex3end = int(excoord3[:exidx3]), int(excoord3[exidx3 + 1:])
-            except ValueError: continue
+        excoord1, excoord2, excoord3 = excoords.split(';')
+        exidx1, exidx2, exidx3 = excoord1.find('-'), excoord2.find('-'), excoord2.find('-')
+        try:
+            ex1start, ex1end = int(excoord1[:exidx1]), int(excoord1[exidx1 + 1:])
+            ex2start, ex2end = int(excoord2[:exidx2]), int(excoord2[exidx2 + 1:])
+            ex3start, ex3end = int(excoord3[:exidx3]), int(excoord3[exidx3 + 1:])
+        except ValueError: continue
 
-            if s1 == s2:
-                var1 += 1
-                if (e1 - s1) < (e2 - s2):
-                    shorter_first_var1 += 1
-                else:
-                    shorter_second_var1 += 1
-            elif e1 == e2:
-                var2 += 1
-                if (e1 - s1) < (e2 - s2):
-                    shorter_first_var2 += 1
-                else:
-                    shorter_second_var2 += 1
+        if s1 == s2:
+            var1 += 1
+            if (e1 - s1) < (e2 - s2):
+                shorter_first_var1 += 1
             else:
-                var3 += 1
+                shorter_second_var1 += 1
+        elif e1 == e2:
+            var2 += 1
             if (e1 - s1) < (e2 - s2):
-                shorter_first += 1
-            else: shorter_second += 1
-            for coord in [s1, s2, e1, e2]:
-                if str(coord) not in excoords:
-                    junc_not_matching_exon += 1
-                    break
-            # copy from other extract sequence files:
-            # extract sequence
-            if int(chrom) > loaded_chrom:
-                loaded_chrom += 1
-                chrom_seq = load_chrom_seq(loaded_chrom)
-
-            # select the psi whose junction includes the exon
-            psi1, psi2 = map(float, epsi.split(';'))
-            if (e1 - s1) < (e2 - s2):
-                psi = psi1
-            else: psi = psi2
-            window_around_start = chrom_seq[ex2start - introns_bef_start - 1:ex2start + exons_after_start - 1]
-            window_around_end = chrom_seq[ex2end - exons_bef_end - 2:ex2end + introns_after_end - 2]
-            # tried pretty much from -5 bef to +5 after
-            # -3, -1 start with AG common
-            # -3, -1 end with GT common 0.43
-            extr1, extr2 = chrom_seq[ex2start+ttt:ex2start+ttt+2], chrom_seq[ex2end+ttt:ex2end+ttt+2]
-            if strand == '-':
-                window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
-                                                         reverse_complement(window_around_start[::-1])
-                extr1, extr2 = reverse_complement(extr2[::-1]), reverse_complement(extr1[::-1])
-            # # encode & convert to numpy arrays
-            # GT-AG and GC-AG
-            # print(extr1)
-            if counter > 0:
-                counts1[extr1.upper()] += 1
-                counts2[extr2.upper()] += 1
-                counter -= 1
-            if counter == 0:
-                print('-'*40)
-                print('Counts 1')
-                for (k, v) in counts1.items():
-                    percent = v / 10000
-                    if percent > 0.05:
-                        print(f'{k} :{percent:.2f}')
-                print('-'*40)
-                # print('Counts 2')
-                # for (k, v) in counts2.items():
-                #     percent = v/10000
-                #     if percent > 0.05:
-                #         print(f'{k} :{percent:.2f}')
+                shorter_first_var2 += 1
+            else:
+                shorter_second_var2 += 1
+        else:
+            var3 += 1
+        if (e1 - s1) < (e2 - s2):
+            shorter_first += 1
+        else: shorter_second += 1
+        for coord in [s1, s2, e1, e2]:
+            if str(coord) not in excoords:
+                junc_not_matching_exon += 1
                 break
-                import sys
-                sys.exit()
-            # print(extr2)
+        # copy from other extract sequence files:
+        # extract sequence
+        if int(chrom) > loaded_chrom:
+            loaded_chrom += 1
+            chrom_seq = load_chrom_seq(loaded_chrom)
 
-            # print(chrom_seq[ex2end-0:ex2end+2])
-            start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
-            start, end = np.array(start), np.array(end)
+        # select the psi whose junction includes the exon
+        psi1, psi2 = map(float, epsi.split(';'))
+        if (e1 - s1) < (e2 - s2):
+            psi = psi1
+        else: psi = psi2
+        # if strand == '+': continue
+        if strand == '+':
+            window_around_start = chrom_seq[ex2start - introns_bef_start-3:ex2start + exons_after_start -3]
+            window_around_end = chrom_seq[ex2end - exons_bef_end +2:ex2end + introns_after_end +2]
+        elif strand == '-':
+            window_around_start = chrom_seq[ex2start - introns_bef_start -3:ex2start + exons_after_start -3]
+            window_around_end = chrom_seq[ex2end - exons_bef_end + 2:ex2end + introns_after_end +2]
+        # tried pretty much from -5 bef to +5 after
+        # -3, -1 start with AG common
+        # -3, -1 end with GT common 0.43
+        extr1, extr2 = chrom_seq[ex2start+ttt:ex2start+ttt+2], chrom_seq[ex2end+ttt:ex2end+ttt+2]
+        if strand == '-':
+            window_around_start, window_around_end = reverse_complement(window_around_end[::-1]), \
+                                                     reverse_complement(window_around_start[::-1])
+            extr1, extr2 = reverse_complement(extr2[::-1]), reverse_complement(extr1[::-1])
+        extr3, extr4 = window_around_start[70:72], window_around_end[68:70]
 
-            l1, l2, l3 = ex2start - ex1end, ex2end - ex2start, ex3start - ex2end
-            l1, l2, l3 = (l1 - intron_mean) / intron_std, (l2 - exon_mean) / exon_std, (l3 - intron_mean) / intron_std
-            l1s.append(l1)
-            l2s.append(l2)
-            l3s.append(l3)
+        # # encode & convert to numpy arrays
+        # GT-AG and GC-AG
+        # + strand -> -3 offset, - strand -> 0 offset  AG :0.83
+        # + strand -> 0 offset, - strand -> -3 offset  GT :0.84
 
-            lens_and_psi_vector = np.array([l1, l2, l3, psi])
-            start_and_end = np.concatenate((start, end))
-            sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
-            if psi < 0.8:
-                low_exons.append(sample)
-            elif psi < 1:
-                high_exons.append(sample)
-            else:
-                raise Exception('Constitutive exon detected')
-            psis.append(psi)
-        low_psi_exons = np.array(low_exons)
-        high_psi_exons = np.array(high_exons)
+        # print(extr1)
+        target = 1000000
+        if i < target:
+            counts_start[extr3.upper()] += 1
+            counts_end[extr4.upper()] += 1
+        if i == target:
+            print('-'*40)
+            print('Counts 1')
+            for (k, v) in counts_start.items():
+                percent = v / target
+                if percent > 0.05:
+                    print(f'{k} :{percent:.2f}')
+            print('-'*40)
+            break
+        # print(extr2)
+
+        # print(chrom_seq[ex2end-0:ex2end+2])
+        start, end = one_hot_encode_seq(window_around_start), one_hot_encode_seq(window_around_end)
+        start, end = np.array(start), np.array(end)
+
+        l1, l2, l3 = ex2start - ex1end, ex2end - ex2start, ex3start - ex2end
+        l1, l2, l3 = (l1 - intron_mean) / intron_std, (l2 - exon_mean) / exon_std, (l3 - intron_mean) / intron_std
+        l1s.append(l1)
+        l2s.append(l2)
+        l3s.append(l3)
+
+        lens_and_psi_vector = np.array([l1, l2, l3, psi])
+        start_and_end = np.concatenate((start, end))
+        sample = np.concatenate((start_and_end,lens_and_psi_vector.reshape(1,4))).astype(np.float32)
+        if psi < 0.8:
+            low_exons.append(sample)
+        elif psi < 1:
+            high_exons.append(sample)
+        else:
+            raise Exception('Constitutive exon detected')
+        psis.append(psi)
+    low_psi_exons = np.array(low_exons)
+    high_psi_exons = np.array(high_exons)
 
 psis = np.array(psis)
 l1s, l2s, l3s = np.array(l1s), np.array(l2s), np.array(l3s)
@@ -178,8 +180,11 @@ print(f'Number of low PSI exons: {len(low_exons)}')
 print(f'Number of high PSI exons: {len(high_exons)}')
 print(f'Number of cons exons: {len(cons_exons)}')
 
-# np.save(f'{data_path}/{save_to_low}', low_exons)
-# np.save(f'{data_path}/{save_to_high}', high_exons)
+print(f'Most common nucleotides right after exon start: {Counter(counts_start).most_common(1)}')
+print(f'Most common nucleotides right before exon end: {Counter(counts_end).most_common(1)}')
+
+np.save(f'{data_path}/{save_to_low}', low_exons)
+np.save(f'{data_path}/{save_to_high}', high_exons)
 print(f'Runtime {time.time()-startt}')
 
 print(f'Number of junctions where cassette exon is left: {var1}') # 10886

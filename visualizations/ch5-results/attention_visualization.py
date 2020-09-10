@@ -189,7 +189,7 @@ def bar_chart_zoomed(attn_ws):
     # fig.canvas.draw()
 
     plt.tight_layout()
-    plt.savefig('mean_attention_barchart_zoomed.png', dpi=300, bbox='tight')
+    plt.savefig('mean_attention_barchart_zoomed_2.png', dpi=300, bbox='tight')
 
     plt.show(dpi=300)
 
@@ -250,14 +250,14 @@ def heatmap():
              transform=gcf().transFigure, clip_on=False)
     # grid[0].plot([0., 0.], [0, 1], color=line_color, lw=3.5,
     #          transform=gcf().transFigure, clip_on=False)
-    grid[0].plot([0.025, 0.993], [0.4975, 0.4975], color=line_color, lw=3.5,
+    grid[0].plot([0.025, 0.993], [0.495, 0.495], color=line_color, lw=3,
              transform=gcf().transFigure, clip_on=False)
 
     exon_start, exon_end = 69/140, 71/140
     intron_end, intron_start = 68/140, 72/140
 
     for i in range(8): grid[i].set_xticks([])
-    y = -0.0325
+    y = -0.0375
     for i in range(0, 8, 2):
         grid[i].annotate('intron', xy=(0, y), xycoords='axes fraction', xytext=(0.25, y),
                     arrowprops=dict(arrowstyle="-", color='black'), ha='center', va='center')
@@ -284,7 +284,7 @@ def heatmap():
 
     plt.tight_layout()
     plt.savefig('attention_heatmap.png', dpi=300, bbox='tight')
-    plt.show(dpi=300)
+    # plt.show(dpi=300)
 
 heatmap()
 
@@ -311,11 +311,11 @@ def heatmap_rectangle(attn_ws):
 
 
 
-attn_ws_multi_heads = np.load(f'attn_ws_multi_distributed/attn_ws_110.npy')
+attn_ws_multi_heads = np.load(f'attn_ws_multi_last_run/attn_ws_166.npy')
 mean_attn_ws_multi_heads = np.mean(attn_ws_multi_heads, axis=-1)
 # bar_chart(mean_attn_ws_multi_heads)
 
-# bar_chart_not_zoomed(mean_attn_ws_multi_heads)
-#
+bar_chart_not_zoomed(mean_attn_ws_multi_heads)
+# #
 # bar_chart_zoomed(mean_attn_ws_multi_heads)
 # heatmap_rectangle(mean_attn_ws_multi_heads)

@@ -2,6 +2,12 @@ import numpy as np
 import time
 from utils import one_hot_encode_seq, reverse_complement
 
+print(
+"""
+DEPRECATED - CHECK THAT EXON BOUNDARIES ARE CORRECT FOR NUCLEOTIDE EXTRACTION BEFORE USING
+"""
+)
+
 startt = time.time()
 psis = []
 

@@ -3,6 +3,12 @@ import time
 from utils import one_hot_encode_seq, reverse_complement, overlap
 import matplotlib.pyplot as plt
 
+print(
+"""
+DEPRECATED - CHECK THAT EXON BOUNDARIES ARE CORRECT FOR NUCLEOTIDE EXTRACTION BEFORE USING (see majiq neuron)
+\n"""*10
+)
+
 startt = time.time()
 psis = []
 

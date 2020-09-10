@@ -16,10 +16,11 @@ class VanillaTrainer(BaseTrainer):
         # could potentially add cross-validation support here
 
     def set_param(self, model, criterion, metric_ftns, optimizer, config, data_loader,
-                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False):
+                 valid_data_loader=None, lr_scheduler=None, len_epoch=None, four_seq=False, cv_run_id=0):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.data_loader = data_loader
+        self.cv_run_id = cv_run_id
         if len_epoch is None:
             # epoch-based training
             self.len_epoch = len(self.data_loader)
@@ -153,10 +154,10 @@ class VanillaTrainer(BaseTrainer):
             pred = self.model(seqs, lens)
             if self.attention:
                 pred, attn_ws = pred
-            #     attn_ws = attn_ws.data.cpu().numpy()
-            #     attn_ws_b.append(attn_ws)
-            #     databs = data.data.cpu().numpy()
-            #     datab.append(databs)
+                attn_ws = attn_ws.data.cpu().numpy()
+                attn_ws_b.append(attn_ws)
+                databs = data.data.cpu().numpy()
+                datab.append(databs)
 
             loss = self.criterion(pred, target)
 
@@ -171,14 +172,17 @@ class VanillaTrainer(BaseTrainer):
                 except ValueError as e:
                     self.logger.info(e)
                     continue
-        # if self.attention and metrics == self.test_all_metrics:
-        #     attn_ws_b = np.concatenate(attn_ws_b, axis=0)
-        #     for attnw in sum(np.mean(attn_ws_b[:, :140], axis=0)):
-        #         self.logger.info(f'{attnw:.2f}')
-            # if epoch == 50:
-            #     np.save(f'test_all_data.npy', np.concatenate(datab, axis=0))
-            # np.save(f'attn_ws_{epoch}.npy', attn_ws_b)
-        # del attn_ws_b
+        if self.attention and metrics == self.test_all_metrics:
+            attn_ws_b = np.concatenate(attn_ws_b, axis=0)
+            for attnw in sum(np.mean(attn_ws_b[:, :140], axis=0)):
+                self.logger.info(f'{attnw:.2f}')
+            if epoch == 50 and self.cv_run_id == 1:
+                np.save(f'test_all_data.npy', np.concatenate(datab, axis=0))
+            if self.cv_run_id == 1:
+                np.save(f'attn_ws_cv_run_id={self.cv_run_id}_epoch={epoch}.npy', attn_ws_b)
+            else:
+                np.save(f'attn_ws_cv_run_id={self.cv_run_id}.npy', attn_ws_b)
+        del attn_ws_b
         predictions, targets = torch.cat(predictions, dim=0).cpu().numpy(), torch.cat(targets, dim=0).cpu().numpy()
         return predictions, targets
 

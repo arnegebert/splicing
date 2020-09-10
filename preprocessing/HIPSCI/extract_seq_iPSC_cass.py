@@ -4,6 +4,12 @@ import numpy as np
 from utils import reverse_complement, one_hot_encode_seq, intron_mean, exon_mean, intron_std, exon_std
 import matplotlib.pyplot as plt
 
+print(
+"""
+DEPRECATED - CHECK THAT EXON BOUNDARIES ARE CORRECT FOR NUCLEOTIDE EXTRACTION BEFORE USING (see majiq neuron)
+\n"""*10
+)
+
 startt = time.time()
 # want to load chromosome as one giant string
 def load_chrom_seq(chrom):
