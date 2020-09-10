@@ -613,12 +613,13 @@ The sequence which an attention head focusses on generally does not change after
 %	\caption{Mean attention weights averaged over all test samples and all four attention heads. }
 %	\label{fig:mean_attn}
 %\end{figure}
-Averaging the attention weights over all heads at the end of training, we visualized the most attended to parts of the input sequence in \ref{fig:mean_attn}.
+Averaging the attention weights over all heads over all cross-validation runs at the end of training, we visualize the 20 nucleotides around the exon and intron boundaries in \ref{fig:mean_attn}. The areas around the boundaries are the most attended to parts of the sequences (we give the attention distribution over the full sequences in the appendix in Figure \ref{app:mean_attn}).
 %Figure \ref{fig:mean_attn} shows what part of the input sequence RASC commonly attends to. 
-Clearly, motifs directly around the exon start and exon end are the most attended to. 
+%Clearly, motifs directly around the exon start and exon end are the most attended to. 
+
 
 %TODO now this is a job for Liz and Wil
-The bar chart suggests that more total attention is paid to the end, rather than the start sequence. However, this pattern is reversed for other runs of the models and likely just a consequence of three heads focusing on the end sequence in the particular training run which is shown. Additionally, note that the different attention heads might be weighted differently by the unifying matrix $W^O$. 
+%The bar chart suggests that more total attention is paid to the end, rather than the start sequence. However, this pattern is reversed for other runs of the models and likely just a consequence of three heads focusing on the end sequence in the particular training run which is shown. Additionally, note that the different attention heads might be weighted differently by the unifying matrix $W^O$. 
 
 
 %\begin{figure}

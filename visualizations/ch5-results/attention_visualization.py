@@ -119,22 +119,25 @@ def bar_chart_not_zoomed(attn_ws):
     ax1.xaxis.set_major_formatter(plt.NullFormatter())
     ax2.xaxis.set_major_formatter(plt.NullFormatter())
 
+    # from when nucleotide extraction was still not perfect
     exon_start, exon_end = 68/140, 70/140
     intron_end, intron_start = 67/140, 71/140
+    exon_start, exon_end = 0.5, 0.5
+    intron_end, intron_start = 0.5, 0.5
     ax1.annotate('intron', xy=(0, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
-    ax1.annotate('intron', xy=(intron_end+1.5/140, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+    ax1.annotate('intron', xy=(intron_end+1/140, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
-    ax1.annotate('exon', xy=(exon_start-1.5/140, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+    ax1.annotate('exon', xy=(exon_start-1/140, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
     ax1.annotate('exon', xy=(1, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
 
     ax2.annotate('exon', xy=(0, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
-    ax2.annotate('exon', xy=(exon_end+1.5/140, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
+    ax2.annotate('exon', xy=(exon_end+1/140, -0.025), xycoords='axes fraction', xytext=(0.25, -0.025),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
-    ax2.annotate('intron', xy=(intron_start-1.5/140, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
+    ax2.annotate('intron', xy=(intron_start-1/140, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
                 arrowprops=dict(arrowstyle="->", color='b'), ha='center', va='center')
     ax2.annotate('intron', xy=(1, -0.025), xycoords='axes fraction', xytext=(0.75, -0.025),
                 arrowprops=dict(arrowstyle="-", color='b'), ha='center', va='center')
@@ -158,13 +161,14 @@ def bar_chart_zoomed(attn_ws):
     ax1.set_xlim(-0.5, 19.5)
     ax2.set_xlim(-0.5, 19.5)
 
-    ax1.bar(xs, mean[67-10:67+10])#, yerr=stderr[:140])
-    ax2.bar(xs, mean[211-10:211+10])#, yerr=stderr[140:])
+    # when nucleotide extraction was still biased
+    # ax1.bar(xs, mean[67-10:67+10])
+    # ax2.bar(xs, mean[211-10:211+10])
+    ax1.bar(xs, mean[60:80])
+    ax2.bar(xs, mean[200:220])
 
-    # ax1.set_xticks([])
     ax1.xaxis.set_major_formatter(plt.NullFormatter())
     ax2.xaxis.set_major_formatter(plt.NullFormatter())
-    no_ticks = 140
     # exon_start, exon_end = 8/20, 10/20
     # intron_end, intron_start = 7/20, 11/20
     y = -0.02
@@ -189,7 +193,7 @@ def bar_chart_zoomed(attn_ws):
     # fig.canvas.draw()
 
     plt.tight_layout()
-    plt.savefig('mean_attention_barchart_zoomed_2.png', dpi=300, bbox='tight')
+    plt.savefig('mean_attention_barchart_zoomed.png', dpi=300, bbox='tight')
 
     plt.show(dpi=300)
 
@@ -253,8 +257,11 @@ def heatmap():
     grid[0].plot([0.025, 0.993], [0.495, 0.495], color=line_color, lw=3,
              transform=gcf().transFigure, clip_on=False)
 
+    # 1.5/140
     exon_start, exon_end = 69/140, 71/140
     intron_end, intron_start = 68/140, 72/140
+    exon_start, exon_end = 0.5, 0.5
+    intron_end, intron_start = 0.5, 0.5
 
     for i in range(8): grid[i].set_xticks([])
     y = -0.0375
@@ -286,7 +293,7 @@ def heatmap():
     plt.savefig('attention_heatmap.png', dpi=300, bbox='tight')
     # plt.show(dpi=300)
 
-heatmap()
+# heatmap()
 
 def heatmap_rectangle(attn_ws):
     h = 10
@@ -309,13 +316,30 @@ def heatmap_rectangle(attn_ws):
     ax.set_yticks([])
     plt.show()
 
+def average_over_runs():
+    ws = []
+    for i in range(9):
+        w = np.load(f'attn_ws_multi_heads/attn_ws_cv_run_id={i}.npy')
+        ws.append(w)
+    ws = np.array(ws)
+    mean = np.mean(ws, axis=0)
+    return mean
+
+def average_over_heads(attn_ws):
+    return np.mean(attn_ws, axis=-1)
+attn_ws_multi_heads = np.load(f'attn_ws_multi_heads/attn_ws_cv_run_id=2.npy')
+
+mean_attn = average_over_runs()
+mean_attn = average_over_heads(mean_attn)
+# attn_ws_multi_heads = np.load(f'attn_ws_multi_heads/attn_ws_cv_run_id=1_epoch=152.npy')
+
+# mean_attn_ws_multi_heads = np.mean(attn_ws_multi_heads, axis=-1)
 
 
-attn_ws_multi_heads = np.load(f'attn_ws_multi_last_run/attn_ws_166.npy')
-mean_attn_ws_multi_heads = np.mean(attn_ws_multi_heads, axis=-1)
 # bar_chart(mean_attn_ws_multi_heads)
 
-bar_chart_not_zoomed(mean_attn_ws_multi_heads)
-# #
+bar_chart_not_zoomed(mean_attn)
+
+# bar_chart_zoomed(mean_attn)
 # bar_chart_zoomed(mean_attn_ws_multi_heads)
 # heatmap_rectangle(mean_attn_ws_multi_heads)
