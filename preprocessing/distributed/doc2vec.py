@@ -2,6 +2,10 @@ import math
 import gensim.models
 import time
 
+"""
+Script used to pre-train doc2vec model on human genome (was for pre-training the doc2vec component in the thesis)
+"""
+
 sentence_len = 30000
 continue_training = False
 epochs = 5
@@ -44,7 +48,6 @@ class HumanGenomeCorpus(object):
                 doc_id += 1
         print(f'Number of documents: {doc_id+1}')
 
-# w o w
 # takes 11 s for 19-23 if I give a list
 # takes 49 s for 19-23 if I use a generator
 

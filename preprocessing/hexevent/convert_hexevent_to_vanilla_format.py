@@ -1,5 +1,9 @@
 import numpy as np
 
+"""
+Helper script to convert original DSC data to the 'standard' Vanilla format I use for the data
+"""
+
 src = '../../data/hexevent'
 trgt = '../../data/hexevent'
 

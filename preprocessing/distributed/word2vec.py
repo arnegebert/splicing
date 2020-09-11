@@ -2,6 +2,9 @@ import math
 import gensim.models
 import time
 
+"""
+Script used to train word2vec model on human genome (was never used in the work)
+"""
 sentence_len = 30000
 continue_training = False
 epochs = 5

@@ -1,6 +1,6 @@
 import csv
 
-
+# helper script to filter for donor who has tissue samples from brain cortex, cerebellum and heart
 
 path_annotation = '../../data/gtex_origin/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
 tissues = ['Brain - Cortex', 'Brain - Cerebellum', 'Heart - Left Ventricle']
