@@ -14,7 +14,6 @@ from sklearn.metrics import roc_curve, auc
 
 def generate_permutations(letters):
 
-
     def rec(all, curr, i):
         if i == len(letters)-1:
             all.append(list(curr))

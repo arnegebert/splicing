@@ -1,7 +1,7 @@
 from utils import timer
 
 geneid_to_juncs = dict()
-builder_dir = '../builder_not_neuron'
+builder_dir = '../builder_ipsc'
 
 @timer
 def build_hash_table(builder_dir=builder_dir):

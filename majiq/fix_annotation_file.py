@@ -1,5 +1,7 @@
-
-
+"""
+My BAM files denote chromosome 1 as 'chr1' etc and my gff3 file originally just said '1' instead
+-> changing this here
+"""
 lines = []
 with open('Homo_sapiens.GRCh38.100.chr.gff3') as f:
     for line in f:

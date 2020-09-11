@@ -3,7 +3,7 @@ from utils import timer
 juncs = []
 nproblematic_jstart = 0
 nproblematic_jend = 0
-builder_dir = '../builder_not_neuron'
+builder_dir = '../builder_ipsc'
 
 with open(f'{builder_dir}/constitutive_junctions.tsv') as f:
     for i, line in enumerate(f):

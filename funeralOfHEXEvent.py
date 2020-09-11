@@ -12,6 +12,11 @@ from torch.optim import Adam, RMSprop
 from sklearn import metrics
 import time
 
+"""
+This script contains the code to train the MLPs with 20/100 parameters who manage to 'solve' the HEXEvent dataset just 
+taking the length features as input. 
+"""
+
 start = time.time()
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f'Training with device={device}')
@@ -72,11 +77,11 @@ print(model.__str__())
 # optimizer = Adam(model.parameters(), lr=lr, weight_decay=0, amsgrad=True)
 optimizer = RMSprop(model.parameters(), lr=lr)
 
-# original data from DSC
+# original data from DSC paper; can be downloaded online
 x_cons_data = np.load('data/hexevent/x_cons_data.npy').astype(np.float32)
 hx_cas_data = np.load('data/hexevent/x_cas_data_high.npy').astype(np.float32)
 lx_cas_data = np.load('data/hexevent/x_cas_data_low.npy').astype(np.float32)
-# setting 'psi' of constitutive data to 1
+# setting 'psi' of constitutive data to 1 (this is a quirk of DSC paper's data format)
 x_cons_data[:, -1, 4] = 1
 
 # pre-processing / shuffling methods taken from DSC GitHub

@@ -7,6 +7,9 @@ import model.metric as module_metric
 import model.models as module_arch
 from parse_config import ConfigParser
 
+"""
+Never used during the project
+"""
 
 def main(config):
     logger = config.get_logger('test')

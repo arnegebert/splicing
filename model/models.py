@@ -6,9 +6,8 @@ import torch.nn.functional as F
 
 from base import BaseModel
 
-# exact replication of the model from DSC
 class DSC(BaseModel):
-
+    """ DSC; exactly replicated (same number of parameters) model from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6722613/ """
     def __init__(self, use_lens=True):
         self.use_lens = use_lens
         super().__init__()
@@ -51,20 +50,6 @@ class DSC(BaseModel):
         # reshape because 1D convolutions expect [B, C, L] dimensions
         start, end = start.view(-1, 4, 140), end.view(-1, 4, 140)
 
-        # # 4, 140
-        # x = F.relu(self.conv1_drop_start(self.conv1_start(start)))
-        # # [32, 134]
-        # x = F.max_pool1d(x, 2, stride=2)
-        # # 32, 67
-        # x = F.relu(self.conv2_drop_start(self.conv2_start(x)))
-        # # 8, 64
-        # x = F.max_pool1d(x, 2, stride=2)
-        # # 8, 32
-        # x = F.relu(self.conv3_drop_start(self.conv3_start(x)))
-        # # 8, 30
-        # x = F.max_pool1d(x, 2, stride=2)
-        # # 8, 15
-
         x = F.max_pool1d(F.relu(self.conv1_drop_start(self.conv1_start(start))), 2, stride=2)
         x = F.max_pool1d(F.relu(self.conv2_drop_start(self.conv2_start(x))), 2, stride=2)
         x = F.max_pool1d(F.relu(self.conv3_drop_start(self.conv3_start(x))), 2, stride=2)
@@ -81,105 +66,9 @@ class DSC(BaseModel):
 
         return y
 
-
-class DSC_4_SEQ(BaseModel):
-
-    def __init__(self):
-        super().__init__()
-
-        self.fc_in = 15*8*4 + 3
-        # sequence before start
-        self.conv1_bef_start = nn.Conv1d(4, 32, kernel_size=7)
-        torch.nn.init.xavier_uniform_(self.conv1_bef_start.weight)
-        self.conv1_drop_bef_start = nn.Dropout(0.2)
-
-        self.conv2_bef_start = nn.Conv1d(32, 8, kernel_size=4)
-        torch.nn.init.xavier_uniform_(self.conv2_bef_start.weight)
-        self.conv2_drop_bef_start = nn.Dropout(0.2)
-
-        self.conv3_bef_start = nn.Conv1d(8, 8, kernel_size=3)
-        torch.nn.init.xavier_uniform_(self.conv3_bef_start.weight)
-        self.conv3_drop_bef_start = nn.Dropout(0.2)
-
-        # start sequence
-        self.conv1_start = nn.Conv1d(4, 32, kernel_size=7)
-        torch.nn.init.xavier_uniform_(self.conv1_start.weight)
-        self.conv1_drop_start = nn.Dropout(0.2)
-
-        self.conv2_start = nn.Conv1d(32, 8, kernel_size=4)
-        torch.nn.init.xavier_uniform_(self.conv2_start.weight)
-        self.conv2_drop_start = nn.Dropout(0.2)
-
-        self.conv3_start = nn.Conv1d(8, 8, kernel_size=3)
-        torch.nn.init.xavier_uniform_(self.conv3_start.weight)
-        self.conv3_drop_start = nn.Dropout(0.2)
-
-        # end conv blocks here...
-        self.conv1_end = nn.Conv1d(4, 32, kernel_size=7)
-        torch.nn.init.xavier_uniform_(self.conv1_end.weight)
-        self.conv1_drop_end = nn.Dropout(0.2)
-
-        self.conv2_end = nn.Conv1d(32, 8, kernel_size=4)
-        torch.nn.init.xavier_uniform_(self.conv2_end.weight)
-        self.conv2_drop_end = nn.Dropout(0.2)
-
-        self.conv3_end = nn.Conv1d(8, 8, kernel_size=3)
-        torch.nn.init.xavier_uniform_(self.conv3_end.weight)
-        self.conv3_drop_end = nn.Dropout(0.2)
-
-        # end conv blocks here...
-        self.conv1_after_end = nn.Conv1d(4, 32, kernel_size=7)
-        torch.nn.init.xavier_uniform_(self.conv1_after_end.weight)
-        self.conv1_drop_after_end = nn.Dropout(0.2)
-
-        self.conv2_after_end = nn.Conv1d(32, 8, kernel_size=4)
-        torch.nn.init.xavier_uniform_(self.conv2_after_end.weight)
-        self.conv2_drop_after_end = nn.Dropout(0.2)
-
-        self.conv3_after_end = nn.Conv1d(8, 8, kernel_size=3)
-        torch.nn.init.xavier_uniform_(self.conv3_after_end.weight)
-        self.conv3_drop_after_end = nn.Dropout(0.2)
-
-        self.fc1 = nn.Linear(self.fc_in, 64)
-        self.drop_fc = nn.Dropout(0.5)
-        self.fc2 = nn.Linear(64, 1)
-
-    def forward(self, seqs, lens):
-        # [128, 2, 142, 4] or [128, 2, 140, 4]
-        # lens = torch.zeros_like(lens)
-        bef_start, start, end, after_end = seqs[:, 0], seqs[:, 1], seqs[:, 2], seqs[:, 3]
-        bef_start, start, end, after_end = bef_start.view(-1, 4, 140), start.view(-1, 4, 140), \
-                                           end.view(-1, 4, 140), after_end.view(-1, 4, 140)
-
-        x = F.max_pool1d(F.relu(self.conv1_drop_bef_start(self.conv1_bef_start(bef_start))), 2, stride=2)
-        x = F.max_pool1d(F.relu(self.conv2_drop_bef_start(self.conv2_bef_start(x))), 2, stride=2)
-        x = F.max_pool1d(F.relu(self.conv3_drop_bef_start(self.conv3_bef_start(x))), 2, stride=2)
-
-        xx = F.max_pool1d(F.relu(self.conv1_drop_start(self.conv1_start(start))), 2, stride=2)
-        xx = F.max_pool1d(F.relu(self.conv2_drop_start(self.conv2_start(xx))), 2, stride=2)
-        xx = F.max_pool1d(F.relu(self.conv3_drop_start(self.conv3_start(xx))), 2, stride=2)
-
-        xxx = F.max_pool1d(F.relu(self.conv1_drop_end(self.conv1_end(end))), 2, stride=2)
-        xxx = F.max_pool1d(F.relu(self.conv2_drop_end(self.conv2_end(xxx))), 2, stride=2)
-        xxx = F.max_pool1d(F.relu(self.conv3_drop_end(self.conv3_end(xxx))), 2, stride=2)
-
-        xxxx = F.max_pool1d(F.relu(self.conv1_drop_after_end(self.conv1_after_end(after_end))), 2, stride=2)
-        xxxx = F.max_pool1d(F.relu(self.conv2_drop_after_end(self.conv2_after_end(xxxx))), 2, stride=2)
-        xxxx = F.max_pool1d(F.relu(self.conv3_drop_after_end(self.conv3_after_end(xxxx))), 2, stride=2)
-
-        feats = torch.cat((x, xx, xxx, xxxx), dim=1)
-        feats = feats.view(-1, self.fc_in-3)
-        feats = torch.cat((feats, lens), dim=1)
-        y = self.drop_fc(F.relu(self.fc1(feats)))
-        y = torch.sigmoid(self.fc2(y))
-
-        return y
-
-# 1 layers = seems best, as high as 85.8, fastest to train
-# 2 layers = slow to train, stop at 85 after 63 epochs
-# 3 layers = stopped after 20 epochs took like 20 min and it was still only at 82
 # 19141 parameters
 class BiLSTM(BaseModel):
+    """Base BiLSTM model without attention (performs very poorly) """
     def __init__(self, three_len_feats=True):
         super().__init__()
         self.three_feats = three_len_feats
@@ -224,9 +113,37 @@ class BiLSTM(BaseModel):
         y = torch.sigmoid(self.fc2(y))
         return y
 
+
+# 512 neurons in hidden layers still overfits
+# 256 neurons with dropout 0.2/0.5 still overfits
+# 128/64 with dropout=0.5 overfits
+# 64/16 d=0.5 just bad; d=0.2 overfits
+# lens as input are again a game changer...
+class MLP2(BaseModel):
+    """Model used in conjunction with D2V embeddings"""
+    def __init__(self, use_lens=True):
+        super().__init__()
+        self.use_lens = use_lens
+        self.fc1 = nn.Linear(200+3, 32)
+        self.fc2 = nn.Linear(32, 8)
+        self.fc3 = nn.Linear(8, 1)
+        self.drop_fc1 = nn.Dropout(0.2)
+        self.drop_fc2 = nn.Dropout(0.2)
+
+    def forward(self, d2v_feats, lens):
+        if not self.use_lens: lens = torch.zeros_like(lens)
+        # [B, 200]
+        feats = torch.cat((d2v_feats, lens), dim=1)
+        x = F.relu(self.drop_fc1(self.fc1(feats)))
+        # x = F.relu(self.drop_fc1(self.fc1(d2v_feats)))
+        x  = F.relu(self.drop_fc2(self.fc2(x)))
+        x = torch.sigmoid(self.fc3(x))
+        return x
+
 class AttnBiLSTM(BaseModel):
     def __init__(self, LSTM_dim=50, fc_dim=128, attn_dim=100, conv_size=3, attn_dropout=0.4, n_heads=4, head_dim=50,
                  seq_length=140, fc_dropout=0.5, attn_mode='heads', use_lens=True):
+        """ This is RASC. """
         super().__init__()
         assert conv_size % 2 == 1, "Only uneven convolution sizes allowed because uneven conv same padding support implemented"
         self.conv_size = conv_size
@@ -253,6 +170,7 @@ class AttnBiLSTM(BaseModel):
         self.lstm2 = nn.LSTM(input_size=4, hidden_size=self.LSTM_dim//2,
                              bidirectional=True, batch_first=True)
 
+        # combination of extensions which could be tried
         if attn_mode == 'single_head':
             self.attention = AttentionBlock(LSTM_dim, attn_dim, attn_dropout)
         elif attn_mode == 'no_query':
@@ -611,106 +529,4 @@ class AttentionBlockWithoutQueryWithConvWithHeads(BaseModel):
         z = self.heads_unifier(zs)
         return z, attn_ws
 
-# overfitting AS FUCK
-class MLP(BaseModel):
-    def __init__(self):
-        super().__init__()
 
-        self.fc1 = nn.Linear(200, 1024)
-        self.fc2 = nn.Linear(1024, 1024)
-        self.fc3 = nn.Linear(1024, 1)
-        self.drop_fc1 = nn.Dropout(0.2)
-        self.drop_fc2 = nn.Dropout(0.2)
-
-    def forward(self, d2v_feats, lens):
-        # [B, 100] input
-
-        # [128, 142, 4] or [128, 140, 4]
-        x = F.relu(self.drop_fc1(self.fc1(d2v_feats)))
-        x  = F.relu(self.drop_fc2(self.fc2(x)))
-        x = torch.sigmoid(self.fc3(x))
-        return x
-
-# 512 neurons in hidden layers still overfits
-# 256 neurons with dropout 0.2/0.5 still overfits
-# 128/64 with dropout=0.5 overfits
-# 64/16 d=0.5 just bad; d=0.2 overfits
-# lens as input are again a fucking game changer...
-class MLP2(BaseModel):
-    def __init__(self, use_lens=True):
-        super().__init__()
-        self.use_lens = use_lens
-        self.fc1 = nn.Linear(200+3, 32)
-        self.fc2 = nn.Linear(32, 8)
-        self.fc3 = nn.Linear(8, 1)
-        self.drop_fc1 = nn.Dropout(0.2)
-        self.drop_fc2 = nn.Dropout(0.2)
-
-    def forward(self, d2v_feats, lens):
-        if not self.use_lens: lens = torch.zeros_like(lens)
-        # [B, 200]
-        feats = torch.cat((d2v_feats, lens), dim=1)
-        x = F.relu(self.drop_fc1(self.fc1(feats)))
-        # x = F.relu(self.drop_fc1(self.fc1(d2v_feats)))
-        x  = F.relu(self.drop_fc2(self.fc2(x)))
-        x = torch.sigmoid(self.fc3(x))
-        return x
-
-# ok, still a bit of overfitting, but just worse than MLP2
-# AUC ~83.5 with 64, d=0.2
-class MLP3(BaseModel):
-    def __init__(self):
-        super().__init__()
-
-        self.fc1 = nn.Linear(200+3, 16)
-        self.fc2 = nn.Linear(16, 1)
-        self.drop_fc1 = nn.Dropout(0.2)
-
-    def forward(self, d2v_feats, lens):
-        # [B, 100] input
-
-        # [B, 200]
-        # lens = torch.zeros_like(lens)
-        #d2v_feats = torch.zeros_like(d2v_feats)
-        feats = torch.cat((d2v_feats, lens), dim=1)
-        x = F.relu(self.drop_fc1(self.fc1(feats)))
-        x = torch.sigmoid(self.fc2(x))
-        return x
-
-class MLP4(BaseModel):
-    def __init__(self):
-        super().__init__()
-
-        self.fc1 = nn.Linear(200+3, 1)
-        self.drop_fc1 = nn.Dropout(0.35)
-
-    def forward(self, d2v_feats, lens):
-        # [B, 100] input
-
-        # [B, 200]
-        feats = torch.cat((d2v_feats, lens), dim=1)
-        x = torch.sigmoid(self.fc1(feats))
-        # x = torch.sigmoid(self.drop_fc1(self.fc1(feats)))
-        # x = (self.fc2(x))
-        return x
-
-class MLP_4_SEQ(BaseModel):
-    def __init__(self):
-        super().__init__()
-
-        self.fc1 = nn.Linear(400+3, 32)
-        self.fc2 = nn.Linear(32, 8)
-        self.fc3 = nn.Linear(8, 1)
-        self.drop_fc1 = nn.Dropout(0.2)
-        self.drop_fc2 = nn.Dropout(0.2)
-
-    def forward(self, d2v_feats, lens):
-        # [B, 100] input
-
-        # [B, 200]
-        feats = torch.cat((d2v_feats, lens), dim=1)
-        x = F.relu(self.drop_fc1(self.fc1(feats)))
-        # x = F.relu(self.drop_fc1(self.fc1(d2v_feats)))
-        x  = F.relu(self.drop_fc2(self.fc2(x)))
-        x = torch.sigmoid(self.fc3(x))
-        return x

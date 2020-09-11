@@ -44,10 +44,10 @@ source env/bin/activate
 MAJIQ Buider
 ---
 Neuron data:
-majiq build fix_Homo_sapiens.GRCh38.100.gff3 -c majiq.config -j 8 -o builder/ --mem-profile --dump-constitutive 
+majiq build fix_Homo_sapiens.GRCh38.100.gff3 -c neuron.config -j 8 -o builder/ --mem-profile --dump-constitutive 
 
-Not Neuron data:
-majiq build fix_Homo_sapiens.GRCh38.100.gff3 -c not_neuron.config -j 8 -o builder_not_neuron/ --mem-profile --dump-constitutive 
+iPSC data:
+majiq build fix_Homo_sapiens.GRCh38.100.gff3 -c ipsc.config -j 8 -o builder_ipsc/ --mem-profile --dump-constitutive 
 
 
 # inter-majiq processing of single samples
@@ -58,17 +58,17 @@ voila tsv builder/splicegraph.sql psi/all.psi.voila -f voila/all.tsv
 voila view builder/splicegraph.sql psi/all.psi.voila
 
 
-majiq psi builder_not_neuron/bezi1.majiq -j 4 -o psi_not_neuron/ -n bezi1
-majiq psi builder_not_neuron/bezi2.majiq -j 4 -o psi_not_neuron/ -n bezi2
-majiq psi builder_not_neuron/lexy2.majiq -j 4 -o psi_not_neuron/ -n lexy2
+majiq psi builder_ipsc/bezi1.majiq -j 4 -o psi_ipsc/ -n bezi1
+majiq psi builder_ipsc/bezi2.majiq -j 4 -o psi_ipsc/ -n bezi2
+majiq psi builder_ipsc/lexy2.majiq -j 4 -o psi_ipsc/ -n lexy2
 
-voila tsv builder_not_neuron/splicegraph.sql psi_not_neuron/bezi1.psi.voila -f voila/bezi1.tsv
-voila tsv builder_not_neuron/splicegraph.sql psi_not_neuron/bezi2.psi.voila -f voila/bezi2.tsv
-voila tsv builder_not_neuron/splicegraph.sql psi_not_neuron/lexy2.psi.voila -f voila/lexy2.tsv
+voila tsv builder_ipsc/splicegraph.sql psi_ipsc/bezi1.psi.voila -f voila/bezi1.tsv
+voila tsv builder_ipsc/splicegraph.sql psi_ipsc/bezi2.psi.voila -f voila/bezi2.tsv
+voila tsv builder_ipsc/splicegraph.sql psi_ipsc/lexy2.psi.voila -f voila/lexy2.tsv
 
-voila view builder_not_neuron/splicegraph.sql psi_not_neuron/bezi1.psi.voila
-voila view builder_not_neuron/splicegraph.sql psi_not_neuron/bezi2.psi.voila
-voila view builder_not_neuron/splicegraph.sql psi_not_neuron/lexy2.psi.voila
+voila view builder_ipsc/splicegraph.sql psi_ipsc/bezi1.psi.voila
+voila view builder_ipsc/splicegraph.sql psi_ipsc/bezi2.psi.voila
+voila view builder_ipsc/splicegraph.sql psi_ipsc/lexy2.psi.voila
 
 
 

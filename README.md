@@ -8,6 +8,10 @@ low / high = lowly / highly included non-constitutive cassette exons (or junctio
 
 Config files for the experiments are named as ```<dataset>_<datatype>_<other-special-conditons>_<model>.config``` and be found in the ```\config```-folder.
 
+Standard data format ('Vanilla format') used among all my datasets:  
+A single training sample has the dimensions [281, 4]:  
+- the first 280 rows are the one-hot encoded nucleotides (1-140 = start sequence, 141-280 = end sequence)  
+- row 281 = l1, l2, l3, PSI where l1 = length of intron to the left of the exon, l2 = length of exon itself, l3 = length of intron to the right
 
 The README below is copied from the PyTorch Project Template and will go into more detail about the repo structure. 
 

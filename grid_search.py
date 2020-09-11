@@ -11,6 +11,10 @@ from parse_config import ConfigParser
 import time
 import itertools
 
+"""
+Used during project to optimize RASC parameters, but deprecated
+"""
+
 # fix random seeds for reproducibility
 SEED = 0
 torch.manual_seed(SEED)
