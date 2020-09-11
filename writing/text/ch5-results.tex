@@ -196,9 +196,11 @@ The performance across rarely and highly included junctions is less disparate th
 	\label{table:gtex_junc_nolens}
 \end{table}
 
-As model performance is more promising than on the GTEx-based exon-centric datasets, we validate that this isn't due to an overreliance on the length features as on the HEXEvent dataset. Table \ref{table:gtex_junc_nolens} shows that the length features still make up a large part of model performance, but that the models don't rely on them completely. However, the performance proportion the length features account for is still biologically implausible. 
+As model performance is more promising than on the GTEx-based exon-centric datasets, we validate that this isn't due to an overreliance on the length features as on the HEXEvent dataset. Table \ref{table:gtex_junc_nolens} shows that the models don't completely rely on the length features, albeit they still make up a large part of model performance. From a biological standpoint, the length features are not a factor that explicitly affects the spliceosome, but are correlated with multiple factors such as exon and intron nucleotide composition \cite{lengthsnucleotidecom} or splice site strength \cite{lengthsref2} that do. Ideally, the models would learn to identify these factors directly and don't rely on the length features. Thus we conclude that the dataset is an improvement over the HEXEvent dataset, but generating a dataset where model performance is less dependent on the length features is still desirable. 
+%, but that the models don't rely on them completely. 
+%However, the performance proportion the length features account for is still biologically implausible. 
 
-Thus we conclude that the dataset is an improvement over the HEXEvent dataset, but generating a dataset where model performance is less dependent on the length features is still desirable. 
+
 
 
 %15 \% of alternatively spliced exons are highly included 
@@ -208,7 +210,7 @@ Thus we conclude that the dataset is an improvement over the HEXEvent dataset, b
 %- seriously considering not showing these results as I basically already debunked HEXEvent at this point -- so from a narrative perspective, why spend effort on replicating it?
 
 \subsubsection{Evaluation of the GTEx-based datasets}
-Overall, we observe poor to promising model performance, biologically surprising low cross-tissue performance differences and biologically implausible reliance on the length features. 
+Overall, we observe poor to promising model performance, biologically surprising low cross-tissue performance differences and still undesirably high reliance on the length features. 
 In \ref{subsubsec:naivepsi}, we mentioned issues when trying to estimate PSI naively. Although we alleviated these in pre-processing, we don't account for the information contained in non-junction reads and don't integrate information from multiple samples. As a result, data quality is likely still an issue distorting the results in this section. 
 Thus we conclude that the GTEx-based datasets improve upon the HEXEvent dataset, but using datasets based on more accurate PSI estimation methods is desirable and would lead to more meaningful results. %would lead to more meaningful results.
 
@@ -519,7 +521,7 @@ After having achieved a good level of performance on the classification task, we
 
 
 The results show that the models still fail to explain a lot of the variation in the PSI value: no model is able to explain even half of it. 
-As on the classification tasks, RASC outperforms the other models by a wide margin and all models are significantly worse on explaining the variance for highly included, rather than rarely to moderately included, non-constitutive exons. The latter observation is particularly pronounced: the $R^2$ score of all models on HighPSI is below 0, showing that they fail to explain the variance even as well as a baseline model whom consistently predicts the mean. Thus, we take these results as indication that the current Splicing Codes can still be significantly improved. 
+As on the classification tasks, RASC outperforms the other models by a wide margin and all models are significantly worse on explaining the variance for highly included, rather than rarely to moderately included, non-constitutive exons. The latter observation is particularly pronounced: the $R^2$ score of all models on HighPSI is below 0, showing that they fail to explain the variance even as well as a baseline model whom consistently predicts the mean. Thus, we take these results as indication that the current splicing codes can still be significantly improved. 
 
 
 
@@ -555,7 +557,7 @@ However, D2V is significantly outperformed by RASC on our dataset. This indicate
 We also observe that the $R^2$ values reported by \cite{d2vsplicing} are significantly higher: the best performing model W2V is able to explain nearly 70\% of the variance. We consider multiple possible explanations for this: 
 \begin{itemize}
 	\item Splicing behaviour on the mouse dataset is easier to predict because of data processing differences. Like our work, \cite{d2vsplicing} use MAJIQ for data processing. While they don't explicitly state the version of MAJIQ they used, MAJIQ has received various updates since their publication. These updates include improvements to the splicing detection algorithm which could affect the outcome of data processing. 
-	\item Splicing behaviour on the mouse dataset is easier to predict because of dataset composition differences. The mouse dataset only includes cassette exons, while our dataset also includes constitutive non-cassette exons. Since splicing motifs between cassette and non-cassette exons likely differ, the learning task of our models could be more challenging since they have to learn to recognize both. As a counter point, the mouse dataset only contains 10,000 training samples which might be too few samples to train our models.
+	\item Splicing behaviour on the mouse dataset is easier to predict because of dataset composition differences. The mouse dataset only includes cassette exons, while our dataset also includes constitutive non-cassette exons. Since splicing motifs between cassette and non-cassette exons likely differ, the learning task of models on our dataset could be more challenging since they have to learn to recognize both. As a counter point, the mouse dataset only contains 10,000 training samples which might be too few samples to train RASC and DSC.
 
 	
 

@@ -32,7 +32,7 @@ In this chapter, we give more details about the exact task we are trying to solv
 
 We consider a classification and regression task. For the classification task, the models classify an exon or junction as constitutive or not. For the regression task, the models regress the PSI value of an exon or junction. The training samples comprise of exon or junction features helpful for classification or regression and the corresponding PSI value. \\
 For the classification task, we classify all exons and junctions based on their PSI value before training on them. Strictly speaking, all exons and junctions with a PSI of less than 100\% are non-constitutive. However, due to spurious reads, we classify all exons with a PSI $\geq 99\%$ as constitutive. For the regression task, we use the PSI values as training labels. 
-For either task, the output of our models is a prediction $\hat{y} \in [0, 1]$. 
+For either task, the output of the models is a prediction $\hat{y} \in [0, 1]$. 
 
 We focus on the easier classification task at first and only evaluate the models on the more challenging regression task once we have achieved a good predictive power for the classification task. 
 
@@ -900,7 +900,7 @@ where the ground truth $y \in \{0, 1\}$ and the prediction of the model $\hat{y}
 To evaluate the models, we report the mean test set performance and standard deviation across (cross-validation) runs. 
 Where we established in a base experiment that the variance for a given model was low between runs (lower than $\sim$1\%), we only trained the model once in follow-up experiments for practical reasons.
 
-Previous studies have shown that model performance varies significantly between lowly and highly included alternatively spliced exons \cite{dsc} \cite{buschhertel}. Thus, following previous work, we split our test set into a set of highly (PSI > 80\%) and a set of lowly to moderately included, alternatively spliced exons (PSI <=80\%). Both sets contain all constitutive exons. We denote the first set as high PSI dataset (HighPSI), the second as low PSI dataset (LowPSI) and the complete test as all PSI dataset (AllPSI). We evaluate our models on all three datasets.
+Previous studies have shown that model performance varies significantly between lowly and highly included alternatively spliced exons \cite{dsc} \cite{buschhertel}. Thus, following previous work, we split our test set into a set of highly (PSI > 80\%) and a set of lowly to moderately included, alternatively spliced exons (PSI <=80\%). Both sets contain all constitutive exons. We denote the first set as high PSI dataset (HighPSI), the second as low PSI dataset (LowPSI) and the complete test as all PSI dataset (AllPSI). We evaluate the models on all three datasets.
 
 
 \subsubsection{Metrics} \label{subsubsec:metrics}
