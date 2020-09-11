@@ -1,39 +1,57 @@
 \chapter{\label{ch:2-litreview}Biological background} % 808 words
 
 \minitoc
-
 \begin{figure}[h]
-	\centering\includegraphics[width=0.9\textwidth]{../visualizations/ch2-biobackground/pre-mrna2mrna.png} 
+	\centering\includegraphics[width=0.8\textwidth]{../visualizations/ch2-biobackground/transcription.jpg} 
+	\caption
+	{Transcription of DNA \cite{img:transcription}. The enzyme RNA polymerase reads the DNA and constructs the complementary RNA transcript one nucleotide at a time. 
+		%TODO something about how I add reverse complement here
+	}
+	\label{fig:transcription}
+\end{figure}
+
+
+Gene expression is fundamental to all life. It is the process whereby a segment of DNA, a gene, is used to direct the synthesis of a functional gene product (protein, functional RNA). Gene expression occurs in two steps: during transcription (see Figure \ref{fig:transcription}), the DNA is transcribed into messenger RNA (mRNA) and during translation, the mRNA is decoded into gene products. A DNA strand is made up by a sequence of the four nucleotides adenine (A), thymine (T), cytosine (C), and guanine (G). The nucleotides adenine and thymine as well as cytosine and guanine form complementary base-pairs, which are the building blocks of the double-stranded helix that makes up a DNA molecule. RNA is the same, except that thymine is replaced by uracil (U) and that most RNA molecules are single-stranded.
+
+%Genes can be located either on the antisense strand (also non-coding, negative or - strand) or on the sense strand (also coding, positive or + strand). 
+
+In more detail, during transcription, an initially transcribed precursor mRNA (pre-RNA) is translated into a mature RNA. 
+The majority of sequence information (>90\%) in the pre-RNA is contained in long, non-coding regions, introns, which flank shorter, predominantly coding regions, exons. 
+%This process, splicing, is motivated by DNA being made up of exons (predominantly coding regions), and, typically longer, introns (non-coding regions).
+During splicing, the spliceosome removes the introns from the pre-mRNA and joins the exons together to form the mature mRNA (see Figure \ref{fig:pre-mrna2mrna}). The spliceosome is a complex molecular machine consisting of as many as 150 proteins \cite{splicing_current_perspectives}. The previous location of an intron in the transcript where two exons adjoin each other is called a splice junction or splice site.
+
+
+\begin{figure}
+	\centering\includegraphics[width=0.8\textwidth]{../visualizations/ch2-biobackground/pre-mrna2mrna.png} 
 	\caption
 	{The process of splicing \cite{img:mrna}. Introns are removed from the pre-mRNA to obtain the mature mRNA only consisting of exons. Apart from coding regions, exons may also consist of non-coding untranslated regions (UTRs). Like introns, UTRs influence gene expression. 
 	}
 	\label{fig:pre-mrna2mrna}
 \end{figure}
 
-Gene expression is fundamental to all life. It is the process whereby a sequence of nucleotides, a gene, is used to direct the synthesis of a functional gene product (protein, functional RNA). Gene expression occurs in two steps: during transcription, the DNA is transcribed into messenger RNA (mRNA) and during translation, the mRNA is decoded into gene products.\\
-In more detail, during transcription, an initially transcribed precursor mRNA (pre-RNA) is translated into a mature RNA. 
-The majority of sequence information (>90\%) in the pre-RNA is contained in long, non-coding regions, introns, which flank the exons (who are predominantly coding regions). 
-%This process, splicing, is motivated by DNA being made up of exons (predominantly coding regions), and, typically longer, introns (non-coding regions).
-Only exons are contained in the mature mRNA. Introns are still contained in the initially transcribed precursor mRNA (pre-mRNA). However, they are spliced out by the spliceosome to form the mature mRNA (see Figure \ref{fig:pre-mrna2mrna}). The spliceosome is a complex molecular machine consisting of as many as 150 proteins \cite{splicing_current_perspectives}. The previous location of an intron in the transcript where two exons adjoin each other is called a splice junction or splice site.
+
+
+Exons which are always included in the mRNA are called constitutive exons. However, 95\% of human genes with multiple exons are alternatively spliced, that is, they may only sometimes be included, or may be included with different splice sites. Thus, alternative splicing results in the generation of multiple transcripts (also transcript isoforms) from one gene. 
 
 \begin{figure}[h]
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch2-biobackground/alternative_splicing_forms.png} 
 	\caption
-	{The most common forms of alternative splicing and the resulting different possible mature mRNAs \cite{img:altsplicingforms}.
+	{Different types of alternative splicing and the resulting different possible mature mRNAs \cite{img:altsplicingforms}.
 	}
 	\label{fig:altsplicingforms}
 \end{figure}
 
-Exons which are always included in the mRNA are called constitutive exons. However, 95\% of human genes with multiple exons are alternatively spliced, that is, they may only sometimes be included, or may be included with different splice sites. Alternative splicing results in the generation of multiple transcripts from a gene. The most common types of alternative splicing in higher eukaryotes are \cite{commonsplicing1}\cite{commonsplicing2}:
-
+The most common types of alternative splicing (visualized in Figure \ref{img:altsplicingforms}) in higher eukaryotes are \cite{commonsplicing1}\cite{commonsplicing2}:
 \begin{itemize}
-	\item Cassete exons are exons which are sometimes included in the mature mRNA and sometimes skipped. This is the most common form of alternative splicing in higher eukaryotes (so also humans), accounting for roughly 40\% of all AS splicing events \cite{splicing_current_perspectives}.
-	\item Exons with an alternative 3' or 5' splice-site. The 3' splice site or splice junction is the end of the exon towards the 3' end of the RNA strand (typically visualized as falling to the right of the sequence). The 5' splice site or splice junction is the end of the exon towards the 5' end of the RNA strand (typically visualized as falling to the left of the sequence). An alternative 3' or 5' splice-site may be located deeper inside the exon or outside the exon in a typically intronic region. Alternative 3' and 5' site splicing respectively constitute approximately 18\% and 8\% of all AS splicing events in higher eukaryotes \cite{splicing_current_perspectives}. 
-	\item intron retention, that is, when an intron between exons is not spliced out. It accounts for roughly 5\% of AS activity in higher eukaryotes \cite{splicing_current_perspectives}.
+	\item Cassete exons are exons which are sometimes included in the mature mRNA and sometimes skipped. This is the most common form of alternative splicing in higher eukaryotes (so also humans), accounting for roughly 40\% of all alternative splicing events \cite{splicing_current_perspectives}.
+	\item Exons with an alternative 3' or 5' splice-site. The 3' splice site or splice junction is the end of the exon towards the 3' end of the RNA strand (typically visualized as falling to the right of the sequence). The 5' splice site or splice junction is the end of the exon towards the 5' end of the RNA strand (typically visualized as falling to the left of the sequence). An alternative 3' or 5' splice-site may be located deeper inside the exon or outside the exon in a typically intronic region. Alternative 3' and 5' site splicing respectively constitute approximately 18\% and 8\% of all alternative splicing events in higher eukaryotes \cite{splicing_current_perspectives}. 
+	\item intron retention, that is, when an intron between exons is not spliced out. It accounts for roughly 5\% of alternative splicing activity in higher eukaryotes \cite{splicing_current_perspectives}.
 \end{itemize}
 
 
-Different forms of alternative splicing are visualized in Figure \ref{fig:altsplicingforms}. More complex forms of alternative splicing, such as mutually exclusive exons, also exist, but they are currently believed to be less common. Alternative splicing occurs in nearly all organisms that carry out pre-mRNA splicing as such as plants or animals and its frequency varies across organisms \cite{splicing_current_perspectives}. 
+
+%Different forms of alternative splicing are visualized in Figure \ref{fig:altsplicingforms}.
+More complex forms of alternative splicing, such as mutually exclusive exons, also exist, but they are currently believed to be less common. Alternative splicing occurs in nearly all organisms that carry out pre-mRNA splicing as such as plants or animals and its frequency varies across organisms \cite{splicing_current_perspectives}. 
 \subsubsection{Why does alternative splicing occur?}
 Alternative splicing enables a single gene to encode multiple protein variants. This massively contributes to proteomic diversity. For instance, the roughly 20,000 human protein-coding genes are estimated to encoder over 100,000 different proteins \cite{splicing_current_perspectives}.
 

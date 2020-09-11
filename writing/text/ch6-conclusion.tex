@@ -8,7 +8,7 @@
 
 \chapter{\label{ch:6-conclusion}Conclusion} % 360
 \section{Summary}
-This work approached the task of predicting alternative splicing behaviour from a Deep Learning perspective.
+This work approached the task of predicting alternative splicing behaviour from a deep learning perspective.
 We discussed key challenges which should be addressed when estimating PSI, implemented our method for PSI estimation and constructed splicing quantification datasets based on processing with our PSI estimation method, SUPPA and MAJIQ. We proposed RASC: a novel splicing code which is the first application of an attention mechanism to splicing quantification and reimplemented the two baselines models DSC and D2V. %from the literature.
 
 Evaluating the models on HEXEvent, we showed that HEXEvent is confounded and that the performance of DSC can be matched by extremely simple MLPs with two to three orders of magnitudes fewer parameters which use no sequence information. 
@@ -24,7 +24,7 @@ The dataset most commonly used to train splicing codes is based on mouse instead
 In contrast, the wide use of standardized, publically available datasets could allow a quick iteration of ideas and a fair comparison between them. 
 %Such datasets have for instance lead to a rapid succession of breakthroughs in Computer Vision and NLP \cite{deeplearning}.
 %In contrast, the rapid succession of breakthroughs in Computer Vision and NLP was only possible through the wide use of standardized datasets which allowed a quick iteration of ideas and a fair comparison between them. 
-For these reasons, we believe that a concerted effort to construct high-quality, standardized datasets for the training of Machine Learning, and particular Deep Learning, splicing codes should be undertaken. We plan to make our HipSci MAJIQ datasets, as well as our code base, publically available as a stepping stone towards this goal.
+For these reasons, we believe that a concerted effort to construct high-quality, standardized datasets for the training of Machine Learning, and particular deep learning, splicing codes should be undertaken. We plan to make our HipSci MAJIQ datasets, as well as our code base, publically available as a stepping stone towards this goal.
 %We showed that there are still large improvements to be made in the domain of splicing models by applying promising methods from the other application areas of Deep Learning. 
 
 
@@ -34,7 +34,7 @@ RASC's predictive power could further be improved by incorporating additional in
 Even additional hyperparameter tuning may lead to further improvements since our hyperparameter tuning was limited due to computational constraints. Experiments maxing out the batch size (and stabilizing training) or trying different learning rate schedules would be particularly interesting. 
 
 
-Like all Deep Learning models, RASC suffers from poor interpretability. While we have taken some first steps towards interpreting RASC by analyzing what parts of a sequence it attends to, a lot more work remains to be done. We discussed changes to RASC's model architecture such as replacing the BiLSTM units and using only one attention head. Further inspiration could be taken from methods exploring the inner workings of Transformer models in NLP \cite{interpretingbert}. The application of methods visualizing the most important input features for a specific prediction is another interesting research direction \cite{deeplift}. 
+Like all deep learning models, RASC suffers from poor interpretability. While we have taken some first steps towards interpreting RASC by analyzing what parts of a sequence it attends to, a lot more work remains to be done. We discussed changes to RASC's model architecture such as replacing the BiLSTM units and using only one attention head. Further inspiration could be taken from methods exploring the inner workings of Transformer models in NLP \cite{interpretingbert}. The application of methods visualizing the most important input features for a specific prediction is another interesting research direction \cite{deeplift}. 
 % what input features are the most important for a specific training sample 
 %Additionally, methods which visualize what input features are the most important for a specific training sample 
 %

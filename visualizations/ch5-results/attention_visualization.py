@@ -206,9 +206,9 @@ def heatmap():
     # plt.style.use('seaborn')
 
     mean_attn_ws_epochs = []
-    epochs = 109
+    epochs = 100
     for i in range(epochs):
-        attn_ws = np.load(f'attn_ws_multi_distributed/attn_ws_{i+1}.npy')#[:,:140]
+        attn_ws = np.load(f'attn_ws_multi_heads/attn_ws_cv_run_id=1_epoch={i+1}.npy')#[:,:140]
 
         mean = np.mean(attn_ws, axis=0)
         mean_attn_ws_epochs.append(mean)
@@ -296,9 +296,9 @@ def heatmap():
 
     plt.tight_layout()
     plt.savefig('attention_heatmap.png', dpi=300, bbox='tight')
-    # plt.show(dpi=300)
+    plt.show(dpi=300)
 
-# heatmap()
+heatmap()
 
 def heatmap_rectangle(attn_ws):
     h = 10
@@ -341,10 +341,6 @@ mean_attn, std_attn = average_over_runs(mean_attn)
 # mean_attn_ws_multi_heads = np.mean(attn_ws_multi_heads, axis=-1)
 
 
-# bar_chart(mean_attn_ws_multi_heads)
-
 # bar_chart_not_zoomed(mean_attn)
 
-bar_chart_zoomed(mean_attn, std_attn)
-# bar_chart_zoomed(mean_attn_ws_multi_heads)
-# heatmap_rectangle(mean_attn_ws_multi_heads)
+# bar_chart_zoomed(mean_attn, std_attn)

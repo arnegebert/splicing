@@ -619,13 +619,14 @@ Averaging the attention weights over all heads over all cross-validation runs at
 %Figure \ref{fig:mean_attn} shows what part of the input sequence RASC commonly attends to. 
 %Clearly, motifs directly around the exon start and exon end are the most attended to. 
 
+% TODO: 84% note
 
 %TODO now this is a job for Liz and Wil
 %The bar chart suggests that more total attention is paid to the end, rather than the start sequence. However, this pattern is reversed for other runs of the models and likely just a consequence of three heads focusing on the end sequence in the particular training run which is shown. Additionally, note that the different attention heads might be weighted differently by the unifying matrix $W^O$. 
 
 However, care should be taken when interpreting these results. The attention weights don't directly correspond to the relative importance of each position for multiple reasons: 
 \begin{enumerate}[label=(\alph*)]
-	\item A position, as displayed in \ref{fig:mean_attn}, contains the information from multiple positions in the sequence because RASC is based on BiLSTM units.
+	\item A position, as displayed in Figure \ref{fig:mean_attn}, contains the information from multiple positions in the sequence because RASC is based on BiLSTM units.
 	\item The shown attention weights are a mean between all test set samples and several training runs. Therefore, they don't correspond to the attention weights used by any particular model for any particular training sample. 
 	\item The variance between runs is large: generally 20\% of the mean value. A contributing factor is that the attention distribution of the model likely shifts based on which information is encoded in which position. Thus this observation is also related to (a).
 	\item The displayed attention weights are a mean between the four attention heads. We know from Section \ref{subsubsec:result_heads} that RASC's performance is similar with only one attention head. Thus, there is likely some redundant overlap between the focus of different heads (e.g. two heads focus on the region close to the exon/intron boundary). Since the overlapping attention is redundant, the overlap is free to shift between runs likely introducing further noise into the attention weights we observe. Additionally, while we averaged the attention weights between heads, RASC unifies them via the learned matrix $W^O$ which might not apply an uniform weighting (e.g. it might assign more weight to heads if they are the only head attenting a particular region). 
@@ -633,7 +634,7 @@ However, care should be taken when interpreting these results. The attention wei
 
 Thus, while the results in \ref{fig:mean_attn} can serve to identify a general trend regarding which sequence regions contain the information most relevant to splicing behaviour, they should not be the basis for specific conclusions about the relative importance of specific nucleotide positions. 
 
-If the goal is working towards such an interpretation (based on a Deep Learning model), a BiLSTM unit should not be used to find representations for the nucleotides. A fully connected-model which does not mix information between positions until the attention layer would be better suited. Additionally, only one attention head should be used. 
+If the goal is working towards such an interpretation (based on a deep learning model), a BiLSTM unit should not be used to find representations for the nucleotides. A fully connected-model which does not mix information between positions until the attention layer would be better suited. Additionally, only one attention head should be used. 
 
 Further modifications, which don't require architectural changes include taking the mean attention weights over more cross-validation runs and only visualizing the attention weight for one training sample. Finally, architecture-independent techniques for visualizing the inputs with the greatest impact for a specific prediction could be applied \cite{deeplift}.
 
