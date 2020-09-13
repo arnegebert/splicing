@@ -14,7 +14,7 @@
 
 
 
-In this chapter, we give more details about the exact task we are trying to solve, introduce the primary data sources and describe how these were used to obtain the training datasets. Additionally, we motivate and explain the evaluated models and describe how these were implemented and trained.
+In this chapter, we define the exact tasks we are trying to solve, introduce the primary data sources and describe how these were used to obtain the training datasets. Additionally, we motivate and explain the evaluated models, and describe their implementation and training.
 % We also give implementation details regarding processing steps, model implementation, and model training.
 
 %\subsubsection{Why PSI?} \label{subsubsec:whypsi}
@@ -30,18 +30,19 @@ In this chapter, we give more details about the exact task we are trying to solv
 \section{Task formulation} \label{sec:task_formulation}
 
 
-We consider a classification and regression task. For the classification task, the models classify an exon or junction as constitutive or not. For the regression task, the models regress the PSI value of an exon or junction. The training samples comprise of exon or junction features helpful for classification or regression and the corresponding PSI value. \\
-For the classification task, we classify all exons and junctions based on their PSI value before training on them. Strictly speaking, all exons and junctions with a PSI of less than 100\% are non-constitutive. However, due to spurious reads, we classify all exons with a PSI $\geq 99\%$ as constitutive. For the regression task, we use the PSI values as training labels. 
+We consider a classification and regression task. For the classification task, the models predict whether an exon or junction is constitutive or not. Strictly speaking, all exons and junctions with a PSI of less than 100\% are non-constitutive. However, to account for spurious reads resulting from low-quality alignments, we define all exons and junctions with PSI $\geq 99\%$ as constitutive and apply this definition to our training samples. Thus, the models are trained on the classified training samples and predict the classification of an exon or junction. For the regression task, the models are directly trained on, and also directly predict, the PSI value of an exon or junction. 
 For either task, the output of the models is a prediction $\hat{y} \in [0, 1]$. 
+%For the classification task, we classify all exons and junctions based on their PSI value before training on them. 
+% For the regression task, the models regress the PSI value of an exon or junction. %The training samples comprise of exon or junction features helpful for classification or regression and the corresponding PSI value.
+
 
 We focus on the easier classification task at first and only evaluate the models on the more challenging regression task once we have achieved a good predictive power for the classification task. 
 
 
-Previous work indicates that advances in predicting one type of alternative splicing behaviour (e.g. cassette exons) via Machine Learning methods also translates to advances in prediction for other types (e.g. exons with an alternative 3' splice site) \cite{dsc} \cite{buschhertel}. Therefore, a practical choice is to only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. As noted, cassette exons are the most common form of alternative splicing in higher eukaryote and thus we choose cassette exons as the type of alternative splicing we will focus on.
+Previous work indicates that advances in predicting one type of alternative splicing behaviour (e.g. cassette exons) via Machine Learning methods also translates to advances in prediction for other types (e.g. exons with an alternative 3' splice site) \cite{dsc} \cite{buschhertel}. Therefore, we only focus on one splicing type as this reduces the number of experiments and needed training time by two to three factors. In particular, we focus on cassette exons as they are the most common form of alternative splicing (accounting for 40\% of all alternative splicing events \cite{splicing_current_perspectives}).
 
 
-
-Due to a similar argument, advances in predicting alternative splicing behaviour of junctions also translate to the same advances for exons, we also evaluate the models on one class of junction datasets. Junctions datasets have the additional advantage that they contain a lot more training samples (at least twice as many per definition). deep learning algorithms are notorious for requiring large datasets to train and this enables us to test whether increasing data quantity improves model performance. 
+By a similar argument, the advances in predicting alternative splicing behaviour of junctions also translate to the same advances for exons. Junction-based datasets are interesting because they contain significantly more training samples than exon-based datasets (at least twice as many per definition). Deep learning algorithms are notorious for requiring large datasets to train and this enables us to test whether insufficient data quantity is a performance bottleneck when training on the exon-based datasets. Thus, we also evaluate the models on junction datasets.
 
 
 \section{Datasets}\label{sec:datasets}
@@ -49,10 +50,15 @@ Three primary sources for genomic data were used in this study: the Human Exon s
 
 
 \subsection{HEXEvent database} \label{subsec:hexevent}
-The HEXEvent database contains genome-wide exon data sets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons). It was compiled based on known mRNA variants as defined by the UCSC Genome Browser (newest version is hg38) as well as their associated available expressed sequence tag (EST) information. ESTs are short cDNA sequences which have been used in older sequencing techniques (before the advent of modern high-throughput sequencing technologies). 
+The HEXEvent database contains genome-wide exon datasets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons). It was compiled based on known mRNA variants as defined by the UCSC Genome Browser for the human reference genome hg38 as well as their associated available expressed sequence tag (EST) information. ESTs are short cDNA sequences generated through Sanger sequencing (a first generation sequencing method) with the primary aim to facilitate genome annotations. However, ESTs have largely been replaced by sequence reads generated from next generation sequencing technologies such as RNA-Seq which are able to generate vastly more reads at a fraction of the cost \cite{sequencinghistory}. 
 
 %perhaps extra section where I discuss the merit of each dataset because right now it doesn't fit
-Some issues with ESTs which therefore also affect HEXEvent are worth highlighting. ESTs are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error-prone \cite{hitchhiker}. Additionally, ESTs underrepresent less frequent transcripts and as a result, often only capture 50 - 65\% of an organism's genes \cite{estunderrepresenttransripts}. Thus, these biases may also have an adverse effect on the HEXEvent database's data quality.
+Two issues with ESTs are worth highlighting: 
+\begin{itemize}
+	\item ESTs are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error-prone \cite{hitchhiker}. 
+	\item ESTs underrepresent less frequent transcripts and as a result, often only capture 50 - 65\% of an organism's genes \cite{estunderrepresenttransripts}. 
+\end{itemize}
+Thus, the HEXEvent database should not be used without stringent filtering processes and only captures the splicing behaviour of the most frequently expressed genes.
 
 %Thus, great care needs to be taken to account for these systematic biases when working with EST data.
 %It was chosen as a data source for direct comparability with the baseline paper \cite{dsc}.
@@ -65,11 +71,11 @@ Some issues with ESTs which therefore also affect HEXEvent are worth highlightin
 
 %these are sequence reads datasets based on which I will estimate the PSI values
 \subsection{GTEx} \label{subsec:gtex}
-The GTEx project provides the most comprehensive database for tissue-specific gene expression and regulation available to-date; containing over 17000 samples from nearly 1000 human donors. The sequencing data was obtained using mainly molecular assay-based techniques like Whole Genome Genotyping (WGS), Whole Exome Sequencing (WES) and RNA-Seq. Samples were taken from up to 54 different tissue sites. In particular, the tissue samples are also taken from less commonly seen tissue sites such as brain or heart as the GTEx project sources its samples from recently-deceased donors who have donated their body to science. Thus, the GTEx project, and by extension partially this thesis, was only made possible through the kindness and generosity of the donors.
+The GTEx project provides the most comprehensive database for tissue-specific gene expression and regulation available to-date; it contains over 17000 samples from nearly 1000 human donors. The sequencing data was obtained using mainly molecular assay-based techniques like Whole Genome Genotyping (WGS), Whole Exome Sequencing (WES) and RNA-Seq. Samples were taken from up to 54 different tissue sites. In particular, the tissue samples are also taken from less commonly seen tissue sites such as brain or heart as the GTEx project sources its samples from recently-deceased donors who have donated their body to science. Thus, the GTEx project, and by extension partially this thesis, was only made possible through the kindness and generosity of the donors.
 
-Processed data which can not be used to identify the donors is publicly available on the GTEx portal. To access raw data (e.g. raw RNA-seq reads) and meta-information about the samples one is required to undergo a data access request. It is intended that data access is requested by PIs or leader of research groups for their whole lab and approval of a data access request usually takes upwards of 3 months. 
+Processed data which can not be used to identify the donors is publicly available on the GTEx portal. To access raw data (e.g. raw RNA-seq reads) and meta-information about the samples, one is required to undergo a data access request. It is intended that data access is requested by PIs or leader of research groups for their whole lab and approval of a data access request usually takes upwards of 3 months. 
 %The co-collaborators Prof. Wilfred Haerty and Prof. Elizabeth Tunbridge have access to the protected part of the GTEx data. However, the scope of projects for which they were granted access does not include this thesis and changing the scope would require undergoing the data access process again. 
-Since the approval process would've taken too long, we can only use the publicly available part of the GTEx data in this study, in particular the files containing information about exon-exon junction reads. 
+Since the approval process would have finished very late into the project, if at all, we only use the publicly available part of the GTEx data. In particular, we use the files containing exon-exon junction read counts as accessible on the GTEx portal from GTEx Analysis V8 \cite{gtex_files}. 
 
 %using gtex:
 %'We strongly recommend the use of TPM (Transcripts Per Million), because is normalized for gene length first, and then for sequencing depth. This allows a direct comparison between samples' https://github.com/comprna/SUPPA/wiki/SUPPA2-tutorial
@@ -77,21 +83,21 @@ Since the approval process would've taken too long, we can only use the publicly
 \subsection{HipSci} \label{subsec:hipsci}
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch4-methods/ipscprocess.png} 
-	\caption[test.]{
-		The four high-level steps taken to obtain iPSCs \cite{img:ipscprocess}:
+	\caption{
+		The making of iPSCs in four high-level steps \cite{img:ipscprocess}:
 		(1) Grow a cell culture of donor cells, (2) transduce the genes associated with reprogramming into the cells via viral vectors, (3) isolate the cells expressing the transduced genes (in red) and culture them according to embryonic stem cell culture and, finally, (4) a small subset of the transfected cells become iPSCs.
 	}
 	\label{fig:ipscprocess}
 \end{figure}
 
-HipSci provides a large repository of human induced pluripotent stem cell (iPSC) lines. iPSCs are mature cells which have been reprogrammed to again become immature pluripotent (undetermined) cells. This process is visualized in Figure \ref{fig:ipscprocess}. As iPSC lines are not directly obtained from human donors, but rather from building a cell culture based on some initial donor cells, accessing raw RNA-seq reads is not constrained by the same data privacy regulations which prevented access to the raw RNA-seq reads from the GTEx project.
+HipSci provides a large repository of human induced pluripotent stem cell (iPSC) lines. iPSCs are mature cells which have been reprogrammed to again become immature pluripotent (undetermined) cells. This process is visualized in Figure \ref{fig:ipscprocess}. As iPSC lines are not directly obtained from human donors, but rather from building a cell culture based on initial donor cells, accessing raw RNA-seq reads is not constrained by the same data privacy regulations which prevented access to the raw RNA-seq reads from the GTEx project.
 
 
 Concretely, over 300 cell lines from over 300 donors along with sequencing information based on RNA-seq is publicly available from the HipSci portal. From these we selected two different groups of cell lines:
 \begin{itemize}
 	
-	\item the first group contains 25 biological replicates (that is, samples from different cell lines developed under the same conditions) of sensory neuron cell lines \cite{ipscneurons}. These cell lines were obtained by differentiating iPSCs to sensory neuron cells.
-	\item the second group contains 20 biological replicates of iPSC lines which weren't differentiated to any other cell type. Here care was taken to choose donors from whom at least two different iPSC lines were developed.
+	\item The first group contains 25 biological replicates (that is, samples from different cell lines developed under the same conditions) of sensory neuron cell lines \cite{ipscneurons}. These cell lines were obtained by differentiating iPSCs to sensory neuron cells.
+	\item The second group contains 20 biological replicates of iPSC lines which were not differentiated to any other cell type. Here care was taken to choose donors from whom at least two different iPSC lines were developed.
 	
 	%	iPSC lines: the second group of 20 biological replicates were taken from skin-tissue based iPSCs which weren't differentiated to any other tissue. Here care was taken to choose donors from whom at least two different iPSC lines were developed. This allows us to test how well the learned features of the model generalize when applied to another library of the same tissue type from the same individual.
 \end{itemize}
@@ -128,6 +134,7 @@ The appendix contains the ENA Accession Numbers of the chosen samples in Section
 
 %High-throughput sequencing of cDNA fragments (RNA-seq; Lister et al., 2008) has become a popular tool to investigate RNA expression and post-transcriptional regulation. Sequencing of the transcriptome reveals tens of thousands of transcripts expressed simultaneously (Mortazavi et al., 2008). Despite providing a deep and genome-wide view on post-transcriptional processing, current technologies cannot reveal transcripts in full-length due to limitations in read length.  [https://www.researchgate.net/publication/282645615_Alternative_Splicing_Signatures_in_RNA-seq_Data_Percent_Spliced_in_PSI/link/59e8404b458515c3630fe4e3/download]
 
+Our primary data sources provide us access to short reads, short inferred sequences of base-pairs of the mature mRNA transcript. Typical reads from our primary data sources are between 150 to 250 base pairs long \cite{hitchhikerrnaseq}. We now discuss how to leverage these reads to obtain an accurate PSI estimate for exons and junctions.
 
 
 %However, due to limitations in read length, they are not able to provide a full view of post-transcriptional processing so far.
@@ -153,9 +160,9 @@ The advantage of this estimate lies in its simplicity and flexibility. It is qui
 
 However, this estimate also has various issues:
 \begin{enumerate}[label=(\alph*)]
-	\item It doesn't account for uncertainty. A rarely expressed gene may only experience a few reads of a particular exon leading to a very uncertain estimate. If we observe 1 IR and 1 ER for exon E1, and 15 IR and 15 ER for exon E2, then the estimated PSI of both exons is 50\%.
+	\item It does not account for uncertainty. A rarely expressed gene may only experience a few reads of a particular exon leading to a very uncertain estimate. If we observe 1 IR and 1 ER for exon E1, and 15 IR and 15 ER for exon E2, then the estimated PSI of both exons is 50\%.
 %	: $PSI_{E1} = \frac{1}{2} = 50\%$. Compare this to E2 where we observed 15 inclusion and 15 exclusion reads: $PSI_{E2} = \frac{15}{30} = 50\%$.\\
-	The estimate of $PSI_{E2}$ is likely to be more accurate, but this information is not contained in the estimate. Concretely, these two samples would be treated as equally important by the network even though they likely shouldn't.
+	The estimate of $PSI_{E2}$ is likely to be more accurate, but this information is not contained in the estimate. Concretely, these two samples would be treated as equally important by the network even though they likely should not.
 	
 	To account for this, it is possible to only count exons who experienced at least a certain number of reads. However, raw read counts are unreliable when not accounting for overall gene expression: 10 reads in a lowly expressed gene may be as significant as 20 reads in a highly expressed gene. There are several measures for the abundance of a gene: Reads Per Kilobase Million (RPKM), Fragments Per Kilobase Million (FPKM) and Transcripts Per Kilobase Million (TPM). Of these, TPM is usually the most common choice. Therefore, a better solution is likely to only count reads from genes whose TPM is above a certain threshold. \\
 	Note that there is not a principled way to choose this threshold. The choice between a threshold which e.g. filters 5\% or 20\% of the samples is a trade-off between data quality and data quantity. In practice, the `optimal' cutoff threshold will be unknown and vary from dataset to dataset.
@@ -213,10 +220,10 @@ However, this estimate also has various issues:
 
 %hopefully was able to demonstrate that this estimate is problematic and may easily be unreliable.
 %Due to these issues relating to calibrating for uncertainty, to not making use of all of the available evidence, to integrating reads across multiple samples and misattributing reads, is estimate is problematic.
-Any estimate of PSI that doesn't account for all, or at least the majority of these issues, will likely be very unreliable. 
+Any estimate of PSI that does not account for all, or at least the majority of these issues, will likely be very unreliable. 
 
 \subsubsection{A word of caution} \label{subsubsec:caution}
-However, even if all of these issues are addressed optimally, the resulting PSI estimate would still be imperfect. For instance, the `solutions' for (a) and (d) implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript aren't equally distributed due to biases relating to GC-content \cite{gccontentbias}, gene length and dinucleotide frequencies \cite{rnaseqbiascorrection}.
+However, even if all of these issues are addressed optimally, the resulting PSI estimate would still be imperfect. For instance, the `solutions' for (a) and (d) implicitly rely on the assumption that reads across a transcript are evenly distributed. It is well-known that sequence reads across a transcript are not equally distributed due to biases relating to GC-content \cite{gccontentbias}, gene length and dinucleotide frequencies \cite{rnaseqbiascorrection}.
 % or transcript length bias. 
 % there is also transcript length bias, see https://biologydirect.biomedcentral.com/articles/10.1186/1745-6150-4-14
 % but this bias is more about biases between transcripts rather than within a given transcript
@@ -502,7 +509,7 @@ The same cross-tissue observations also hold for the intron-centric GTEx-based d
 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/dataset_histograms_seaborn.png} 
-	\caption[test.]{
+	\caption{
 		Histograms comparing the exon-centric versions of the four fundamentally different training datasets used. The shown GTEx dataset is based on samples from brain cortex tissue and the shown HipSci datasets are based on samples from iPSCs differentiated to neurons. 
 	}
 	\label{fig:datahistograms}
@@ -544,7 +551,7 @@ CNNs are useful when the input data contains spatially invariant patterns.  Sinc
 CNNs are also promising for the application to genomic data: 
 \begin{itemize}
 	\item Nucleotide sequences contain motifs (nucleotide sequence patterns conjectured to be biologically significant). Motifs are frequently represented as position weight matrixes (PWMs) which encode information about the significance of the occurrence of a particular nucleotide at a particular position. The kernels used in CNNs can be interpreted as PWMs with learnable weights. Thus, the inductive bias of CNNs, that the learning task can be solved via optimizing matrix weights, aligns well with our initial knowledge about the task. %  are promising because they can automatically optimize these weights and learn to recognize important motifs.
-	\item Motifs are found at different positions in the input sequence. This isn't a natural problem setting for some Machine Learning algorithms since they would need to learn to recognize the same motif in different positions. However, CNNs are inherently spatially invariant and thus are again well-suited to detecting motifs within a sequence.
+	\item Motifs are found at different positions in the input sequence. This is not a natural problem setting for some Machine Learning algorithms since they would need to learn to recognize the same motif in different positions. However, CNNs are inherently spatially invariant and thus are again well-suited to detecting motifs within a sequence.
 \end{itemize}
 
 
@@ -566,11 +573,11 @@ Concretely, each CNN block consists of three convolutional layers. The first con
 Like text, genomic data is fundamentally a sequence of characters.
 This makes it possible to apply techniques known from NLP to genomic data. This is an especially promising area of cross-pollination because of the large strides NLP has been able to make in recent years using deep learning.
 Some of the most important milestones in NLP have been efficient embeddings via Word2Vec \cite{w2v1} \cite{w2v2}, applying Recurrent Neural Networkss (RNNs) to text as in Sequence-to-Sequence (seq2seq) learning \cite{seq2seq} and leveraging attention as in the extremely powerful and deep Transformer models \cite{allyouneed} \cite{bert}.\\
-In this work, we evaluate the application of Doc2Vec (a derivative of Word2Vec), Seq2Seq models and the attention mechanism for the classification of alternative splicing events and the regressing of their frequency. We don't evaluate the current state-of-the-art Transformer models. Albeit very potent, they usually require huge datasets in the order of millions of samples which aren't available for this task (this decision is discussed in more detail in Section \ref{lstmvstransformer}). Nonetheless, we do adapt the attention mechanism as known from Transformers for our task. In this way, we feel the evaluated models make use of the most important deep learning innovations originating from NLP.
+In this work, we evaluate the application of Doc2Vec (a derivative of Word2Vec), Seq2Seq models and the attention mechanism for the classification of alternative splicing events and the regressing of their frequency. We do not evaluate the current state-of-the-art Transformer models. Albeit very potent, they usually require huge datasets in the order of millions of samples which are not available for this task (this decision is discussed in more detail in Section \ref{lstmvstransformer}). Nonetheless, we do adapt the attention mechanism as known from Transformers for our task. In this way, we feel the evaluated models make use of the most important deep learning innovations originating from NLP.
 
 %While scaling down Transformers and then applying is an interesting avenue of research, even heavily scaled-down models might still be over parametrized for the task as it has frequently been shown that very shallow networks (with less than 5 layers) perform best on genomic data \cite{}. Additionally, our input sequences are very long; generally 140 tokens or more. Initial tests showed that this also leads to memory problems when training on only one GPU, as the memory requirements of Transformers grows quadratically with respect to the length of the input sequence, further complicating their application. Due to these considerations, we chose to forego the evaluation of Transformer-based models in this study.
 \subsection{D2V: MLP-based} \label{subsec:d2v}
-This model is a reimplementation of the model used for PSI regression on the mouse genome in \cite{d2vsplicing}. The only architectural difference is that we possibly use a differently-sized MLP in the second part of the network, as architectural details on the MLP aren't given and no public implementation is available. 
+This model is a reimplementation of the model used for PSI regression on the mouse genome in \cite{d2vsplicing}. The only architectural difference is that we possibly use a differently-sized MLP in the second part of the network, as architectural details on the MLP are not given and no public implementation is available. 
 %If I want to expand this section:
 %Asgari, E., & Mofrad, M. R. (2015). Continuous distributed representation of biological sequences for deep proteomics and genomics. PloS one, 10(11), e0141287.
 %Contains very good explanations / phrasings
@@ -905,7 +912,7 @@ Previous studies have shown that model performance varies significantly between 
 
 \subsubsection{Metrics} \label{subsubsec:metrics}
 As in previous work \cite{dsc} \cite{buschhertel}, we use the Area under the receiver operating characteristic curve (AUC) as the primary evaluation metric. The AUC provides an aggregate measure of the classification performance across all possible decision thresholds.\\
-However, the AUC doesn't provide information about model performance at a particular decision threshold. To evaluate whether a model is fit for clinical use, decision threshold-specific metrics like sensitivity and specificity are crucial to know.
+However, the AUC does not provide information about model performance at a particular decision threshold. To evaluate whether a model is fit for clinical use, decision threshold-specific metrics like sensitivity and specificity are crucial to know.
 To evaluate these, we analytically compute the decision threshold which maximizes the F1 score. The F1 score provides an aggregate measure which treats precision and recall equally and is defined as the harmonic mean of precision and recall. It is a common measure to evaluate the performance of classifiers and we use it as a starting point for our further analysis. 
 
 Again following previous work \cite{d2vsplicing} \cite{jha}, we use the explained variance $R^2$ to evaluate model performance on the regression task. 

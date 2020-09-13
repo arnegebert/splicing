@@ -4,7 +4,7 @@ Why genes in pieces?
 \end{savequote}
 
 \chapter{\label{ch:1-intro}Introduction} 
-"One gene, one protein" was the prevailing dogma for over 30 years. Yet this belief was turned upside down by the stunning discovery in 1977 that genes contain long non-coding sequences \cite{discoveryofsplicing} (see Figure \ref{fig:discovery}). Instead, these non-coding sequences (introns) must be removed and only the coding sequences (exons) are joined together to form the blueprint of a gene product. Different sequences may be spliced together in different ways under different circumstances, allowing one gene to encode multiple proteins. Splicing and Alternative Splicing were discovered. 
+``One gene, one protein'' was the prevailing dogma for over 30 years. Yet this belief was turned upside down by the stunning discovery in 1977 that genes contain long non-coding sequences \cite{discoveryofsplicing} (see Figure \ref{fig:discovery}). Instead, these non-coding sequences (introns) must be removed and only the coding sequences (exons) are joined together to form the blueprint of a protein. Different exons may be spliced together under different circumstances, allowing one gene to encode multiple proteins. Splicing, the removal of introns, and alternative splicing, the combination of different exons, were discovered. 
 
 %Gene expression is fundamental to all life. It is the process whereby a sequence of nucleotides is used to direct the synthesis of a functional gene product (protein, functional RNA). And even though gene expression is such a fundamental process, our understanding of it is still lacking [alzheimer, dark matter]. 
 %
@@ -17,12 +17,12 @@ Why genes in pieces?
 %	} 
 	\frame{ \includegraphics[width=0.49\textwidth]{../visualizations/ch1-introduction/schematic_electron_microscopy.jpg}
 	}
-	\caption{Original electron microspy leading to the discovery of splicing (left) and schematic (right) \cite{discoveryofsplicing}. Introns show up as loops in this image.  }
+	\caption{Original electron microspy leading to the discovery of splicing (left) and corresponding schematic (right) \cite{discoveryofsplicing}. Introns (non-coding sequences) show up as the loops A, B and C in this illustration.  }
 	\label{fig:discovery}
 
 \end{figure}
 
-But "Why genes in pieces?". This question was posed by Walter Gilbert one year later \cite{whygenesinpieces}. Gilbert answered his own question and proposed that splicing, in essence, provides a multiplier which speeds up the rate of evolutionary adaption: a single nucleotide mutation influencing splicing may now lead to the inclusion or exclusion of whole genomic regions and thus the generation of a novel gene product. Was Gilbert correct? 42 years later we are still uncertain, but some support for his ideas have been found \cite{whyrevisited}. %perhaps introduction of alternative splicing
+But ``Why genes in pieces?''. This question was posed by Walter Gilbert one year later \cite{whygenesinpieces}. Gilbert answered his own question and proposed that splicing, in essence, provides a multiplier which speeds up the rate of evolutionary adaption: a single nucleotide mutation influencing splicing may now lead to the inclusion or exclusion of whole genomic regions and thus the generation of a different protein. Was Gilbert correct? 42 years later we are still uncertain, but some support for his ideas have been found \cite{whyrevisited}. %perhaps introduction of alternative splicing
 
 What we have gained in the past four decades of research, is a greater appreciation of the importance and the complexity of splicing. 
 Misregulated alternative splicing is a biomarker for several forms of cancer \cite{cancer} \cite{splicingcausescancer} and up to 50\% of known disease-causing mutations in humans have been shown to affect splicing \cite{50diseasessplicing}. 
@@ -68,12 +68,12 @@ A parallel development has been the rise of deep learning fuelled by increasing 
 Originating from Computer Vision \cite{alexnet}, deep learning has brought about breakthroughs in tasks as disparate as the early detection of Alzheimer's disease \cite{alzheimerdeeplearning} or estimating the demographic makeup of the US \cite{demographic}. 
 %deep learning also hasn't missed biology and, in particular, genomics. 
 %It has been applied to the prediction of protein structure [alphafold]
-With the advent of next-generation sequencing, the amount of genomic data available has increased by a multi-fold making genomics a prime application domain for deep learning. 
+With the advent of next-generation sequencing, the amount of genomic data available has increased by a multi-fold, making genomics a prime application domain for deep learning. 
 
 %deep learning has produced breakthroughs in the ability of machines to interpret images, text and audio. 
 
 
-Our work lies at the intersection between the desire for better splicing codes and the revolution of many fields by deep learning. We develop a Recurrent Attentive Splicing Code (RASC) inspired by deep learning techniques known from Natural Language Processing (NLP). During evaluation, we find that we can replicate the performance of a 20,000 parameter splicing model using a 100 parameter model which takes no sequence information as input when reusing a dataset by the literature. Motivated by this finding, we set out to develop better datasets and construct datasets based on three different processing methods. We show that only one of them provides appropriate data quality and quantity for the training of deep learning-based splicing codes. Comparing RASC against two reimplemented splicing codes, we show that it outperforms the previous state-of-the-art splicing code for alternative splicing exon classification by 15\%. 
+Our work lies at the intersection between the desire for better splicing codes and the revolution of many fields by deep learning. We develop a Recurrent Attentive Splicing Code (RASC) inspired by deep learning techniques known from Natural Language Processing (NLP). During evaluation, we find that we can replicate the performance of a 20,000-parameter model using a 100-parameter model which takes no sequence information as input when reusing a dataset from the literature. Motivated by this finding, we set out to develop better datasets and construct datasets based on three different processing methods. We demonstrate that only one of them provides appropriate data quality and quantity for the training of deep learning-based splicing codes. Comparing RASC against two reimplemented splicing codes, we show that it outperforms the previous state-of-the-art splicing code for classifying alternative splicing events by 15\%. 
 
 
 %In summary, we our main contributions are as follows:
@@ -87,10 +87,10 @@ Our work lies at the intersection between the desire for better splicing codes a
 %\section{Document structure}
 The rest of the text is organized as follows:
 \begin{itemize}
-	\item Chapter 2 succinctly introduces the required biological background required to follow the rest of this work. It also gives more detail about the importance of splicing.
+	\item Chapter 2 succinctly introduces the biological background required to follow the rest of this work. It also gives more detail about the importance of splicing.
 	\item Chapter 3 reviews the splicing codes which have already been developed.
-	\item Chapter 4 describes the dataset construction and the evaluated models in detail. It is by far the longest and most theoretical chapter due to us developing datasets and due to us modifying the attention mechanism known from Transformer models.
-	\item Chapter 5 presents the results of evaluating the models on a total of 16 different datasets. This includes the dataset whom we show to be critically confounded and the datasets for whose future us we advocate.
+	\item Chapter 4 describes the dataset construction and the evaluated models in detail. It is by far the longest and most theoretical chapter due to us developing new datasets and modifying the attention mechanism known from Transformer models.
+	\item Chapter 5 presents the results of evaluating the models on a total of 16 different datasets. This includes the dataset which we show to be critically confounded and the datasets for whose future use we advocate.
 	\item Chapter 6 summarizes our findings and draws more general conclusions. We also give suggestions for future work.
 \end{itemize}
 %\minitoc

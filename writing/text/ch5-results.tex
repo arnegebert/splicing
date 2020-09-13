@@ -155,23 +155,19 @@ The performance on highly included, alternatively spliced exons (80\% <= PSI < 9
 \end{figure}
 
 
-\begin{figure}[h]
-%	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_DSC/final/ROC.png} 
-%	\includegraphics[width=0.7\textwidth]{../saved/log/GTEx_Junc_Heart_Attn/junc_cv_final/ROC.png}
-	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_junc_brain_roc.png} 
-	\caption{ROC curve from training RASC on the GTEx-based intron-centric brain-cortex-tissue-based dataset. }
-	\label{fig:gtex_junc_rocs}
-\end{figure}
-
-
-
 \subsubsection{Main analysis}
 Figure \ref{fig:gtex_junc_barcharts} shows that the AUC of all models increases by at least 0.05 to 0.06 compared to the exon classification task. This is likely a result of the intron-centric datasets containing on average four times more training samples than the exon-centric datasets. The performance of RASC is the most promising and experiences the largest growth (by 0.15 AUC) demonstrating its capacity to capitalize on the increased number of training samples. The corresponding classification accuracy of RASC, when choosing the decision threshold which maximizes the F1 score, is roughly 70\% and shows that there is still room for further improvement. 
 
 Similar to the exon-centric datasets \ref{subsec:gtex_exon}, we observe very low cross-tissue performance differences. We again believe that model performance is generally too poor to warrant speculation about the underlying biological realities. However, we come to a different conclusion regarding the observation that the different dataset sizes between tissues don't affect model performance:
 for the GTEx-based exon-centric datasets we hypothesized that the models have hit diminishing returns for adding more data or that they need significantly more data. As the number of training samples has quadrupled in the move from exon- to intron-centric datasets, we now believe that the models have hit a point of diminishing returns for adding more data. 
 
-
+\begin{figure}[h]
+	%	\includegraphics[width=0.5\textwidth]{../saved/log/GTEx_Junc_Heart_DSC/final/ROC.png} 
+	%	\includegraphics[width=0.7\textwidth]{../saved/log/GTEx_Junc_Heart_Attn/junc_cv_final/ROC.png}
+	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/gtex_junc_brain_roc.png} 
+	\caption{ROC curve from training RASC on the GTEx-based intron-centric brain-cortex-tissue-based dataset. }
+	\label{fig:gtex_junc_rocs}
+\end{figure}
 
 The performance across rarely and highly included junctions is less disparate than on the exon-centric datasets (see Figure \ref{fig:gtex_junc_rocs}). This indicates that the models are better able to learn to recognize motifs which separate constitutive and highly alternatively spliced junctions than for exons.
 %However, this observation may not be very epistemiologically certain as only 15\%
@@ -221,7 +217,7 @@ Thus we conclude that the GTEx-based datasets improve upon the HEXEvent dataset,
 
 
 \section{HipSci SUPPA datasets} \label{subsec:hipsci_suppa}
-\subsection{Dataset based on iPSC-derived sensory neuron cell lines}
+\subsection{Dataset based on iPSC-derived sensory neuron cells}
 
 \begin{figure}
 	\centering\includegraphics[width=0.7\textwidth]{../visualizations/ch5-results/suppa_cross_model_roc_auc_comparison.png} 
@@ -326,7 +322,7 @@ Motivated by this observation, we use the HipSci MAJIQ dataset to validate our a
 
 \subsection{Evaluation of the additional attention modifications} \label{subsubsec:attn_hyperparams}
 
-We evaluate the three additional attention modifications described in \ref{subsec:alternative_attention} by testing them sequentially. The results of these tests are shown in Figure \ref{fig:attn_extension_barcharts}. 
+We evaluate the three additional attention modifications described in \ref{subsec:alternative_attention} by testing them sequentially. The results of these tests are illustrated in Figure \ref{fig:attn_extension_barcharts}. 
 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/attn_extension_barcharts.png} 
@@ -608,7 +604,7 @@ The sequence which an attention head focusses on generally does not change after
 
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch5-results/mean_attention_barchart_zoomed.png}
-	\caption{Mean attention weights averaged over all test samples and all four attention heads. Error bars show the standard deviation between cross-validation runs. }
+	\caption{Mean attention weights averaged over all test samples and all four attention heads. Each bar represents the attention given to one element from the 280 elements given to the attention layer. The 20 elements closest to the two boundaries are shown. The error bars represent the standard deviation between cross-validation runs. }
 	\label{fig:mean_attn}
 \end{figure}
 
