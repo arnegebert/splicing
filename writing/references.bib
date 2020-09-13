@@ -485,15 +485,13 @@
 }
 
 @article{tsne,
-	added-at = {2010-02-21T07:58:39.000+0100},
-	author = {van der Maaten, L.J.P. and Hinton, G.E.},
-	biburl = {https://www.bibsonomy.org/bibtex/2d721e0c952141718d2e8cf658ffe9a3f/ds9},
-	interhash = {d3658497eff9fea21e66bb43320a822a},
-	intrahash = {d721e0c952141718d2e8cf658ffe9a3f},
-	keywords = {da mds projection visualization},
-	timestamp = {2010-02-21T07:58:39.000+0100},
-	title = {Visualizing High-Dimensional Data Using t-SNE},
-	year = 2008
+	author = {van der Maaten, Laurens and Hinton, Geoffrey},
+	year = {2008},
+	month = {11},
+	pages = {2579-2605},
+	title = {Viualizing data using t-SNE},
+	volume = {9},
+	journal = {Journal of Machine Learning Research}
 }
 
 
@@ -529,6 +527,28 @@
 	volume = {7},
 	journal = {BMC bioinformatics},
 	doi = {10.1186/1471-2105-7-77}
+}
+
+@article{sanger1977dna,
+	title={DNA sequencing with chain-terminating inhibitors},
+	author={Sanger, Frederick and Nicklen, Steven and Coulson, Alan R},
+	journal={Proceedings of the national academy of sciences},
+	volume={74},
+	number={12},
+	pages={5463--5467},
+	year={1977},
+	publisher={National Acad Sciences}
+}
+
+@article{overviewmlapproachestosplicing,
+	title={Machine learning approaches for the prioritization of genomic variants impacting pre-mrna splicing},
+	author={Rowlands, Charlie F and Baralle, Diana and Ellingford, Jamie M},
+	journal={Cells},
+	volume={8},
+	number={12},
+	pages={1513},
+	year={2019},
+	publisher={Multidisciplinary Digital Publishing Institute}
 }
 
 @article{estunderrepresenttransripts,
@@ -569,11 +589,10 @@
 
 @article{gpt3,
 	title={Language Models are Few-Shot Learners},
-	author={Tom B. Brown and Benjamin Mann and Nick Ryder and Melanie Subbiah and Jared Kaplan and Prafulla Dhariwal and Arvind Neelakantan and Pranav Shyam and Girish Sastry and Amanda Askell and Sandhini Agarwal and Ariel Herbert-Voss and Gretchen Krueger and Tom Henighan and Rewon Child and Aditya Ramesh and Daniel M. Ziegler and Jeffrey Wu and Clemens Winter and Christopher Hesse and Mark Chen and Eric Sigler and Mateusz Litwin and Scott Gray and Benjamin Chess and Jack Clark and Christopher Berner and Sam McCandlish and Alec Radford and Ilya Sutskever and Dario Amodei},
+	author={T. Brown and B. Mann and Nick Ryder and Melanie Subbiah and J. Kaplan and P. Dhariwal and Arvind Neelakantan and Pranav Shyam and Girish Sastry and Amanda Askell and Sandhini Agarwal and Ariel Herbert-Voss and G. Kr{\"u}ger and Tom Henighan and R. Child and Aditya Ramesh and D. Ziegler and Jeffrey Wu and Clemens Winter and Christopher Hesse and Mark Chen and E. Sigler and Mateusz Litwin and Scott Gray and Benjamin Chess and J. Clark and Christopher Berner and Sam McCandlish and A. Radford and Ilya Sutskever and Dario Amodei},
+	journal={ArXiv},
 	year={2020},
-	eprint={2005.14165},
-	archivePrefix={arXiv},
-	primaryClass={cs.CL}
+	volume={abs/2005.14165}
 }
 
 @ARTICLE{seq2seq,
@@ -791,22 +810,27 @@
 	doi = {10.1109/78.650093}
 }
 
+
 @inproceedings{attention_recommender_systems,
-	author = {Seo, Sungyong and Huang, Jing and Yang, Hao and Liu, Yan},
-	year = {2017},
-	month = {08},
-	pages = {297-305},
-	title = {Interpretable Convolutional Neural Networks with Dual Local and Global Attention for Review Rating Prediction},
-	isbn = {978-1-4503-4652-8},
-	doi = {10.1145/3109859.3109890}
+	title={Interpretable convolutional neural networks with dual local and global attention for review rating prediction},
+	author={Seo, Sungyong and Huang, Jing and Yang, Hao and Liu, Yan},
+	booktitle={Proceedings of the Eleventh ACM Conference on Recommender Systems},
+	pages={297--305},
+	year={2017}
 }
 
-@article{attention_speech_recognition,
-	author = {Chorowski, Jan and Bahdanau, Dzmitry and Serdyuk, Dmitriy and Cho, Kyunghyun and Bengio, Y.},
+@inproceedings{attention_speech_recognition,
+	author = {Chorowski, Jan and Bahdanau, Dzmitry and Serdyuk, Dmitriy and Cho, Kyunghyun and Bengio, Yoshua},
+	title = {Attention-Based Models for Speech Recognition},
 	year = {2015},
-	month = {06},
-	pages = {},
-	title = {Attention-Based Models for Speech Recognition}
+	publisher = {MIT Press},
+	address = {Cambridge, MA, USA},
+	abstract = {Recurrent sequence generators conditioned on input data through an attention mechanism have recently shown very good performance on a range of tasks including machine translation, handwriting synthesis [1,2] and image caption generation [3]. We extend the attention-mechanism with features needed for speech recognition. We show that while an adaptation of the model used for machine translation in [2] reaches a competitive 18.7% phoneme error rate (PER) on the TIMET phoneme recognition task, it can only be applied to utterances which are roughly as long as the ones it was trained on. We offer a qualitative explanation of this failure and propose a novel and generic method of adding location-awareness to the attention mechanism to alleviate this issue. The new method yields a model that is robust to long inputs and achieves 18% PER in single utterances and 20% in 10-times longer (repeated) utterances. Finally, we propose a change to the attention mechanism that prevents it from concentrating too much on single frames, which further reduces PER to 17.6% level.},
+	booktitle = {Proceedings of the 28th International Conference on Neural Information Processing Systems - Volume 1},
+	pages = {577–585},
+	numpages = {9},
+	location = {Montreal, Canada},
+	series = {NIPS'15}
 }
 
 @ARTICLE{w2v1,
@@ -1210,11 +1234,11 @@
 }
 
 @article{kmerlength1,
-	author = {Ng, Patrick},
-	year = {2017},
-	month = {01},
-	pages = {},
-	title = {dna2vec: Consistent vector representations of variable-length k-mers}
+	title={dna2vec: Consistent vector representations of variable-length k-mers},
+	author={Patrick Ng},
+	journal={ArXiv},
+	year={2017},
+	volume={abs/1701.06279}
 }
 
 @article{kmerlength2,
@@ -1259,6 +1283,36 @@
 	volume = {27},
 	journal = {Bioinformatics (Oxford, England)},
 	doi = {10.1093/bioinformatics/btr508}
+}
+
+@article{surveyrnaseqbestpractices,
+	title={A survey of best practices for RNA-seq data analysis},
+	author={Conesa, Ana and Madrigal, Pedro and Tarazona, Sonia and Gomez-Cabrero, David and Cervera, Alejandra and McPherson, Andrew and Szcze{\'s}niak, Micha{\l} Wojciech and Gaffney, Daniel J and Elo, Laura L and Zhang, Xuegong and others},
+	journal={Genome biology},
+	volume={17},
+	number={1},
+	pages={13},
+	year={2016},
+	publisher={BioMed Central}
+}
+
+@article{britz2020deeplearningmostimportantideas,
+	author={Denny Britz},
+	title={Deep Learning's Most Important Ideas - A Brief Historical Review},
+	year={2020},
+	url={http://dennybritz.com/blog/deep-learning-most-important-ideas},
+	publisher={s.n.}
+}
+
+@article{novelbraintranscripts,
+	author = {Clark, Michael and Wrzesiński, Tomasz and Garcia, Aintzane and Hall, Nicola and Kleinman, Joel and Hyde, Thomas and Weinberger, Daniel and Harrison, Paul and Haerty, Wilfried and Tunbridge, Elizabeth},
+	year = {2019},
+	month = {11},
+	pages = {1-11},
+	title = {Long-read sequencing reveals the complex splicing profile of the psychiatric risk gene CACNA1C in human brain},
+	volume = {25},
+	journal = {Molecular Psychiatry},
+	doi = {10.1038/s41380-019-0583-1}
 }
 
 @article {ipscneurons,

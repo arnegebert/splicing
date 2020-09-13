@@ -135,7 +135,7 @@ Similarly, all of the above biological replicates were used in the MAJIQ Builder
 	\label{table:d2vparams}
 \end{table}
 
-The hyperparameters used during pre-training are given in table \ref{table:d2vparams}. Except for the number of epochs, these are the same as in the baseline paper \cite{d2vsplicing}. We reduced the number of epochs from 20 to 5, as initial tests showed no performance difference between these two values. However, while \cite{d2vsplicing} don't mention what Doc2Vec implementation they use, almost all of these parameters are the same as the default parameters from the gensim library. Therefore, we believe that these parameters weren't fine-tuned very intensively. 
+The hyperparameters used during pre-training are given in Table \ref{table:d2vparams}. Except for the number of epochs, these are the same as in the baseline paper \cite{d2vsplicing}. We reduced the number of epochs from 20 to 5, as initial tests showed no performance difference between these two values. However, while \cite{d2vsplicing} don't mention what Doc2Vec implementation they use, almost all of these parameters are the same as the default parameters from the gensim library. Therefore, we believe that these parameters weren't fine-tuned very intensively. 
 
 Two hyperparameters, not yet introduced, are mentioned in Table \ref{table:d2vparams}. Although these hyperparameters aren't very impactful when training on genomic data (as the vocabulary only consists of 64 words), we mention them for completeness (as they are also mentioned in \cite{d2vsplicing}):
 \begin{itemize}
