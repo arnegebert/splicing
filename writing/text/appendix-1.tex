@@ -1,10 +1,10 @@
-\begin{savequote}[8cm]
-\textlatin{Cor animalium, fundamentum e\longs t vitæ, princeps omnium, Microco\longs mi Sol, a quo omnis vegetatio dependet, vigor omnis \& robur emanat.}
-
-The heart of animals is the foundation of their life, the sovereign of everything within them, the sun of their microcosm, that upon which all growth depends, from which all power proceeds.
-  \qauthor{--- William Harvey %\cite{harvey_exercitatio_1628}
-  }
-\end{savequote}
+%\begin{savequote}[8cm]
+%\textlatin{Cor animalium, fundamentum e\longs t vitæ, princeps omnium, Microco\longs mi Sol, a quo omnis vegetatio dependet, vigor omnis \& robur emanat.}
+%
+%The heart of animals is the foundation of their life, the sovereign of everything within them, the sun of their microcosm, that upon which all growth depends, from which all power proceeds.
+%  \qauthor{--- William Harvey %\cite{harvey_exercitatio_1628}
+%  }
+%\end{savequote}
 
 \chapter{\label{app:appendix}Appendix}
 
@@ -137,13 +137,13 @@ Similarly, all of the above biological replicates were used in the MAJIQ Builder
 
 The hyperparameters used during pre-training are given in Table \ref{table:d2vparams}. Except for the number of epochs, these are the same as in the baseline paper \cite{d2vsplicing}. We reduced the number of epochs from 20 to 5, as initial tests showed no performance difference between these two values. However, while \cite{d2vsplicing} don't mention what Doc2Vec implementation they use, almost all of these parameters are the same as the default parameters from the gensim library. Therefore, we believe that these parameters weren't fine-tuned very intensively. 
 
-Two hyperparameters, not yet introduced, are mentioned in Table \ref{table:d2vparams}. Although these hyperparameters aren't very impactful when training on genomic data (as the vocabulary only consists of 64 words), we mention them for completeness (as they are also mentioned in \cite{d2vsplicing}):
+Two hyperparameters, not yet introduced, are mentioned in Table \ref{table:d2vparams}. Although these hyperparameters aren't very impactful when training on genomic data (as the vocabulary only consists of 64 words), we mention them for completeness:
 \begin{itemize}
-	\item The minimum count parameters eliminates all words which occur fewer than the minumum amount from the corpus. Infrequent words don't have enough examples to allow the model to learn a good representation of them. Additionally, while the individual words might uncommon, there might be a lot of them, making it computationally expensive to keep them.
+	\item The minimum count parameters eliminates all words which occur fewer than the minumum amount of times from the corpus. Infrequent words don't have enough examples to allow the model to learn a good representation of them. Additionally, while the individual words themselves are uncommon, the total amount of uncommong words might still be large, making it computationally expensive to keep them.
 	
 	\item Negative sampling \cite{w2v2} 
-	is a technique to reduce the computational cost of backpropagating the gradient updates. The size of the weights in the Word2Vec or Doc2Vec can be easily reach millions of learnable weights with a medium sized vocabulary: for 10,000 words in the vocabulary and 300-dimensional embedding, the matrix representing the hidden weights already has 3 million weights. This makes backpropagation expensive as all of these weights need to be updated in every step. \\
-	When negative sampling is enabled, by default only the weights connected to the word tne network should predict will be updated via backpropagation. Additionally, a certain number of negative samples, words which the network shouldn't predict, are randomly chosen and their weights updated too. This dramatically reduces the computational cost of backpropagating the gradient updates, since only the weights of very few words in the vocabulary are updated. 
+	is a technique to reduce the computational cost of backpropagating the gradient updates. The size of the weights in the Word2Vec or Doc2Vec can easily reach millions of learnable weights with a medium sized vocabulary: for 10,000 words in the vocabulary and 300-dimensional embedding, the matrix representing the hidden weights already has 3 million weights. This makes backpropagation expensive as all of these weights need to be updated in every step. \\
+	When negative sampling is enabled, by default only the weights connected to the word the network should predict will be updated via backpropagation. Additionally, a certain number of negative samples, words which the network shouldn't predict, are randomly chosen and their weights are updated too. This dramatically reduces the computational cost of backpropagating the gradient updates, since only the weights of very few words in the vocabulary are updated. 
 \end{itemize}
 
 

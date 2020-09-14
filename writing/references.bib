@@ -68,7 +68,7 @@
 @article{longtermcall,
 	title={Splicing regulation: from a parts list of regulatory elements to an integrated splicing code},
 	author={Wang, Zefeng and Burge, Christopher B},
-	journal={Rna},
+	journal={RNA},
 	volume={14},
 	number={5},
 	pages={802--813},
@@ -112,7 +112,7 @@
 @article{deeplearning,
 	title={Deep learning},
 	author={LeCun, Yann and Bengio, Yoshua and Hinton, Geoffrey},
-	journal={nature},
+	journal={Nature},
 	volume={521},
 	number={7553},
 	pages={436--444},
@@ -134,8 +134,6 @@
 	PAGES={220},     
 	
 	YEAR={2019},      
-	
-	URL={https://www.frontiersin.org/article/10.3389/fnagi.2019.00220},       
 	
 	DOI={10.3389/fnagi.2019.00220},      
 	
@@ -206,7 +204,6 @@
 	volume = {9},
 	number = {8},
 	issn = {0899-7667},
-	url = {https://doi.org/10.1162/neco.1997.9.8.1735},
 	doi = {10.1162/neco.1997.9.8.1735},
 	abstract = {Learning to store information over extended time intervals by recurrent backpropagation takes a very long time, mostly because of insufficient, decaying error backflow. We briefly review Hochreiter's (1991) analysis of this problem, then address it by introducing a novel, efficient, gradient based method called long short-term memory (LSTM). Truncating the gradient where this does not do harm, LSTM can learn to bridge minimal time lags in excess of 1000 discrete-time steps by enforcing constant error flow through constant error carousels within special units. Multiplicative gate units learn to open and close access to the constant error flow. LSTM is local in space and time; its computational complexity per time step and weight is O. 1. Our experiments with artificial data involve local, distributed, real-valued, and noisy pattern representations. In comparisons with real-time recurrent learning, back propagation through time, recurrent cascade correlation, Elman nets, and neural sequence chunking, LSTM leads to many more successful runs, and learns much faster. LSTM also solves complex, artificial long-time-lag tasks that have never been solved by previous recurrent network algorithms.},
 	journal = {Neural Comput.},
@@ -369,9 +366,7 @@
 	month = {02},
 	abstract = "{GC content bias describes the dependence between fragment count (read coverage) and GC content found in Illumina sequencing data. This bias can dominate the signal of interest for analyses that focus on measuring fragment abundance within a genome, such as copy number estimation (DNA-seq). The bias is not consistent between samples; and there is no consensus as to the best methods to remove it in a single sample. We analyze regularities in the GC bias patterns, and find a compact description for this unimodal curve family. It is the GC content of the full DNA fragment, not only the sequenced read, that most influences fragment count. This GC effect is unimodal: both GC-rich fragments and AT-rich fragments are underrepresented in the sequencing results. This empirical evidence strengthens the hypothesis that PCR is the most important cause of the GC bias. We propose a model that produces predictions at the base pair level, allowing strand-specific GC-effect correction regardless of the downstream smoothing or binning. These GC modeling considerations can inform other high-throughput sequencing analyses such as ChIP-seq and RNA-seq.}",
 	issn = {0305-1048},
-	doi = {10.1093/nar/gks001},
-	url = {https://doi.org/10.1093/nar/gks001},
-	eprint = {https://academic.oup.com/nar/article-pdf/40/10/e72/25335311/gks001.pdf},
+	doi = {10.1093/nar/gks001}
 }
 
 @article{rnaseqbiascorrection,
@@ -511,11 +506,20 @@
 }
 
 @article{hitchhikerrnaseq,
-	title={RNA sequencing data: hitchhiker's guide to expression analysis},
-	author={Van Den Berge, Koen and Hembach, Katharina M and Soneson, Charlotte and Tiberi, Simone and Clement, Lieven and Love, Michael I and Patro, Rob and Robinson, Mark D},
-	year={2019},
-	publisher={Annual Reviews}
+	volume = {2},
+	number = {1},
+	month = {July},
+	author = {Koen Van den Berge and Katharina M Hembach and Charlotte Soneson and Simone Tiberi and Lieven Clement and Michael I Love and Rob Patro and Mark D Robinson},
+	title = {RNA Sequencing Data: Hitchhiker's Guide to Expression Analysis},
+	publisher = {Annual Reviews},
+	year = {2019},
+	journal = {Annual Review of Biomedical Data Science},
+	pages = {139--173},
+	language = {english},
+	issn = {2574-3414},
+	doi = {10.1146/annurev-biodatasci-072018-021255}
 }
+
 
 
 @article{systematicbiasinest,
@@ -574,6 +578,15 @@
 	doi = {10.1101/gr.229102.}
 }
 
+@book{von_goethe_wilhelm_1829,
+	title = {Wilhelm {Meisters} {Wanderjahre} oder die {Entsagenden}},
+	shorttitle = {Werke},
+	language = {de},
+	publisher = {Cotta},
+	author = {von Goethe, Johann Wolfgang},
+	year = {1829}
+}
+
 @article {ghentransformers,
 	author = {Clauwaert, Jim and Waegeman, Willem},
 	title = {Novel transformer networks for improved sequence labeling in genomics},
@@ -582,17 +595,14 @@
 	doi = {10.1101/836163},
 	publisher = {Cold Spring Harbor Laboratory},
 	abstract = {In genomics, a wide range of machine learning methodologies are used to annotate biological sequences for the detection of positions of interest such as transcription start sites, translation initiation sites, methylation sites, splice sites and promotor start sites. In recent years, this area has been dominated by convolutional neural networks, which typically outperform previously designed methods as a result of automated scanning for influential sequence motifs. However, those architectures do not allow for the efficient processing of the full genomic sequence. As an improvement, we introduce transformer architectures for whole genome sequence labeling tasks. We show that these architectures, recently introduced for natural language processing, allow for a fast processing of long DNA sequences. We apply existing networks and introduce an optimized method for the calculation of attention from input nucleotides. To demonstrate this, we evaluate our architecture on several sequence labeling tasks, and find it to achieve state-of-the-art performances when comparing it to specialized models for the annotation of transcription start sites, translation initiation sites and 4mC methylation in E. coli, substantiating the robustness of the newly introduced framework.},
-	URL = {https://www.biorxiv.org/content/early/2020/02/28/836163},
-	eprint = {https://www.biorxiv.org/content/early/2020/02/28/836163.full.pdf},
 	journal = {bioRxiv}
 }
 
 @article{gpt3,
-	title={Language Models are Few-Shot Learners},
-	author={T. Brown and B. Mann and Nick Ryder and Melanie Subbiah and J. Kaplan and P. Dhariwal and Arvind Neelakantan and Pranav Shyam and Girish Sastry and Amanda Askell and Sandhini Agarwal and Ariel Herbert-Voss and G. Kr{\"u}ger and Tom Henighan and R. Child and Aditya Ramesh and D. Ziegler and Jeffrey Wu and Clemens Winter and Christopher Hesse and Mark Chen and E. Sigler and Mateusz Litwin and Scott Gray and Benjamin Chess and J. Clark and Christopher Berner and Sam McCandlish and A. Radford and Ilya Sutskever and Dario Amodei},
-	journal={ArXiv},
-	year={2020},
-	volume={abs/2005.14165}
+	title={Language models are few-shot learners},
+	author={Brown, Tom B and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and Kaplan, Jared and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav and Sastry, Girish and Askell, Amanda and others},
+	journal={arXiv preprint arXiv:2005.14165},
+	year={2020}
 }
 
 @ARTICLE{seq2seq,
@@ -617,7 +627,7 @@
 	author = {Ruder, Sebastian},
 	title = {{A Review of the Neural History of Natural Language Processing}},
 	year = {2018},
-	howpublished = {\url{http://ruder.io/a-review-of-the-recent-history-of-nlp/}},
+	howpublished = {\url{ruder.io/a-review-of-the-recent-history-of-nlp/}},
 }
 
 @ARTICLE{googlemt2016,
@@ -825,12 +835,11 @@
 	year = {2015},
 	publisher = {MIT Press},
 	address = {Cambridge, MA, USA},
-	abstract = {Recurrent sequence generators conditioned on input data through an attention mechanism have recently shown very good performance on a range of tasks including machine translation, handwriting synthesis [1,2] and image caption generation [3]. We extend the attention-mechanism with features needed for speech recognition. We show that while an adaptation of the model used for machine translation in [2] reaches a competitive 18.7% phoneme error rate (PER) on the TIMET phoneme recognition task, it can only be applied to utterances which are roughly as long as the ones it was trained on. We offer a qualitative explanation of this failure and propose a novel and generic method of adding location-awareness to the attention mechanism to alleviate this issue. The new method yields a model that is robust to long inputs and achieves 18% PER in single utterances and 20% in 10-times longer (repeated) utterances. Finally, we propose a change to the attention mechanism that prevents it from concentrating too much on single frames, which further reduces PER to 17.6% level.},
 	booktitle = {Proceedings of the 28th International Conference on Neural Information Processing Systems - Volume 1},
 	pages = {577–585},
 	numpages = {9},
 	location = {Montreal, Canada},
-	series = {NIPS'15}
+	series = {NIPS 2015}
 }
 
 @ARTICLE{w2v1,
@@ -911,7 +920,7 @@
 	Number="Database issue",
 	Pages="D750--753",
 	Month="Jan",
-	note={\url{https://bionumbers.hms.harvard.edu/bionumber.aspx?id=105336&ver=6}},
+	note={\url{bionumbers.hms.harvard.edu/bionumber.aspx?id=105336&ver=6}},
 }
 
 @article{dropout,
@@ -968,7 +977,7 @@
 	day = 22,
 	publisher = {ELRA},
 	address = {Valletta, Malta},
-	note={\url{http://is.muni.cz/publication/884893/en}},
+	note={\url{is.muni.cz/publication/884893/en}},
 	language={English}
 }
 
@@ -979,8 +988,7 @@
 	editor = {H. Wallach and H. Larochelle and A. Beygelzimer and F. d Alch\'{e}-Buc and E. Fox and R. Garnett},
 	pages = {8024--8035},
 	year = {2019},
-	publisher = {Curran Associates, Inc.},
-	url = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf}
+	publisher = {Curran Associates, Inc.}
 }
 
 % 18081010 
@@ -1054,7 +1062,7 @@
 	author = "{N}ational {H}uman {G}enome {R}esearch {I}nstitute",
 	title = "Antisense",
 	year = "n.d.",
-	url = "www.genome.gov/genetics-glossary/antisense",
+	url = "genome.gov/genetics-glossary/antisense",
 	note = "[Online; accessed 11-September-2020]"
 }
 
@@ -1062,7 +1070,7 @@
 	author = "{Mutundis}",
 	title = "File:Pre-mRNA to mRNA MH.svg",
 	year = "2015",
-	url = "https://commons.wikimedia.org/wiki/File:Pre-mRNA_to_mRNA_MH.svg",
+	url = "commons.wikimedia.org/wiki/File:Pre-mRNA_to_mRNA_MH.svg",
 	note = "[Online; accessed 23-August-2020]"
 }
 
@@ -1300,7 +1308,7 @@
 	author={Denny Britz},
 	title={Deep Learning's Most Important Ideas - A Brief Historical Review},
 	year={2020},
-	url={http://dennybritz.com/blog/deep-learning-most-important-ideas},
+	url={dennybritz.com/blog/deep-learning-most-important-ideas},
 	publisher={s.n.}
 }
 
@@ -1338,9 +1346,7 @@
 	month = {01},
 	abstract = "{ Ultra-deep RNA sequencing has become a powerful approach for genome-wide analysis of pre-mRNA alternative splicing. We develop MATS (multivariate analysis of transcript splicing), a Bayesian statistical framework for flexible hypothesis testing of differential alternative splicing patterns on RNA-Seq data. MATS uses a multivariate uniform prior to model the between-sample correlation in exon splicing patterns, and a Markov chain Monte Carlo (MCMC) method coupled with a simulation-based adaptive sampling procedure to calculate the P -value and false discovery rate (FDR) of differential alternative splicing. Importantly, the MATS approach is applicable to almost any type of null hypotheses of interest, providing the flexibility to identify differential alternative splicing events that match a given user-defined pattern. We evaluated the performance of MATS using simulated and real RNA-Seq data sets. In the RNA-Seq analysis of alternative splicing events regulated by the epithelial-specific splicing factor ESRP1, we obtained a high RT–PCR validation rate of 86\% for differential exon skipping events with a MATS FDR of. Additionally, over the full list of RT–PCR tested exons, the MATS FDR estimates matched well with the experimental validation rate. Our results demonstrate that MATS is an effective and flexible approach for detecting differential alternative splicing from RNA-Seq data. }",
 	issn = {0305-1048},
-	doi = {10.1093/nar/gkr1291},
-	url = {https://doi.org/10.1093/nar/gkr1291},
-	eprint = {https://academic.oup.com/nar/article-pdf/40/8/e61/25334363/gkr1291.pdf},
+	doi = {10.1093/nar/gkr1291}
 }
 
 
@@ -1514,6 +1520,5 @@ Citations from initial project essay:
 	editor       = {Ambrose, J. C. and Baple, E. L. and Bleda, M. and Boardman-Pretty, F. and Boissiere, J. M. and Boustred, C. R. and Caulfield, M. J. and Chan, G. C. and Craig, C. E. H. and Daugherty, L. C. and de Burca, A. and Devereau, A. and Elgar, G. and Foulger, R. E. and Fowler, T. and Furi{\'o}-Tar{\'\i}, P. and Hackett, J. M. and Halai, D. and Holman, J. E. and Hubbard, T. J. P. and Jackson, R. and Kasperaviciute, D. and Kayikci, M. and Lahnstein, L. and Lawson, K. and Leigh, S. E. A. and Leong, I. U. S. and Lopez, F. J. and Maleady-Crowe, F. and Mason, J. and McDonagh, E. M. and Moutsianas, L. and Mueller, M. and Murugaesu, N. and Need, A. C. and Odhams, C. A. and Patch, C. and Perez-Gil, D. and Polychronopoulos, D. and Pullinger, J. and Rahim, T. and Rendon, A. and Riesgo-Ferreiro, P. and Rogers, T. and Ryten, M. and Savage, K. and Sawant, K. and Scott, R. H. and Siddiq, A. and Sieghart, A. and Smedley, D. and Smith, K. R. and Sosinsky, A. and Spooner, W. and Stevens, H. E. and Stuckey, A. and Sultana, R. and Thomas, E. R. A. and Thompson, S. R. and Tregidgo, C. and Tucci, A. and Walsh, E. and Watters, S. A. and Welland, M. J. and Williams, E. and Witkowska, K. and Wood, S. M. and Zarowiecki, M.},
 	elocation-id = {781088},
 	eprint       = {https://www.biorxiv.org/content/early/2019/09/26/781088.full.pdf},
-	publisher    = {Cold Spring Harbor Laboratory},
-	url          = {https://www.biorxiv.org/content/early/2019/09/26/781088},
+	publisher    = {Cold Spring Harbor Laboratory}
 }

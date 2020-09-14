@@ -56,9 +56,12 @@ print(f'DSC Performance change: {dsc_change:.3f}')
 print(f'D2V Performance change: {d2v_change:.3f}')
 print(f'RASC Performance change: {rasc_change:.3f}')
 
-dsc_perf, rasc_perf = 0.822, 0.875
-rasc_improv = compute_relative_performance_change(dsc_perf, rasc_perf)
-print(f'RASC improves upon DSC by {rasc_improv:.3f}')
+d2v_perf, dsc_perf, rasc_perf = 0.71, 0.822, 0.875
+d2v_improv = compute_relative_performance_change(d2v_perf, rasc_perf)
+dsc_improv = compute_relative_performance_change(dsc_perf, rasc_perf)
+print(f'RASC improves upon D2V by {d2v_improv:.3f}')
+
+print(f'RASC improves upon DSC by {dsc_improv:.3f}')
 
 # cons: 0.590%, low: 0.183%, high: 0.227%
 # cons: 0.564%, low: 0.192%, high: 0.244% or 44 vs 56

@@ -1,5 +1,5 @@
 \chapter{\label{ch:4-methods}Methods} % 9049 words
-
+%\minitoc
 %short name for attention model  -- PRALINE current favourite of the cheesy ones, but DRASC overall preferred
 %Attentive recurrent splicing code
 %ARSC
@@ -52,7 +52,7 @@ Three primary sources for genomic data were used in this study: the Human Exon s
 \subsection{HEXEvent database} \label{subsec:hexevent}
 The HEXEvent database contains genome-wide exon datasets of human internal exons which can be filtered for selected splicing events (e.g. constitutive or cassette exons). It was compiled based on known mRNA variants as defined by the UCSC Genome Browser for the human reference genome hg38 as well as their associated available expressed sequence tag (EST) information. ESTs are short cDNA sequences generated through Sanger sequencing (a first generation sequencing method) \cite{sanger1977dna} with the primary aim to facilitate genome annotations. However, ESTs have largely been replaced by sequence reads generated from next generation sequencing technologies such as RNA-Seq which are able to generate vastly more reads at a fraction of the cost \cite{sequencinghistory}. 
 
-%perhaps extra section where I discuss the merit of each dataset because right now it doesn't fit
+%perhaps extra section where I discuss the merit of each dataset because right now it does not fit
 Two issues with ESTs are worth highlighting: 
 \begin{itemize}
 	\item ESTs are based on only a single sequencing pass and especially bases at the 3' and 5' end of the EST are known to be highly error-prone \cite{hitchhiker}. 
@@ -195,10 +195,10 @@ However, this estimate also has various issues:
 	$$\#IR_{norm} = \frac{\#IR}{exon\_length + read\_length -1}$$
 	$$\#ER_{norm} = \frac{\#ER}{read\_length - 1}$$
 
-	% included berlin graphic as favouring action over inaction and well I don't think (I hope) I have an excessive amount of graphics yet
+	% included berlin graphic as favouring action over inaction and well I do not think (I hope) I have an excessive amount of graphics yet
 	%	Note that this assumes that reads are uniformly distributed across a transcript isoform. It is well-known that RNA-seq reads are biased .... [get paper from Liz/Wilfred]
 	
-	%	thought: this normalization doesn't obviously seem correct to me on second thought. an ER can be found at two junctions, so that would double the number of possible read starts
+	%	thought: this normalization does not obviously seem correct to me on second thought. an ER can be found at two junctions, so that would double the number of possible read starts
 	%	IR can only start from position 0 to exon.length-read.length of the exon can't they?
 	%	won't do anything about this but will want to use weaker claim
 	%	I think you can't really do normalization for junction counting
@@ -245,7 +245,7 @@ However, it should be noted that HEXEvent uses the criticized naive estimation m
 Therefore, care should be taken when drawing conclusions based on the PSI estimates of this dataset. 
 
 \subsubsection{Our PSI estimation implementation} \label{subsubsec:implementedpsiestimation}
-To obtain a PSI estimate based on the publicly accessible exon-exon junction read counts of the GTEx project, we implement our own PSI estimation method. We are not able to use the PSI estimation methods from the literature we introduce below, as they require access to the raw RNA-seq reads which we don't have access to due to data privacy regulations.
+To obtain a PSI estimate based on the publicly accessible exon-exon junction read counts of the GTEx project, we implement our own PSI estimation method. We are not able to use the PSI estimation methods from the literature we introduce below, as they require access to the raw RNA-seq reads which we do not have access to due to data privacy regulations.
 
 GTEx publicly gives access to anonymized information about which sample types were taken from which donor. We use this information to find a donor from whom brain cortex tissue, cerebellum tissue and heart tissue samples were taken. For each tissue sample, we derive two datasets: one exon-centric dataset in which we estimate PSI for cassette exons and one intron-centric dataset in which we estimate PSI for junctions. 
 % would give more details about how cassette exons/junctions are selected in the respective datasets here
@@ -262,7 +262,7 @@ Fundamentally, our PSI estimation relies on the formula $PSI = \frac{\#IR}{(\#IR
 
 Using the normalized \#IR and \#ER of all exons and junctions remaining after filtering, we then compute PSI: $PSI = \frac{\#IR^{TPM}_{norm}}{(\#IR^{TPM}_{norm}+\#ER^{TPM}_{norm})}$. 
 
-Comparing our estimation method to the standards set out by \ref{subsubsec:naivepsi}, this estimate fails to take into account the information contained in non-junction reads, as we simply don't have access to them.
+Comparing our estimation method to the standards set out by \ref{subsubsec:naivepsi}, this estimate fails to take into account the information contained in non-junction reads, as we simply do not have access to them.
 This estimate also does not aggregate the information from multiple biological samples, although we took care to choose the donor with tissue samples from brain cortex, cerebellum and heart, whose total read count was the highest. 
 Reads may also be misattributed in our cassette exon PSI estimation as described in (e). Note that misattribution is not an issue when estimating the PSI of junctions.
 %The initial dataset contained roughly 10 million total exon-exon junction read count for each tissue distributed over roughly 330,000 unique junctions. More statistics about this dataset, and the others, are given in Section \ref{subsec:datasetstatistics}. 
@@ -288,11 +288,11 @@ Reads may also be misattributed in our cassette exon PSI estimation as described
 
 \subsubsection{More sophisticated PSI estimation approaches}
 
-Several approaches have been developed which try to address the issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of $\Delta$ PSI) and don't directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose two fast methods which represent different approaches to PSI estimation: SUPPA \cite{suppa2} and MAJIQ \cite{majiq2}. SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. MAJIQ has already been used for the construction of similar datasets before \cite{jha}.
+Several approaches have been developed which try to address the issues in estimating PSI. However, many of these focus purely on the differential splicing changes between conditions (in the form of $\Delta$ PSI) and do not directly report the PSI in a given condition which is what we are initially interested in. Of the methods directly reporting PSI, we chose two fast methods which represent different approaches to PSI estimation: SUPPA \cite{suppa2} and MAJIQ \cite{majiq2}. SUPPA is primarily based on quantification of transcripts, while MAJIQ is based on building up a splicing graph. MAJIQ has already been used for the construction of similar datasets before \cite{jha}.
 %\ref{fig:dataset_creation_process} shows the high-level steps taken when using SUPPA and MAJIQ to create datasets for training.
 
 
-% inaccurate as I don't think SUPPA directly takes BAM / kinda unnessessary either way
+% inaccurate as I do not think SUPPA directly takes BAM / kinda unnessessary either way
 %\begin{figure}
 %	\centering\includegraphics[width=0.7\textwidth]{figures/d2v-Page-3.pdf} 
 %	\caption{Data flow when using MAJIQ or SUPPA to create a training dataset. }
@@ -320,7 +320,7 @@ SUPPA's main competitive advantage for PSI estimation lies in its speed and low 
 
 
 % this was taken from the results section
-%in retrospect, SUPPA was not the best choice for dataset processing. It operates at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Additionally, it does not make it possible to generate a list of non-cassette constitutive exons, therefore roughly halving the size of the training set and the number of samples the model can learn from. Its PSI estimation is very simplistic and doesn't account for multiple of the issues highlighted in \ref{subsec:psiestimation}. 
+%in retrospect, SUPPA was not the best choice for dataset processing. It operates at a transcript level and therefore implicitly relies on the assumption that all transcripts of a given gene are known - this is often not the case. Additionally, it does not make it possible to generate a list of non-cassette constitutive exons, therefore roughly halving the size of the training set and the number of samples the model can learn from. Its PSI estimation is very simplistic and does not account for multiple of the issues highlighted in \ref{subsec:psiestimation}. 
 
 
 
@@ -332,7 +332,7 @@ SUPPA's main competitive advantage for PSI estimation lies in its speed and low 
 \end{figure}
 Modeling Alternative Junction Inclusion Quantification (MAJIQ) builds up a splice graph which contains exon as vertices and junctions as edges. An edge is added between two vertices if a transcript isoform is found in which they share a junction (that is if the exons are neighbours and everything between them has been spliced out).
 Constitutive exons are vertices with two incoming edges.
-Vertices which have more than two incoming edges are denoted as local splicing variations (LSVs) and they represent exons involved in at least one alternative splicing event. This problem formulation allows MAJIQ to model more complex splicing events (rather than only the splicing events from Figure \ref{fig:altsplicingforms}), although we will not leverage this extra capability here. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\Delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping. The only issue from Section \ref{subsubsec:naivepsi} MAJIQ doesn't account for is (b): the integration of the information from non-junction reads. Thus, we expect MAJIQ's PSI estimates to be the most accurate of all methods we are testing.
+Vertices which have more than two incoming edges are denoted as local splicing variations (LSVs) and they represent exons involved in at least one alternative splicing event. This problem formulation allows MAJIQ to model more complex splicing events (rather than only the splicing events from Figure \ref{fig:altsplicingforms}), although we will not leverage this extra capability here. Figure \ref{fig:splice_graph} shows an example splice graph. Importantly, apart from estimating $\Delta$ PSI between different conditions, MAJIQ is also able to directly estimate PSI for a given condition. The estimation is done using a combination of read rate modelling, Bayesian PSI modelling and bootstrapping. The only issue from Section \ref{subsubsec:naivepsi} MAJIQ does not account for is (b): the integration of the information from non-junction reads. Thus, we expect MAJIQ's PSI estimates to be the most accurate of all methods we are testing.
 % looked at mjiq paper; it only seems to look at juntons
 % hadnles eg point 5. by only looking at junctions until the very end and modelling eg cassette exons as two distinct LSVs --- ie each junction will have its own PSI
 
@@ -372,7 +372,7 @@ At this point, the datasets have been preprocessed such that we have the followi
 \begin{itemize}
 	\item chromosome and strand information of the to-be-used exon or junction,
 	\item start and end coordinates of the exon or junction within a chromosome,
-	\item the lengths of neighbouring introns or exons\footnote{Due to data limitations, we don't know the length of neighbouring exons when creating intron-centric training samples from GTEx data. In this case, the length of the neighbouring exons is set to 0. }.
+	\item the lengths of neighbouring introns or exons\footnote{Due to data limitations, we do not know the length of neighbouring exons when creating intron-centric training samples from GTEx data. In this case, the length of the neighbouring exons is set to 0. }.
 \end{itemize}
 
 Using this information, now either exon-centric or intron-centric training samples are created. Exon-centric training samples are created when the task of the network is to classify an exon or regress its PSI. Intron-centric training samples are created when the task of the network is to classify a junction or regress its PSI. 
@@ -385,7 +385,7 @@ Note that for intron-centric training samples we do not classify the intron or r
 %Note that it is not technically correct to say that we classify an intron or regress its PSI because the inclusion or exlusion of an intronic sequence may occur when 
 \begin{figure}
 	\centering\includegraphics[width=0.9\textwidth]{../visualizations/ch4-methods/input_schematic.png} 
-	\caption{Schematic of model input for an exon-centric training sample \cite{dsc}. The input are the 140 nucleotide windows extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. The input for intron-centric training samples (not shown) similarly consists of two 140 nucleotide windows around intron start and end, as well as the length features.}
+	\caption{Schematic of model inputs for an exon-centric training sample \cite{dsc}. The input are the 140 nucleotide windows extracted around the exon start and exon end, as well as the normalized length of the exon and its flanking introns. The inputs for intron-centric training samples (not shown) similarly consist of two 140 nucleotide windows around intron start and end, as well as the length features.}
 	\label{fig:inputschematic}
 \end{figure}
 
@@ -393,7 +393,7 @@ Using the chromosome information, and the start and end coordinates, two 140 nuc
 
 Furthermore, if an exon or junction is located on the negative strand, the extracted start and end windows are switched, the order of the nucleotides within the start and end windows are reversed, and each extracted nucleotide is converted to its reverse complement. This mirrors biology, as the spliceosome also observes the exon start and end sites as switched and reverse complemented between the positive and negative strand.
 
-%Presumably, this means the models don't have to learn different features for exons or junctions on the + and - strand. \\
+%Presumably, this means the models do not have to learn different features for exons or junctions on the + and - strand. \\
 Samples from the chromosomes X, Y and M are excluded due to the fundamental functional differences between them and the autosomes (e.g., there only exists one functional copy of the sex chromosomes).
 
 The extracted nucleotides are one-hot encoded as four dimensional vectors. Specifically, adenine `A' is encoded as [1 0 0 0], cytosine `C' as [0 1 0 0], guanine `G' as [0 0 1 0] and thymine `T' as [0 0 0 1]. Thus, each 140 nucleotide long window is converted into an 140x4 matrix containing one-hot encoded nucleotides. 
@@ -511,7 +511,7 @@ In general, the intron-centric datasets contain roughly four times more training
 \begin{figure}
 	\centering\includegraphics[width=1\textwidth]{../visualizations/ch4-methods/dataset_histograms_seaborn.png} 
 	\caption{
-		Histograms comparing the exon-centric versions of the four fundamentally different training datasets used. The shown GTEx dataset is based on samples from brain cortex tissue and the shown HipSci datasets are based on samples from iPSCs differentiated to sensory neuron cells. 
+		Histograms comparing the exon-centric versions of the four different training dataset classes. The shown GTEx dataset is based on samples from brain cortex tissue and the shown HipSci datasets are based on samples from iPSCs differentiated to sensory neuron cells. 
 	}
 	\label{fig:datahistograms}
 \end{figure}
@@ -605,7 +605,7 @@ During training on text data, the corpus is split into documents which are ideal
 %showed that the effect of this document length parameter on performance is negligible. 
 %does not seem to affect model performance in a meaningful way.
 \subsubsection{Using k-mers}\label{subsubsec:kmers}
-Naively applying word2vec or doc2vec to genomic data would mean treating each nucleotide as a word. Drawing the parallel to natural language, this would mean wanting to embed each character in a word. However, a single character or nucleotide (which comes from an alphabet of only four characters) is not unique enough and occurs in too many contexts to obtain meaningful representations. Therefore, it is desirable to base the embedding on multiple characters or multiple nucleotides, that is on words or k-mers. While a sentence can easily be split into words, the split of a nucleotide sequence into k-mers is not as clear-cut: we don't know the functionality of most nucleotides and therefore can not easily split a sequence into semantically meaningful units.
+Naively applying word2vec or doc2vec to genomic data would mean treating each nucleotide as a word. Drawing the parallel to natural language, this would mean wanting to embed each character in a word. However, a single character or nucleotide (which comes from an alphabet of only four characters) is not unique enough and occurs in too many contexts to obtain meaningful representations. Therefore, it is desirable to base the embedding on multiple characters or multiple nucleotides, that is on words or k-mers. While a sentence can easily be split into words, the split of a nucleotide sequence into k-mers is not as clear-cut: we do not know the functionality of most nucleotides and therefore can not easily split a sequence into semantically meaningful units.
 
 Previous studies have explored this issue \cite{kmerlength1} \cite{kmerlength2}, and found that the compromise of splitting each nucleotide sequence into overlapping 3-mers is a performant choice. Overlapping means that given, for example, the sequence `AACGAT', the resulting overlapping 3-mers are `AAC', `ACG', `CGA' and `GAT'. Based on these findings, we split each sequence of nucleotides into overlapping 3-mers and obtain 27,998 overlapping 3-mers from the 28,000 nucleotides long pre-training sequences. 
 
@@ -637,7 +637,7 @@ Pre-processing the human genome like described above and using the DM training m
 %\end{figure}
 
 \subsubsection{Obtaing the embeddings}
-After pre-training, the embedding for a given word or document is the value of the hidden cells of the shallow pre-training MLP\footnote{In practice, the words in a corpus are one-hot encoded and the value of the hidden layers doesn't need to be computed. Recalling that the weights of the hidden layer of an MLP are represented as a $N\times d$ matrix, only the d-dimensional column which belongs to the respective one-hot encoded word needs to be retrieved. All other columns will be multiplied by 0. $N$ represents the size of the vocabulary (64 for us) and $d$ the number of embedding dimensions (100 for us).}. In the case of 100-dimensional embeddings, this means that the hidden layer contains 100 neurons. The intuition behind this is that the models learned a representation which is helpful for the prediction task the model was trained on. Since the prediction task was either to reconstruct a word or document given its context or vice-versa, the representation for a given word or document should encode its context. Thus, the main idea behind word2vec and doc2vec, that a word or document is defined by the context in which it occurs (and its representation should encode this context), is achieved.
+After pre-training, the embedding for a given word or document is the value of the hidden cells of the shallow pre-training MLP\footnote{In practice, the words in a corpus are one-hot encoded and the value of the hidden layers does not need to be computed. Recalling that the weights of the hidden layer of an MLP are represented as a $N\times d$ matrix, only the d-dimensional column which belongs to the respective one-hot encoded word needs to be retrieved. All other columns will be multiplied by 0. $N$ represents the size of the vocabulary (64 for us) and $d$ the number of embedding dimensions (100 for us).}. In the case of 100-dimensional embeddings, this means that the hidden layer contains 100 neurons. The intuition behind this is that the models learned a representation which is helpful for the prediction task the model was trained on. Since the prediction task was either to reconstruct a word or document given its context or vice-versa, the representation for a given word or document should encode its context. Thus, the main idea behind word2vec and doc2vec, that a word or document is defined by the context in which it occurs (and its representation should encode this context), is achieved.
 
 
 
@@ -729,7 +729,7 @@ The attention mechanism also adds interpretability to a model since it indicates
 
 
 % how attention hasn't been used in genomics so far
-%[transformer here and why I don't use it]
+%[transformer here and why I do not use it]
 %[More applications of attention]
 %It has been applied to constituency parsing (Vinyals et al., 2015)
 %, reading comprehension (Hermann et al., 2015)
@@ -767,15 +767,17 @@ We now describe the modifications we made to the seq2seq and attention set-up kn
 As the name implies, models based on the seq2seq framework take a sequence as input and give a sequence as output. This is achieved via using a recurrent decoder which outputs symbols until it outputs an <EOS> (end-of-sequence, e.g. a `.') token.
 However, we only expect a single output: a scalar signifying the classification or frequency of the alternative splicing behaviour of an exon or junction. 
 % However, in our case, the output will always be a single scalar. 
-Thus, we don't require a recurrent decoder and use a shallow MLP in its place.
+Thus, we do not require a recurrent decoder and use a shallow MLP in its place.
 \subsubsection{Modification 2: Attention with a learned query vector}
-The most common form of attention (multiplicative or dot-product self-attention \cite{allyouneed}), makes uses of conceptual queries and key-value pairs. A query, key and value matrix is assigned to each symbol in the input sequence. A given query is compared to all keys by computing a similarity score between the query and each key via the dot-product. The similarity scores are normalized through the use of a softmax layer. The normalized similarity scores are also commonly called the attention weights; keys similar to the query are weighted more. The output of the attention layer for a given query and input sequence is then the weighted vector sum obtained by multiplying each value by the attention weight of its respective key.
+The goal of using the attention layer in our network is to attend to the most important nucleotide representations from the start and end sequences. We achieve this goal through starting from the most common form of attention, multiplicative or dot-product self-attention \cite{allyouneed}, and then modifying it for our task. 
+
+Dot-product self-attention makes uses of conceptual queries and key-value pairs. A query, key and value matrix is assigned to each symbol in the input sequence. A given query is compared to all keys by computing a similarity score between the query and each key via the dot-product. The similarity scores are normalized through a softmax layer. The normalized similarity scores are also commonly called the attention weights; keys similar to the query are weighted more. The output of the attention layer for a given query and input sequence is then the weighted vector sum obtained by multiplying each value by the attention weight of its respective key.
 Putting the above intuition into formulas, the (dot-product self-) attention mechanism can be described more formally:
 
-Initially, the query, key and value matrices $Q$, $K$ and $V$ are computed by multiplying the input with the query, key and value parameter matrices $W^Q$, $W^K$ and $W^V$:
+Initially, the query, key and value matrices $Q$, $K$ and $V$ are computed by multiplying the input $I$ with the query, key and value parameter matrices $W^Q$, $W^K$ and $W^V$:
 $$Q, K, V = IW^Q, IW^K, IW^V$$
 where $I \in \mathbb{R}^{l \times in}$, and $W^Q,W^K, W^V \in \mathbb{R}^{in \times out}$,
-and $Q,K, V \in \mathbb{R}^{l \times out}$. $in$ corresponds to the number of features of each element in the input sequence to the attention layer, $out$ corresponds to the number of features in the output of the attention layer. $l$ corresponds to the number of elements in the input sequence.
+and $Q,K, V \in \mathbb{R}^{l \times out}$. $in$ corresponds to the number of features of each element in the input sequence to the attention layer, $out$ corresponds to the number of features in the output of the attention layer. $l$ corresponds to the number of elements in the input sequence. The input $I$ is a concatenation (along the first dimension) of the representations given by the encoder for the nucleotide window around the exon start and exon end.
 
 Attention can be then computed as:
 $$Z = attention(I) = softmax(QK^T)V$$
@@ -786,17 +788,15 @@ Note that this makes use of the fact that $Q\cdotp K = QK^T$ where $\cdotp$ deno
 %remove this division by square-root -- maybe ask Kuba how to photoshop this away
 
 
-As shown, multiplicative self-attention computes a separate query for each input token. It is called self-attention because it allows a sequence to pay attention to `itself'. (Unmasked) self-attention is mainly used in the encoder part of Transformer architectures to improve the representation for each word.\\
-However, our objective in using attention is not to improve the representation for each symbol in a sequence (finding a good representation is the task of the encoder), but to select the most important features from an input sequence. The conceptual query for our task is also always the same independent of input: is this exon constitutively spliced or not?
+As shown, multiplicative self-attention computes a separate query for each input token. It is called self-attention because it allows a sequence to pay attention to `itself'. (Unmasked) self-attention is mainly used in the encoder part of Transformer architectures to improve the representation of each word.\\
+However, our objective in using attention is not to improve the representation of each symbol in a sequence (finding a good representation is the task of the encoder), but to select the most important features from an input sequence. The conceptual query for our task is also always the same independent of input: is this exon constitutively spliced or not?
 %thought: this also naturally happens in seq2seq models when they use attention -- how is what I am doing differently?
 Thus, we adapt the attention mechanism so that we learn a single, input-independent query ${Q}^* \in \mathbb{R}^{1 \times out}$. The output of the attention layer is now computed as:
 $$Z^* = {attention}^*(I) = softmax({Q}^*K^T)V$$
 
 %decided against explaining innovation as two-points with (1) one query and (2) independent of input because I felt unsure of (2)
 
-where $Z^* \in \mathbb{R}^{1 \times out}$. Note that the query matrix ${Q}^*$ is directly learned in the attention block and not multiplied with the input, giving rise to its input independence. The output $Z$ is now a weighted sum of the nucleotide representation in the input sequences which the model deemed most crucial to pay attention to.
-The input $I$ is a concatenation (along the first dimension) of the representations given by the encoder for the nucleotide sequence around the exon start and exon end.
-
+where $Z^* \in \mathbb{R}^{1 \times out}$. ${attention}^*$ denotes the so modified attention mechanism. Note that the query matrix ${Q}^*$ is directly learned and not multiplied with the input, giving rise to its input independence. The output $Z$ is now a weighted sum of the nucleotide representation in the input sequences which the model deemed most crucial to pay attention to.
 
 
 \subsection{Further modifications of the attention mechanism} \label{subsec:alternative_attention}
@@ -810,39 +810,41 @@ As the query matrix ${Q}^*$ is the same independent of the exact input sequences
 This is possible by learning a key weight matrix $W^{K_{no\_query}} \in \mathbb{R}^{in \times 1}$ and computing attention as:
 $$K_{no\_query} = IW^{K_{no\_query}}$$
 $$Z_{no\_query} = {attention}^{**}(I) = softmax(K^*)V$$
-where $K_{no\_query} \in \mathbb{R}^{l \times 1}$ and $Z_{no\_query} \in \mathbb{R}^{1 \times out}$. This has the advantage of reducing the number of learnable weights as adapted the key weight matrix $W^{K_{no\_query}} \in \mathbb{R}^{in \times 1}$ is smaller than the initial key weight matrix $W^{K} \in \mathbb{R}^{in \times l}$.  
+where $K_{no\_query} \in \mathbb{R}^{l \times 1}$ and $Z_{no\_query} \in \mathbb{R}^{1 \times out}$. This has the advantage of reducing the number of trainable weights as the adapted key weight matrix $W^{K_{no\_query}} \in \mathbb{R}^{in \times 1}$ is smaller than the initial key weight matrix $W^{K} \in \mathbb{R}^{in \times l}$ and the query matrix ${Q}^* \in \mathbb{R}^{1 \times out}$ is removed.  
 
 
 \subsubsection{Multiple attention heads} \label{subsubsec:heads}
-Having one set of query, key and value matrices limits the model to one representational subspace (one way of `interpreting' the input). It might be useful for the model to have multiple representational subspaces. This is usually achieved \cite{allyouneed} via $h$ different sets of query, key and weight matrices $W^{Q^*_1}, W^{K_1}, W^{V_1}, \dots W^{Q^*_{h}}, W^{K_{h}},W^{V_{h}}$ producing $h$  outputs $Z_1, \dots, Z_{h}$. Applying this extension in our context engenders the following formulas:
+Having one set of query, key and value matrices limits the model to one representational subspace (one way of `interpreting' the input). It might be useful for the model to have multiple representational subspaces. This is usually achieved \cite{allyouneed} via introducing multiple attention heads: instead of learning one set query, key and value weight matrices, $h$ sets of query, key and weight matrices $W^{Q^*_1}, W^{K_1}, W^{V_1}, \dots W^{Q^*_{h}}, W^{K_{h}},W^{V_{h}}$ are learned to produce $h$  outputs $Z_1, \dots, Z_{h}$. Applying this idea to the modified ${attention}^*$ mechanism engenders the following formulas:
 $$K_i, V_i = IW^K_i, IW^V_i$$
 $$Z^*_i = {attention}^*_i(I) = softmax({Q}^*_iK^T_i)V_i$$
+where $i \in \{1, \dots, h\}$.
 Note that the query weight matrices $W^{Q^*_1}, \dots, W^{Q^*_h}$ are again directly learned, like in the single head case. 
 
 The final output matrix $Z_{final} \in \mathbb{R}^{l \times out}$ is then computed as:
 $$Z_{final} = concat(Z_1^*, \dots, Z_{h}^*) W^O$$
-where the concatenation occurs along the second dimension and $W^O \in \mathbb{R}^{out * h \times out_{new}}$. $out_{new}$ represents the new output dimension of the attention layer, which is arrived at by combining the dimensions of the $h$ attention heads.
+where the concatenation occurs along the second dimension and $W^O \in \mathbb{R}^{out * h \times out_{new}}$. $out_{new}$ represents the new output dimension of the attention layer, which integrates the outputs of the $h$ attention heads.
 
-While these extra representational subspaces might make the model more powerful and also more robust (in the sense that multiple attention heads act like an ensemble model), it also increases the number of learnable weights potentially leading to overfitting.
+While these extra representational subspaces might make the model more powerful and also more robust (in the sense that multiple attention heads act like an ensemble model \cite{sixteenheads}), it also increases the number of trainable weights potentially leading to overfitting.
 \subsubsection{Convolution in attention heads} \label{subsubsec:attention_conv}
 The information contained in a single nucleotide is very low. 
-This motivated \cite{ghentransformers} to integrate an additional 1D convolution into the computation of the query, key and value matrices Q, K and V which is applied after the multiplication with the weight matrices $W^Q, W^K$ and $W^V$. This convolution allows the model to more effectively integrate information from multiple neighbouring nucleotides. This extension can also be understood as an alternative to splitting the input nucleotide sequence into k-mers (similar to the split into overlapping 3-mers for the input of the D2V model described in Section \ref{subsubsec:kmers}) and provided better results than splitting the input nucleotide sequence into k-mers when using a Transformer network for a genome annotation task in \cite{ghentransformers}.
+This motivated \cite{ghentransformers} to integrate an additional 1D convolution into the computation of the query, key and value matrices Q, K and V which is applied after the multiplication with the weight matrices $W^Q, W^K$ and $W^V$. This convolution allows the model to more effectively integrate information from multiple neighbouring nucleotides. This extension can also be understood as an alternative to splitting the input nucleotide sequence into k-mers (similar to the split into overlapping 3-mers for the input of the D2V model described in Section \ref{subsubsec:kmers}) and provided better results than splitting the input nucleotide sequence into k-mers when using a Transformer architecture for a genome annotation task in \cite{ghentransformers}.
 In formulas, we can describe the adapted attention mechanism as:
 %Keeping in mind the modification of directly learning the query matrix, this leads to:
+$$K, V = IW^K, IW^V$$
 $$K_{conv}, V_{conv} = conv(K), conv(V)$$
 $$Z^*_{conv} = {attention}_{conv}^*(I) = softmax({Q}^*K_{conv}^T)V_{conv}$$
-where $K$ and $V$ are both fed through the same convolutional layer to arrive at $K_{conv}$ and $V_{conv}$. The weight matrix corresponding to the convolutional layer is chosen so it has the same number of feature dimensions as $K$ and $V$, that is, $W_{conv} \in \mathbb{R}^{out \times kernel \times out}$. $kernel$ denotes the size of the convolutional kernel. 
+where $K$ and $V$ are both fed through the same convolutional layer $conv$ to arrive at $K_{conv}$ and $V_{conv}$. The weight matrix corresponding to the convolutional layer $conv$ is chosen so it has the same number of feature dimensions as $K$ and $V$, that is, $W_{conv} \in \mathbb{R}^{out \times kernel \times out}$. $kernel$ denotes the size of the convolutional kernel. 
 The padding is chosen so that the first dimension of $K$ and $V$ stays the same which leads to $K_{conv}, V_{conv} \in \mathbb{R}^{l \times out}$.
-%The number of convolutional filters and the padding are chosen so that the dimensions of the $K$ and $V$ matrices don't change, that is, $K_{conv}, V_{conv} \in \mathbb{R}^{l \times out}$.
+%The number of convolutional filters and the padding are chosen so that the dimensions of the $K$ and $V$ matrices do not change, that is, $K_{conv}, V_{conv} \in \mathbb{R}^{l \times out}$.
+We now describe two further implementational details:
 
 To incorporate the domain knowledge that the input sequences to our model come from two different places in the genome, the convolution is applied in such a way that it does not mix the information between the sequences around the exon start and around the exon end. To achieve this, we implemented the following computations:
-$$K^{start}, K^{end} = I^{start}W^K, I^{end}W^K,$$
+$$K^{start}, K^{end} = I^{start}W^K, I^{end}W^K$$
 $$K^{start}_{conv}, K^{end}_{conv} = conv(K^{start}), conv(K^{end})$$
 $$K_{conv} = concat(K^{start}_{conv}, K^{end}_{conv})$$
 where the $start$ and $end$ superscript respectively refer to the sequence around the start and end of the exon. The concatenation is along the first dimension (so the length of the sequences). The analogue computation was implemented for $V_{conv}$.
 
-
-A small implementational detail regarding the attention blocks: the query, key and value parameter matrices are implemented via a linear layer with the appropriate dimensions. These also learn bias weights which are added to the output by default. While in theory the bias weights should be turned off to implement exactly the shown formulas, in practice other attention mechanism implementations leave these turned on \cite{annotatedtransformer} and so we follow suit. Thus, to be precise, the query, key and value matrix computation should be:
+The query, key and value parameter matrices are implemented via a fully-connected layer with the appropriate dimensions. By default, fully-connected layers also learn bias weights which are added to the output. While in theory the bias weights should be turned off to implement exactly the shown formulas, in practice other attention mechanism implementations leave these turned on \cite{annotatedtransformer} and so we follow suit. Thus, to be precise, the query, key and value matrix computation should be:
 $$K, V = IW^K + B^K, IW^V + B^V$$
 $$Z^* = {attention}^*(I) = softmax(({Q}^*K^T)+B^{Q^*})V$$
 where the query, key and value bias matrices $B^{Q^*}, B^K$ and $B^V \in \mathbb{R}^{1 \times out}$.
@@ -931,7 +933,7 @@ The hyperparameters used for training the models are given in Table \ref{table:h
 		Dropout (after fully-connected layer) & 0.5\\
 		\hline
 	\end{tabular}
-	\caption{Hyperparameters of the three models
+	\caption{Hyperparameters of the three models.
 	}
 	\label{table:hyperparameters}
 \end{table}
@@ -960,7 +962,7 @@ Again following previous work \cite{jha} \cite{d2vsplicing}, we use the explaine
 %For our analysis, we analytically compute and use the decision threshold which maximizes the harmonic mean of the precision and recall, that is, the F1 score. 
 
 % : say which metrics you actually evaluate here
-%Naively, this threshold may be set to 0.5, but this will not necessarily be the 'optimal' decision threshold in the sense of the optimality we define.  that it doesn't balance the trade-off between false positive false negatives in the way we want. We analytically compute the decision 
+%Naively, this threshold may be set to 0.5, but this will not necessarily be the 'optimal' decision threshold in the sense of the optimality we define.  that it does not balance the trade-off between false positive false negatives in the way we want. We analytically compute the decision 
 %
 %For further analysis, we also evaluate sensitivity, specificity and F1 score on the HipSci MAJIQ dataset. Since the AUC is an aggreg
 %
@@ -969,6 +971,6 @@ Again following previous work \cite{jha} \cite{d2vsplicing}, we use the explaine
 %However, some of our datasets were unbalanced. This may lead to a degenerating behaviour where a model only predicts the majority class. Additionally, only looking at the AUC does not give a good sense of the .... specificity.. recall?
 %This is not captured by the AUC. \\
 %Thus, we also evaluated the F1 of our models when working with an unbalanced dataset as in the case of the HipSci-based dataset processed with MAJIQ.
-%The output of our models is a single, continuous scalar $\hat{y} \in [0, 1]$. As the AUC itself is an aggregate measure across all decision thresholds, we don't need to set it to a certain value that translates the continuous prediction into a discrete positive or negative class prediction. To compute the F1 score, we do. Naively, this threshold may be set to 0.5; that is, all outputs above 0.5 will be interpreted as a prediction of the positive class and all other outputs as a prediction of the negative class. However, this threshold may not be optimal to maximize the F1 score, especially when working with unbalanced datasets. We choose the threshold which maximizes the F1 score on the test set.
+%The output of our models is a single, continuous scalar $\hat{y} \in [0, 1]$. As the AUC itself is an aggregate measure across all decision thresholds, we do not need to set it to a certain value that translates the continuous prediction into a discrete positive or negative class prediction. To compute the F1 score, we do. Naively, this threshold may be set to 0.5; that is, all outputs above 0.5 will be interpreted as a prediction of the positive class and all other outputs as a prediction of the negative class. However, this threshold may not be optimal to maximize the F1 score, especially when working with unbalanced datasets. We choose the threshold which maximizes the F1 score on the test set.
 
 
